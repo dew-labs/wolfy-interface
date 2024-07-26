@@ -1,19 +1,21 @@
 @use '@/style/utils';
-@import '@/style/reset';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Fix for fullscreen page in PWA */
 
 // html,
 // body,
 // #root {
-//   inline-size: 100%;
-//   max-inline-size: 100%;
-//   block-size: 100%;
-//   min-block-size: 100%;
+//   inline-size: 100%;inline-size
+//   max-inline-size: 100%;max-inline-size
+//   block-size: 100%;block-size
+//   min-block-size: 100%;min-block-size
 // }
 
 // html {
-//   min-block-size: calc(100% + env(safe-area-inset-top));
+//   min-block-size: calc(100% + env(safe-area-inset-top));min-block-size
 // }
 
 /* END fix */
@@ -52,7 +54,7 @@
 
 /* Scrollbar Track */
 // ::-webkit-scrollbar-track {
-//   background-color: #fff;
+//   background-color: #fff;background-color
 // }
 
 /* Scrollbar Handle */

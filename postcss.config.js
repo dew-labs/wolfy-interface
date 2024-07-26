@@ -3,10 +3,12 @@ import autoprefixer from 'autoprefixer'
 import calc from 'postcss-calc'
 import flexbugsFixes from 'postcss-flexbugs-fixes'
 import presetEnv from 'postcss-preset-env'
+import tailwindCss from 'tailwindcss'
 
 export default () => {
   return {
     plugins: [
+      tailwindCss,
       flexbugsFixes,
       presetEnv({
         stage: 1,

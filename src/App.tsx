@@ -6,6 +6,7 @@ import './setupSchema'
 import './i18n/setup'
 
 import {Partytown} from '@builder.io/partytown/react'
+import {NextUIProvider} from '@nextui-org/react'
 import {announce} from '@react-aria/live-announcer'
 import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/react'
 import {QueryClientProvider, useQueryErrorResetBoundary} from '@tanstack/react-query'
@@ -55,7 +56,7 @@ function App() {
   }, [])
 
   return (
-    <>
+    <NextUIProvider>
       <ErrorBoundary fallback={null}>
         <Partytown debug={DEBUG} forward={['dataLayer.push']} />
       </ErrorBoundary>
@@ -80,7 +81,7 @@ function App() {
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ErrorBoundary>
-    </>
+    </NextUIProvider>
   )
 }
 

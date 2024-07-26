@@ -60,6 +60,12 @@ const config = {
       },
     ],
     'plugin/no-low-performance-animation-properties': true,
+    'scss/at-rule-no-unknown': [
+      true,
+      {
+        ignoreAtRules: ['apply', 'layer', 'responsive', 'screen', 'tailwind', 'variants'],
+      },
+    ],
   },
   overrides: [
     {
