@@ -184,6 +184,9 @@ importers:
       '@sentry/vite-plugin':
         specifier: ^2.21.0
         version: 2.21.0
+      '@svgr/plugin-prettier':
+        specifier: ^8.1.0
+        version: 8.1.0(@svgr/core@8.1.0(typescript@5.5.3))
       '@svgr/plugin-svgo':
         specifier: ^8.1.0
         version: 8.1.0(@svgr/core@8.1.0(typescript@5.5.3))(typescript@5.5.3)
@@ -5649,6 +5652,12 @@ packages:
       {
         integrity: sha512-0xiIyBsLlr8quN+WyuxooNW9RJ0Dpr8uOnH/xrCVO8GLUcwHISwj1AG0k+LFzteTkAA0GbX0kj9q6Dk70PTiPA==,
       }
+    engines: {node: '>=14'}
+    peerDependencies:
+      '@svgr/core': '*'
+
+  '@svgr/plugin-prettier@8.1.0':
+    resolution: {integrity: sha512-o4/uFI8G64tAjBZ4E7gJfH+VP7Qi3T0+M4WnIsP91iFnGPqs5WvPDkpZALXPiyWEtzfYs1Rmwy1Zdfu8qoZuKw==}
     engines: {node: '>=14'}
     peerDependencies:
       '@svgr/core': '*'
@@ -12212,6 +12221,11 @@ packages:
         optional: true
       prettier-plugin-svelte:
         optional: true
+
+  prettier@2.8.8:
+    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
 
   prettier@3.3.2:
     resolution:
@@ -19558,6 +19572,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@svgr/plugin-prettier@8.1.0(@svgr/core@8.1.0(typescript@5.5.3))':
+    dependencies:
+      '@svgr/core': 8.1.0(typescript@5.5.3)
+      deepmerge: 4.3.1
+      prettier: 2.8.8
+
   '@svgr/plugin-svgo@8.1.0(@svgr/core@8.1.0(typescript@5.5.3))(typescript@5.5.3)':
     dependencies:
       '@svgr/core': 8.1.0(typescript@5.5.3)
@@ -23867,6 +23887,8 @@ snapshots:
   prettier-plugin-tailwindcss@0.6.5(prettier@3.3.2):
     dependencies:
       prettier: 3.3.2
+
+  prettier@2.8.8: {}
 
   prettier@3.3.2: {}
 

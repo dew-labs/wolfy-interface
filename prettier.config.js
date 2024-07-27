@@ -12,6 +12,7 @@ export default {
   htmlWhitespaceSensitivity: 'strict',
   plugins: [
     // 'some-other-plugin',
+    '@svgr/plugin-prettier',
     'prettier-plugin-tailwindcss', // tailwindcss plugin must be loaded last
   ],
   tailwindConfig: './tailwind.config.js',
