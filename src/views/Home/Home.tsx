@@ -1,34 +1,28 @@
 import {Button} from '@nextui-org/react'
-import {useTranslation} from 'react-i18next'
 
 import SkipLink from '@/components/SkipLink'
+import WolfyNavbar from '@/components/WolfyNavbar'
 import HeadTags from '@/lib/head/HeadTags'
+import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 
-import style from './Home.module.scss'
-
 export default function Home() {
-  const {t} = useTranslation()
+  const [walletAccount] = useWalletAccount()
+
+  const checkAccount = () => {
+    console.log(walletAccount)
+  }
+
   return (
-    <div className={style.Page}>
+    <div>
       <HeadTags title='Home' />
       <SkipLink title='Skip to main content' to='#main-content' />
-      <main {...skipTargetProps('main-content')}>
-        {t('welcome')}
-        <input />
-        <br />
-        <button id='hehe'>hehe</button>
-        <br />
-        <a
-          href='#hehe'
-          style={{
-            fontSize: 100,
-          }}
-        >
-          link
-        </a>
-        <Button color='primary'>Button</Button>
-        <textarea />
+      <WolfyNavbar />
+      <main
+        className='flex max-w-[1024px] items-center justify-center'
+        {...skipTargetProps('main-content')}
+      >
+        <Button onPress={checkAccount}>Check account</Button>
       </main>
     </div>
   )

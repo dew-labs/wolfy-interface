@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  min-block-size: 100dvh;
+}
+
 /* Fix for fullscreen page in PWA */
 
 // html,

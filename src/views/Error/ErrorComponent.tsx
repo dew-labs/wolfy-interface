@@ -1,4 +1,3 @@
-import PrimaryButton from '@/components/PrimaryButton/PrimaryButton'
 import HeadTags from '@/lib/head/HeadTags'
 
 import style from './ErrorComponent.module.scss'
@@ -20,8 +19,8 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
           </h1>
           <span className={style.Description}>{errorMessage}</span>
           <div className={style.Search}>
-            <PrimaryButton
-              onPress={() => {
+            <button
+              onClick={() => {
                 if (reset) {
                   reset()
                 } else {
@@ -30,7 +29,7 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
               }}
             >
               Try again
-            </PrimaryButton>
+            </button>
           </div>
         </div>
       </main>

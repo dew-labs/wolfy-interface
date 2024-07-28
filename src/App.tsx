@@ -24,6 +24,8 @@ import AuthUpdater from './auth/AuthUpdater'
 import GoogleOneTapLogin from './auth/components/GoogleOneTapLogin'
 import {DEBUG} from './constants/config'
 import Head from './lib/head/Head'
+import ThemeSubscriber from './lib/theme/ThemeSubscriber'
+import ThemeUpdater from './lib/theme/ThemeUpdater'
 import {createQueryClient} from './queries/queries'
 import {createRouter} from './router'
 import ErrorComponent from './views/Error/ErrorComponent'
@@ -74,6 +76,8 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <QueryErrorBoundary>
             <Toaster richColors />
+            <ThemeUpdater />
+            <ThemeSubscriber />
             <GoogleOneTapLogin router={router} />
             <AuthUpdater router={router} />
             <RouterProvider router={router} />

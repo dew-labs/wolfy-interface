@@ -16,5 +16,5 @@ export default {
     'prettier-plugin-tailwindcss', // tailwindcss plugin must be loaded last
   ],
   tailwindConfig: './tailwind.config.js',
-  tailwindFunctions: ['clsx', 'cva', 'tw'],
+  tailwindFunctions: ['clsx', 'cva', 'tw', 'cn'],
 }

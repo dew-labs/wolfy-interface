@@ -10,8 +10,8 @@ import {sentryVitePlugin} from '@sentry/vite-plugin'
 import {TanStackRouterVite} from '@tanstack/router-vite-plugin'
 import UnheadVite from '@unhead/addons/vite'
 // import legacy from '@vitejs/plugin-legacy'
-// import react from '@vitejs/plugin-react-swc'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
+// import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {obfuscator} from 'rollup-obfuscator'
 import TurboConsole from 'unplugin-turbo-console/vite'
@@ -148,40 +148,41 @@ export default defineConfig(({mode}) => {
       //// eslint-disable-next-line @typescript-eslint/no-unsafe-call
       // MillionLint.vite(),
       // SWC React
-      // react({
-      //   plugins: [
-      //     ['@swc-jotai/debug-label', {}],
-      //     ['@swc-jotai/react-refresh', {}],
-      //     !inTestOrDevMode
-      //       ? [
-      //           '@swc/plugin-react-remove-properties',
-      //           {
-      //             // The regexes defined here are processed in Rust so the syntax is different from
-      //             // JavaScript `RegExp`s. See https://docs.rs/regex.
-      //             properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
-      //           },
-      //         ]
-      //       : false,
-      //   ].filter(Boolean) as [string, Record<string, unknown>][], // Don't know why typescript cannot infer the type here
-      // }),
       react({
-        babel: {
-          plugins: [
-            [
-              'babel-plugin-react-compiler',
-              {
-                // compilationMode: 'annotation',
-              },
-            ],
-            ['jotai/babel/plugin-debug-label', {}],
-            ['jotai/babel/plugin-react-refresh', {}],
-            [
-              'react-remove-properties',
-              {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
-            ],
-          ],
-        },
+        plugins: [
+          ['@swc-jotai/debug-label', {}],
+          ['@swc-jotai/react-refresh', {}],
+          !inTestOrDevMode
+            ? [
+                '@swc/plugin-react-remove-properties',
+                {
+                  // The regexes defined here are processed in Rust so the syntax is different from
+                  // JavaScript `RegExp`s. See https://docs.rs/regex.
+                  properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
+                },
+              ]
+            : false,
+        ].filter(Boolean) as [string, Record<string, unknown>][], // Don't know why typescript cannot infer the type here
       }),
+      // Babel React for react compiler
+      // react({
+      //   babel: {
+      //     plugins: [
+      //       [
+      //         'babel-plugin-react-compiler',
+      //         {
+      //           // compilationMode: 'annotation',
+      //         },
+      //       ],
+      //       ['jotai/babel/plugin-debug-label', {}],
+      //       ['jotai/babel/plugin-react-refresh', {}],
+      //       [
+      //         'react-remove-properties',
+      //         {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
+      //       ],
+      //     ],
+      //   },
+      // }),
       // process.env.VITEST
       //   ? undefined
       //   : pluginChecker({
