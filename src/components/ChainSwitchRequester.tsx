@@ -19,7 +19,7 @@ export default memo(function ChainSwitchRequester() {
         if (currentChainId !== chainId) {
           await thisWalletAccount.switchStarknetChain(chainId)
         }
-      } catch (e) {
+      } catch (_e: unknown) {
         toast.error('Cannot switch chain, please switch manually in your wallet')
       }
     })()

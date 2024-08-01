@@ -11,9 +11,15 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as FaucetRouteImport } from './routes/faucet/route'
 import { Route as IndexRouteImport } from './routes/index/route'
 
 // Create/Update Routes
+
+const FaucetRouteRoute = FaucetRouteImport.update({
+  path: '/faucet',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/faucet/route.lazy').then((d) => d.Route))
 
 const IndexRouteRoute = IndexRouteImport.update({
   path: '/',
@@ -31,12 +37,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRoute
     }
+    '/faucet': {
+      id: '/faucet'
+      path: '/faucet'
+      fullPath: '/faucet'
+      preLoaderRoute: typeof FaucetRouteImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({ IndexRouteRoute })
+export const routeTree = rootRoute.addChildren({
+  IndexRouteRoute,
+  FaucetRouteRoute,
+})
 
 /* prettier-ignore-end */
 
@@ -46,11 +62,15 @@ export const routeTree = rootRoute.addChildren({ IndexRouteRoute })
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/faucet"
       ]
     },
     "/": {
       "filePath": "index/route.tsx"
+    },
+    "/faucet": {
+      "filePath": "faucet/route.tsx"
     }
   }
 }

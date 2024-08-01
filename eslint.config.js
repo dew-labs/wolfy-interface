@@ -348,6 +348,20 @@ const reactConfigs = [
   }),
   ...applyToTypescriptReact('react/typescript', {
     rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'all',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+          // reportUsedIgnorePattern: true,
+        },
+      ],
       // https://github.com/orgs/react-hook-form/discussions/8020
       '@typescript-eslint/no-misused-promises': [
         2,

@@ -9,7 +9,6 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Link,
   Navbar,
   NavbarBrand,
   NavbarContent,
@@ -19,12 +18,14 @@ import {
   NavbarMenuToggle,
   useDisclosure,
 } from '@nextui-org/react'
+import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
 import {memo, useState} from 'react'
+import {useTranslation} from 'react-i18next'
 
-// import {useTranslation} from 'react-i18next'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import {FaucetRoute, TradeRoute} from '@/routeRegistry'
 import useCallback from '@/utils/hooks/useCallback'
 
 import ChainSelect from './ChainSelect'
@@ -34,18 +35,26 @@ import ConnectModal from './ConnectModal'
 import ThemeSwitchButton from './ThemeSwitchButton'
 
 const menuItems = [
-  'About',
-  'Blog',
-  'Customers',
-  'Pricing',
-  'Enterprise',
-  'Changelog',
-  'Documentation',
-  'Contact Us',
+  {
+    label: 'Trade',
+    to: TradeRoute.fullPath,
+  },
+  // {
+  //   label: 'Stake',
+  //   to: '',
+  // },
+  // {
+  //   label: 'Pools',
+  //   to: '',
+  // },
+  {
+    label: 'Faucet',
+    to: FaucetRoute.fullPath,
+  },
 ]
 
 export default memo(function WolfyNavbar(props: NavbarProps) {
-  // const {t} = useTranslation()
+  const {t} = useTranslation()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const {isOpen, onOpen, onOpenChange} = useDisclosure()
@@ -74,35 +83,30 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
       >
+        <NavbarMenuToggle className='text-default-400 md:hidden' />
         {/* Left Content */}
-        <NavbarBrand>
+        <NavbarBrand className='flex-grow-0'>
           {/* <div className='rounded-full bg-foreground text-background'>
             <Icon icon='solar:alt-arrow-right-linear' />
           </div> */}
-          <span className='ml-2 text-small font-medium'>Wolfy</span>
+          <span className='text-large font-medium'>{t('Wolfy')}</span>
         </NavbarBrand>
 
         {/* Center Content */}
-        <NavbarContent justify='center'>
-          <NavbarItem>
-            <Link className='text-default-500' href='#' size='sm'>
-              Home
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link className='text-default-500' href='#' size='sm'>
-              Stake
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link className='text-default-500' href='#' size='sm'>
-              Pools
-            </Link>
-          </NavbarItem>
+        <NavbarContent justify='start'>
+          {menuItems.map(item => {
+            return (
+              <NavbarItem key={item.label}>
+                <Link className='text-sm text-default-500' to={item.to}>
+                  {t(item.label)}
+                </Link>
+              </NavbarItem>
+            )
+          })}
         </NavbarContent>
 
         {/* Right Content */}
-        <NavbarContent className='hidden md:flex' justify='end'>
+        <NavbarContent className='flex' justify='end'>
           <NavbarItem className='ml-2 flex gap-2'>
             <ThemeSwitchButton />
             <ChainSelect />
@@ -114,7 +118,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   endContent={<Icon icon='solar:alt-arrow-right-linear' />}
                   className={'w-full'}
                 >
-                  Connect
+                  {t('Connect')}
                 </Button>
               </>
             )}
@@ -132,9 +136,9 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                     <DropdownItem key='profile' className='h-14 gap-2'>
                       <p className='font-semibold'>{walletAccount?.address}</p>
                     </DropdownItem>
-                    <DropdownItem key='settings'>Settings</DropdownItem>
+                    <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
                     <DropdownItem key='logout' color='danger' onPress={handleDisconnect}>
-                      Disconnect
+                      {t('Disconnect')}
                     </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
@@ -142,8 +146,6 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             )}
           </NavbarItem>
         </NavbarContent>
-
-        <NavbarMenuToggle className='text-default-400 md:hidden' />
 
         <NavbarMenu
           className='top-[calc(var(--navbar-height)_-_1px)] max-h-fit bg-default-200/50 pb-6 pt-6 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
@@ -157,20 +159,10 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             },
           }}
         >
-          <NavbarMenuItem>
-            <Button fullWidth as={Link} href='/#' variant='faded'>
-              Sign In
-            </Button>
-          </NavbarMenuItem>
-          <NavbarMenuItem className='mb-4'>
-            <Button fullWidth as={Link} className='bg-foreground text-background' href='/#'>
-              Get Started
-            </Button>
-          </NavbarMenuItem>
           {menuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <Link className='mb-2 w-full text-default-500' href='#' size='md'>
-                {item}
+            <NavbarMenuItem key={`${item.label}-${index}`}>
+              <Link className='text-d mb-2 flex w-full text-default-500' to={item.to}>
+                {t(item.label)}
               </Link>
               {index < menuItems.length - 1 && <Divider className='opacity-50' />}
             </NavbarMenuItem>
