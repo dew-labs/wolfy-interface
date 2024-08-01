@@ -19,7 +19,7 @@ export default function Home() {
       <SkipLink title='Skip to main content' to='#main-content' />
       <WolfyNavbar />
       <main
-        className='flex max-w-[1024px] items-center justify-center'
+        className='mx-auto flex max-w-[1024px] items-center justify-center'
         {...skipTargetProps('main-content')}
       >
         <Button onPress={checkAccount}>Check account</Button>
