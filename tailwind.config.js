@@ -4,12 +4,13 @@ import {nextui} from '@nextui-org/react'
 
 export default {
   content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx,vue,svelte}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
+    './index.{htm,html}',
+    './src/**/*.{?(c|m)[jt]s?(x),vue,svelte}',
+    './node_modules/@nextui-org/theme/dist/**/*.?(c|m)[jt]s?(x)',
   ],
   theme: {
     extend: {},
   },
+  darkMode: 'class',
   plugins: [nextui()],
 }

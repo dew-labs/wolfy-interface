@@ -19,11 +19,9 @@ import {useState} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 
-enum OrderType {
-  Long,
-  Short,
-  Swap,
-}
+import useExecutionType, {ExecutionType} from '@/lib/trade/states/useExecutionType'
+import useOrderType, {OrderType} from '@/lib/trade/states/useOrderType'
+import useCallback from '@/utils/hooks/useCallback'
 
 const ORDER_TYPE_LABEL: Record<OrderType, string> = {
   [OrderType.Long]: 'Long',
@@ -35,14 +33,6 @@ const INPUT_2_LABEL: Record<OrderType, string> = {
   [OrderType.Long]: 'To long',
   [OrderType.Short]: 'To short',
   [OrderType.Swap]: 'To receive',
-}
-
-const SUPPORTED_ORDER_TYPES: OrderType[] = [OrderType.Long, OrderType.Short, OrderType.Swap]
-
-enum ExecutionType {
-  Market,
-  Limit,
-  TPSL,
 }
 
 const AVAILABLE_EXECUTION_TYPES: Record<OrderType, ExecutionType[]> = {
@@ -57,6 +47,8 @@ const EXECUTION_TYPE_LABEL: Record<ExecutionType, string> = {
   [ExecutionType.TPSL]: 'TP/SL',
 }
 
+const SUPPORTED_ORDER_TYPES: OrderType[] = [OrderType.Long, OrderType.Short, OrderType.Swap]
+
 const SUPPORTED_ASSETS_TO_PAY = ['BTC', 'ETH', 'SOL', 'USDT']
 
 type Pool = [string, string]
@@ -68,37 +60,45 @@ const POOLS: Pool[] = [
 ]
 
 export default function Controller() {
-  const [orderType, setOrderType] = useState(OrderType.Long)
-  const [executionType, setExecutionType] = useState(ExecutionType.Market)
+  const [orderType, setOrderType] = useOrderType()
+  const [executionType, setExecutionType] = useExecutionType()
   const [assetToPay, setAssetToPay] = useState(SUPPORTED_ASSETS_TO_PAY[0])
   const [leverage, setLeverage] = useState(1)
   const [leverageInput, setLeverageInput] = useState('1')
   const [maxLeverage, _setMaxLeverage] = useState(100)
   const [pool, setPool] = useState<Pool>(['ETH', 'USDT'])
+  const latestPool = useLatest(pool)
   const [collateral, setCollateral] = useState('ETH')
   const latestCollateral = useLatest(collateral)
 
-  const setCurrentOrderType = (value: Key) => {
-    console.log('Setting order type to:', value)
-    setOrderType(value as OrderType)
-  }
+  const setCurrentOrderType = useCallback(
+    (value: Key) => {
+      setOrderType(value as OrderType)
+    },
+    [setOrderType],
+  )
 
-  const setCurrentExecutionType = (value: Key) => {
-    console.log('Setting execution type to:', value)
-    setExecutionType(value as ExecutionType)
-  }
+  const setCurrentExecutionType = useCallback(
+    (value: Key) => {
+      setExecutionType(value as ExecutionType)
+    },
+    [setExecutionType],
+  )
 
-  const handleLeverageChange = (value: unknown) => {
-    const numValue = Number(value)
-    if (!Number.isFinite(numValue) || numValue <= 0) return
+  const handleLeverageChange = useCallback(
+    (value: unknown) => {
+      const numValue = Number(value)
+      if (!Number.isFinite(numValue) || numValue <= 0) return
 
-    if (numValue > maxLeverage) return
+      if (numValue > maxLeverage) return
 
-    setLeverage(numValue)
-    setLeverageInput(numValue.toString())
-  }
+      setLeverage(numValue)
+      setLeverageInput(numValue.toString())
+    },
+    [maxLeverage],
+  )
 
-  const handlePoolChange = (value: unknown) => {
+  const handlePoolChange = useCallback((value: unknown) => {
     if (typeof value !== 'string') return
     const valueArray = value.split('/')
     if (valueArray.length !== 2) return
@@ -106,13 +106,13 @@ export default function Controller() {
     if (!valueArray.includes(latestCollateral.current)) {
       setCollateral(String(valueArray[0]))
     }
-  }
+  }, [])
 
-  const handleCollateralChange = (value: unknown) => {
+  const handleCollateralChange = useCallback((value: unknown) => {
     if (typeof value !== 'string') return
-    if (!pool.includes(value)) return
+    if (!latestPool.current.includes(value)) return
     setCollateral(value)
-  }
+  }, [])
 
   return (
     <div className='flex w-full max-w-xs flex-col'>
@@ -155,7 +155,7 @@ export default function Controller() {
             // }
             endContent={
               <Select
-                label='Select an animal'
+                aria-label='Select pay asset'
                 className='max-w-xs'
                 variant='bordered'
                 selectedKeys={[assetToPay]}
@@ -315,7 +315,7 @@ export default function Controller() {
           </div>
         </CardBody>
       </Card>
-      <Card className='mt-2'>
+      <Card className='mt-4'>
         <CardBody>
           {`${ORDER_TYPE_LABEL[orderType]} ${pool[0]}`}
           <Divider className='mt-3 opacity-50' />

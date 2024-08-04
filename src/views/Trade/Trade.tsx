@@ -18,10 +18,10 @@ export default function Home() {
       <SkipLink title='Skip to main content' to='#main-content' />
       <WolfyNavbar />
       <main
-        className='mx-auto flex max-w-[1024px] items-center justify-center p-4'
+        className='mx-auto flex max-w-7xl items-center justify-center p-4'
         {...skipTargetProps('main-content')}
       >
-        <div className='flex w-full flex-row gap-2'>
+        <div className='flex w-full flex-row gap-4'>
           <div className='w-full'>
             <MarketInformation />
             <Chart />

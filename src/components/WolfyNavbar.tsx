@@ -27,6 +27,7 @@ import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {FaucetRoute, TradeRoute} from '@/routeRegistry'
 import useCallback from '@/utils/hooks/useCallback'
+import middleEllipsis from '@/utils/middleEllipsis'
 
 import ChainSelect from './ChainSelect'
 import ChainSwitchRequester from './ChainSwitchRequester'
@@ -82,6 +83,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         height='60px'
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
+        maxWidth='2xl'
       >
         <NavbarMenuToggle className='text-default-400 md:hidden' />
         {/* Left Content */}
@@ -133,11 +135,13 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                     </button>
                   </DropdownTrigger>
                   <DropdownMenu aria-label='Profile Actions' variant='flat'>
-                    <DropdownItem key='profile' className='h-14 gap-2'>
-                      <p className='font-semibold'>{walletAccount?.address}</p>
+                    <DropdownItem key='profile'>
+                      <p className='font-semibold'>
+                        {!!walletAccount?.address && middleEllipsis(walletAccount.address)}
+                      </p>
                     </DropdownItem>
                     <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
-                    <DropdownItem key='logout' color='danger' onPress={handleDisconnect}>
+                    <DropdownItem key='disconnect' color='danger' onPress={handleDisconnect}>
                       {t('Disconnect')}
                     </DropdownItem>
                   </DropdownMenu>

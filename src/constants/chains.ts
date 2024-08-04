@@ -19,8 +19,10 @@ export const SUPPORTED_CHAINS: {
   },
 ] as const
 
-export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.chainId)
+export const SUPPORTED_CHAIN_IDS = [StarknetChainId.SN_SEPOLIA] as const
 
-export function isChainIdSupported(chainId: unknown): chainId is StarknetChainId {
+export function isChainIdSupported(
+  chainId: unknown,
+): chainId is (typeof SUPPORTED_CHAIN_IDS)[number] {
   return SUPPORTED_CHAIN_IDS.includes(chainId as StarknetChainId)
 }

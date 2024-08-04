@@ -13,6 +13,7 @@ export default memo(function ChainSelect() {
     <>
       <CorrectNetworkButton />
       <Select
+        aria-label='Select Network'
         items={SUPPORTED_CHAINS}
         selectedKeys={[chainId]}
         onSelectionChange={selection => {

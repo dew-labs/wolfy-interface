@@ -12,7 +12,7 @@ import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import pluginDeprecation from 'eslint-plugin-deprecation'
-import {plugin as exceptionHandling} from 'eslint-plugin-exception-handling'
+import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
 import pluginI18next from 'eslint-plugin-i18next'
 import pluginImportX from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
@@ -91,17 +91,15 @@ function createApplyTo(include, exclude = []) {
 
 const applyToAll = createApplyTo(['**/*.?(c|m)[jt]s?(x)', '**/*.json?(c|5)'])
 const applyToScript = createApplyTo(['**/*.?(c|m)[jt]s?(x)'])
-const applyToJson = createApplyTo(['**/*.json'], ['**/tsconfig.json', '.vscode/settings.json'])
-const applyToJsonc = createApplyTo(['**/*.jsonc', '.vscode/settings.json'])
+const applyToJson = createApplyTo(
+  ['**/*.json'],
+  ['**/tsconfig.json', '.vscode/*.json', '.zed/*.json'],
+)
+const applyToJsonc = createApplyTo(['**/*.jsonc', '.vscode/*.json', '.zed/*.json'])
 const applyToJson5 = createApplyTo(['**/*.json5', '**/tsconfig.json'])
 const applyToJsonC5 = createApplyTo(['**/*.json?(c|5)'])
 const applyToTypescript = createApplyTo(['**/*.?(c|m)ts?(x)'])
-const applyToReact = createApplyTo([
-  '**/*.?(c|m)jsx',
-  '**/*.?(c|m)tsx',
-  '**/use*.?(c|m)js?(x)',
-  '**/use*.?(c|m)ts?(x)',
-])
+const applyToReact = createApplyTo(['**/*.?(c|m)[jt]sx', '**/use*.?(c|m)[jt]s?(x)'])
 const applyToTypescriptReact = createApplyTo(['**/*.?(c|m)tsx', '**/use*.?(c|m)ts?(x)'])
 const applyToVitest = createApplyTo(
   ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
@@ -194,7 +192,7 @@ const coreConfigs = [
   }),
   ...applyToAll('core/exception-handling', {
     plugins: {
-      'exception-handling': exceptionHandling,
+      'exception-handling': pluginExceptionHandling,
     },
     rules: {
       // 'exception-handling/no-unhandled': 'error',
@@ -257,6 +255,20 @@ const typescriptConfigs = [
       },
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          caughtErrors: 'all',
+          ignoreRestSiblings: false,
+          reportUsedIgnorePattern: true,
+          varsIgnorePattern: '^(?!__)_.*|^_$',
+          argsIgnorePattern: '^(?!__)_.*|^_$',
+          caughtErrorsIgnorePattern: '^(?!__)_.*|^_$',
+          destructuredArrayIgnorePattern: '^(?!__)_.*|^_$',
+        },
+      ],
       '@typescript-eslint/no-inferrable-types': 'off',
       '@typescript-eslint/use-unknown-in-catch-callback-variable': 'warn', // TODO: enable
       '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
@@ -308,7 +320,7 @@ const reactConfigs = [
       'react-compiler': pluginReactCompiler,
     },
     rules: {
-      'react-compiler/react-compiler': 'error',
+      // 'react-compiler/react-compiler': 'error',
     },
   }),
   ...applyToReact('react', {
@@ -348,20 +360,6 @@ const reactConfigs = [
   }),
   ...applyToTypescriptReact('react/typescript', {
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'all',
-          argsIgnorePattern: '^_',
-          caughtErrors: 'all',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-          // reportUsedIgnorePattern: true,
-        },
-      ],
       // https://github.com/orgs/react-hook-form/discussions/8020
       '@typescript-eslint/no-misused-promises': [
         2,
@@ -418,11 +416,11 @@ const testConfigs = [
 const config = tsEslint.config(
   pluginGitignore({
     root: true,
-    files: ['.gitignore', '.eslintignore'],
+    files: ['.gitignore'],
     strict: false,
   }),
   {
-    ignores: ['public/*', '**/*.gen.ts'],
+    ignores: ['public/*', '**/*.gen.ts', '**/abis/*'],
   },
   ...coreConfigs,
   ...jsonConfigs,

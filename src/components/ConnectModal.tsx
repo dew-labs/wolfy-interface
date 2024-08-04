@@ -23,6 +23,7 @@ import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
+import UnexpectedError from '@/utils/api/UnexpectedError'
 import toastErrorMessage from '@/utils/errors/toastErrorMessage'
 import useCallback from '@/utils/hooks/useCallback'
 
@@ -57,7 +58,12 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
         shadow='sm'
         isPressable
         onPress={() => {
-          if ('connect' in props) props.connect(props.wallet)
+          if (!('connect' in props)) return
+          try {
+            props.connect(props.wallet)
+          } catch (error) {
+            throw new UnexpectedError(error)
+          }
         }}
         className='align-center justify-content-center w-full'
       >
@@ -111,6 +117,7 @@ export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalPr
     if (!isOpen) return
 
     void (async function () {
+      // TODO:retry
       const [wallets, discoveryWallets, lastConnectedWallet] = await Promise.all([
         getStarknetCore.getAvailableWallets(),
         getStarknetCore.getDiscoveryWallets(),

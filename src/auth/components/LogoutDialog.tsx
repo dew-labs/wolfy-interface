@@ -43,7 +43,10 @@ export default memo(function LogoutDialog(props: PropsWithChildren<Props>) {
       <ModalOverlay
         // TODO: add animation
         className={({isEntering, isExiting}) =>
-          clsx(style.Overlay, isEntering && style.IsEntering, isExiting && style.IsExiting)
+          clsx(style.Overlay, {
+            [style.IsEntering]: isEntering,
+            [style.IsExiting]: isExiting,
+          })
         }
         isDismissable
       >
