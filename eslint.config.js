@@ -261,28 +261,9 @@ const typescriptConfigs = [
       '@typescript-eslint/promise-function-async': ['error'],
       'no-loop-func': 'off',
       '@typescript-eslint/no-loop-func': 'error',
-      // NOTE: keep in radar, enable for new projects
-      // 'no-magic-numbers': 'off',
-      // '@typescript-eslint/no-magic-numbers': [
-      //   'error',
-      //   {
-      //     ignore: [1, -1, '1n', '-1n', 0, '0n', '-0n', Infinity, NaN],
-      //     ignoreEnums: true,
-      //     ignoreNumericLiteralTypes: true,
-      //     ignoreArrayIndexes: true,
-      //     ignoreTypeIndexes: true,
-      //   },
-      // ],
       '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
       '@typescript-eslint/no-unnecessary-qualifier': 'error',
       '@typescript-eslint/no-useless-empty-export': 'error',
-      // NOTE: keep in radar, enable for new projects
-      // '@typescript-eslint/prefer-readonly': ['error'],
-      // '@typescript-eslint/prefer-readonly-parameter-types': [
-      //   'error',
-      //   {checkParameterProperties: true, treatMethodsAsReadonly: true, ignoreInferredTypes: true},
-      // ],
-      'no-restricted-imports': 'off',
       // Extends or disable rules of the presets
       '@typescript-eslint/no-unused-vars': [
         'error',

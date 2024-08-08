@@ -222,7 +222,7 @@ export default function MarketInformation() {
               className='my-2'
               removeWrapper
               selectionMode='single'
-              selectedKeys={selectedToken ? [selectedToken] : undefined}
+              selectedKeys={selectedToken ? [selectedToken] : []}
               onSelectionChange={handleSelectMarket}
               sortDescriptor={marketSortDescriptor}
               onSortChange={handleSortChange}

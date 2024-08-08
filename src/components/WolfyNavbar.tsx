@@ -129,7 +129,9 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   <DropdownTrigger>
                     <button className='mt-1 h-8 w-8 transition-transform'>
                       <Badge color='success' content='' placement='bottom-right' shape='circle'>
-                        <BoringAvatar size='32px' variant='beam' name={walletAccount?.address} />
+                        {!!walletAccount?.address && (
+                          <BoringAvatar size='32px' variant='beam' name={walletAccount.address} />
+                        )}
                       </Badge>
                     </button>
                   </DropdownTrigger>

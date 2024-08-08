@@ -79,8 +79,12 @@ export function getHttpProvider(chainId: StarknetChainId) {
   if (!(chainId in HTTP_RPC_PROVIDERS)) throw new Error(`Unsupported chain ID: ${chainId}`)
   if (HTTP_RPC_PROVIDERS[chainId].length === 0)
     throw new Error(`No available HTTP RPC providers for chain ID: ${chainId}`)
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed non-null
+  const sampleProvider = sample(HTTP_RPC_PROVIDERS[chainId], 1)[0]!
+
   return new RpcProvider({
-    nodeUrl: sample(HTTP_RPC_PROVIDERS[chainId], 1)[0],
+    nodeUrl: sampleProvider,
     batch: 0,
   })
 }

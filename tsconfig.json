@@ -24,8 +24,8 @@
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
     // "noImplicitReturns": true, // Way too strict and not worth it?
-    // "exactOptionalPropertyTypes": true, // TODO: consider enabling this, but way too strict and not worth it?
     // END Type checking
     // Handled in eslint: disable them to prevent error duplication
     "allowUnreachableCode": true, // rule name: no-unreachable
