@@ -15,13 +15,12 @@ import {
   Tabs,
   Tooltip,
 } from '@nextui-org/react'
-import {useState} from 'react'
+import {useCallback, useState} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 
 import useExecutionType, {ExecutionType} from '@/lib/trade/states/useExecutionType'
 import useOrderType, {OrderType} from '@/lib/trade/states/useOrderType'
-import useCallback from '@/utils/hooks/useCallback'
 
 const ORDER_TYPE_LABEL: Record<OrderType, string> = {
   [OrderType.Long]: 'Long',
@@ -49,7 +48,7 @@ const EXECUTION_TYPE_LABEL: Record<ExecutionType, string> = {
 
 const SUPPORTED_ORDER_TYPES: OrderType[] = [OrderType.Long, OrderType.Short, OrderType.Swap]
 
-const SUPPORTED_ASSETS_TO_PAY = ['BTC', 'ETH', 'SOL', 'USDT']
+const SUPPORTED_ASSETS_TO_PAY = ['BTC', 'ETH', 'SOL', 'USDT'] as const
 
 type Pool = [string, string]
 
@@ -62,7 +61,7 @@ const POOLS: Pool[] = [
 export default function Controller() {
   const [orderType, setOrderType] = useOrderType()
   const [executionType, setExecutionType] = useExecutionType()
-  const [assetToPay, setAssetToPay] = useState(SUPPORTED_ASSETS_TO_PAY[0])
+  const [assetToPay, setAssetToPay] = useState<string>(SUPPORTED_ASSETS_TO_PAY[0])
   const [leverage, setLeverage] = useState(1)
   const [leverageInput, setLeverageInput] = useState('1')
   const [maxLeverage, _setMaxLeverage] = useState(100)

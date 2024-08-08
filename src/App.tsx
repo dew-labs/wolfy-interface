@@ -32,7 +32,7 @@ import ErrorComponent from './views/Error/ErrorComponent'
 
 const JotaiDevTools = import.meta.env.PROD
   ? () => null
-  : lazy(() => import('./utils/components/JotaiDevTools'))
+  : lazy(async () => import('./utils/components/JotaiDevTools'))
 
 function QueryErrorBoundary({children}: PropsWithChildren) {
   const {reset} = useQueryErrorResetBoundary()

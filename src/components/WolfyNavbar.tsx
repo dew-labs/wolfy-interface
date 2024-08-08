@@ -20,13 +20,12 @@ import {
 } from '@nextui-org/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
-import {memo, useState} from 'react'
+import {memo, useCallback, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {FaucetRoute, TradeRoute} from '@/routeRegistry'
-import useCallback from '@/utils/hooks/useCallback'
 import middleEllipsis from '@/utils/middleEllipsis'
 
 import ChainSelect from './ChainSelect'

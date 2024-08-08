@@ -18,7 +18,7 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
             We’re not perfect, error happens{errorCode ? ': ' + errorCode : '!'}
           </h1>
           <span className={style.Description}>{errorMessage}</span>
-          <div className={style.Search}>
+          <div>
             <button
               onClick={() => {
                 if (reset) {

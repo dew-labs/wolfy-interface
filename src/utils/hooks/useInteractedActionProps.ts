@@ -1,6 +1,4 @@
-import {useRef} from 'react'
-
-import useCallback, {type MemoizedCallback} from './useCallback'
+import {type MemoizedCallback, useCallback, useRef} from 'react'
 
 export default function useInteractedActionProps(
   action: MemoizedCallback<() => void>,

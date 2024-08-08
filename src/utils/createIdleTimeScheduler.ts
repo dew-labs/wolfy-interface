@@ -11,6 +11,7 @@ const createIdleTimeScheduler = (timeout = 3000) => {
 
     if ('requestIdleCallback' in window) {
       // Wait at most two seconds before processing events.
+
       requestIdleCallback(process, {timeout})
     } else {
       process()

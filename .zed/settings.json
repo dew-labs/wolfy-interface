@@ -25,7 +25,9 @@
       },
       "rulesCustomizations": [
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "prettier/prettier", "severity": "off"}
+        {"rule": "prettier/prettier", "severity": "off"},
+        // Silent the stylistic rules in you IDE, but still auto fix them
+        {"rule": "simple-import-sort/imports", "severity": "off"}
       ]
     }
   }

@@ -1,8 +1,8 @@
 import getStarknetCore from 'get-starknet-core'
 import {useAtom, useSetAtom} from 'jotai'
+import {useCallback} from 'react'
 
 import {walletAccountAtom} from '@/lib/starknet/atoms'
-import useCallback from '@/utils/hooks/useCallback'
 
 import {useSetWalletChainId} from './useWalletChainId'
 

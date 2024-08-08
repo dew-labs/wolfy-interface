@@ -1,11 +1,10 @@
 import {Icon} from '@iconify/react'
 import {Button} from '@nextui-org/react'
-import {memo} from 'react'
+import {memo, useCallback} from 'react'
 import {useLatest} from 'react-use'
 
 import {Theme} from '@/lib/theme/theme'
 import useTheme from '@/lib/theme/useTheme'
-import useCallback from '@/utils/hooks/useCallback'
 
 export default memo(function ThemeSwitchButton() {
   const [theme, setTheme] = useTheme()

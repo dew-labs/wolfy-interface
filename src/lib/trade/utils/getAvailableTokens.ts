@@ -1,4 +1,4 @@
-import {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenData} from '@/lib/trade/services/fetchTokensData'
 
 import convertPriceToUsd from './price/convertPriceToUsd'

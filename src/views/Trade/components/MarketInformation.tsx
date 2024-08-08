@@ -15,7 +15,7 @@ import {
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
 import {queryOptions, useQuery} from '@tanstack/react-query'
-import {useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
 import type {StarknetChainId} from '@/constants/chains'
@@ -29,7 +29,6 @@ import useToken from '@/lib/trade/states/useToken'
 import type {AvailableTokens} from '@/lib/trade/utils/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/getAvailableUsdLiquidityForPosition'
-import useCallback from '@/utils/hooks/useCallback'
 import max from '@/utils/numbers/bigint/max'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
 import roundToNDecimalPlaces from '@/utils/numbers/roundToNDecimalPlaces'
@@ -121,12 +120,15 @@ export default function MarketInformation() {
   const sortedAndFilteredIndexTokens = useMemo(() => {
     const sortedAndFilteredIndexTokens = Array.from(indexTokensWithLiquidityInformation.values())
       .map(index => {
-        const symbol = tokensMetadata.get(index.markets[0].indexTokenAddress)?.symbol
+        const indexTokenAddress = index.markets[0]?.indexTokenAddress
+        if (!indexTokenAddress) return false
+
+        const symbol = tokensMetadata.get(indexTokenAddress)?.symbol
 
         if (!symbol) return false
         return {
           symbol,
-          address: index.markets[0].indexTokenAddress,
+          address: indexTokenAddress,
           ...index,
         }
       })

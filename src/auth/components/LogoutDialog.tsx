@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import {memo, type PropsWithChildren, useCallback} from 'react'
+import {memo, type MemoizedCallback, type PropsWithChildren, useCallback} from 'react'
 import {
   Button,
   Dialog,
@@ -10,8 +10,6 @@ import {
   Text,
 } from 'react-aria-components'
 import {useLatest} from 'react-use'
-
-import type {MemoizedCallback} from '@/utils/hooks/useCallback'
 
 import style from './LogoutDialog.module.scss'
 

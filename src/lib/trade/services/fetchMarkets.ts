@@ -6,6 +6,37 @@ import {getHttpProvider} from '@/constants/rpcProviders'
 import {getTokenMetadata, type Token} from '@/constants/tokens'
 import toStarknetAddress from '@/lib/starknet/utils/toStarknetAddress'
 
+function getMarketIndexName(p: {indexToken: Token; isSpotOnly: boolean}) {
+  const {indexToken, isSpotOnly} = p
+
+  if (isSpotOnly) {
+    return `SWAP-ONLY`
+  }
+
+  return `${indexToken.baseSymbol ?? indexToken.symbol}/USD`
+}
+
+function getMarketPoolName(p: {longToken: Token; shortToken: Token}) {
+  const {longToken, shortToken} = p
+
+  if (longToken.address === shortToken.address) {
+    return longToken.symbol
+  }
+
+  return `${longToken.symbol}-${shortToken.symbol}`
+}
+
+function getMarketFullName(p: {
+  longToken: Token
+  shortToken: Token
+  indexToken: Token
+  isSpotOnly: boolean
+}) {
+  const {indexToken, longToken, shortToken, isSpotOnly} = p
+
+  return `${getMarketIndexName({indexToken, isSpotOnly})} [${getMarketPoolName({longToken, shortToken})}]`
+}
+
 export interface Market {
   marketTokenAddress: string
   indexTokenAddress: string
@@ -65,35 +96,4 @@ export default async function fetchMarkets(chainId: StarknetChainId) {
       }
     })
     .filter(Boolean)
-}
-
-function getMarketFullName(p: {
-  longToken: Token
-  shortToken: Token
-  indexToken: Token
-  isSpotOnly: boolean
-}) {
-  const {indexToken, longToken, shortToken, isSpotOnly} = p
-
-  return `${getMarketIndexName({indexToken, isSpotOnly})} [${getMarketPoolName({longToken, shortToken})}]`
-}
-
-function getMarketIndexName(p: {indexToken: Token; isSpotOnly: boolean}) {
-  const {indexToken, isSpotOnly} = p
-
-  if (isSpotOnly) {
-    return `SWAP-ONLY`
-  }
-
-  return `${indexToken.baseSymbol ?? indexToken.symbol}/USD`
-}
-
-function getMarketPoolName(p: {longToken: Token; shortToken: Token}) {
-  const {longToken, shortToken} = p
-
-  if (longToken.address === shortToken.address) {
-    return longToken.symbol
-  }
-
-  return `${longToken.symbol}-${shortToken.symbol}`
 }

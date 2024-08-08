@@ -13,7 +13,7 @@ import getStarknetCore, {
   type StarknetWindowObject,
   type WalletProvider,
 } from 'get-starknet-core'
-import {memo, useEffect, useRef, useState} from 'react'
+import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
 import {WalletAccount} from 'starknet'
 
@@ -25,7 +25,6 @@ import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import UnexpectedError from '@/utils/api/UnexpectedError'
 import toastErrorMessage from '@/utils/errors/toastErrorMessage'
-import useCallback from '@/utils/hooks/useCallback'
 
 interface AvailableWalletProps {
   wallet: StarknetWindowObject

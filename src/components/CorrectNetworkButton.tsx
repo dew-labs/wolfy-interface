@@ -1,13 +1,12 @@
 import {Icon} from '@iconify/react'
 import {Button, Tooltip} from '@nextui-org/react'
-import {memo} from 'react'
+import {memo, useCallback} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useChainIdIsSupportedMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
-import useCallback from '@/utils/hooks/useCallback'
 
 export default memo(function CorrectNetworkButton() {
   const matched = useChainIdIsSupportedMatched()

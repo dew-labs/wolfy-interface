@@ -5,8 +5,8 @@
  * @class PubSubChannel
  */
 export default class PubSubChannel<M = unknown> {
-  private publisher: BroadcastChannel
-  private subscriber: BroadcastChannel
+  private readonly publisher: BroadcastChannel
+  private readonly subscriber: BroadcastChannel
 
   constructor(channelName: string) {
     this.publisher = new BroadcastChannel(channelName)

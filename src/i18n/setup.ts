@@ -1,6 +1,6 @@
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector' // how about ssr?
-import HttpBackend, {HttpBackendOptions} from 'i18next-http-backend'
+import HttpBackend, {type HttpBackendOptions} from 'i18next-http-backend'
 import {initReactI18next} from 'react-i18next'
 
 import {MODE} from '@/constants/config'
@@ -37,6 +37,10 @@ void i18n
       request: (_, url, _2, callback) => {
         // instead of loading from a URL like i18next-http-backend is intended for, we re-purpose this plugin to load chunks instead by overriding the default request behavior
         const [lng, ns] = url.split('|')
+
+        if (!lng || !ns) {
+          throw new Error('Invalid URL format. Expected "lng|ns"')
+        }
 
         loadLocaleBundle(lng, ns)
           .then(data => {
