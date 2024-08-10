@@ -1,8 +1,10 @@
-import DataStoreABI from '@/abis/DataStoreABI'
-import ReaderABI from '@/abis/ReaderABI'
 import {StarknetChainId} from '@/constants/chains'
-import {ADDRESS_ZERO, getContractAddress, newContract} from '@/constants/contracts'
-import {getHttpProvider} from '@/constants/rpcProviders'
+import {
+  ADDRESS_ZERO,
+  getContractAddress,
+  newSatoruContract,
+  SatoruContract,
+} from '@/constants/contracts'
 import {getTokenMetadata, type Token} from '@/constants/tokens'
 import toStarknetAddress from '@/lib/starknet/utils/toStarknetAddress'
 
@@ -48,12 +50,9 @@ export interface Market {
 }
 
 export default async function fetchMarkets(chainId: StarknetChainId) {
-  const provider = getHttpProvider(chainId)
-
-  const dataStoreAddress = getContractAddress(chainId, 'DataStore')
-  const dataStoreContract = newContract(DataStoreABI, dataStoreAddress, provider)
-
-  const readerContract = newContract(ReaderABI, getContractAddress(chainId, 'Reader'), provider)
+  const dataStoreAddress = getContractAddress(chainId, SatoruContract.DataStore)
+  const dataStoreContract = newSatoruContract(chainId, SatoruContract.DataStore)
+  const readerContract = newSatoruContract(chainId, SatoruContract.Reader)
 
   const marketNum = await dataStoreContract.get_market_count()
 

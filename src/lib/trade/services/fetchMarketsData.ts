@@ -1,7 +1,5 @@
-import DataStoreABI from '@/abis/DataStoreABI'
-import ReaderABI from '@/abis/ReaderABI'
 import type {StarknetChainId} from '@/constants/chains'
-import {getContractAddress, newContract} from '@/constants/contracts'
+import {createCalldata, getContractAddress, multicall, SatoruContract} from '@/constants/contracts'
 import {
   borrowingExponentFactorKey,
   borrowingFactorKey,
@@ -33,7 +31,6 @@ import {
   virtualMarketIdKey,
   virtualTokenIdKey,
 } from '@/constants/dataStore'
-import {getHttpProvider} from '@/constants/rpcProviders'
 import cairoIntToBigInt from '@/lib/starknet/utils/cairoIntToBigInt'
 import {type Market} from '@/lib/trade/services/fetchMarkets'
 import {logError} from '@/utils/logger'
@@ -115,14 +112,14 @@ export interface MarketData extends Market {
   virtualShortTokenId: string | number | bigint
 }
 
+export type MarketsData = Map<string, MarketData>
+
 export default async function fetchMarketsData(
   chainId: StarknetChainId,
   markets: Market[],
   tokensData: Map<string, TokenData>,
   accountAddress: string | undefined,
-) {
-  const provider = getHttpProvider(chainId)
-
+): Promise<MarketsData> {
   const results = await Promise.allSettled(
     markets
       .map(async market => {
@@ -145,16 +142,7 @@ export default async function fetchMarketsData(
           short_token: market.shortTokenAddress,
         }
 
-        const readerContract = newContract(
-          ReaderABI,
-          getContractAddress(chainId, 'Reader'),
-          provider,
-        )
-        const dataStoreContract = newContract(
-          DataStoreABI,
-          getContractAddress(chainId, 'DataStore'),
-          provider,
-        )
+        const dataStoreAddress = getContractAddress(chainId, SatoruContract.DataStore)
 
         try {
           const [
@@ -186,8 +174,6 @@ export default async function fetchMarketsData(
             fundingExponentFactor,
             maxPnlFactorForTradersLong,
             maxPnlFactorForTradersShort,
-            claimableFundingAmountLong,
-            claimableFundingAmountShort,
             positionFeeFactorForPositiveImpact,
             positionFeeFactorForNegativeImpact,
             positionImpactFactorPositive,
@@ -213,19 +199,19 @@ export default async function fetchMarketsData(
             shortInterestInTokensUsingLongToken,
             shortInterestInTokensUsingShortToken,
             // Fail if any of the call fail
-          ] = await Promise.all([
+          ] = await multicall(chainId, [
             // marketInfo
-            readerContract.get_market_info(
+            createCalldata(chainId, SatoruContract.Reader, 'get_market_info', [
               {
-                contract_address: dataStoreContract.address,
+                contract_address: dataStoreAddress,
               },
               tokenPricesInMarket,
               market.marketTokenAddress,
-            ),
+            ]),
             // marketTokenPriceMax
-            readerContract.get_market_token_price(
+            createCalldata(chainId, SatoruContract.Reader, 'get_market_token_price', [
               {
-                contract_address: dataStoreContract.address,
+                contract_address: dataStoreAddress,
               },
               marketProps,
               tokenPricesInMarket.index_token_price,
@@ -233,11 +219,11 @@ export default async function fetchMarketsData(
               tokenPricesInMarket.short_token_price,
               MAX_PNL_FACTOR_FOR_TRADERS_KEY,
               true,
-            ),
+            ]),
             // marketTokenPriceMin
-            readerContract.get_market_token_price(
+            createCalldata(chainId, SatoruContract.Reader, 'get_market_token_price', [
               {
-                contract_address: dataStoreContract.address,
+                contract_address: dataStoreAddress,
               },
               marketProps,
               tokenPricesInMarket.index_token_price,
@@ -245,172 +231,227 @@ export default async function fetchMarketsData(
               tokenPricesInMarket.short_token_price,
               MAX_PNL_FACTOR_FOR_TRADERS_KEY,
               false,
-            ),
+            ]),
             // isMarketDisabled
-            dataStoreContract.get_bool(isMarketDisabledKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_bool', [
+              isMarketDisabledKey(market.marketTokenAddress),
+            ]),
             // virtualMarketId
-            dataStoreContract.get_felt252(virtualMarketIdKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_felt252', [
+              virtualMarketIdKey(market.marketTokenAddress),
+            ]),
             // virtualLongTokenId
-            dataStoreContract.get_felt252(virtualTokenIdKey(market.longTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_felt252', [
+              virtualTokenIdKey(market.longTokenAddress),
+            ]),
             // virtualShortTokenId
-            dataStoreContract.get_felt252(virtualTokenIdKey(market.shortTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_felt252', [
+              virtualTokenIdKey(market.shortTokenAddress),
+            ]),
             // longPoolAmount
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               poolAmountKey(market.marketTokenAddress, market.longTokenAddress),
-            ),
+            ]),
             // shortPoolAmount
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               poolAmountKey(market.marketTokenAddress, market.shortTokenAddress),
-            ),
+            ]),
             // maxLongPoolAmount
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPoolAmountKey(market.marketTokenAddress, market.longTokenAddress),
-            ),
+            ]),
             // maxShortPoolAmount
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPoolAmountKey(market.marketTokenAddress, market.shortTokenAddress),
-            ),
+            ]),
             // reserveFactorLong
-            dataStoreContract.get_u256(reserveFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              reserveFactorKey(market.marketTokenAddress, true),
+            ]),
             // reserveFactorShort
-            dataStoreContract.get_u256(reserveFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              reserveFactorKey(market.marketTokenAddress, false),
+            ]),
             // openInterestReserveFactorLong
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestReserveFactorKey(market.marketTokenAddress, true),
-            ),
+            ]),
             // openInterestReserveFactorShort
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestReserveFactorKey(market.marketTokenAddress, false),
-            ),
+            ]),
             // maxOpenInterestLong
-            dataStoreContract.get_u256(maxOpenInterestKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              maxOpenInterestKey(market.marketTokenAddress, true),
+            ]),
             // maxOpenInterestShort
-            dataStoreContract.get_u256(maxOpenInterestKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              maxOpenInterestKey(market.marketTokenAddress, false),
+            ]),
             // positionImpactPoolAmount
-            dataStoreContract.get_u256(positionImpactPoolAmountKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionImpactPoolAmountKey(market.marketTokenAddress),
+            ]),
             // swapImpactPoolAmountLong
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               swapImpactPoolAmountKey(market.marketTokenAddress, market.longTokenAddress),
-            ),
+            ]),
             // swapImpactPoolAmountShort
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               swapImpactPoolAmountKey(market.marketTokenAddress, market.shortTokenAddress),
-            ),
+            ]),
             // borrowingFactorLong
-            dataStoreContract.get_u256(borrowingFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              borrowingFactorKey(market.marketTokenAddress, true),
+            ]),
             // borrowingFactorShort
-            dataStoreContract.get_u256(borrowingFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              borrowingFactorKey(market.marketTokenAddress, false),
+            ]),
             // borrowingExponentFactorLong
-            dataStoreContract.get_u256(borrowingExponentFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              borrowingExponentFactorKey(market.marketTokenAddress, true),
+            ]),
             // borrowingExponentFactorShort
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               borrowingExponentFactorKey(market.marketTokenAddress, false),
-            ),
+            ]),
             // fundingFactor
-            dataStoreContract.get_u256(fundingFactorKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              fundingFactorKey(market.marketTokenAddress),
+            ]),
             // fundingExponentFactor
-            dataStoreContract.get_u256(fundingExponentFactorKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              fundingExponentFactorKey(market.marketTokenAddress),
+            ]),
             // maxPnlFactorForTradersLong
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS_KEY, market.marketTokenAddress, true),
-            ),
+            ]),
             // maxPnlFactorForTradersShort
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS_KEY, market.marketTokenAddress, false),
-            ),
-            // claimableFundingAmountLong
-            accountAddress
-              ? dataStoreContract.get_u256(
-                  claimableFundingAmountKey(
-                    market.marketTokenAddress,
-                    market.longTokenAddress,
-                    accountAddress,
-                  ),
-                )
-              : undefined,
-            // claimableFundingAmountShort
-            accountAddress
-              ? dataStoreContract.get_u256(
-                  claimableFundingAmountKey(
-                    market.marketTokenAddress,
-                    market.shortTokenAddress,
-                    accountAddress,
-                  ),
-                )
-              : undefined,
+            ]),
             // positionFeeFactorForPositiveImpact
-            dataStoreContract.get_u256(positionFeeFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionFeeFactorKey(market.marketTokenAddress, true),
+            ]),
             // positionFeeFactorForNegativeImpact
-            dataStoreContract.get_u256(positionFeeFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionFeeFactorKey(market.marketTokenAddress, false),
+            ]),
             // positionImpactFactorPositive
-            dataStoreContract.get_u256(positionImpactFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionImpactFactorKey(market.marketTokenAddress, true),
+            ]),
             // positionImpactFactorNegative
-            dataStoreContract.get_u256(positionImpactFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionImpactFactorKey(market.marketTokenAddress, false),
+            ]),
             // maxPositionImpactFactorPositive
-            dataStoreContract.get_u256(maxPositionImpactFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              maxPositionImpactFactorKey(market.marketTokenAddress, true),
+            ]),
             // maxPositionImpactFactorNegative
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPositionImpactFactorKey(market.marketTokenAddress, false),
-            ),
+            ]),
             // maxPositionImpactFactorForLiquidations
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               maxPositionImpactFactorForLiquidationsKey(market.marketTokenAddress),
-            ),
+            ]),
             // minCollateralFactor
-            dataStoreContract.get_u256(minCollateralFactorKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              minCollateralFactorKey(market.marketTokenAddress),
+            ]),
             // minCollateralFactorForOpenInterestLong
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               minCollateralFactorForOpenInterest(market.marketTokenAddress, true),
-            ),
+            ]),
             // minCollateralFactorForOpenInterestShort
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               minCollateralFactorForOpenInterest(market.marketTokenAddress, false),
-            ),
+            ]),
             // positionImpactExponentFactor
-            dataStoreContract.get_u256(positionImpactExponentFactorKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              positionImpactExponentFactorKey(market.marketTokenAddress),
+            ]),
             // swapFeeFactorForPositiveImpact
-            dataStoreContract.get_u256(swapFeeFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              swapFeeFactorKey(market.marketTokenAddress, true),
+            ]),
             // swapFeeFactorForNegativeImpact
-            dataStoreContract.get_u256(swapFeeFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              swapFeeFactorKey(market.marketTokenAddress, false),
+            ]),
             // swapImpactFactorPositive
-            dataStoreContract.get_u256(swapImpactFactorKey(market.marketTokenAddress, true)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              swapImpactFactorKey(market.marketTokenAddress, true),
+            ]),
             // swapImpactFactorNegative
-            dataStoreContract.get_u256(swapImpactFactorKey(market.marketTokenAddress, false)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              swapImpactFactorKey(market.marketTokenAddress, false),
+            ]),
             // swapImpactExponentFactor
-            dataStoreContract.get_u256(swapImpactExponentFactorKey(market.marketTokenAddress)),
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+              swapImpactExponentFactorKey(market.marketTokenAddress),
+            ]),
             // longInterestUsingLongToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestKey(market.marketTokenAddress, market.longTokenAddress, true),
-            ),
+            ]),
             // longInterestUsingShortToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestKey(market.marketTokenAddress, market.shortTokenAddress, true),
-            ),
+            ]),
             // shortInterestUsingLongToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestKey(market.marketTokenAddress, market.longTokenAddress, false),
-            ),
+            ]),
             // shortInterestUsingShortToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestKey(market.marketTokenAddress, market.shortTokenAddress, false),
-            ),
+            ]),
             // longInterestInTokensUsingLongToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestInTokensKey(market.marketTokenAddress, market.longTokenAddress, true),
-            ),
+            ]),
             // longInterestInTokensUsingShortToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestInTokensKey(market.marketTokenAddress, market.shortTokenAddress, true),
-            ),
+            ]),
             // shortInterestInTokensUsingLongToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestInTokensKey(market.marketTokenAddress, market.longTokenAddress, false),
-            ),
+            ]),
             // shortInterestInTokensUsingShortToken
-            dataStoreContract.get_u256(
+            createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
               openInterestInTokensKey(market.marketTokenAddress, market.shortTokenAddress, false),
-            ),
-          ])
+            ]),
+          ] as const)
+
+          let claimableFundingAmountLong, claimableFundingAmountShort
+
+          if (accountAddress) {
+            ;[claimableFundingAmountLong, claimableFundingAmountShort] = await multicall(chainId, [
+              // claimableFundingAmountLong
+              createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+                claimableFundingAmountKey(
+                  market.marketTokenAddress,
+                  market.longTokenAddress,
+                  accountAddress,
+                ),
+              ]),
+              // claimableFundingAmountShort
+              createCalldata(chainId, SatoruContract.DataStore, 'get_u256', [
+                claimableFundingAmountKey(
+                  market.marketTokenAddress,
+                  market.shortTokenAddress,
+                  accountAddress,
+                ),
+              ]),
+            ] as const)
+          }
 
           const marketDivisor = market.isSameCollaterals ? 2n : 1n
 

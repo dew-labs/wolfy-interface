@@ -9,10 +9,12 @@ export interface TokenData extends Token {
   balance: bigint
 }
 
+export type TokensData = Map<string, TokenData>
+
 export default async function fetchTokensData(
   chainId: StarknetChainId,
   accountAddress: string | undefined,
-): Promise<Map<string, TokenData>> {
+): Promise<TokensData> {
   const [tokenPrices, tokenBalances] = await Promise.all([
     fetchTokenPrices(chainId),
     fetchTokenBalances(chainId, accountAddress),

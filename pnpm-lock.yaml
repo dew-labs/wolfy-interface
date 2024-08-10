@@ -64,6 +64,9 @@ importers:
       '@unhead/dom':
         specifier: ^1.9.16
         version: 1.9.16
+      abi-wan-kanabi:
+        specifier: ^2.2.2
+        version: 2.2.2
       axios:
         specifier: ^1.7.3
         version: 1.7.3(debug@4.3.6)

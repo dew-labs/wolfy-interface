@@ -1,9 +1,6 @@
 import {matchQuery, MutationCache, QueryClient, type QueryKey} from '@tanstack/react-query'
 
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
-import {createQueryConfig, createQueryUtils} from '@/utils/query/query'
-
-const queryConfig = createQueryConfig({})
 
 declare module '@tanstack/react-query' {
   interface Register {
@@ -60,11 +57,3 @@ export function createQueryClient() {
   })
   return queryClient
 }
-
-const queries = createQueryUtils(queryConfig)
-
-// export type QueryDataType<T extends keyof typeof queryConfig> = ReturnType<
-//   typeof queries.getQuery<T>
-// >['data']
-
-export default queries

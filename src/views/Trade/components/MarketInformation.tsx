@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
-import {queryOptions, useQuery} from '@tanstack/react-query'
+import {type QueryClient, queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
 import {useCallback, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
@@ -22,9 +22,9 @@ import type {StarknetChainId} from '@/constants/chains'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
-import fetchMarkets from '@/lib/trade/services/fetchMarkets'
-import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
-import fetchTokensData from '@/lib/trade/services/fetchTokensData'
+import fetchMarkets, {type Market} from '@/lib/trade/services/fetchMarkets'
+import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import fetchTokensData, {type TokensData} from '@/lib/trade/services/fetchTokensData'
 import useToken from '@/lib/trade/states/useToken'
 import type {AvailableTokens} from '@/lib/trade/utils/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/getAvailableTokens'
@@ -32,19 +32,60 @@ import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/getAvailabl
 import max from '@/utils/numbers/bigint/max'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
 import roundToNDecimalPlaces from '@/utils/numbers/roundToNDecimalPlaces'
-import {NO_REFETCH_OPTIONS} from '@/utils/query/query'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-function createGetMarketsQueryOptions(
+function createGetMarketsDataQueryOptions(
   chainId: StarknetChainId,
   accountAddress: string | undefined,
+  queryClient: QueryClient,
 ) {
   return queryOptions({
     queryKey: ['markets', chainId, accountAddress] as const,
     queryFn: async ({queryKey}) => {
-      const markets = await fetchMarkets(queryKey[1])
-      // TODO: reuse data from cache
-      const tokensData = await fetchTokensData(queryKey[1], queryKey[2])
-      return await fetchMarketsData(queryKey[1], markets, tokensData, queryKey[2])
+      let markets = queryClient.getQueryData(['markets', queryKey[1]])
+      if (!markets) {
+        markets = await queryClient.fetchQuery({
+          queryKey: ['markets', queryKey[1]],
+        })
+      }
+
+      let tokensData = queryClient.getQueryData(['tokens', queryKey[1], accountAddress])
+      if (!tokensData) {
+        tokensData = await queryClient.fetchQuery({
+          queryKey: ['tokens', queryKey[1], queryKey[2]],
+        })
+      }
+
+      if (!markets || !tokensData) {
+        return new Map() as MarketsData
+      }
+
+      return await fetchMarketsData(
+        queryKey[1],
+        markets as Market[],
+        tokensData as TokensData,
+        queryKey[2],
+      )
+    },
+    ...NO_REFETCH_OPTIONS,
+  })
+}
+
+function createGetMarketsQueryOptions(chainId: StarknetChainId) {
+  return queryOptions({
+    queryKey: ['markets', chainId] as const,
+    queryFn: async ({queryKey}) => {
+      return await fetchMarkets(queryKey[1])
+    },
+    ...NO_REFETCH_OPTIONS,
+  })
+}
+
+function createGetTokensQueryOptions(chainId: StarknetChainId, accountAddress: string | undefined) {
+  return queryOptions({
+    queryKey: ['tokens', chainId, accountAddress] as const,
+    queryFn: async ({queryKey}) => {
+      return await fetchTokensData(queryKey[1], queryKey[2])
     },
     ...NO_REFETCH_OPTIONS,
   })
@@ -63,8 +104,14 @@ export default function MarketInformation() {
   const [selectedToken, setSelectedToken] = useToken()
   const accountAddress = walletAccount?.address
   const tokensMetadata = getTokensMetadata(chainId)
+  const queryClient = useQueryClient()
 
-  const {data: marketsData} = useQuery(createGetMarketsQueryOptions(chainId, accountAddress))
+  useQuery(createGetMarketsQueryOptions(chainId))
+  useQuery(createGetTokensQueryOptions(chainId, accountAddress))
+
+  const {data: marketsData} = useQuery(
+    createGetMarketsDataQueryOptions(chainId, accountAddress, queryClient),
+  )
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
 
   let availableTokens: AvailableTokens | undefined = undefined
