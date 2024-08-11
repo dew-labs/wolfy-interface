@@ -1,7 +1,9 @@
 import {sample} from 'remeda'
-import {RpcProvider} from 'starknet'
+import {type ParsedEvent, RpcProvider} from 'starknet'
 
 import {StarknetChainId} from './chains'
+import {getContractAddress, SatoruContract} from './contracts'
+import {getSatoruEventHash, type ParsedSatoruEvent, parseEvent, type SatoruEvent} from './events'
 
 export const HTTP_RPC_PROVIDERS: Record<StarknetChainId, string[]> = {
   [StarknetChainId.SN_MAIN]: [
@@ -9,8 +11,8 @@ export const HTTP_RPC_PROVIDERS: Record<StarknetChainId, string[]> = {
     'https://api-starknet-mainnet.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952',
     'https://starknet-mainnet.core.chainstack.com/eb9e6d5b7fd5aca63fc138fc3862fc2c',
     // 'https://lb.drpc.org/ogrpc?network=starknet&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
-    'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/SMOBrqazCx_UNfMy8HsLlXWOF8o5bHI-',
-    'https://free-rpc.nethermind.io/mainnet-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
+    'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/-xREXsAaaQDXnEY1ZQmOqhcBjnQbbvza',
+    'https://rpc.nethermind.io/mainnet-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
     'https://starknet-mainnet.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
     'https://starknet-mainnet.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
     // -------------------------------------------------------------------------
@@ -34,8 +36,8 @@ export const HTTP_RPC_PROVIDERS: Record<StarknetChainId, string[]> = {
   [StarknetChainId.SN_SEPOLIA]: [
     'https://api-starknet-sepolia.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952',
     // 'https://lb.drpc.org/ogrpc?network=starknet-sepolia&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
-    'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/SMOBrqazCx_UNfMy8HsLlXWOF8o5bHI-',
-    'https://free-rpc.nethermind.io/sepolia-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
+    'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-xREXsAaaQDXnEY1ZQmOqhcBjnQbbvza',
+    'https://rpc.nethermind.io/sepolia-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
     'https://starknet-sepolia.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
     'https://starknet-sepolia.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
     // -------------------------------------------------------------------------
@@ -57,17 +59,17 @@ export const WSS_RPC_PROVIDERS: Record<StarknetChainId, string[]> = {
     'wss://starknet-mainnet.core.chainstack.com/ws/eb9e6d5b7fd5aca63fc138fc3862fc2c',
     'wss://lb.drpc.org/ogws?network=starknet&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
     // // -------------------------------------------------------------------------
-    // 'wss://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
-    // 'wss://endpoints.omniatech.io/v1/ws/starknet/mainnet/5999c7a20d6c42a9b367e4ae85b7f65c',
+    'wss://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
+    'wss://endpoints.omniatech.io/v1/ws/starknet/mainnet/5999c7a20d6c42a9b367e4ae85b7f65c',
     // // -------------------------------------------------------------------------
-    // 'wss://starknet-mainnet-rpc.dwellir.com',
-    // 'wss://starknet.drpc.org',
+    'wss://starknet-mainnet-rpc.dwellir.com',
+    'wss://starknet.drpc.org',
   ],
   [StarknetChainId.SN_SEPOLIA]: [
-    'wss://api-starknet-sepolia.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952',
-    'wss://lb.drpc.org/ogws?network=starknet-sepolia&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
+    // 'wss://api-starknet-sepolia.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952', // Unusable
+    // 'wss://lb.drpc.org/ogws?network=starknet-sepolia&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__', // Unusable
     // // -------------------------------------------------------------------------
-    // 'wss://endpoints.omniatech.io/v1/ws/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93',
+    'wss://endpoints.omniatech.io/v1/ws/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93',
     // // -------------------------------------------------------------------------
     // 'wss://starknet-sepolia.drpc.org',
   ],
@@ -89,9 +91,185 @@ export function getHttpProvider(chainId: StarknetChainId) {
   })
 }
 
+// -----------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- in order to achieve optional generic
+export type SatoruEventHandler<T extends SatoruEvent | void = void> = (
+  event: T extends SatoruEvent ? ParsedSatoruEvent<T> : ParsedEvent,
+) => void
+
+function createWebsocketProvider(url: string, chainId: StarknetChainId) {
+  const eventEmitterAddress = getContractAddress(chainId, SatoruContract.EventEmitter)
+
+  const ws = new WebSocket(url)
+  let id = 0
+  const pendingMessages: string[] = []
+  const promises = new Map<
+    number,
+    | {
+        eventHandler: SatoruEventHandler
+        resolve: (unsubscriber: () => Promise<void>) => void
+        reject: (error: Error) => void
+      }
+    | {
+        eventHandler: undefined
+        resolve: (result: boolean) => void
+        reject: (error: Error) => void
+      }
+  >()
+  const eventHandlers = new Map<number, SatoruEventHandler>()
+
+  ws.onopen = () => {
+    console.log(`WebSocket Provider connected to ${url}`)
+    while (pendingMessages.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed non-null
+      ws.send(pendingMessages.shift()!)
+    }
+  }
+
+  ws.onerror = error => {
+    console.error(`WebSocketProvider error:`, error)
+  }
+
+  ws.onmessage = message => {
+    console.log(`WebSocketProvider received message: ${message.data}`)
+
+    if (typeof message.data !== 'string') return
+    const data = JSON.parse(message.data)
+
+    if (data && typeof data === 'object' && 'result' in data) {
+      // Subscribe & Unsubscribe messages
+      if ('id' in data && typeof data.id === 'number') {
+        const id = data.id
+        if (promises.has(id)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed non-null
+          const promise = promises.get(id)!
+
+          if (promise.eventHandler) {
+            if (typeof data.result === 'number') {
+              const subscription = data.result
+              eventHandlers.set(subscription, promise.eventHandler)
+              promise.resolve(async () => unsubscribe(subscription))
+            } else
+              promise.resolve(async () => {
+                // empty
+              })
+          } else {
+            if (typeof data.result === 'boolean') promise.resolve(data.result)
+            else promise.resolve(false)
+          }
+          promises.delete(id)
+        }
+        return
+      }
+
+      // Subscription event messages
+      if (
+        'method' in data &&
+        data.method === 'pathfinder_subscription' &&
+        data.result &&
+        typeof data.result === 'object' &&
+        'subscription' in data.result &&
+        typeof data.result.subscription === 'number' &&
+        'result' in data.result
+      ) {
+        const handler = eventHandlers.get(data.result.subscription)
+        if (!handler) return
+        const parsedEvent = parseEvent(data.result.result)
+        if (!parsedEvent) return
+        handler(parsedEvent as never)
+      }
+    }
+  }
+
+  ws.onclose = () => {
+    console.log('WebSocket Provider disconnected')
+  }
+
+  async function send<T extends SatoruEvent>(
+    message: {method: string; params: unknown},
+    eventHandler: SatoruEventHandler<T>,
+  ): Promise<() => Promise<boolean>>
+  async function send(message: {method: string; params: unknown}): Promise<void>
+  async function send(
+    message: {method: string; params: unknown},
+    eventHandler?: SatoruEventHandler,
+  ) {
+    if ([WebSocket.CLOSED, WebSocket.CLOSING].includes(ws.readyState)) {
+      return Promise.reject(new Error('WebSocket Provider is not closed'))
+    }
+
+    id++
+    const toSend = JSON.stringify({
+      id,
+      jsonrpc: '2.0',
+      method: message.method,
+      params: message.params,
+    })
+
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(toSend)
+    }
+
+    if (ws.readyState === WebSocket.CONNECTING) {
+      pendingMessages.push(toSend)
+    }
+
+    return new Promise((resolve, reject) => {
+      promises.set(id, {eventHandler, resolve, reject})
+    })
+  }
+
+  async function subscribeToEvent<T extends SatoruEvent>(
+    event: T,
+    eventHandler: SatoruEventHandler<T>,
+  ) {
+    const eventHash = getSatoruEventHash(event)
+    return send(
+      {
+        method: 'pathfinder_subscribe',
+        params: {
+          kind: 'events',
+          address: eventEmitterAddress,
+          keys: [[eventHash]],
+        },
+      },
+      eventHandler,
+    )
+  }
+
+  async function unsubscribe(id: number) {
+    return send({
+      method: 'pathfinder_unsubscribe',
+      params: [id],
+    })
+  }
+
+  function close() {
+    ws.close()
+  }
+
+  return {
+    subscribeToEvent,
+    close,
+  }
+}
+
 export function getWssProvider(chainId: StarknetChainId) {
   if (!(chainId in WSS_RPC_PROVIDERS)) throw new Error(`Unsupported chain ID: ${chainId}`)
   if (HTTP_RPC_PROVIDERS[chainId].length === 0)
     throw new Error(`No available WSS RPC providers for chain ID: ${chainId}`)
-  return sample(WSS_RPC_PROVIDERS[chainId], 1)[0]
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed non-null
+  const sampleProvider = sample(WSS_RPC_PROVIDERS[chainId], 1)[0]!
+
+  return createWebsocketProvider(sampleProvider, chainId)
 }
+
+// Usages:
+// const wssProvider = getWssProvider(chainId)
+
+// const eventHandler: SatoruEventHandler<SatoruEvent.OrderCreated> = e => {
+//   console.log(e)
+// }
+// const unsubscribe = await wssProvider.subscribeToEvent(SatoruEvent.OrderCreated, eventHandler)
