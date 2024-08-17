@@ -82,6 +82,7 @@
     "react-i18next": "^15.0.0",
     "react-use": "^17.5.1",
     "remeda": "^2.7.0",
+    "satoru-sdk": "^1.0.1",
     "sonner": "^1.5.0",
     "starknet": "^6.12.1",
     "tailwind-merge": "^2.4.0",
