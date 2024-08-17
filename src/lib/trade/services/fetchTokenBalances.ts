@@ -1,9 +1,7 @@
-import ERC20ABI from '@/abis/ERC20ABI'
-import {StarknetChainId} from '@/constants/chains'
-import {newContract} from '@/constants/contracts'
-import {getHttpProvider} from '@/constants/rpcProviders'
+import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'satoru-sdk'
+import {Contract} from 'starknet'
+
 import {getTokensMetadata} from '@/constants/tokens'
-import cairoIntToBigInt from '@/lib/starknet/utils/cairoIntToBigInt'
 
 export default async function getTokenBalances(
   chainId: StarknetChainId,
@@ -13,12 +11,12 @@ export default async function getTokenBalances(
 
   if (!accountAddress) return balanceMap
 
-  const provider = getHttpProvider(chainId)
+  const provider = getProvider(ProviderType.HTTP, chainId)
   const tokens = Array.from(getTokensMetadata(chainId).values())
 
   await Promise.allSettled(
     tokens.map(async token => {
-      const contract = newContract(ERC20ABI, token.address, provider)
+      const contract = new Contract(ERC20ABI, token.address, provider).typedv2(ERC20ABI)
       const balance = await contract.balance_of(accountAddress)
       balanceMap.set(token.address, cairoIntToBigInt(balance))
     }),

@@ -4,6 +4,7 @@ import 'lazysizes/plugins/parent-fit/ls.parent-fit'
 import 'lazysizes/plugins/attrchange/ls.attrchange'
 import './setupSchema'
 import './i18n/setup'
+import './setupSatoru'
 
 import {Partytown} from '@builder.io/partytown/react'
 import {NextUIProvider} from '@nextui-org/react'

@@ -1,4 +1,5 @@
-import {StarknetChainId} from '@/constants/chains'
+import {StarknetChainId} from 'satoru-sdk'
+
 import {getTokensMetadata, type Token} from '@/constants/tokens'
 import fetchTokenBalances from '@/lib/trade/services/fetchTokenBalances'
 

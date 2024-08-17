@@ -1,43 +1,16 @@
-import {StarknetChainId} from '@/constants/chains'
 import {
-  ADDRESS_ZERO,
-  getContractAddress,
-  newSatoruContract,
+  createSatoruContract,
+  DataStoreABI,
+  getSatoruContractAddress,
+  isRepresentZero,
+  ReaderABI,
   SatoruContract,
-} from '@/constants/contracts'
-import {getTokenMetadata, type Token} from '@/constants/tokens'
-import toStarknetAddress from '@/lib/starknet/utils/toStarknetAddress'
+  type StarknetChainId,
+  toStarknetHexString,
+} from 'satoru-sdk'
 
-function getMarketIndexName(p: {indexToken: Token; isSpotOnly: boolean}) {
-  const {indexToken, isSpotOnly} = p
-
-  if (isSpotOnly) {
-    return `SWAP-ONLY`
-  }
-
-  return `${indexToken.baseSymbol ?? indexToken.symbol}/USD`
-}
-
-function getMarketPoolName(p: {longToken: Token; shortToken: Token}) {
-  const {longToken, shortToken} = p
-
-  if (longToken.address === shortToken.address) {
-    return longToken.symbol
-  }
-
-  return `${longToken.symbol}-${shortToken.symbol}`
-}
-
-function getMarketFullName(p: {
-  longToken: Token
-  shortToken: Token
-  indexToken: Token
-  isSpotOnly: boolean
-}) {
-  const {indexToken, longToken, shortToken, isSpotOnly} = p
-
-  return `${getMarketIndexName({indexToken, isSpotOnly})} [${getMarketPoolName({longToken, shortToken})}]`
-}
+import {getTokenMetadata} from '@/constants/tokens'
+import getMarketFullName from '@/lib/trade/utils/market/getMarketFullName'
 
 export interface Market {
   marketTokenAddress: string
@@ -50,9 +23,9 @@ export interface Market {
 }
 
 export default async function fetchMarkets(chainId: StarknetChainId) {
-  const dataStoreAddress = getContractAddress(chainId, SatoruContract.DataStore)
-  const dataStoreContract = newSatoruContract(chainId, SatoruContract.DataStore)
-  const readerContract = newSatoruContract(chainId, SatoruContract.Reader)
+  const dataStoreAddress = getSatoruContractAddress(chainId, SatoruContract.DataStore)
+  const dataStoreContract = createSatoruContract(chainId, SatoruContract.DataStore, DataStoreABI)
+  const readerContract = createSatoruContract(chainId, SatoruContract.Reader, ReaderABI)
 
   const marketNum = await dataStoreContract.get_market_count()
 
@@ -65,17 +38,17 @@ export default async function fetchMarkets(chainId: StarknetChainId) {
   return markets
     .map(market => {
       try {
-        const indexTokenHex = toStarknetAddress(market.index_token)
-        const longTokenHex = toStarknetAddress(market.long_token)
-        const shortTokenHex = toStarknetAddress(market.short_token)
-        const marketTokenHex = toStarknetAddress(market.market_token)
+        const indexTokenHex = toStarknetHexString(market.index_token)
+        const longTokenHex = toStarknetHexString(market.long_token)
+        const shortTokenHex = toStarknetHexString(market.short_token)
+        const marketTokenHex = toStarknetHexString(market.market_token)
 
         const indexToken = getTokenMetadata(chainId, indexTokenHex)
         const longToken = getTokenMetadata(chainId, longTokenHex)
         const shortToken = getTokenMetadata(chainId, shortTokenHex)
 
         const isSameCollaterals = market.long_token === market.short_token
-        const isSpotOnly = indexTokenHex === ADDRESS_ZERO
+        const isSpotOnly = isRepresentZero(indexTokenHex)
 
         const name = getMarketFullName({indexToken, longToken, shortToken, isSpotOnly})
 

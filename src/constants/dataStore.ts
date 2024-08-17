@@ -1,6 +1,6 @@
 import {ec, num, shortString} from 'starknet'
 
-type Hashable = string | bigint | boolean | number
+export type Hashable = string | bigint | boolean | number
 
 export function getKey(v: Hashable | Hashable[]) {
   const values = Array.isArray(v) ? v : [v]
@@ -17,6 +17,95 @@ export function getKey(v: Hashable | Hashable[]) {
   )
 }
 
+// export const MAX_POOL_AMOUNT_FOR_DEPOSIT_KEY = getKey("MAX_POOL_AMOUNT_FOR_DEPOSIT");
+// export const FUNDING_INCREASE_FACTOR_PER_SECOND = getKey("FUNDING_INCREASE_FACTOR_PER_SECOND");
+// export const FUNDING_DECREASE_FACTOR_PER_SECOND = getKey("FUNDING_DECREASE_FACTOR_PER_SECOND");
+// export const MIN_FUNDING_FACTOR_PER_SECOND = getKey("MIN_FUNDING_FACTOR_PER_SECOND");
+// export const MAX_FUNDING_FACTOR_PER_SECOND = getKey("MAX_FUNDING_FACTOR_PER_SECOND");
+// export const THRESHOLD_FOR_STABLE_FUNDING = getKey("THRESHOLD_FOR_STABLE_FUNDING");
+// export const THRESHOLD_FOR_DECREASE_FUNDING = getKey("THRESHOLD_FOR_DECREASE_FUNDING");
+
+// export const MIN_POSITION_IMPACT_POOL_AMOUNT_KEY = getKey("MIN_POSITION_IMPACT_POOL_AMOUNT");
+// export const POSITION_IMPACT_POOL_DISTRIBUTION_RATE_KEY = getKey(
+//     "POSITION_IMPACT_POOL_DISTRIBUTION_RATE"
+// );
+// export const SWAP_IMPACT_POOL_AMOUNT_KEY = getKey("SWAP_IMPACT_POOL_AMOUNT");
+// export const ESTIMATED_GAS_FEE_BASE_AMOUNT = getKey("ESTIMATED_GAS_FEE_BASE_AMOUNT");
+// export const ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR = getKey("ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR");
+// export const POOL_AMOUNT_ADJUSTMENT_KEY = getKey("POOL_AMOUNT_ADJUSTMENT");
+
+// export const PRICE_FEED = getKey("PRICE_FEED");
+// export const PRICE_FEED_MULTIPLIER = getKey("PRICE_FEED_MULTIPLIER");
+// export const PRICE_FEED_HEARTBEAT_DURATION = getKey("PRICE_FEED_HEARTBEAT_DURATION");
+
+// export const MIN_ORACLE_SIGNERS = getKey("MIN_ORACLE_SIGNERS");
+// export const FEE_TOKEN = getKey("FEE_TOKEN");
+
+// export const MAX_ORACLE_PRICE_AGE = getKey("MAX_ORACLE_PRICE_AGE");
+
+// export function fundingIncreaseFactorPerSecondKey(market: Hashable) {
+//     return getKey([FUNDING_INCREASE_FACTOR_PER_SECOND, market]);
+// }
+
+// export function fundingDecreaseFactorPerSecondKey(market: Hashable) {
+//     return getKey([FUNDING_DECREASE_FACTOR_PER_SECOND, market]);
+// }
+
+// export function minFundingFactorPerSecondKey(market: Hashable) {
+//     return getKey([MIN_FUNDING_FACTOR_PER_SECOND, market]);
+// }
+
+// export function maxFundingFactorPerSecondKey(market: Hashable) {
+//     return getKey([MAX_FUNDING_FACTOR_PER_SECOND, market]);
+// }
+
+// export function thresholdForStableFundingKey(market: Hashable) {
+//     return getKey([THRESHOLD_FOR_STABLE_FUNDING, market]);
+// }
+
+// export function thresholdForDecreaseFundingKey(market: Hashable) {
+//     return getKey([THRESHOLD_FOR_DECREASE_FUNDING, market]);
+// }
+
+// export function minPositionImpactPoolAmountKey(market: Hashable) {
+//     return getKey([MIN_POSITION_IMPACT_POOL_AMOUNT_KEY, market]);
+// }
+
+// export function positionImpactPoolDistributionRateKey(market: Hashable) {
+//     return getKey([POSITION_IMPACT_POOL_DISTRIBUTION_RATE_KEY, market]);
+// }
+
+// export function poolAmountAdjustmentKey(market: Hashable, token: Hashable) {
+//     return getKey([POOL_AMOUNT_ADJUSTMENT_KEY, market, token]);
+// }
+
+// export function maxPoolAmountForDepositKey(market: Hashable, token: Hashable) {
+//     return getKey([MAX_POOL_AMOUNT_FOR_DEPOSIT_KEY, market, token]);
+// }
+
+// export function priceFeedKey(token: Hashable) {
+//     return getKey([PRICE_FEED, token]);
+// }
+
+// export function priceFeedMultiplierKey(token: Hashable) {
+//     return getKey([PRICE_FEED_MULTIPLIER, token]);
+// }
+
+// export function priceFeedHeartbeatDurationKey(token: Hashable) {
+//     return getKey([PRICE_FEED_HEARTBEAT_DURATION, token]);
+// }
+
+// export function getPositionKey(
+//     account: Hashable,
+//     market: Hashable,
+//     collateral_token: Hashable,
+//     is_long: boolean
+// ) {
+//     return getKey([account, market, collateral_token, is_long]);
+// }
+
+export const MAX_ORAC_REF_PRICE_DEV_FACTOR = getKey('MAX_ORAC_REF_PRICE_DEV_FACTOR')
+export const STABLE_PRICE = getKey('STABLE_PRICE')
 export const POSITION_IMPACT_FACTOR_KEY = getKey('POSITION_IMPACT_FACTOR')
 export const MAX_POSITION_IMPACT_FACTOR_KEY = getKey('MAX_POS_IMPACT_FACTOR')
 export const POSITION_IMPACT_EXPONENT_FACTOR_KEY = getKey('POS_IMPACT_EXP_FACTOR')
@@ -76,7 +165,12 @@ export const VIRTUAL_INVENTORY_FOR_SWAPS_KEY = getKey('VIRT_INV_FOR_SWAPS')
 export const AFFILIATE_REWARD_KEY = getKey('AFFILIATE_REWARD')
 export const IS_MARKET_DISABLED_KEY = getKey('IS_MARKET_DISABLED')
 export const UI_FEE_FACTOR = getKey('UI_FEE_FACTOR')
+export const MAX_PNL_FACTOR_FOR_ADL = getKey('MAX_PNL_FACTOR_FOR_ADL')
+export const MIN_PNL_FACTOR_AFTER_ADL = getKey('MIN_PNL_FACTOR_AFTER_ADL')
 
+export function minPnlFactorAfterAdl(market: Hashable, isLong: boolean) {
+  return getKey([MIN_PNL_FACTOR_AFTER_ADL, market, isLong])
+}
 // -----------------------------------------------------------------------------
 
 export function positionImpactFactorKey(market: Hashable, isPositive: boolean) {
@@ -249,4 +343,8 @@ export function maxPoolAmountKey(market: Hashable, token: Hashable) {
 
 export function uiFeeFactorKey(address: Hashable) {
   return getKey([UI_FEE_FACTOR, address])
+}
+
+export function stablePriceTokenKey(token: Hashable) {
+  return getKey([STABLE_PRICE, token])
 }

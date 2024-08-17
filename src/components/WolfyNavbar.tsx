@@ -16,7 +16,6 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
-  useDisclosure,
 } from '@nextui-org/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
@@ -57,9 +56,17 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
   const {t} = useTranslation()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const {isOpen, onOpen, onOpenChange} = useDisclosure()
+  const [isConectModalOpen, setIsConnectModalOpen] = useState(false)
   const isConnected = useIsWalletConnected()
   const [walletAccount, disconnect] = useWalletAccount()
+
+  const handleCloseConnectModal = useCallback(() => {
+    setIsConnectModalOpen(false)
+  }, [])
+
+  const handleOpenConnectModal = useCallback(() => {
+    setIsConnectModalOpen(true)
+  }, [])
 
   const handleDisconnect = useCallback(async () => {
     await disconnect()
@@ -69,7 +76,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
     <>
       <ChainSwitchRequester />
       <ChainSwitchSubscriber />
-      <ConnectModal isOpen={isOpen} onOpenChange={onOpenChange} />
+      <ConnectModal isOpen={isConectModalOpen} onClose={handleCloseConnectModal} />
       <Navbar
         {...props}
         classNames={{
@@ -114,7 +121,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             {!isConnected && (
               <>
                 <Button
-                  onPress={onOpen}
+                  onPress={handleOpenConnectModal}
                   color='primary'
                   endContent={<Icon icon='solar:alt-arrow-right-linear' />}
                   className={'w-full'}

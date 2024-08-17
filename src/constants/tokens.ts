@@ -1,4 +1,4 @@
-import {StarknetChainId} from './chains'
+import {StarknetChainId} from 'satoru-sdk'
 
 export interface Token {
   name: string
@@ -44,56 +44,26 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
       //   coingeckoUrl: 'https://www.coingecko.com/en/coins/wrapped-steth',
       // },
       [
-        '0x06c91e45243196580079bb9287555b4c3abe453fc54b98176c8cda9758b29504',
+        '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
         {
-          name: 'Satoru Market Token',
-          symbol: 'GM',
+          name: 'Wolfy ETH',
+          symbol: 'wfETH',
           decimals: 18,
-          address: '0x06c91e45243196580079bb9287555b4c3abe453fc54b98176c8cda9758b29504',
-          imageUrl: 'https://assets.coingecko.com/coins/images/35903/standard/ballz-logo.png',
-        },
-      ],
-      [
-        '0x042c1a16c9cd00af9ea4a42e70776abc43f3d9583c2f259115df6e33a5e1baab',
-        {
-          name: 'zETH',
-          symbol: 'zETH',
-          decimals: 18,
-          address: '0x042c1a16c9cd00af9ea4a42e70776abc43f3d9583c2f259115df6e33a5e1baab',
+          address: '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+
           imageUrl: 'https://assets.coingecko.com/coins/images/18834/standard/wstETH.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
         },
       ],
       [
-        '0x06f20e6aec861fbfe738dc9b639832ff449a5ce762cbcfbe84132561cab49e54',
+        '0x0585593986c67a9802555dab7c7728270b603da6721ed6f754063eb8fd51f0aa',
         {
-          name: 'USDC',
-          symbol: 'USDC',
+          name: 'Wolfy USD',
+          symbol: 'wUSD',
           decimals: 18,
-          address: '0x06f20e6aec861fbfe738dc9b639832ff449a5ce762cbcfbe84132561cab49e54',
+          address: '0x0585593986c67a9802555dab7c7728270b603da6721ed6f754063eb8fd51f0aa',
           imageUrl: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/usdc',
-        },
-      ],
-      [
-        '0x020e9f2751212c9858219250e875ce6ac02aba3d45bff8262f5f0f0a1cf1aee0',
-        {
-          name: 'wETH',
-          symbol: 'wETH',
-          decimals: 18,
-          address: '0x020e9f2751212c9858219250e875ce6ac02aba3d45bff8262f5f0f0a1cf1aee0',
-          imageUrl: 'https://assets.coingecko.com/coins/images/18834/standard/wstETH.png',
-          coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
-        },
-      ],
-      [
-        '0x026c9f97a5e7ae83320675f691457fbf5222366da33df5f2a0c7b77c28529ef3',
-        {
-          name: 'Satoru Market Token',
-          symbol: 'GM',
-          decimals: 18,
-          address: '0x026c9f97a5e7ae83320675f691457fbf5222366da33df5f2a0c7b77c28529ef3',
-          imageUrl: 'https://assets.coingecko.com/coins/images/35903/standard/ballz-logo.png',
         },
       ],
     ]),

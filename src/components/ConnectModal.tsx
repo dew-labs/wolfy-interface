@@ -13,12 +13,12 @@ import getStarknetCore, {
   type StarknetWindowObject,
   type WalletProvider,
 } from 'get-starknet-core'
-import {memo, useCallback, useEffect, useRef, useState} from 'react'
+import {memo, type MemoizedCallback, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
+import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
 import {WalletAccount} from 'starknet'
 
-import {isChainIdSupported, type StarknetChainId} from '@/constants/chains'
-import {getHttpProvider} from '@/constants/rpcProviders'
+import {isChainIdSupported} from '@/constants/chains'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import {Theme} from '@/lib/theme/theme'
@@ -84,10 +84,10 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
 
 interface ConnectModalProps {
   isOpen: boolean
-  onOpenChange: () => void
+  onClose: MemoizedCallback<() => void>
 }
 
-export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalProps) {
+export default memo(function ConnectModal({isOpen, onClose}: ConnectModalProps) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
 
@@ -102,8 +102,8 @@ export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalPr
   const handleClose = useCallback(() => {
     if (latestIsConnecting.current) isCancelled.current = true
     setIsConnecting(false)
-    onOpenChange()
-  }, [onOpenChange])
+    onClose()
+  }, [onClose])
 
   const shouldStopConnectingOrContinue = useCallback(() => {
     if (isCancelled.current) {
@@ -113,8 +113,6 @@ export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalPr
   }, [])
 
   useEffect(() => {
-    if (!isOpen) return
-
     void (async function () {
       // TODO:retry
       const [wallets, discoveryWallets, lastConnectedWallet] = await Promise.all([
@@ -150,7 +148,9 @@ export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalPr
         shouldStopConnectingOrContinue()
 
         const walletAccount = new WalletAccount(
-          isChainIdSupported(connectedWalletChainId) ? getHttpProvider(connectedWalletChainId) : {},
+          isChainIdSupported(connectedWalletChainId)
+            ? getProvider(ProviderType.HTTP, connectedWalletChainId)
+            : {},
           connectedWallet,
         )
 
@@ -181,10 +181,16 @@ export default memo(function ConnectModal({isOpen, onOpenChange}: ConnectModalPr
         void getStarknetCore.disconnect()
       }
       setIsConnecting(false)
-      onOpenChange()
+      onClose()
     },
-    [onOpenChange, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
+    [onClose, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
   )
+  useEffect(() => {
+    console.log('lastConnectedWallet:', lastConnectedWallet)
+    if (!lastConnectedWallet) return
+
+    void connect(lastConnectedWallet)
+  }, [lastConnectedWallet, connect])
 
   return (
     <Modal isOpen={isOpen} placement={'top-center'} onOpenChange={handleClose} backdrop='blur'>

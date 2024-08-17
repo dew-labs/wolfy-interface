@@ -14,79 +14,41 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
-import {type QueryClient, queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
+import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import {useCallback, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
+import type {StarknetChainId} from 'satoru-sdk'
 
-import type {StarknetChainId} from '@/constants/chains'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
-import fetchMarkets, {type Market} from '@/lib/trade/services/fetchMarkets'
-import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMarketsData'
-import fetchTokensData, {type TokensData} from '@/lib/trade/services/fetchTokensData'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import {type Market} from '@/lib/trade/services/fetchMarkets'
+import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
+import {type TokensData} from '@/lib/trade/services/fetchTokensData'
 import useToken from '@/lib/trade/states/useToken'
-import type {AvailableTokens} from '@/lib/trade/utils/getAvailableTokens'
-import getAvailableTokens from '@/lib/trade/utils/getAvailableTokens'
-import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/getAvailableUsdLiquidityForPosition'
+import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
+import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
+import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import max from '@/utils/numbers/bigint/max'
+import expandDecimals from '@/utils/numbers/expandDecimals'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
-import roundToNDecimalPlaces from '@/utils/numbers/roundToNDecimalPlaces'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 function createGetMarketsDataQueryOptions(
   chainId: StarknetChainId,
+  markets: Market[] | undefined,
+  tokensData: TokensData | undefined,
   accountAddress: string | undefined,
-  queryClient: QueryClient,
 ) {
   return queryOptions({
-    queryKey: ['markets', chainId, accountAddress] as const,
-    queryFn: async ({queryKey}) => {
-      let markets = queryClient.getQueryData(['markets', queryKey[1]])
-      if (!markets) {
-        markets = await queryClient.fetchQuery({
-          queryKey: ['markets', queryKey[1]],
-        })
-      }
-
-      let tokensData = queryClient.getQueryData(['tokens', queryKey[1], accountAddress])
-      if (!tokensData) {
-        tokensData = await queryClient.fetchQuery({
-          queryKey: ['tokens', queryKey[1], queryKey[2]],
-        })
-      }
-
-      if (!markets || !tokensData) {
-        return new Map() as MarketsData
-      }
-
-      return await fetchMarketsData(
-        queryKey[1],
-        markets as Market[],
-        tokensData as TokensData,
-        queryKey[2],
-      )
-    },
-    ...NO_REFETCH_OPTIONS,
-  })
-}
-
-function createGetMarketsQueryOptions(chainId: StarknetChainId) {
-  return queryOptions({
-    queryKey: ['markets', chainId] as const,
-    queryFn: async ({queryKey}) => {
-      return await fetchMarkets(queryKey[1])
-    },
-    ...NO_REFETCH_OPTIONS,
-  })
-}
-
-function createGetTokensQueryOptions(chainId: StarknetChainId, accountAddress: string | undefined) {
-  return queryOptions({
-    queryKey: ['tokens', chainId, accountAddress] as const,
-    queryFn: async ({queryKey}) => {
-      return await fetchTokensData(queryKey[1], queryKey[2])
-    },
+    queryKey: ['marketsData', chainId, markets, tokensData, accountAddress] as const,
+    queryFn:
+      markets && tokensData
+        ? async () => {
+            return await fetchMarketsData(chainId, markets, tokensData, accountAddress)
+          }
+        : skipToken,
     ...NO_REFETCH_OPTIONS,
   })
 }
@@ -104,13 +66,21 @@ export default function MarketInformation() {
   const [selectedToken, setSelectedToken] = useToken()
   const accountAddress = walletAccount?.address
   const tokensMetadata = getTokensMetadata(chainId)
-  const queryClient = useQueryClient()
 
-  useQuery(createGetMarketsQueryOptions(chainId))
-  useQuery(createGetTokensQueryOptions(chainId, accountAddress))
+  const {data: markets} = useQuery({
+    queryKey: ['markets', chainId],
+    enabled: false,
+  })
+
+  const {data: tokensData} = useQuery({
+    queryKey: ['tokens', chainId, accountAddress],
+    enabled: false,
+  })
 
   const {data: marketsData} = useQuery(
-    createGetMarketsDataQueryOptions(chainId, accountAddress, queryClient),
+    // TODO: type later
+    // @ts-expect-error type later
+    createGetMarketsDataQueryOptions(chainId, markets, tokensData, accountAddress),
   )
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
 
@@ -156,8 +126,8 @@ export default function MarketInformation() {
 
       indexes.set(token, {
         markets,
-        maxLongLiquidity: max(...longLiquids),
-        maxShortLiquidity: max(...shortLiquids),
+        maxLongLiquidity: max(...longLiquids) / expandDecimals(1, USD_DECIMALS),
+        maxShortLiquidity: max(...shortLiquids) / expandDecimals(1, USD_DECIMALS),
       })
     })
 
@@ -284,12 +254,8 @@ export default function MarketInformation() {
                   return (
                     <TableRow key={item.address} className='cursor-pointer'>
                       <TableCell>{`${item.symbol} / USD`}</TableCell>
-                      <TableCell>
-                        ${formatLocaleNumber(roundToNDecimalPlaces(item.maxLongLiquidity))}
-                      </TableCell>
-                      <TableCell>
-                        ${formatLocaleNumber(roundToNDecimalPlaces(item.maxShortLiquidity))}
-                      </TableCell>
+                      <TableCell>${formatLocaleNumber(item.maxLongLiquidity)}</TableCell>
+                      <TableCell>${formatLocaleNumber(item.maxShortLiquidity)}</TableCell>
                     </TableRow>
                   )
                 })}
