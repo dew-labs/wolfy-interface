@@ -11,13 +11,13 @@ export default memo(function ThemeSubscriber() {
   useEffect(() => {
     try {
       if (currentTheme === Theme.Dark) {
-        document.body.classList.add('dark')
-        document.body.classList.add('text-foreground')
-        document.body.classList.add('bg-background')
+        document.documentElement.classList.add('dark')
+        document.documentElement.classList.add('text-foreground')
+        document.documentElement.classList.add('bg-background')
       } else {
-        document.body.classList.remove('dark')
-        document.body.classList.remove('text-foreground')
-        document.body.classList.remove('bg-background')
+        document.documentElement.classList.remove('dark')
+        document.documentElement.classList.remove('text-foreground')
+        document.documentElement.classList.remove('bg-background')
       }
     } catch (error) {
       logError(error)

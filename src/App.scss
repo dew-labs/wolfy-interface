@@ -24,8 +24,17 @@ body {
 
 /* END fix */
 
+/* stylelint-disable custom-property-pattern */
+$nextUiPrimary: hsl(var(--nextui-primary) / var(--nextui-primary-opacity, var(--tw-bg-opacity)));
+$nextUiPrimaryHover: hsl(var(--nextui-primary) / var(--nextui-hover-opacity, var(--tw-bg-opacity)));
+$nextUiBackground: hsl(
+  var(--nextui-background) / var(--nextui-background-opacity, var(--tw-bg-opacity))
+);
+
+/* stylelint-enable custom-property-pattern */
+
 * {
-  outline-color: var(--Primary-Color, #cd2732);
+  outline-color: $nextUiPrimary;
 }
 
 .visually-hidden:not(:focus, :active, :focus-within),
@@ -46,29 +55,7 @@ body {
   color: #fff;
   text-decoration: none;
 
-  background-color: #cd2732;
+  background-color: $nextUiPrimary;
   border-end-start-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
-}
-
-/* Scrollbar Width */
-::-webkit-scrollbar {
-  inline-size: 0.375rem;
-}
-
-/* Scrollbar Track */
-// ::-webkit-scrollbar-track {
-//   background-color: #fff;background-color
-// }
-
-/* Scrollbar Handle */
-::-webkit-scrollbar-thumb {
-  background: #cd2732;
-
-  /* Handle on hover */
-  @media (hover: hover) {
-    &:hover {
-      background: #a0131c;
-    }
-  }
 }
