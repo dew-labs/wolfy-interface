@@ -1,9 +1,11 @@
 import getStarknetCore from 'get-starknet-core'
 import {useAtom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
+import type {WalletAccount} from 'starknet'
 
 import {walletAccountAtom} from '@/lib/starknet/atoms'
 
+import {useSetAccountAddress} from './useAccountAddress'
 import {useSetWalletChainId} from './useWalletChainId'
 
 export default function useWalletAccount() {
@@ -23,5 +25,14 @@ export default function useWalletAccount() {
 }
 
 export function useSetWalletAccount() {
-  return useSetAtom(walletAccountAtom)
+  const setWalletAccount = useSetAtom(walletAccountAtom)
+  const setAccountAddress = useSetAccountAddress()
+
+  return useCallback(
+    (walletAccount?: WalletAccount | undefined) => {
+      setWalletAccount(walletAccount)
+      setAccountAddress(walletAccount?.address ?? '')
+    },
+    [setWalletAccount, setAccountAddress],
+  )
 }

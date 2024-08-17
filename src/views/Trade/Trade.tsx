@@ -4,8 +4,8 @@ import type {StarknetChainId} from 'satoru-sdk'
 import SkipLink from '@/components/SkipLink'
 import WolfyNavbar from '@/components/WolfyNavbar'
 import HeadTags from '@/lib/head/HeadTags'
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import fetchMarkets from '@/lib/trade/services/fetchMarkets'
 import fetchPositionsConstants from '@/lib/trade/services/fetchPositionsConstants'
 import fetchTokensData from '@/lib/trade/services/fetchTokensData'
@@ -69,14 +69,14 @@ function createGetReferralInfoQueryOptions(chainId: StarknetChainId, account: st
 }
 
 export default function Home() {
-  const [walletAccount] = useWalletAccount()
+  const accountAddress = useAccountAddress()
   const [chainId] = useChainId()
 
   useQuery(createGetMarketsQueryOptions(chainId))
-  useQuery(createGetTokensQueryOptions(chainId, walletAccount?.address))
+  useQuery(createGetTokensQueryOptions(chainId, accountAddress))
   useQuery(createGetUiFeeFactor(chainId))
   useQuery(createGetPositionsConstantsQueryOptions(chainId))
-  useQuery(createGetReferralInfoQueryOptions(chainId, walletAccount?.address))
+  useQuery(createGetReferralInfoQueryOptions(chainId, accountAddress))
 
   return (
     <div>

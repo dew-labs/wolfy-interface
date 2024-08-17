@@ -20,8 +20,8 @@ import {groupBy} from 'remeda'
 import type {StarknetChainId} from 'satoru-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {type Market} from '@/lib/trade/services/fetchMarkets'
 import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
@@ -62,9 +62,8 @@ interface TokenOption {
 
 export default function MarketInformation() {
   const [chainId] = useChainId()
-  const [walletAccount] = useWalletAccount()
   const [selectedToken, setSelectedToken] = useToken()
-  const accountAddress = walletAccount?.address
+  const accountAddress = useAccountAddress()
   const tokensMetadata = getTokensMetadata(chainId)
 
   const {data: markets} = useQuery({

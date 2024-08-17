@@ -22,6 +22,7 @@ import BoringAvatar from 'boring-avatars'
 import {memo, useCallback, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {FaucetRoute, TradeRoute} from '@/routeRegistry'
@@ -58,7 +59,8 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isConectModalOpen, setIsConnectModalOpen] = useState(false)
   const isConnected = useIsWalletConnected()
-  const [walletAccount, disconnect] = useWalletAccount()
+  const [, disconnect] = useWalletAccount()
+  const accountAddress = useAccountAddress()
 
   const handleCloseConnectModal = useCallback(() => {
     setIsConnectModalOpen(false)
@@ -136,8 +138,8 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   <DropdownTrigger>
                     <button className='mt-1 h-8 w-8 transition-transform'>
                       <Badge color='success' content='' placement='bottom-right' shape='circle'>
-                        {!!walletAccount?.address && (
-                          <BoringAvatar size='32px' variant='beam' name={walletAccount.address} />
+                        {!!accountAddress && (
+                          <BoringAvatar size='32px' variant='beam' name={accountAddress} />
                         )}
                       </Badge>
                     </button>
@@ -145,7 +147,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   <DropdownMenu aria-label='Profile Actions' variant='flat'>
                     <DropdownItem key='profile'>
                       <p className='font-semibold'>
-                        {!!walletAccount?.address && middleEllipsis(walletAccount.address)}
+                        {!!accountAddress && middleEllipsis(accountAddress)}
                       </p>
                     </DropdownItem>
                     <DropdownItem key='settings'>{t('Settings')}</DropdownItem>

@@ -3,8 +3,8 @@ import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import {t} from 'i18next'
 import type {StarknetChainId} from 'satoru-sdk'
 
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import formatDeltaUsd from '@/lib/trade/numbers/formatDeltaUsd'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
@@ -38,9 +38,8 @@ function createGetPositionQueryOptions(
 const savedShowPnlAfterFees: boolean = true
 
 export default function PositionTab() {
-  const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
-  const account = walletAccount?.address
+  const account = useAccountAddress()
 
   const {data: markets} = useQuery({
     queryKey: ['markets', chainId],

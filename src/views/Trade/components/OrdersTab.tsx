@@ -14,6 +14,7 @@ import {useLatest} from 'react-use'
 import type {StarknetChainId} from 'satoru-sdk'
 import {toast} from 'sonner'
 
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
@@ -56,7 +57,7 @@ function createGetOrdersQueryOptions(
 export default function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
-  const account = walletAccount?.address
+  const account = useAccountAddress()
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
