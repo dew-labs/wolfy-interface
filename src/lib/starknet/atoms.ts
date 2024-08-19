@@ -9,4 +9,4 @@ export const walletChainIdAtom = atom<string>()
 
 export const chainIdAtom = atom(DEFAULT_CHAIN_ID)
 
-export const accountAddress = atom('')
+export const accountAddressAtom = atom('')

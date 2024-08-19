@@ -1,6 +1,6 @@
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenData} from '@/lib/trade/services/fetchTokensData'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import getMidPrice from '@/lib/trade/utils/price/getMidPrice'
 
 export interface AvailableTokens {
@@ -34,13 +34,13 @@ export default function getAvailableTokens(markets: MarketsData): AvailableToken
     collaterals.add(longToken)
     collaterals.add(shortToken)
 
-    const longPoolAmountUsd = convertPriceToUsd(
+    const longPoolAmountUsd = convertTokenAmountToUsd(
       market.longPoolAmount,
       market.longToken.decimals,
       getMidPrice(market.longToken.price),
     )
 
-    const shortPoolAmountUsd = convertPriceToUsd(
+    const shortPoolAmountUsd = convertTokenAmountToUsd(
       market.shortPoolAmount,
       market.shortToken.decimals,
       getMidPrice(market.shortToken.price),

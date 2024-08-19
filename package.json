@@ -55,6 +55,7 @@
     "@unhead/dom": "^1.9.16",
     "abi-wan-kanabi": "^2.2.2",
     "axios": "^1.7.3",
+    "bignumber.js": "^9.1.2",
     "boring-avatars": "^1.10.2",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -92,7 +93,6 @@
     "use-mutative": "^1.1.6",
     "usehooks-ts": "^3.1.0",
     "uuid": "^10.0.0",
-    "viem": "^2.19.3",
     "vite-plugin-mkcert": "^1.17.5"
   },
   "devDependencies": {

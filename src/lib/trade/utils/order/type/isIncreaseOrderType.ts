@@ -1,5 +1,7 @@
 import {OrderType} from 'satoru-sdk'
 
-export function isIncreaseOrderType(orderType: OrderType) {
+export function isIncreaseOrderType(
+  orderType: OrderType,
+): orderType is OrderType.MarketIncrease | OrderType.LimitIncrease {
   return [OrderType.MarketIncrease, OrderType.LimitIncrease].includes(orderType)
 }

@@ -11,14 +11,16 @@ import {useSetWalletChainId} from './useWalletChainId'
 export default function useWalletAccount() {
   const [walletAccount, setWalletAccount] = useAtom(walletAccountAtom)
   const setWalletChainId = useSetWalletChainId()
+  const setAccountAddress = useSetAccountAddress()
 
   const disconnect = useCallback(
     async function () {
       await getStarknetCore.disconnect()
       setWalletAccount(undefined)
       setWalletChainId(undefined)
+      setAccountAddress('')
     },
-    [setWalletChainId],
+    [setWalletChainId, setAccountAddress],
   )
 
   return [walletAccount, disconnect] as const

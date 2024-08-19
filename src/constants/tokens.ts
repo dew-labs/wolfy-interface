@@ -59,7 +59,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
         '0x0585593986c67a9802555dab7c7728270b603da6721ed6f754063eb8fd51f0aa',
         {
           name: 'Wolfy USD',
-          symbol: 'wUSD',
+          symbol: 'wfUSD',
           decimals: 18,
           address: '0x0585593986c67a9802555dab7c7728270b603da6721ed6f754063eb8fd51f0aa',
           imageUrl: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',

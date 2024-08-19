@@ -1,11 +1,11 @@
 import {useAtom, useSetAtom} from 'jotai'
 
-import {accountAddress} from '@/lib/starknet/atoms'
+import {accountAddressAtom} from '@/lib/starknet/atoms'
 
 export default function useAccountAddress() {
-  return useAtom(accountAddress)[0]
+  return useAtom(accountAddressAtom)[0]
 }
 
 export function useSetAccountAddress() {
-  return useSetAtom(accountAddress)
+  return useSetAtom(accountAddressAtom)
 }

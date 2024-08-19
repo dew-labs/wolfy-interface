@@ -1,8 +1,8 @@
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Order, OrdersData} from '@/lib/trade/services/fetchOrders'
 import type {TokenData, TokensData} from '@/lib/trade/services/fetchTokensData'
-import convertPriceToTokenAmount from '@/lib/trade/utils/price/convertPriceToTokenAmount'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import getTokensRatioByAmounts, {
   type TokensRatio,
 } from '@/lib/trade/utils/token/getTokensRatioByAmounts'
@@ -65,7 +65,7 @@ export default function getOrdersInfo(
           marketsData,
           swapPath: order.swapPath,
           initialCollateralAddress: order.initialCollateralTokenAddress,
-          usdIn: convertPriceToUsd(
+          usdIn: convertTokenAmountToUsd(
             order.initialCollateralDeltaAmount,
             initialCollateralToken.decimals,
             initialCollateralToken.price.min,
@@ -74,7 +74,7 @@ export default function getOrdersInfo(
         })
 
         const priceImpactAmount = swapPathStats
-          ? convertPriceToTokenAmount(
+          ? convertUsdToTokenAmount(
               swapPathStats.totalSwapPriceImpactDeltaUsd,
               targetCollateralToken.decimals,
               targetCollateralToken.price.min,
@@ -82,7 +82,7 @@ export default function getOrdersInfo(
           : 0n
 
         const swapFeeAmount = swapPathStats
-          ? convertPriceToTokenAmount(
+          ? convertUsdToTokenAmount(
               swapPathStats.totalSwapFeeUsd,
               targetCollateralToken.decimals,
               targetCollateralToken.price.min,
@@ -152,7 +152,7 @@ export default function getOrdersInfo(
           marketsData,
           swapPath: order.swapPath,
           initialCollateralAddress: order.initialCollateralTokenAddress,
-          usdIn: convertPriceToUsd(
+          usdIn: convertTokenAmountToUsd(
             order.initialCollateralDeltaAmount,
             initialCollateralToken.decimals,
             initialCollateralToken.price.min,

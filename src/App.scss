@@ -59,3 +59,10 @@ $nextUiBackground: hsl(
   border-end-start-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
 }
+
+@layer utilities {
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    @apply appearance-none;
+  }
+}

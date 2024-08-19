@@ -7,81 +7,34 @@ import {
   TableHeader,
   TableRow,
 } from '@nextui-org/react'
-import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
+import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
 import {useCallback} from 'react'
 import {useLatest} from 'react-use'
-import type {StarknetChainId} from 'satoru-sdk'
 import {toast} from 'sonner'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import useOrders from '@/lib/trade/hooks/useOrders'
 import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
-import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
-import fetchOrders from '@/lib/trade/services/fetchOrders'
-import type {TokensData} from '@/lib/trade/services/fetchTokensData'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
 import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
-import getOrdersInfo from '@/lib/trade/utils/order/getOrdersInfo'
 import {isDecreaseOrderType} from '@/lib/trade/utils/order/type/isDecreaseOrderType'
 import {isIncreaseOrderType} from '@/lib/trade/utils/order/type/isIncreaseOrderType'
-import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
 import {getMarkPrice} from '@/lib/trade/utils/position/getPositionsInfo'
-import convertPriceToTokenAmount from '@/lib/trade/utils/price/convertPriceToTokenAmount'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
-import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
-
-function createGetOrdersQueryOptions(
-  chainId: StarknetChainId,
-  marketsData: MarketsData | undefined,
-  tokensData: TokensData | undefined,
-  accountAddress: string | undefined,
-) {
-  return queryOptions({
-    queryKey: ['orders', chainId, marketsData, tokensData, accountAddress] as const,
-    queryFn:
-      marketsData && tokensData
-        ? async () => {
-            const orders = await fetchOrders(chainId, accountAddress)
-            const ordersInfo = getOrdersInfo(marketsData, tokensData, orders)
-            return Array.from(ordersInfo.values()).filter(order => isPositionOrder(order))
-          }
-        : skipToken,
-    ...NO_REFETCH_OPTIONS,
-  })
-}
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 
 export default function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
-  const account = useAccountAddress()
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
 
-  const {data: markets} = useQuery({
-    queryKey: ['markets', chainId],
-    enabled: false,
-  })
-
-  const {data: tokensData} = useQuery({
-    queryKey: ['tokens', chainId, account] as const,
-    enabled: false,
-  })
-
-  const {data: marketsData} = useQuery({
-    queryKey: ['marketsData', chainId, markets, tokensData, account] as const,
-    enabled: false,
-  })
-
-  const {data: orders} = useQuery(
-    // TODO: type later
-    // @ts-expect-error type later
-    createGetOrdersQueryOptions(chainId, marketsData, tokensData, account),
-  )
+  const orders = useOrders()
 
   const handleCancelOrder = useCallback(
     (orderKey: string) => {
@@ -125,13 +78,13 @@ export default function OrdersTab() {
             const initialCollateralToken = order.initialCollateralToken
             const targetCollateralToken = order.targetCollateralToken
 
-            const collateralUsd = convertPriceToUsd(
+            const collateralUsd = convertTokenAmountToUsd(
               order.initialCollateralDeltaAmount,
               initialCollateralToken.decimals,
               initialCollateralToken.price.min,
             )
 
-            const targetCollateralAmount = convertPriceToTokenAmount(
+            const targetCollateralAmount = convertUsdToTokenAmount(
               collateralUsd,
               targetCollateralToken.decimals,
               targetCollateralToken.price.min,

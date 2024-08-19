@@ -1,6 +1,6 @@
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenData} from '@/lib/trade/services/fetchTokensData'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import getMidPrice from '@/lib/trade/utils/price/getMidPrice'
 
 export default function getNextPoolAmountsParams(p: {
@@ -25,15 +25,15 @@ export default function getNextPoolAmountsParams(p: {
   const longPrice = getMidPrice(longToken.price)
   const shortPrice = getMidPrice(shortToken.price)
 
-  const longPoolUsd = convertPriceToUsd(longPoolAmount, longToken.decimals, longPrice)
-  const shortPoolUsd = convertPriceToUsd(shortPoolAmount, shortToken.decimals, shortPrice)
+  const longPoolUsd = convertTokenAmountToUsd(longPoolAmount, longToken.decimals, longPrice)
+  const shortPoolUsd = convertTokenAmountToUsd(shortPoolAmount, shortToken.decimals, shortPrice)
 
-  // const longPoolUsdAdjustment = convertPriceToUsd(
+  // const longPoolUsdAdjustment = convertTokenAmountToUsd(
   //   marketInfo.longPoolAmountAdjustment,
   //   longToken.decimals,
   //   longPrice,
   // )
-  // const shortPoolUsdAdjustment = convertPriceToUsd(
+  // const shortPoolUsdAdjustment = convertTokenAmountToUsd(
   //   marketInfo.shortPoolAmountAdjustment,
   //   shortToken.decimals,
   //   shortPrice,

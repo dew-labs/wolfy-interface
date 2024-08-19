@@ -1,5 +1,5 @@
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import getMidPrice from '@/lib/trade/utils/price/getMidPrice'
 
 export function getPoolUsdWithoutPnl(
@@ -20,5 +20,5 @@ export function getPoolUsdWithoutPnl(
     price = getMidPrice(token.price)
   }
 
-  return convertPriceToUsd(poolAmount, token.decimals, price)
+  return convertTokenAmountToUsd(poolAmount, token.decimals, price)
 }

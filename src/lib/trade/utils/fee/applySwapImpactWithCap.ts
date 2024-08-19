@@ -1,7 +1,7 @@
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenData} from '@/lib/trade/services/fetchTokensData'
 import {getTokenPoolType} from '@/lib/trade/utils/market/getTokenPoolType'
-import convertPriceToTokenAmount from '@/lib/trade/utils/price/convertPriceToTokenAmount'
+import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import roundUpMagnitudeDivision from '@/utils/numbers/bigint/roundUpMagnitudeDivision'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
@@ -26,7 +26,7 @@ export function applySwapImpactWithCap(
 
   if (priceImpactDeltaUsd > 0) {
     // round positive impactAmount down, this will be deducted from the swap impact pool for the user
-    impactDeltaAmount = convertPriceToTokenAmount(priceImpactDeltaUsd, token.decimals, price)
+    impactDeltaAmount = convertUsdToTokenAmount(priceImpactDeltaUsd, token.decimals, price)
 
     const maxImpactAmount = isLongCollateral
       ? marketInfo.swapImpactPoolAmountLong

@@ -1,6 +1,6 @@
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
-export default function convertPriceToUsd(
+export default function convertTokenAmountToUsd(
   tokenAmount: bigint,
   tokenDecimals: number,
   price: bigint,

@@ -19,7 +19,7 @@ export default async function fetchTokenPrices(_chainId: StarknetChainId) {
   return Promise.resolve(
     new Map<string, Price>([
       [eth, {min: 3699531877496039000000n, max: 3701098600000000000000n}],
-      [usd, {min: 999900000000000000n, max: 1000062000000000000n}],
+      [usd, {min: 1000000000000000000n, max: 1000000000000000000n}],
       [market, {min: 1500062000000000000n, max: 1600062000000000000n}],
     ]),
   )

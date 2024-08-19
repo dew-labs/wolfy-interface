@@ -1,5 +1,3 @@
-import {parseUnits} from 'viem'
-
 import abs from '@/utils/numbers/bigint/abs'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
@@ -15,7 +13,7 @@ export default function getLimitedDisplay(
 ) {
   const {maxThreshold = MAX_EXCEEDING_THRESHOLD, minThreshold = MIN_EXCEEDING_THRESHOLD} = opts
   const max = maxThreshold === null ? null : expandDecimals(maxThreshold, tokenDecimals)
-  const min = parseUnits(minThreshold, tokenDecimals)
+  const min = expandDecimals(minThreshold, tokenDecimals)
   const absAmount = abs(amount)
 
   if (absAmount == 0n) {
