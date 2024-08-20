@@ -6,11 +6,14 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchReferralInfo from '@/lib/trade/services/referral/fetchReferralInfo'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-function createGetReferralInfoQueryOptions(chainId: StarknetChainId, account: string | undefined) {
+function createGetReferralInfoQueryOptions(
+  chainId: StarknetChainId,
+  accountAddress: string | undefined,
+) {
   return queryOptions({
-    queryKey: ['referralInfo', chainId, account],
+    queryKey: ['referralInfo', chainId, accountAddress],
     queryFn: async () => {
-      return await fetchReferralInfo(chainId, account)
+      return await fetchReferralInfo(chainId, accountAddress)
     },
     ...NO_REFETCH_OPTIONS,
   })

@@ -11,7 +11,12 @@ enum UserTabs {
   Claims = 'Claims',
 }
 
-const AVAILABLE_TABS = [UserTabs.Positions, UserTabs.Orders, UserTabs.Trades, UserTabs.Claims]
+const AVAILABLE_TABS = [
+  UserTabs.Positions,
+  UserTabs.Orders,
+  // UserTabs.Trades,
+  // UserTabs.Claims
+]
 
 const TABS_LABEL: Record<UserTabs, string> = {
   [UserTabs.Positions]: 'Positions',

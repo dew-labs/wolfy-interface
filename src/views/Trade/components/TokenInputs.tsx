@@ -1,4 +1,5 @@
 import {Input, Select, SelectItem} from '@nextui-org/react'
+import clsx from 'clsx'
 import {memo, type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
 
 import useTokensData from '@/lib/trade/hooks/useTokensData'
@@ -65,6 +66,7 @@ export default memo(function TokenInputs({
   const [payTokenAmountInput, setPayTokenAmountInput] = useState(() =>
     shrinkDecimals(payTokenAmount, payTokenDecimals),
   )
+  const [payTokenAmountInputIsFocused, setPayTokenAmountInputIsFocused] = useState(false)
 
   const payTokenAmountUsdShrinked = payTokenAmountUsd
     ? shrinkDecimals(payTokenAmountUsd, USD_DECIMALS, 2, true)
@@ -87,6 +89,7 @@ export default memo(function TokenInputs({
   )
 
   ;(function syncPayTokenAmountInputWithPayTokenAmount() {
+    if (payTokenAmountInputIsFocused) return
     if (!payTokenDecimals) return
     const inputExpanded = expandDecimals(payTokenAmountInput, payTokenDecimals)
 
@@ -105,6 +108,7 @@ export default memo(function TokenInputs({
   const [tokenAmountInput, setTokenAmountInput] = useState(() =>
     shrinkDecimals(tokenAmount, tokenDecimals),
   )
+  const [tokenAmountInputIsFocussed, setTokenAmountInputIsFocused] = useState(false)
   const tokenAmountUsdShrinked = tokenAmountUsd
     ? shrinkDecimals(tokenAmountUsd, USD_DECIMALS, 2, true)
     : '0'
@@ -122,6 +126,7 @@ export default memo(function TokenInputs({
   )
 
   ;(function syncTokenAmountInputWithTokenAmount() {
+    if (tokenAmountInputIsFocussed) return
     if (!tokenDecimals) return
     const inputExpanded = expandDecimals(tokenAmountInput, tokenDecimals)
     const diff = abs(inputExpanded - tokenAmount)
@@ -149,6 +154,11 @@ export default memo(function TokenInputs({
   )
 
   // -------------------------------------------------------------------------------------------------------------------
+
+  const isValidPayTokenAmount =
+    !!tokensData &&
+    !!payTokenAddress &&
+    payTokenAmount <= (tokensData.get(payTokenAddress)?.balance ?? 0n)
 
   return (
     <>
@@ -183,6 +193,7 @@ export default memo(function TokenInputs({
         label={`Pay: $${payTokenAmountUsdShrinked}`}
         value={payTokenAmountInput}
         onChange={handlePayTokenAmountInputChange}
+        onFocusChange={setPayTokenAmountInputIsFocused}
         placeholder='0.0'
         classNames={{
           inputWrapper: 'h-20 relative',
@@ -191,8 +202,13 @@ export default memo(function TokenInputs({
         }}
         endContent={
           <>
-            <div className='absolute right-3 top-2 whitespace-nowrap text-xs'>
-              Balance: ~{payTokenData && payTokenBalanceShrinked}
+            <div
+              className={clsx(
+                'absolute right-3 top-2 whitespace-nowrap text-xs',
+                payTokenData && !isValidPayTokenAmount && 'text-danger-500',
+              )}
+            >
+              Balance: ~{payTokenBalanceShrinked}
             </div>
             <Select
               aria-label='Select pay asset'
@@ -232,6 +248,7 @@ export default memo(function TokenInputs({
         }}
         value={tokenAmountInput}
         onChange={handleTokenAmountInputChange}
+        onFocusChange={setTokenAmountInputIsFocused}
         // startContent={
         //   <div className='pointer-events-none flex items-center'>
         //     <span className='text-small text-default-400'>$</span>

@@ -20,7 +20,7 @@ function createGetOrdersQueryOptions(
   accountAddress: string | undefined,
 ) {
   return queryOptions({
-    queryKey: ['orders', chainId, marketsData, tokensData, accountAddress] as const,
+    queryKey: ['orders', chainId, accountAddress, marketsData, tokensData] as const,
     queryFn:
       marketsData && tokensData
         ? async () => {

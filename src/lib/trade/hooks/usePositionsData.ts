@@ -18,7 +18,7 @@ function createGetPositionQueryOptions(
   accountAddress: string | undefined,
 ) {
   return queryOptions({
-    queryKey: ['positions', chainId, marketsData, tokensData, accountAddress] as const,
+    queryKey: ['positions', chainId, accountAddress, marketsData, tokensData] as const,
     queryFn:
       marketsData && tokensData
         ? async () => {

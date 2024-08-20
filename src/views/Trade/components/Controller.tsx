@@ -12,30 +12,36 @@ import {
   Tabs,
   Tooltip,
 } from '@nextui-org/react'
-import {
-  type Dispatch,
-  memo,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
+import clsx from 'clsx'
+import {memo, useCallback} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
-import {toast} from 'sonner'
+import {OrderType} from 'satoru-sdk'
 
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import useConnect from '@/lib/starknet/hooks/useConnect'
+import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
+import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import useGasPrice from '@/lib/trade/hooks/useGasPrice'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
+import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
 import useTokensData from '@/lib/trade/hooks/useTokensData'
-import useTokenAddress from '@/lib/trade/states/useTokenAddress'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import sendOrder from '@/lib/trade/services/sendOrder'
 import useTradeMode, {TradeMode} from '@/lib/trade/states/useTradeMode'
 import useTradeType, {TradeType} from '@/lib/trade/states/useTradeType'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
+import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
-import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
-import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 
+import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
+import useCollateralToken from './hooks/useCollateralToken'
+import useMarket from './hooks/useMarket'
+import usePayToken from './hooks/usePayToken'
+import useToken from './hooks/useToken'
 import TokenInputs from './TokenInputs'
 
 const TRADE_TYPE_LABEL: Record<TradeType, string> = {
@@ -64,261 +70,49 @@ const TRADE_MODE_LABEL: Record<TradeMode, string> = {
   [TradeMode.Trigger]: 'TP/SL',
 }
 
-const SUPPORTED_TRADE_TYPES: TradeType[] = [TradeType.Long, TradeType.Short, TradeType.Swap]
-
-function useToken(tradeMode: TradeMode) {
-  const tokensData = useTokensData()
-  const [tokenAddress] = useTokenAddress()
-  const tokenData = tokenAddress ? tokensData?.get(tokenAddress) : undefined
-  const tokenDecimals = tokenData?.decimals ?? 0
-
-  const [tokenAmountUsd, setTokenAmountUsd] = useState(0n)
-  const [tokenPrice, setTokenPrice] = useState<bigint>()
-  const derivedTokenPrice =
-    tokenPrice && tradeMode !== TradeMode.Market ? tokenPrice : (tokenData?.price.min ?? 0n)
-
-  const tokenAmount = useMemo(() => {
-    if (!derivedTokenPrice) return 0n
-    return convertUsdToTokenAmount(tokenAmountUsd, tokenDecimals, derivedTokenPrice)
-  }, [derivedTokenPrice, tokenAmountUsd, tokenDecimals])
-
-  const setTokenAmount = useCallback(
-    (tokenAmount: bigint) => {
-      const tokenAmountUsd = convertTokenAmountToUsd(tokenAmount, tokenDecimals, derivedTokenPrice)
-      setTokenAmountUsd(tokenAmountUsd)
-    },
-    [derivedTokenPrice, tokenDecimals],
-  )
-
-  return {
-    tokenAddress,
-    tokenData,
-    tokenAmount,
-    tokenAmountUsd,
-    setTokenAmount,
-    tokenPrice,
-    setTokenPrice,
-    setTokenAmountUsd,
-  }
-}
-
-function useAvailableMarketsForIndexToken(indexTokenAddress: string | undefined) {
-  const marketsData = useMarketsData()
-
-  return useMemo(() => {
-    if (!indexTokenAddress || !marketsData?.size) return []
-
-    const markets = Array.from(marketsData.values())
-
-    return markets.filter(market => market.indexTokenAddress === indexTokenAddress)
-  }, [marketsData, indexTokenAddress])
-}
-
-function useMarket() {
-  const marketsData = useMarketsData()
-  const [marketAddress, setMarketAddress] = useState<string>()
-  const latestMarketAddress = useLatest(marketAddress)
-
-  const marketData = useMemo(
-    () => (marketAddress ? marketsData?.get(marketAddress) : undefined),
-    [marketAddress, marketsData],
-  )
-  const latestMarketData = useLatest(marketData)
-
-  const poolName = marketData && getMarketPoolName(marketData)
-
-  const availableCollateralTokenAddresses = useMemo(
-    () => (marketData ? [marketData.longTokenAddress, marketData.shortTokenAddress] : []),
-    [marketData],
-  )
-  const latestAvailableCollateralTokenAddresses = useLatest(availableCollateralTokenAddresses)
-
-  return {
-    marketAddress,
-    setMarketAddress,
-    latestMarketAddress,
-    marketData,
-    latestMarketData,
-    availableCollateralTokenAddresses,
-    latestAvailableCollateralTokenAddresses,
-    poolName,
-  }
-}
-
-function usePayToken(
-  tradeMode: TradeMode,
-  tokenAddress: string | undefined,
-  tokenPrice: bigint | undefined,
-  tokenAmountUsd: bigint,
-  setTokenAmountUsd: Dispatch<SetStateAction<bigint>>,
-) {
-  const tokensData = useTokensData()
-
-  const [payTokenAddress, setPayTokenAddress] = useState<string>()
-
-  const payTokenData = payTokenAddress ? tokensData?.get(payTokenAddress) : undefined
-  const payTokenDecimals = payTokenData?.decimals ?? 0
-  const latestPayTokenDecimals = useLatest(payTokenDecimals)
-  const payTokenPrice = (() => {
-    if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) return tokenPrice ?? 0n
-    return payTokenData?.price.min ?? 0n
-  })()
-  const latestPayTokenPrice = useLatest(payTokenPrice)
-
-  const latestPayTokenData = useLatest(payTokenData)
-
-  const [payTokenAmount, baseSetPayTokenAmount] = useState(0n)
-
-  const setPayTokenAmount = useCallback(
-    (payTokenAmount: bigint) => {
-      const newPayTokenAmountUsd = convertTokenAmountToUsd(
-        payTokenAmount,
-        latestPayTokenDecimals.current,
-        latestPayTokenPrice.current,
-      )
-
-      let leverage = latestLeverage.current
-      if (leverage === 0n) leverage = expandDecimals(latestLeverageInput.current, LEVERAGE_DECIMALS)
-
-      setTokenAmountUsd((newPayTokenAmountUsd * leverage) / LEVERAGE_PRECISION)
-
-      baseSetPayTokenAmount(payTokenAmount)
-    },
-    [setTokenAmountUsd],
-  )
-
-  const latestPayTokenAmount = useLatest(payTokenAmount)
-  const payTokenAmountUsd = useMemo(
-    () =>
-      payTokenDecimals && payTokenPrice
-        ? convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, payTokenPrice)
-        : 0n,
-    [payTokenAmount, payTokenDecimals, payTokenPrice],
-  )
-  const latestPayTokenAmountUsd = useLatest(payTokenAmountUsd)
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  const [maxLeverage] = useState(100n * LEVERAGE_PRECISION) // 100
-  const maxLeverageNumber = Number(shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS))
-  const latestMaxLeverage = useLatest(maxLeverage)
-
-  const leverage = useMemo(
-    () => calculateLeverage(tokenAmountUsd, payTokenAmountUsd),
-    [tokenAmountUsd, payTokenAmountUsd],
-  )
-
-  const latestLeverage = useLatest(leverage)
-  const [leverageInput, setLeverageInput] = useState('1')
-  const latestLeverageInput = useLatest(leverageInput)
-
-  const leverageNumber = Number(leverageInput)
-
-  const handleLeverageChange = useCallback(
-    (value: unknown) => {
-      if (typeof value !== 'string' && typeof value !== 'number') return
-      const leverage = expandDecimals(value, LEVERAGE_DECIMALS)
-
-      if (leverage <= 0 || leverage > latestMaxLeverage.current) return
-
-      const newTokenAmountUsd = (latestPayTokenAmountUsd.current * leverage) / LEVERAGE_PRECISION
-      setTokenAmountUsd(newTokenAmountUsd)
-
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS)
-      setLeverageInput(newLeverageInput)
-    },
-    [setTokenAmountUsd],
-  )
-
-  useEffect(
-    function syncLeverageToLeverageInput() {
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS)
-
-      if (leverage > latestMaxLeverage.current) {
-        toast.error('Maximum leverage exceeded.')
-      }
-
-      if (newLeverageInput === '0') {
-        setLeverageInput('1')
-        return
-      }
-
-      setLeverageInput(newLeverageInput)
-    },
-    [leverage],
-  )
-
-  return {
-    payTokenAddress,
-    setPayTokenAddress,
-    payTokenAmount,
-    setPayTokenAmount,
-    payTokenAmountUsd,
-    latestPayTokenAmount,
-    latestPayTokenAmountUsd,
-    payTokenData,
-    latestPayTokenData,
-    maxLeverage,
-    maxLeverageNumber,
-    leverage,
-    leverageNumber,
-    latestLeverage,
-    leverageInput,
-    setLeverageInput,
-    handleLeverageChange,
-  }
-}
-
-function useCollateralToken() {
-  const tokensData = useTokensData()
-
-  const [collateralTokenAddress, setCollateralAddress] = useState<string>()
-  const latestCollateralAddress = useLatest(collateralTokenAddress)
-  const collateralTokenData = collateralTokenAddress
-    ? tokensData?.get(collateralTokenAddress)
-    : undefined
-
-  return {
-    collateralTokenAddress,
-    latestCollateralAddress,
-    setCollateralAddress,
-    collateralTokenData,
-  }
-}
-
-const LEVERAGE_DECIMALS = 4
-const LEVERAGE_PRECISION = expandDecimals(1, LEVERAGE_DECIMALS)
-
-function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
-  if (tokenAmountUsd <= 0 || payTokenAmountUsd <= 0) return 0n
-  return (tokenAmountUsd * LEVERAGE_PRECISION) / payTokenAmountUsd
-}
+const SUPPORTED_TRADE_TYPES: TradeType[] = [
+  TradeType.Long,
+  TradeType.Short,
+  // TradeType.Swap,
+]
 
 export default memo(function Controller() {
+  const queryClient = useQueryClient()
+  const [wallet] = useWalletAccount()
+  const latestWallet = useLatest(wallet)
+  const accountAddress = useAccountAddress()
+  const latestAccountAddress = useLatest(accountAddress)
   const tokensData = useTokensData()
   const _gasPrice = useGasPrice()
 
   const [tradeType, setTradeType] = useTradeType()
+  const latestTradeType = useLatest(tradeType)
   const [tradeMode, setTradeMode] = useTradeMode()
+  const latestTradeMode = useLatest(tradeMode)
 
   const {
     tokenAddress,
     tokenAmount,
     setTokenAmount,
     tokenAmountUsd,
+    latestTokenAmountUsd,
     setTokenAmountUsd,
     tokenPrice,
+    latestDerivedTokenPrice,
     setTokenPrice,
+    tokenData,
   } = useToken(tradeMode)
 
   const availableMarkets = useAvailableMarketsForIndexToken(tokenAddress)
 
   const {
     marketAddress,
+    latestMarketAddress,
     setMarketAddress,
     availableCollateralTokenAddresses,
     latestAvailableCollateralTokenAddresses,
     poolName,
+    marketData,
   } = useMarket()
 
   ;(function setDefaultMarketAddress() {
@@ -333,7 +127,15 @@ export default memo(function Controller() {
     }
   })()
 
-  const {collateralTokenAddress, setCollateralAddress, collateralTokenData} = useCollateralToken()
+  const {
+    collateralTokenAddress,
+    latestCollateralTokenAddress,
+    setCollateralAddress,
+    collateralTokenData,
+    collateralTokenAmount,
+    latestCollateralTokenAmount,
+    setCollateralTokenAmount,
+  } = useCollateralToken()
 
   ;(function setDefaultCollateralTokenAddress() {
     if (!availableCollateralTokenAddresses.length) return
@@ -356,12 +158,19 @@ export default memo(function Controller() {
     leverageInput,
     setLeverageInput,
     handleLeverageChange,
+    leverage,
     leverageNumber,
+    maxLeverage,
+    payTokenData,
+    setLeverageInputFocused,
   } = usePayToken(tradeMode, tokenAddress, tokenPrice, tokenAmountUsd, setTokenAmountUsd)
 
   ;(function syncPayTokenAddressWithCollateralTokenAddress() {
     if (collateralTokenAddress !== payTokenAddress) {
       setPayTokenAddress(collateralTokenAddress)
+    }
+    if (collateralTokenAmount !== payTokenAmount) {
+      setCollateralTokenAmount(payTokenAmount)
     }
   })()
 
@@ -398,8 +207,153 @@ export default memo(function Controller() {
     [setCollateralAddress, latestAvailableCollateralTokenAddresses],
   )
 
+  const referralInfo = useReferralInfo()
+
+  const positionConstants = usePositionsConstants()
+
+  const liquidationPrice =
+    payTokenData &&
+    marketData &&
+    getLiquidationPrice({
+      sizeInUsd: tokenAmountUsd,
+      sizeInTokens: tokenAmount,
+      collateralAmount: payTokenAmount,
+      collateralUsd: payTokenAmountUsd,
+      collateralToken: payTokenData,
+      marketInfo: marketData,
+      pendingFundingFeesUsd: 0n,
+      pendingBorrowingFeesUsd: 0n,
+      minCollateralUsd: positionConstants?.minCollateralUsd ?? 0n,
+      isLong: tradeType === TradeType.Long,
+      useMaxPriceImpact: false, // NOTE: Should be true when the configuration is right
+      referralInfo: referralInfo,
+    })
+
+  const liquidationPriceText = liquidationPrice
+    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, 2, true)
+    : '-'
+
+  const executionPrice =
+    tokenData &&
+    getEntryPrice({
+      sizeInUsd: tokenAmountUsd,
+      sizeInTokens: tokenAmount,
+      indexToken: tokenData,
+    })
+
+  const executionPriceText = executionPrice
+    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, 2, true)
+    : '-'
+
+  const isConnected = useIsWalletConnected()
+  const latestIsConnected = useLatest(isConnected)
+  const connect = useConnect()
+
+  const availableLiquidity = (() => {
+    if (tradeType === TradeType.Long) return marketData?.longPoolAmount ?? 0n
+    return marketData?.shortPoolAmount ?? 0n
+  })()
+
+  const availableLiquidityUsd = (() => {
+    const longTokenAddress = marketData?.longTokenAddress
+    const shortTokenAddress = marketData?.shortTokenAddress
+
+    const longTokenDecimals = marketData?.longToken.decimals ?? 0
+    const shortTokenDecimals = marketData?.shortToken.decimals ?? 0
+
+    let longTokenPrice = marketData?.longToken.price.min ?? 0n
+    let shortTokenPrice = marketData?.shortToken.price.min ?? 0n
+
+    if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
+      if (tokenAddress === longTokenAddress) longTokenPrice = tokenPrice ?? 0n
+      if (tokenAddress === shortTokenAddress) shortTokenPrice = tokenPrice ?? 0n
+    }
+
+    return convertTokenAmountToUsd(
+      availableLiquidity,
+      tradeType === TradeType.Long ? longTokenDecimals : shortTokenDecimals,
+      tradeType === TradeType.Long ? longTokenPrice : shortTokenPrice,
+    )
+  })()
+
+  const availableLiquidityUsdText = (() => {
+    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 2, true)
+  })()
+
+  const isValidSize = tokenAmount > 0n && tokenAmount <= availableLiquidity
+  const isValidPayTokenAmount =
+    !!tokensData &&
+    !!payTokenAddress &&
+    payTokenAmount <= (tokensData.get(payTokenAddress)?.balance ?? 0n)
+  const isValidTokenAmount = tokenAmount > 0n
+  const isValidLeverage = leverage > 0n && leverage <= maxLeverage
+  const isValidOrder = isValidLeverage && isValidTokenAmount && isValidPayTokenAmount && isValidSize
+
+  const handleSubmitBtnPress = useCallback(() => {
+    if (!latestIsConnected.current || !latestWallet.current) {
+      connect()
+      return
+    }
+
+    const isLong = latestTradeType.current === TradeType.Long
+    const receiver = latestAccountAddress.current
+    const market = latestMarketAddress.current
+    const initialCollateralToken = latestCollateralTokenAddress.current
+    const sizeDeltaUsd = latestTokenAmountUsd.current
+    const initialCollateralDeltaAmount = latestCollateralTokenAmount.current
+
+    if (!market) return
+    if (!receiver) return
+    if (!initialCollateralToken) return
+
+    const tradeMode = latestTradeMode.current
+
+    const triggerPrice = latestDerivedTokenPrice.current
+    const acceptablePrice = triggerPrice // TODO: apply price impact
+
+    const orderType = (() => {
+      // Swap not supported yet
+      switch (tradeMode) {
+        case TradeMode.Limit:
+          return OrderType.LimitIncrease
+        case TradeMode.Market:
+          return OrderType.MarketIncrease
+        default:
+          throw new Error('Unsupported trade mode')
+      }
+    })()
+
+    void sendOrder(
+      latestWallet.current,
+      {
+        receiver,
+        market,
+        initialCollateralToken,
+        sizeDeltaUsd,
+        initialCollateralDeltaAmount,
+        orderType,
+        isLong,
+        triggerPrice,
+        acceptablePrice,
+        referralCode: 0,
+      },
+      queryClient,
+    )
+  }, [
+    connect,
+    latestCollateralTokenAddress,
+    latestCollateralTokenAmount,
+    latestMarketAddress,
+    latestTokenAmountUsd,
+    latestDerivedTokenPrice,
+    latestTradeMode,
+    latestTradeType,
+    latestWallet,
+    queryClient,
+  ])
+
   return (
-    <div className='flex w-full max-w-xs flex-col'>
+    <div className='flex w-full min-w-80 max-w-sm flex-col'>
       <Card>
         <CardBody>
           <Tabs
@@ -479,7 +433,10 @@ export default memo(function Controller() {
                   placement='left'
                 >
                   <input
-                    className='w-14 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary'
+                    className={clsx(
+                      'w-14 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+                      leverage > 0n && !isValidLeverage && 'border-danger-500',
+                    )}
                     type='text'
                     aria-label='Leverage value'
                     value={leverageInput}
@@ -492,6 +449,12 @@ export default memo(function Controller() {
                       if (e.key === 'Enter') {
                         handleLeverageChange(leverageInput)
                       }
+                    }}
+                    onFocus={() => {
+                      setLeverageInputFocused(true)
+                    }}
+                    onBlur={() => {
+                      setLeverageInputFocused(false)
                     }}
                   />
                 </Tooltip>
@@ -546,27 +509,44 @@ export default memo(function Controller() {
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Execution Price</div>
-              <div className='flex items-center'>$3,182.83</div>
+              <div className='flex items-center'>{executionPriceText}</div>
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Liquidation Price</div>
-              <div className='flex items-center'>$2,908.83</div>
+              <div className='flex items-center'>{liquidationPriceText}</div>
+            </div>
+            <div className='mt-2 flex w-full justify-between'>
+              <div className='flex items-center'>Available Liquidity</div>
+              <div
+                className={clsx(
+                  'flex items-center',
+                  tokenAmount > 0 && !isValidSize && 'text-danger-500',
+                )}
+              >
+                {availableLiquidityUsdText}
+              </div>
             </div>
           </div>
           <Divider className='mt-3 opacity-50' />
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Fee</div>
-              <div className='flex items-center'>-$0.04</div>
+              <div className='flex items-center'>$0</div>
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Network Fee</div>
-              <div className='flex items-center'>-$0.05</div>
+              <div className='flex items-center'>$0</div>
             </div>
           </div>
           <div className='mt-4 w-full'>
-            <Button color='primary' className='w-full' size='lg'>
-              Place
+            <Button
+              color='primary'
+              className='w-full'
+              size='lg'
+              onPress={handleSubmitBtnPress}
+              isDisabled={isConnected && !isValidOrder}
+            >
+              {!isConnected ? 'Connect Wallet' : 'Place Order'}
             </Button>
           </div>
         </CardBody>

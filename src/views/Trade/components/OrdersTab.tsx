@@ -13,6 +13,7 @@ import {memo, useCallback} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import useOrders from '@/lib/trade/hooks/useOrders'
@@ -30,6 +31,8 @@ import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAm
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
+  const accountAddress = useAccountAddress()
+  const latestAccountAddress = useLatest(accountAddress)
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
@@ -43,7 +46,7 @@ export default memo(function OrdersTab() {
         loading: 'Cancelling...',
         success: data => {
           void queryClient.invalidateQueries({
-            queryKey: ['orders'],
+            queryKey: ['orders', latestChainId.current, latestAccountAddress.current],
           })
           return (
             <>
@@ -99,11 +102,7 @@ export default memo(function OrdersTab() {
             return `${tokenAmountText}`
           })()
 
-          const priceDecimals = order.indexToken.priceDecimals
-
-          const triggerPriceText = `${order.triggerThresholdType} ${formatUsd(order.triggerPrice, {
-            displayDecimals: priceDecimals,
-          })}`
+          const triggerPriceText = `${order.triggerThresholdType} ${formatUsd(order.triggerPrice)}`
 
           const markPrice = getMarkPrice({
             price: order.indexToken.price,
@@ -111,7 +110,7 @@ export default memo(function OrdersTab() {
             isLong: order.isLong,
           })
 
-          const markPriceText = formatUsd(markPrice, {displayDecimals: priceDecimals})
+          const markPriceText = formatUsd(markPrice)
           const sizeText = formatUsd(order.sizeDeltaUsd)
           return (
             <TableRow key={order.key}>
@@ -119,8 +118,8 @@ export default memo(function OrdersTab() {
                 {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
               </TableCell>
               <TableCell>
-                <span>{indexName}</span>
-                <span className='subtext lh-1'>{poolName && `[${poolName}]`}</span>
+                <div>{indexName}</div>
+                <div className='subtext lh-1'>{poolName && `[${poolName}]`}</div>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
               <TableCell>{collateralText}</TableCell>

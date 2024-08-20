@@ -13,12 +13,14 @@ import getStarknetCore, {
   type StarknetWindowObject,
   type WalletProvider,
 } from 'get-starknet-core'
-import {memo, type MemoizedCallback, useCallback, useEffect, useRef, useState} from 'react'
+import {useAtom} from 'jotai'
+import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
 import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
 import {WalletAccount} from 'starknet'
 
 import {isChainIdSupported} from '@/constants/chains'
+import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import {Theme} from '@/lib/theme/theme'
@@ -82,12 +84,9 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
   )
 })
 
-interface ConnectModalProps {
-  isOpen: boolean
-  onClose: MemoizedCallback<() => void>
-}
+export default memo(function ConnectModal() {
+  const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
 
-export default memo(function ConnectModal({isOpen, onClose}: ConnectModalProps) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
 
@@ -102,8 +101,8 @@ export default memo(function ConnectModal({isOpen, onClose}: ConnectModalProps) 
   const handleClose = useCallback(() => {
     if (latestIsConnecting.current) isCancelled.current = true
     setIsConnecting(false)
-    onClose()
-  }, [onClose])
+    setIsOpen(false)
+  }, [])
 
   const shouldStopConnectingOrContinue = useCallback(() => {
     if (isCancelled.current) {
@@ -181,9 +180,9 @@ export default memo(function ConnectModal({isOpen, onClose}: ConnectModalProps) 
         void getStarknetCore.disconnect()
       }
       setIsConnecting(false)
-      onClose()
+      setIsOpen(false)
     },
-    [onClose, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
+    [setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
   )
   useEffect(() => {
     console.log('lastConnectedWallet:', lastConnectedWallet)

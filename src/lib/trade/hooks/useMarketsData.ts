@@ -18,7 +18,7 @@ function createGetMarketsDataQueryOptions(
   accountAddress: string | undefined,
 ) {
   return queryOptions({
-    queryKey: ['marketsData', chainId, markets, tokensData, accountAddress] as const,
+    queryKey: ['marketsData', chainId, accountAddress, markets, tokensData] as const,
     queryFn:
       markets && tokensData
         ? async () => {

@@ -11,7 +11,7 @@ function createGetTokensQueryOptions(chainId: StarknetChainId, accountAddress: s
     queryFn: async () => {
       return await fetchTokensData(chainId, accountAddress)
     },
-    refetchInterval: 2000,
+    refetchInterval: 5000,
     refetchIntervalInBackground: false,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
