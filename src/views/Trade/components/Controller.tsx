@@ -12,7 +12,15 @@ import {
   Tabs,
   Tooltip,
 } from '@nextui-org/react'
-import {type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useState} from 'react'
+import {
+  type Dispatch,
+  memo,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
@@ -286,7 +294,7 @@ function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   return (tokenAmountUsd * LEVERAGE_PRECISION) / payTokenAmountUsd
 }
 
-export default function Controller() {
+export default memo(function Controller() {
   const tokensData = useTokensData()
   const _gasPrice = useGasPrice()
 
@@ -598,4 +606,4 @@ export default function Controller() {
       </Card> */}
     </div>
   )
-}
+})

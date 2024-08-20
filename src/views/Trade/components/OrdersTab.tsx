@@ -9,7 +9,7 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
-import {useCallback} from 'react'
+import {memo, useCallback} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
@@ -27,7 +27,7 @@ import {getMarkPrice} from '@/lib/trade/utils/position/getPositionsInfo'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 
-export default function OrdersTab() {
+export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
   const latestWalletAccount = useLatest(walletAccount)
@@ -142,4 +142,4 @@ export default function OrdersTab() {
       </TableBody>
     </Table>
   )
-}
+})

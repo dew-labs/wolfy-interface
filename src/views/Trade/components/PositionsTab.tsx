@@ -1,5 +1,6 @@
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from '@nextui-org/react'
 import {t} from 'i18next'
+import {memo, useState} from 'react'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokensData from '@/lib/trade/hooks/useTokensData'
@@ -10,13 +11,12 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 
-const savedShowPnlAfterFees: boolean = true
-
-export default function PositionTab() {
+export default memo(function PositionTab() {
   const positionsInfo = usePositionsInfoData()
   const tokensData = useTokensData()
 
   const positions = positionsInfo ? Array.from(positionsInfo.values()) : []
+  const [savedShowPnlAfterFees] = useState(true)
 
   return (
     <Table className='mt-2' aria-label='Positions'>
@@ -94,4 +94,4 @@ export default function PositionTab() {
       </TableBody>
     </Table>
   )
-}
+})

@@ -1,5 +1,5 @@
 import {Tab, Tabs} from '@nextui-org/react'
-import {useCallback, useState} from 'react'
+import {memo, useCallback, useState} from 'react'
 
 import OrdersTab from './OrdersTab'
 import PositionsTab from './PositionsTab'
@@ -28,7 +28,7 @@ function UserClaims() {
   return <div>Comming soon...</div>
 }
 
-export default function UserInformation() {
+export default memo(function UserInformation() {
   const [tab, setTab] = useState<UserTabs>(UserTabs.Positions)
 
   const handleChangeTab = useCallback((value: unknown) => {
@@ -54,4 +54,4 @@ export default function UserInformation() {
       {tab === UserTabs.Claims && <UserClaims />}
     </>
   )
-}
+})

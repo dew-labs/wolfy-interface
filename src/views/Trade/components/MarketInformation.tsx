@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
-import {useCallback, useMemo, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
 import {getTokensMetadata} from '@/constants/tokens'
@@ -36,7 +36,7 @@ interface TokenOption {
   indexTokenAddress: string
 }
 
-export default function MarketInformation() {
+export default memo(function MarketInformation() {
   const [chainId] = useChainId()
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
@@ -46,10 +46,11 @@ export default function MarketInformation() {
 
   const dataIsLoaded = !!marketsData
 
-  let availableTokens: AvailableTokens | undefined = undefined
-  if (dataIsLoaded) {
-    availableTokens = getAvailableTokens(marketsData)
-  }
+  const availableTokens: AvailableTokens | undefined = useMemo(() => {
+    if (marketsData) {
+      return getAvailableTokens(marketsData)
+    }
+  }, [marketsData])
 
   const marketsWithLiquidityGrouppedByIndexToken = useMemo(() => {
     const allMarkets = availableTokens?.allMarkets ? Array.from(availableTokens.allMarkets) : []
@@ -173,7 +174,6 @@ export default function MarketInformation() {
       if (selected.length === 0) return
       const selectedKey = selected[0]
       if (typeof selectedKey !== 'string') return
-      console.log('selectedKey', selectedKey)
       setTokenAddress(selectedKey)
       setMarketSelectorIsOpen(false)
     },
@@ -259,4 +259,4 @@ export default function MarketInformation() {
       </CardBody>
     </Card>
   )
-}
+})

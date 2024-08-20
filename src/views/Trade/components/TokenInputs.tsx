@@ -1,5 +1,5 @@
 import {Input, Select, SelectItem} from '@nextui-org/react'
-import {type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
+import {memo, type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
 
 import useTokensData from '@/lib/trade/hooks/useTokensData'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
@@ -12,6 +12,10 @@ const INPUT_2_LABEL: Record<TradeType, string> = {
   [TradeType.Long]: 'To long',
   [TradeType.Short]: 'To short',
   [TradeType.Swap]: 'To receive',
+}
+
+function cleanNumberString(str: string) {
+  return str.replace(/[^0-9.]/g, '').replace(/^0+(?=\d)/, '')
 }
 
 interface Props {
@@ -33,7 +37,7 @@ interface Props {
 
 const ACCEPTABLE_DIFF = 2n
 
-export default function TokenInputs({
+export default memo(function TokenInputs({
   tradeType,
   tradeMode,
   tokenAddress,
@@ -63,13 +67,13 @@ export default function TokenInputs({
   )
 
   const payTokenAmountUsdShrinked = payTokenAmountUsd
-    ? shrinkDecimals(payTokenAmountUsd, payTokenDecimals, 2, true)
+    ? shrinkDecimals(payTokenAmountUsd, USD_DECIMALS, 2, true)
     : '0'
 
   const handlePayTokenAmountInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
-      const valueInput = value.replace(/[^0-9.]/g, '')
+      const valueInput = cleanNumberString(value)
       try {
         const valueBigInt = expandDecimals(valueInput, payTokenDecimals)
 
@@ -102,13 +106,13 @@ export default function TokenInputs({
     shrinkDecimals(tokenAmount, tokenDecimals),
   )
   const tokenAmountUsdShrinked = tokenAmountUsd
-    ? shrinkDecimals(tokenAmountUsd, tokenDecimals, 2, true)
+    ? shrinkDecimals(tokenAmountUsd, USD_DECIMALS, 2, true)
     : '0'
 
   const handleTokenAmountInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
-      const valueInput = value.replace(/[^0-9.]/g, '')
+      const valueInput = cleanNumberString(value)
       const valueBigint = expandDecimals(valueInput, tokenDecimals)
 
       setTokenAmountInput(valueInput)
@@ -135,7 +139,7 @@ export default function TokenInputs({
   const handleTokenPriceInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
-      const valueInput = value.replace(/[^0-9.]/g, '')
+      const valueInput = cleanNumberString(value)
       const valueBigint = expandDecimals(valueInput, USD_DECIMALS)
 
       setTokenPriceInput(valueInput)
@@ -241,4 +245,4 @@ export default function TokenInputs({
       />
     </>
   )
-}
+})
