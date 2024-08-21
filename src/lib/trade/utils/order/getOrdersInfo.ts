@@ -6,6 +6,7 @@ import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAm
 import getTokensRatioByAmounts, {
   type TokensRatio,
 } from '@/lib/trade/utils/token/getTokensRatioByAmounts'
+import parseContractPrice from '@/lib/trade/utils/token/parseContractPrice'
 import {logError} from '@/utils/logger'
 
 import getPositionOrderTitle from './getPositionOrderTitle'
@@ -141,8 +142,11 @@ export default function getOrdersInfo(
           sizeDeltaUsd: order.sizeDeltaUsd,
         })
 
-        const acceptablePrice = order.contractAcceptablePrice
-        const triggerPrice = order.contractTriggerPrice
+        const acceptablePrice = parseContractPrice(
+          order.contractAcceptablePrice,
+          indexToken.decimals,
+        )
+        const triggerPrice = parseContractPrice(order.contractTriggerPrice, indexToken.decimals)
 
         const swapPathStats = getSwapPathStats({
           marketsData,

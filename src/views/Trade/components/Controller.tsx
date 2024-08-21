@@ -14,12 +14,14 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import {memo, useCallback} from 'react'
+import {memo, useCallback, useRef} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
+import {toast} from 'sonner'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
@@ -35,7 +37,7 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
-import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
 import useCollateralToken from './hooks/useCollateralToken'
@@ -84,6 +86,8 @@ export default memo(function Controller() {
   const latestAccountAddress = useLatest(accountAddress)
   const tokensData = useTokensData()
   const _gasPrice = useGasPrice()
+  const [chainId] = useChainId()
+  const latestChainId = useRef(chainId)
 
   const [tradeType, setTradeType] = useTradeType()
   const latestTradeType = useLatest(tradeType)
@@ -101,6 +105,7 @@ export default memo(function Controller() {
     latestDerivedTokenPrice,
     setTokenPrice,
     tokenData,
+    latestTokenDecimals,
   } = useToken(tradeMode)
 
   const availableMarkets = useAvailableMarketsForIndexToken(tokenAddress)
@@ -308,7 +313,8 @@ export default memo(function Controller() {
 
     const tradeMode = latestTradeMode.current
 
-    const triggerPrice = latestDerivedTokenPrice.current
+    const triggerPrice =
+      latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
     const acceptablePrice = triggerPrice // TODO: apply price impact
 
     const orderType = (() => {
@@ -323,9 +329,8 @@ export default memo(function Controller() {
       }
     })()
 
-    void sendOrder(
-      latestWallet.current,
-      {
+    toast.promise(
+      sendOrder(latestWallet.current, {
         receiver,
         market,
         initialCollateralToken,
@@ -336,8 +341,23 @@ export default memo(function Controller() {
         triggerPrice,
         acceptablePrice,
         referralCode: 0,
+      }),
+      {
+        loading: 'Placing order...',
+        success: data => {
+          void queryClient.invalidateQueries({
+            queryKey: ['orders', latestChainId.current, latestAccountAddress.current],
+          })
+          return (
+            <>
+              Order placed.
+              <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+                View tx
+              </a>
+            </>
+          )
+        },
       },
-      queryClient,
     )
   }, [
     connect,
@@ -350,6 +370,7 @@ export default memo(function Controller() {
     latestTradeType,
     latestWallet,
     queryClient,
+    latestTokenDecimals,
   ])
 
   return (

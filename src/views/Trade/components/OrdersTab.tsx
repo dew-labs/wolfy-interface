@@ -51,7 +51,9 @@ export default memo(function OrdersTab() {
           return (
             <>
               Order cancelled.
-              <a href={`https://sepolia.starkscan.co/tx/${data.tx}`}>View tx</a>
+              <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+                View tx
+              </a>
             </>
           )
         },

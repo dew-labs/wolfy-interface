@@ -1,4 +1,3 @@
-import type {QueryClient} from '@tanstack/react-query'
 import {
   createCall,
   createSatoruContract,
@@ -10,7 +9,6 @@ import {
   SatoruContract,
   toCairoCustomEnum,
 } from 'satoru-sdk'
-import {toast} from 'sonner'
 import {CairoUint256, type Call, type WalletAccount} from 'starknet'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
@@ -51,11 +49,7 @@ function createOrderPrams(props: OrderParams) {
   }
 }
 
-export default async function sendOrder(
-  wallet: WalletAccount,
-  props: OrderParams,
-  queryClient: QueryClient,
-) {
+export default async function sendOrder(wallet: WalletAccount, props: OrderParams) {
   const createOrderParams = createOrderPrams(props)
 
   console.log(createOrderParams)
@@ -88,13 +82,12 @@ export default async function sendOrder(
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    toast.success('Order created.')
     const orderKey = receipt.events[1]?.data[0]
     console.log(orderKey)
-    await queryClient.invalidateQueries({
-      queryKey: ['orders', chainId],
-    })
+    return {
+      tx: receipt.transaction_hash,
+    }
   } else {
-    toast.error('Cannot create order, please try again later.')
+    throw new Error('Cannot place order')
   }
 }

@@ -12,6 +12,7 @@ export default function useToken(tradeMode: TradeMode) {
   const [tokenAddress] = useTokenAddress()
   const tokenData = tokenAddress ? tokensData?.get(tokenAddress) : undefined
   const tokenDecimals = tokenData?.decimals ?? 0
+  const latestTokenDecimals = useLatest(tokenDecimals)
 
   const [tokenAmountUsd, setTokenAmountUsd] = useState(0n)
   const latestTokenAmountUsd = useLatest(tokenAmountUsd)
@@ -44,5 +45,7 @@ export default function useToken(tradeMode: TradeMode) {
     latestDerivedTokenPrice,
     setTokenPrice,
     setTokenAmountUsd,
+    tokenDecimals,
+    latestTokenDecimals,
   }
 }

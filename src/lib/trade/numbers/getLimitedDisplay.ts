@@ -23,12 +23,12 @@ export default function getLimitedDisplay(
     }
   }
 
-  const symbol =
-    max !== null && absAmount > max
-      ? TRIGGER_PREFIX_ABOVE
-      : absAmount < min
-        ? TRIGGER_PREFIX_BELOW
-        : ''
+  const symbol = (() => {
+    if (max !== null && absAmount > max) return TRIGGER_PREFIX_ABOVE
+    if (absAmount < min) return TRIGGER_PREFIX_BELOW
+    return ''
+  })()
+
   const value = max !== null && absAmount > max ? max : absAmount < min ? min : absAmount
 
   return {

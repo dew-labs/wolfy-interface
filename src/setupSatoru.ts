@@ -48,7 +48,7 @@ function registerHttpProviders() {
       'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93',
       // -------------------------------------------------------------------------
       // 'https://starknet-sepolia.drpc.org',
-      'https://free-rpc.nethermind.io/sepolia-juno',
+      // 'https://free-rpc.nethermind.io/sepolia-juno',
       'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
       // 'https://rpc.starknet-testnet.lava.build:443',
     ],
