@@ -28,7 +28,8 @@ import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
-import {FaucetRoute, TradeRoute} from '@/routeRegistry'
+import useDripFaucet from '@/lib/trade/hooks/useFaucetDrip'
+import {TradeRoute} from '@/routeRegistry'
 import middleEllipsis from '@/utils/middleEllipsis'
 
 import ThemeSwitchButton from './ThemeSwitchButton'
@@ -46,10 +47,6 @@ const menuItems = [
   //   label: 'Pools',
   //   to: '',
   // },
-  {
-    label: 'Faucet',
-    to: FaucetRoute.fullPath,
-  },
 ]
 
 export default memo(function WolfyNavbar(props: NavbarProps) {
@@ -64,6 +61,8 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
   const handleDisconnect = useCallback(async () => {
     await disconnect()
   }, [disconnect])
+
+  const [isDripping, handleOnDrip] = useDripFaucet()
 
   return (
     <>
@@ -120,6 +119,17 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   {t('Connect')}
                 </Button>
               </>
+            )}
+            {isConnected && (
+              <Button
+                onPress={handleOnDrip}
+                color='success'
+                endContent={<Icon icon='fa6-solid:faucet-drip' />}
+                className={'w-full'}
+                isLoading={isDripping}
+              >
+                {!isDripping ? t('Faucet') : t('Dripping...')}
+              </Button>
             )}
             {isConnected && (
               <>
