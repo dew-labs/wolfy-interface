@@ -6,10 +6,10 @@ export const SUPPORTED_CHAINS: {
   chainId: StarknetChainId
   name: string
 }[] = [
-  {
-    chainId: StarknetChainId.SN_MAIN,
-    name: 'Mainnet',
-  },
+  // {
+  //   chainId: StarknetChainId.SN_MAIN,
+  //   name: 'Mainnet',
+  // },
   {
     chainId: StarknetChainId.SN_SEPOLIA,
     name: 'Sepolia',

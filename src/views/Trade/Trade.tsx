@@ -14,7 +14,7 @@ export default function Trade() {
 
   return (
     <div>
-      <HeadTags title='Home' />
+      <HeadTags title='Trade' />
       <SkipLink title='Skip to main content' to='#main-content' />
       <WolfyNavbar />
       <main
