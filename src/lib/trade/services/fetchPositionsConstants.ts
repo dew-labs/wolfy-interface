@@ -9,7 +9,7 @@ import {
 
 import {MIN_COLLATERAL_USD_KEY, MIN_POSITION_SIZE_USD_KEY} from '@/constants/dataStore'
 
-export interface PositionsConstants {
+export interface PositionConstants {
   minCollateralUsd: bigint
   minPositionSizeUsd: bigint
 }

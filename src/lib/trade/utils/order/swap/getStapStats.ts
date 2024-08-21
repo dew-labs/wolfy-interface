@@ -4,8 +4,8 @@ import getPriceImpactForSwap from '@/lib/trade/utils/fee/getPriceImpactForSwap'
 import getSwapFee from '@/lib/trade/utils/fee/getSwapFee'
 import getAvailableUsdLiquidityForCollateral from '@/lib/trade/utils/market/getAvailableUsdLiquidityForCollateral'
 import {getTokenPoolType} from '@/lib/trade/utils/market/getTokenPoolType'
-import convertPriceToTokenAmount from '@/lib/trade/utils/price/convertPriceToTokenAmount'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 
 import type {SwapStats} from './getSwapPathStats'
 
@@ -31,7 +31,7 @@ export default function getSwapStats(p: {
   const priceIn = tokenIn.price.min
   const priceOut = tokenOut.price.max
 
-  const amountIn = convertPriceToTokenAmount(usdIn, tokenIn.decimals, priceIn)
+  const amountIn = convertUsdToTokenAmount(usdIn, tokenIn.decimals, priceIn)
 
   let priceImpactDeltaUsd: bigint
 
@@ -61,7 +61,7 @@ export default function getSwapStats(p: {
   const usdInAfterFees = usdIn - swapFeeUsd
 
   let usdOut = usdInAfterFees
-  let amountOut = convertPriceToTokenAmount(usdOut, tokenOut.decimals, priceOut)
+  let amountOut = convertUsdToTokenAmount(usdOut, tokenOut.decimals, priceOut)
 
   let cappedImpactDeltaUsd: bigint
 
@@ -71,7 +71,7 @@ export default function getSwapStats(p: {
       tokenOut,
       priceImpactDeltaUsd,
     )
-    cappedImpactDeltaUsd = convertPriceToUsd(
+    cappedImpactDeltaUsd = convertTokenAmountToUsd(
       positiveImpactAmountTokenOut,
       tokenOut.decimals,
       priceOut,
@@ -85,7 +85,7 @@ export default function getSwapStats(p: {
         cappedDiffUsd,
       )
       if (positiveImpactAmountTokenIn > 0) {
-        cappedImpactDeltaUsd += convertPriceToUsd(
+        cappedImpactDeltaUsd += convertTokenAmountToUsd(
           positiveImpactAmountTokenIn,
           tokenIn.decimals,
           priceIn,
@@ -98,7 +98,7 @@ export default function getSwapStats(p: {
       tokenIn,
       priceImpactDeltaUsd,
     )
-    cappedImpactDeltaUsd = convertPriceToUsd(negativeImpactAmount, tokenIn.decimals, priceIn)
+    cappedImpactDeltaUsd = convertTokenAmountToUsd(negativeImpactAmount, tokenIn.decimals, priceIn)
   }
 
   if (shouldApplyPriceImpact) {
@@ -109,7 +109,7 @@ export default function getSwapStats(p: {
     usdOut = 0n
   }
 
-  amountOut = convertPriceToTokenAmount(usdOut, tokenOut.decimals, priceOut)
+  amountOut = convertUsdToTokenAmount(usdOut, tokenOut.decimals, priceOut)
 
   const liquidity = getAvailableUsdLiquidityForCollateral(
     marketInfo,

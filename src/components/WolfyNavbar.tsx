@@ -22,15 +22,15 @@ import BoringAvatar from 'boring-avatars'
 import {memo, useCallback, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 
+import ChainSelect from '@/lib/starknet/components/ChainSelect'
+import ConnectModal from '@/lib/starknet/components/ConnectModal'
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {FaucetRoute, TradeRoute} from '@/routeRegistry'
 import middleEllipsis from '@/utils/middleEllipsis'
 
-import ChainSelect from './ChainSelect'
-import ChainSwitchRequester from './ChainSwitchRequester'
-import ChainSwitchSubscriber from './ChainSwitchSubscriber'
-import ConnectModal from './ConnectModal'
 import ThemeSwitchButton from './ThemeSwitchButton'
 
 const menuItems = [
@@ -56,17 +56,10 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
   const {t} = useTranslation()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isConectModalOpen, setIsConnectModalOpen] = useState(false)
+  const connect = useConnect()
   const isConnected = useIsWalletConnected()
-  const [walletAccount, disconnect] = useWalletAccount()
-
-  const handleCloseConnectModal = useCallback(() => {
-    setIsConnectModalOpen(false)
-  }, [])
-
-  const handleOpenConnectModal = useCallback(() => {
-    setIsConnectModalOpen(true)
-  }, [])
+  const [, disconnect] = useWalletAccount()
+  const accountAddress = useAccountAddress()
 
   const handleDisconnect = useCallback(async () => {
     await disconnect()
@@ -74,9 +67,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
 
   return (
     <>
-      <ChainSwitchRequester />
-      <ChainSwitchSubscriber />
-      <ConnectModal isOpen={isConectModalOpen} onClose={handleCloseConnectModal} />
+      <ConnectModal />
       <Navbar
         {...props}
         classNames={{
@@ -121,7 +112,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             {!isConnected && (
               <>
                 <Button
-                  onPress={handleOpenConnectModal}
+                  onPress={connect}
                   color='primary'
                   endContent={<Icon icon='solar:alt-arrow-right-linear' />}
                   className={'w-full'}
@@ -136,8 +127,8 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   <DropdownTrigger>
                     <button className='mt-1 h-8 w-8 transition-transform'>
                       <Badge color='success' content='' placement='bottom-right' shape='circle'>
-                        {!!walletAccount?.address && (
-                          <BoringAvatar size='32px' variant='beam' name={walletAccount.address} />
+                        {!!accountAddress && (
+                          <BoringAvatar size='32px' variant='beam' name={accountAddress} />
                         )}
                       </Badge>
                     </button>
@@ -145,7 +136,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   <DropdownMenu aria-label='Profile Actions' variant='flat'>
                     <DropdownItem key='profile'>
                       <p className='font-semibold'>
-                        {!!walletAccount?.address && middleEllipsis(walletAccount.address)}
+                        {!!accountAddress && middleEllipsis(accountAddress)}
                       </p>
                     </DropdownItem>
                     <DropdownItem key='settings'>{t('Settings')}</DropdownItem>

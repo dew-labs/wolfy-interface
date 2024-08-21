@@ -3,6 +3,7 @@ import {memo, useEffect} from 'react'
 import {toast} from 'sonner'
 
 import {isChainIdSupported} from '@/constants/chains'
+import {useSetAccountAddress} from '@/lib/starknet/hooks/useAccountAddress'
 import {useSetChainId} from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
@@ -12,6 +13,7 @@ export default memo(function ChainSwitchSubscriber() {
   const [walletAccount] = useWalletAccount()
   const setChainId = useSetChainId()
   const setWalletChainId = useSetWalletChainId()
+  const setAccountAddress = useSetAccountAddress()
 
   useEffect(() => {
     if (!walletAccount) return
@@ -31,7 +33,10 @@ export default memo(function ChainSwitchSubscriber() {
     walletAccount.walletProvider.on('networkChanged', networkChangedHandler)
 
     const accountChangedHandler: AccountChangeEventHandler = accounts => {
-      console.log(`Accounts changed: ${accounts}`)
+      console.log(`Accounts changed:`, accounts)
+      if (accounts?.[0]) {
+        setAccountAddress(accounts[0])
+      }
     }
 
     walletAccount.walletProvider.on('accountsChanged', accountChangedHandler)
@@ -40,7 +45,7 @@ export default memo(function ChainSwitchSubscriber() {
       walletAccount.walletProvider.off('networkChanged', networkChangedHandler)
       walletAccount.walletProvider.off('accountsChanged', accountChangedHandler)
     }
-  }, [walletAccount, setChainId, setWalletChainId])
+  }, [walletAccount, setChainId, setWalletChainId, setAccountAddress])
 
   return null
 })

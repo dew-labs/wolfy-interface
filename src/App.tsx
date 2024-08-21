@@ -18,6 +18,8 @@ import {lazy, type PropsWithChildren, Suspense, useEffect, useState} from 'react
 import {ErrorBoundary} from 'react-error-boundary'
 import {Toaster} from 'sonner'
 
+import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
+import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'
 import {logError} from '@/utils/logger'
 import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
@@ -79,6 +81,8 @@ function App() {
             <Toaster richColors />
             <ThemeUpdater />
             <ThemeSubscriber />
+            <ChainSwitchRequester />
+            <ChainSwitchSubscriber />
             <GoogleOneTapLogin router={router} />
             <AuthUpdater router={router} />
             <RouterProvider router={router} />

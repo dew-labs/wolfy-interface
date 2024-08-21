@@ -21,7 +21,7 @@ export default function getLiquidationPrice(p: {
   minCollateralUsd: bigint
   isLong: boolean
   useMaxPriceImpact?: boolean
-  referralInfo: ReferralInfo | undefined
+  referralInfo: ReferralInfo | undefined | null
 }) {
   const {
     sizeInUsd,

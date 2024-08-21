@@ -14,44 +14,20 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
-import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
-import {useCallback, useMemo, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
-import type {StarknetChainId} from 'satoru-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import {type Market} from '@/lib/trade/services/fetchMarkets'
-import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
-import {type TokensData} from '@/lib/trade/services/fetchTokensData'
-import useToken from '@/lib/trade/states/useToken'
+import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import max from '@/utils/numbers/bigint/max'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
-import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
-
-function createGetMarketsDataQueryOptions(
-  chainId: StarknetChainId,
-  markets: Market[] | undefined,
-  tokensData: TokensData | undefined,
-  accountAddress: string | undefined,
-) {
-  return queryOptions({
-    queryKey: ['marketsData', chainId, markets, tokensData, accountAddress] as const,
-    queryFn:
-      markets && tokensData
-        ? async () => {
-            return await fetchMarketsData(chainId, markets, tokensData, accountAddress)
-          }
-        : skipToken,
-    ...NO_REFETCH_OPTIONS,
-  })
-}
 
 interface TokenOption {
   longLiquidity: bigint
@@ -60,34 +36,21 @@ interface TokenOption {
   indexTokenAddress: string
 }
 
-export default function MarketInformation() {
+export default memo(function MarketInformation() {
   const [chainId] = useChainId()
-  const [walletAccount] = useWalletAccount()
-  const [selectedToken, setSelectedToken] = useToken()
-  const accountAddress = walletAccount?.address
+  const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
-
-  const {data: markets} = useQuery({
-    queryKey: ['markets', chainId],
-    enabled: false,
-  })
-
-  const {data: tokensData} = useQuery({
-    queryKey: ['tokens', chainId, accountAddress],
-    enabled: false,
-  })
-
-  const {data: marketsData} = useQuery(
-    // TODO: type later
-    // @ts-expect-error type later
-    createGetMarketsDataQueryOptions(chainId, markets, tokensData, accountAddress),
-  )
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
 
-  let availableTokens: AvailableTokens | undefined = undefined
-  if (marketsData) {
-    availableTokens = getAvailableTokens(marketsData)
-  }
+  const marketsData = useMarketsData()
+
+  const dataIsLoaded = !!marketsData
+
+  const availableTokens: AvailableTokens | undefined = useMemo(() => {
+    if (marketsData) {
+      return getAvailableTokens(marketsData)
+    }
+  }, [marketsData])
 
   const marketsWithLiquidityGrouppedByIndexToken = useMemo(() => {
     const allMarkets = availableTokens?.allMarkets ? Array.from(availableTokens.allMarkets) : []
@@ -134,8 +97,13 @@ export default function MarketInformation() {
     return indexes
   }, [marketsWithLiquidityGrouppedByIndexToken])
 
+  const indexTokensWithLiquidityInformationList = useMemo(
+    () => Array.from(indexTokensWithLiquidityInformation.values()),
+    [indexTokensWithLiquidityInformation],
+  )
+
   const sortedAndFilteredIndexTokens = useMemo(() => {
-    const sortedAndFilteredIndexTokens = Array.from(indexTokensWithLiquidityInformation.values())
+    const sortedAndFilteredIndexTokens = indexTokensWithLiquidityInformationList
       .map(index => {
         const indexTokenAddress = index.markets[0]?.indexTokenAddress
         if (!indexTokenAddress) return false
@@ -177,13 +145,21 @@ export default function MarketInformation() {
     })
 
     return sortedAndFilteredIndexTokens
-  }, [indexTokensWithLiquidityInformation, marketSortDescriptor, tokensMetadata])
+  }, [indexTokensWithLiquidityInformationList, marketSortDescriptor, tokensMetadata])
 
-  if (!selectedToken && sortedAndFilteredIndexTokens[0]?.address) {
-    setSelectedToken(sortedAndFilteredIndexTokens[0].address)
+  const indexTokenAddressList = useMemo(
+    () => indexTokensWithLiquidityInformationList.map(i => i.markets[0]?.indexTokenAddress),
+    [indexTokensWithLiquidityInformationList],
+  )
+
+  if (
+    (!tokenAddress || (dataIsLoaded && !indexTokenAddressList.includes(tokenAddress))) &&
+    indexTokenAddressList[0]
+  ) {
+    setTokenAddress(indexTokenAddressList[0])
   }
 
-  const tokenMetadata = selectedToken ? tokensMetadata.get(selectedToken) : undefined
+  const tokenMetadata = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
 
   const [marketSelectorIsOpen, setMarketSelectorIsOpen] = useState(false)
 
@@ -198,11 +174,10 @@ export default function MarketInformation() {
       if (selected.length === 0) return
       const selectedKey = selected[0]
       if (typeof selectedKey !== 'string') return
-      console.log('selectedKey', selectedKey)
-      setSelectedToken(selectedKey)
+      setTokenAddress(selectedKey)
       setMarketSelectorIsOpen(false)
     },
-    [setSelectedToken],
+    [setTokenAddress],
   )
 
   return (
@@ -239,7 +214,7 @@ export default function MarketInformation() {
               className='my-2'
               removeWrapper
               selectionMode='single'
-              selectedKeys={selectedToken ? [selectedToken] : []}
+              selectedKeys={tokenAddress ? [tokenAddress] : []}
               onSelectionChange={handleSelectMarket}
               sortDescriptor={marketSortDescriptor}
               onSortChange={handleSortChange}
@@ -284,4 +259,4 @@ export default function MarketInformation() {
       </CardBody>
     </Card>
   )
-}
+})

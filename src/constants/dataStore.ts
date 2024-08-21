@@ -146,10 +146,12 @@ export const MIN_COLLATERAL_FACTOR_FOR_OPEN_INTEREST_MULTIPLIER_KEY = getKey(
 export const MIN_POSITION_SIZE_USD_KEY = getKey('MIN_POSITION_SIZE_USD')
 export const DEPOSIT_GAS_LIMIT_KEY = getKey('DEPOSIT_GAS_LIMIT')
 export const WITHDRAWAL_GAS_LIMIT_KEY = getKey('WITHDRAW_GAS_LIMIT')
+export const SINGLE_SWAP_GAS_LIMIT_KEY = getKey('SINGLE_SWAP_GAS_LIMIT')
+export const ESTIMATED_GAS_FEE_BASE_AMOUNT_KEY = getKey('EST_GAS_FEE_BASE_AMT')
+export const ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR_KEY = getKey('EST_GAS_FEE_MULT_FACT')
 export const INCREASE_ORDER_GAS_LIMIT_KEY = getKey('INCR_ORD_GAS_LIMIT')
 export const DECREASE_ORDER_GAS_LIMIT_KEY = getKey('DECR_ORD_GAS_LIMIT')
 export const SWAP_ORDER_GAS_LIMIT_KEY = getKey('SWAP_ORD_GAS_LIMIT')
-export const SINGLE_SWAP_GAS_LIMIT_KEY = getKey('SINGLE_SWAP_GAS_LIMIT')
 export const TOKEN_TRANSFER_GAS_LIMIT_KEY = getKey('TOKEN_TRANS_GAS_LIMIT')
 export const NATIVE_TOKEN_TRANSFER_GAS_LIMIT_KEY = getKey('NATIVE_TKN_TRANS_GL')
 export const MARKET_LIST_KEY = getKey('MARKET_LIST')
@@ -279,10 +281,6 @@ export function orderKey(dataStoreAddress: Hashable, nonce: bigint) {
 
 export function depositGasLimitKey(singleToken: boolean) {
   return getKey([DEPOSIT_GAS_LIMIT_KEY, singleToken])
-}
-
-export function withdrawalGasLimitKey() {
-  return getKey([WITHDRAWAL_GAS_LIMIT_KEY])
 }
 
 export function accountOrderListKey(account: Hashable) {

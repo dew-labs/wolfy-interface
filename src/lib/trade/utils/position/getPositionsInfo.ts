@@ -2,15 +2,15 @@ import type {Token} from '@/constants/tokens'
 import {getBasisPoints} from '@/lib/trade/numbers/getBasisPoints'
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Position, PositionsData} from '@/lib/trade/services/fetchPositions'
-import type {PositionsConstants} from '@/lib/trade/services/fetchPositionsConstants'
+import type {PositionConstants} from '@/lib/trade/services/fetchPositionsConstants'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import type {TokenData, TokensData} from '@/lib/trade/services/fetchTokensData'
 import type {ReferralInfo} from '@/lib/trade/services/referral/fetchReferralInfo'
 import {getPositionFee} from '@/lib/trade/utils/fee/getPositionFee'
 import getPriceImpactForPosition from '@/lib/trade/utils/fee/getPriceImpactForPosition'
 import {getMaxAllowedLeverageByMinCollateralFactor} from '@/lib/trade/utils/market/getMaxAllowedLeverageByMinCollateralFactor'
-import convertPriceToTokenAmount from '@/lib/trade/utils/price/convertPriceToTokenAmount'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import getLeverage from './getLeverage'
@@ -72,12 +72,12 @@ export default function getPositionsInfo(
   marketsData: MarketsData,
   tokensData: TokensData,
   positionsData: PositionsData,
-  positionsConstants: PositionsConstants,
+  positionConstants: PositionConstants,
   uiFeeFactor: bigint,
   showPnlInLeverage: boolean,
-  referralInfo?: ReferralInfo,
+  referralInfo?: ReferralInfo | undefined | null,
 ): PositionsInfoData {
-  const {minCollateralUsd} = positionsConstants
+  const {minCollateralUsd} = positionConstants
 
   const positionsInfo = new Map<string, PositionInfo>()
 
@@ -101,18 +101,18 @@ export default function getPositionsInfo(
       indexToken,
     })
 
-    const pendingFundingFeesUsd = convertPriceToUsd(
+    const pendingFundingFeesUsd = convertTokenAmountToUsd(
       position.fundingFeeAmount,
       collateralToken.decimals,
       collateralToken.price.min,
     )
 
-    const pendingClaimableFundingFeesLongUsd = convertPriceToUsd(
+    const pendingClaimableFundingFeesLongUsd = convertTokenAmountToUsd(
       position.claimableLongTokenAmount,
       marketData.longToken.decimals,
       marketData.longToken.price.min,
     )
-    const pendingClaimableFundingFeesShortUsd = convertPriceToUsd(
+    const pendingClaimableFundingFeesShortUsd = convertTokenAmountToUsd(
       position.claimableShortTokenAmount,
       marketData.shortToken.decimals,
       marketData.shortToken.price.min,
@@ -144,7 +144,7 @@ export default function getPositionsInfo(
     const closingFeeUsd = positionFeeInfo.positionFeeUsd
     const uiFeeUsd = positionFeeInfo.uiFeeUsd ?? 0n
 
-    const collateralUsd = convertPriceToUsd(
+    const collateralUsd = convertTokenAmountToUsd(
       position.collateralAmount,
       collateralToken.decimals,
       collateralMinPrice,
@@ -152,7 +152,7 @@ export default function getPositionsInfo(
 
     const remainingCollateralUsd = collateralUsd - totalPendingFeesUsd
 
-    const remainingCollateralAmount = convertPriceToTokenAmount(
+    const remainingCollateralAmount = convertUsdToTokenAmount(
       remainingCollateralUsd,
       collateralToken.decimals,
       collateralMinPrice,

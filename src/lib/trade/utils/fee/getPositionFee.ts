@@ -5,7 +5,7 @@ export function getPositionFee(
   marketInfo: MarketData,
   sizeDeltaUsd: bigint,
   forPositiveImpact: boolean,
-  referralInfo: {totalRebateFactor: bigint; discountFactor: bigint} | undefined,
+  referralInfo: {totalRebateFactor: bigint; discountFactor: bigint} | undefined | null,
   uiFeeFactor?: bigint,
 ) {
   const factor = forPositiveImpact

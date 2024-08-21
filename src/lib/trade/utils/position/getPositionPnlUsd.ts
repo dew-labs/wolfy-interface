@@ -2,7 +2,7 @@ import type {Token} from '@/constants/tokens'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import {getCappedPoolPnl} from '@/lib/trade/utils/market/getCappedPoolPnl'
 import {getPoolUsdWithoutPnl} from '@/lib/trade/utils/market/getPoolUsdWithoutPnl'
-import convertPriceToUsd from '@/lib/trade/utils/price/convertPriceToUsd'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 export function getPositionValueUsd(p: {
@@ -12,7 +12,7 @@ export function getPositionValueUsd(p: {
 }) {
   const {indexToken, sizeInTokens, markPrice} = p
 
-  return convertPriceToUsd(sizeInTokens, indexToken.decimals, markPrice)
+  return convertTokenAmountToUsd(sizeInTokens, indexToken.decimals, markPrice)
 }
 
 export default function getPositionPnlUsd(p: {

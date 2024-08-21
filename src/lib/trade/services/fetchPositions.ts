@@ -130,6 +130,7 @@ export default async function fetchPositions(
 
   Array.from(marketsData.values()).forEach(market => {
     const marketPrice = getMarketPrice(tokensData, market)
+
     if (!marketPrice) return
 
     const collaterals = market.isSameCollaterals

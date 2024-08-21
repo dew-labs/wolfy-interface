@@ -7,193 +7,457 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Input,
-  Select,
-  SelectItem,
   Slider,
   Tab,
   Tabs,
   Tooltip,
 } from '@nextui-org/react'
-import {useCallback, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
+import clsx from 'clsx'
+import {useCallback, useRef, useState} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
+import {OrderType} from 'satoru-sdk'
+import {toast} from 'sonner'
 
-import useExecutionType, {ExecutionType} from '@/lib/trade/states/useExecutionType'
-import useOrderType, {OrderType} from '@/lib/trade/states/useOrderType'
+import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import useConnect from '@/lib/starknet/hooks/useConnect'
+import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
+import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import useGasPrice from '@/lib/trade/hooks/useGasPrice'
+import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
+import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
+import useTokensData from '@/lib/trade/hooks/useTokensData'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import sendOrder from '@/lib/trade/services/sendOrder'
+import useTradeMode, {TradeMode} from '@/lib/trade/states/useTradeMode'
+import useTradeType, {TradeType} from '@/lib/trade/states/useTradeType'
+import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
+import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
+import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
+import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import createResetableComponent from '@/utils/reset-component/createResettableComponent'
 
-const ORDER_TYPE_LABEL: Record<OrderType, string> = {
-  [OrderType.Long]: 'Long',
-  [OrderType.Short]: 'Short',
-  [OrderType.Swap]: 'Swap',
+import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
+import useCollateralToken from './hooks/useCollateralToken'
+import useMarket from './hooks/useMarket'
+import usePayToken from './hooks/usePayToken'
+import useToken from './hooks/useToken'
+import TokenInputs from './TokenInputs'
+
+const TRADE_TYPE_LABEL: Record<TradeType, string> = {
+  [TradeType.Long]: 'Long',
+  [TradeType.Short]: 'Short',
+  [TradeType.Swap]: 'Swap',
 }
 
-const INPUT_2_LABEL: Record<OrderType, string> = {
-  [OrderType.Long]: 'To long',
-  [OrderType.Short]: 'To short',
-  [OrderType.Swap]: 'To receive',
+const AVAILABLE_TRADE_MODES: Record<TradeType, TradeMode[]> = {
+  [TradeType.Long]: [
+    TradeMode.Market,
+    TradeMode.Limit,
+    // TradeMode.Trigger
+  ],
+  [TradeType.Short]: [
+    TradeMode.Market,
+    TradeMode.Limit,
+    // TradeMode.Trigger
+  ],
+  [TradeType.Swap]: [TradeMode.Market, TradeMode.Limit],
 }
 
-const AVAILABLE_EXECUTION_TYPES: Record<OrderType, ExecutionType[]> = {
-  [OrderType.Long]: [ExecutionType.Market, ExecutionType.Limit, ExecutionType.TPSL],
-  [OrderType.Short]: [ExecutionType.Market, ExecutionType.Limit, ExecutionType.TPSL],
-  [OrderType.Swap]: [ExecutionType.Market, ExecutionType.Limit],
+const TRADE_MODE_LABEL: Record<TradeMode, string> = {
+  [TradeMode.Market]: 'Market',
+  [TradeMode.Limit]: 'Limit',
+  [TradeMode.Trigger]: 'TP/SL',
 }
 
-const EXECUTION_TYPE_LABEL: Record<ExecutionType, string> = {
-  [ExecutionType.Market]: 'Market',
-  [ExecutionType.Limit]: 'Limit',
-  [ExecutionType.TPSL]: 'TP/SL',
-}
-
-const SUPPORTED_ORDER_TYPES: OrderType[] = [OrderType.Long, OrderType.Short, OrderType.Swap]
-
-const SUPPORTED_ASSETS_TO_PAY = ['BTC', 'ETH', 'SOL', 'USDT'] as const
-
-type Pool = [string, string]
-
-const POOLS: Pool[] = [
-  ['ETH', 'USDT'],
-  ['ETH', 'USDC'],
-  ['wstETH', 'USDT'],
+const SUPPORTED_TRADE_TYPES: TradeType[] = [
+  TradeType.Long,
+  TradeType.Short,
+  // TradeType.Swap,
 ]
 
-export default function Controller() {
-  const [orderType, setOrderType] = useOrderType()
-  const [executionType, setExecutionType] = useExecutionType()
-  const [assetToPay, setAssetToPay] = useState<string>(SUPPORTED_ASSETS_TO_PAY[0])
-  const [leverage, setLeverage] = useState(1)
-  const [leverageInput, setLeverageInput] = useState('1')
-  const [maxLeverage, _setMaxLeverage] = useState(100)
-  const [pool, setPool] = useState<Pool>(['ETH', 'USDT'])
-  const latestPool = useLatest(pool)
-  const [collateral, setCollateral] = useState('ETH')
-  const latestCollateral = useLatest(collateral)
+const Controller = createResetableComponent(function ({reset}) {
+  const latestReset = useLatest(reset)
+  const queryClient = useQueryClient()
+  const [wallet] = useWalletAccount()
+  const latestWallet = useLatest(wallet)
+  const accountAddress = useAccountAddress()
+  const latestAccountAddress = useLatest(accountAddress)
+  const tokensData = useTokensData()
+  const _gasPrice = useGasPrice()
+  const [chainId] = useChainId()
+  const latestChainId = useRef(chainId)
 
-  const setCurrentOrderType = useCallback(
-    (value: Key) => {
-      setOrderType(value as OrderType)
-    },
-    [setOrderType],
-  )
+  const [tradeType, setTradeType] = useTradeType()
+  const latestTradeType = useLatest(tradeType)
+  const [tradeMode, setTradeMode] = useTradeMode()
+  const latestTradeMode = useLatest(tradeMode)
 
-  const setCurrentExecutionType = useCallback(
-    (value: Key) => {
-      setExecutionType(value as ExecutionType)
-    },
-    [setExecutionType],
-  )
+  const {
+    tokenAddress,
+    tokenAmount,
+    setTokenAmount,
+    tokenAmountUsd,
+    latestTokenAmountUsd,
+    setTokenAmountUsd,
+    tokenPrice,
+    latestDerivedTokenPrice,
+    setTokenPrice,
+    tokenData,
+    latestTokenDecimals,
+  } = useToken(tradeMode)
 
-  const handleLeverageChange = useCallback(
-    (value: unknown) => {
-      const numValue = Number(value)
-      if (!Number.isFinite(numValue) || numValue <= 0) return
+  const availableMarkets = useAvailableMarketsForIndexToken(tokenAddress)
 
-      if (numValue > maxLeverage) return
+  const {
+    marketAddress,
+    latestMarketAddress,
+    setMarketAddress,
+    availableCollateralTokenAddresses,
+    latestAvailableCollateralTokenAddresses,
+    poolName,
+    marketData,
+  } = useMarket()
 
-      setLeverage(numValue)
-      setLeverageInput(numValue.toString())
-    },
-    [maxLeverage],
-  )
+  ;(function setDefaultMarketAddress() {
+    if (!tokenAddress || !availableMarkets.length) return
 
-  const handlePoolChange = useCallback((value: unknown) => {
-    if (typeof value !== 'string') return
-    const valueArray = value.split('/')
-    if (valueArray.length !== 2) return
-    setPool(valueArray as Pool)
-    if (!valueArray.includes(latestCollateral.current)) {
-      setCollateral(String(valueArray[0]))
+    const currentMarketAddressIsAvailable =
+      !!marketAddress &&
+      availableMarkets.map(market => market.marketTokenAddress).includes(marketAddress)
+
+    if (!currentMarketAddressIsAvailable) {
+      setMarketAddress(availableMarkets[0]?.marketTokenAddress)
     }
-  }, [])
+  })()
 
-  const handleCollateralChange = useCallback((value: unknown) => {
-    if (typeof value !== 'string') return
-    if (!latestPool.current.includes(value)) return
-    setCollateral(value)
-  }, [])
+  const {
+    collateralTokenAddress,
+    latestCollateralTokenAddress,
+    setCollateralAddress,
+    collateralTokenData,
+    collateralTokenAmount,
+    latestCollateralTokenAmount,
+    setCollateralTokenAmount,
+  } = useCollateralToken()
+
+  ;(function setDefaultCollateralTokenAddress() {
+    if (!availableCollateralTokenAddresses.length) return
+    if (
+      (!collateralTokenAddress ||
+        !availableCollateralTokenAddresses.includes(collateralTokenAddress)) &&
+      availableCollateralTokenAddresses[0]
+    ) {
+      setCollateralAddress(availableCollateralTokenAddresses[0])
+    }
+  })()
+
+  const {
+    payTokenAddress,
+    setPayTokenAddress,
+    payTokenAmount,
+    setPayTokenAmount,
+    payTokenAmountUsd,
+    maxLeverageNumber,
+    leverageInput,
+    setLeverageInput,
+    handleLeverageChange,
+    leverage,
+    leverageNumber,
+    maxLeverage,
+    payTokenData,
+    setLeverageInputFocused,
+  } = usePayToken(tradeMode, tokenAddress, tokenPrice, tokenAmountUsd, setTokenAmountUsd)
+
+  ;(function syncPayTokenAddressWithCollateralTokenAddress() {
+    if (collateralTokenAddress !== payTokenAddress) {
+      setPayTokenAddress(collateralTokenAddress)
+    }
+    if (collateralTokenAmount !== payTokenAmount) {
+      setCollateralTokenAmount(payTokenAmount)
+    }
+  })()
+
+  const handleChangeTradeType = useCallback(
+    (value: Key) => {
+      setTradeType(value as TradeType)
+    },
+    [setTradeType],
+  )
+
+  const handleChangeTradeMode = useCallback(
+    (value: Key) => {
+      const tradeMode = value as TradeMode
+      setTradeMode(tradeMode)
+    },
+    [setTradeMode],
+  )
+
+  const handlePoolChange = useCallback(
+    (value: unknown) => {
+      if (typeof value !== 'string') return
+      setMarketAddress(value)
+    },
+    [setMarketAddress],
+  )
+
+  const handleCollateralChange = useCallback(
+    (value: unknown) => {
+      if (typeof value !== 'string') return
+      if (!latestAvailableCollateralTokenAddresses.current.length) return
+      if (!latestAvailableCollateralTokenAddresses.current.includes(value)) return
+      setCollateralAddress(value)
+    },
+    [setCollateralAddress, latestAvailableCollateralTokenAddresses],
+  )
+
+  const referralInfo = useReferralInfo()
+
+  const positionConstants = usePositionsConstants()
+
+  const priceDecimals =
+    tokenAddress && tokensData ? calculatePriceDecimals(tokenAddress, tokensData) : undefined
+
+  const liquidationPrice =
+    payTokenData &&
+    marketData &&
+    getLiquidationPrice({
+      sizeInUsd: tokenAmountUsd,
+      sizeInTokens: tokenAmount,
+      collateralAmount: payTokenAmount,
+      collateralUsd: payTokenAmountUsd,
+      collateralToken: payTokenData,
+      marketInfo: marketData,
+      pendingFundingFeesUsd: 0n,
+      pendingBorrowingFeesUsd: 0n,
+      minCollateralUsd: positionConstants?.minCollateralUsd ?? 0n,
+      isLong: tradeType === TradeType.Long,
+      useMaxPriceImpact: false, // NOTE: Should be true when the configuration is right
+      referralInfo: referralInfo,
+    })
+
+  const liquidationPriceText = liquidationPrice
+    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, priceDecimals, true)
+    : '-'
+
+  const executionPrice =
+    tokenData &&
+    getEntryPrice({
+      sizeInUsd: tokenAmountUsd,
+      sizeInTokens: tokenAmount,
+      indexToken: tokenData,
+    })
+
+  const executionPriceText = executionPrice
+    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, priceDecimals, true)
+    : '-'
+
+  const isConnected = useIsWalletConnected()
+  const latestIsConnected = useLatest(isConnected)
+  const connect = useConnect()
+
+  const availableLiquidity = (() => {
+    if (tradeType === TradeType.Long) return marketData?.longPoolAmount ?? 0n
+    return marketData?.shortPoolAmount ?? 0n
+  })()
+
+  const availableLiquidityUsd = (() => {
+    const longTokenAddress = marketData?.longTokenAddress
+    const shortTokenAddress = marketData?.shortTokenAddress
+
+    const longTokenDecimals = marketData?.longToken.decimals ?? 0
+    const shortTokenDecimals = marketData?.shortToken.decimals ?? 0
+
+    let longTokenPrice = marketData?.longToken.price.min ?? 0n
+    let shortTokenPrice = marketData?.shortToken.price.min ?? 0n
+
+    if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
+      if (tokenAddress === longTokenAddress) longTokenPrice = tokenPrice ?? 0n
+      if (tokenAddress === shortTokenAddress) shortTokenPrice = tokenPrice ?? 0n
+    }
+
+    return convertTokenAmountToUsd(
+      availableLiquidity,
+      tradeType === TradeType.Long ? longTokenDecimals : shortTokenDecimals,
+      tradeType === TradeType.Long ? longTokenPrice : shortTokenPrice,
+    )
+  })()
+
+  const availableLiquidityUsdText = (() => {
+    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 0, true, true)
+  })()
+
+  const isValidSize = tokenAmount > 0n && tokenAmount <= availableLiquidity
+  const isValidPayTokenAmount =
+    !!tokensData &&
+    !!payTokenAddress &&
+    payTokenAmount <= (tokensData.get(payTokenAddress)?.balance ?? 0n)
+  const isValidTokenAmount = tokenAmount > 0n
+  const isValidLeverage = leverage > 0n && leverage <= maxLeverage
+  const isValidOrder = isValidLeverage && isValidTokenAmount && isValidPayTokenAmount && isValidSize
+
+  const [isPlacing, setIsPlacing] = useState(false)
+
+  const handleSubmitBtnPress = useCallback(() => {
+    if (!latestIsConnected.current || !latestWallet.current) {
+      connect()
+      return
+    }
+
+    const isLong = latestTradeType.current === TradeType.Long
+    const receiver = latestAccountAddress.current
+    const market = latestMarketAddress.current
+    const initialCollateralToken = latestCollateralTokenAddress.current
+    const sizeDeltaUsd = latestTokenAmountUsd.current
+    const initialCollateralDeltaAmount = latestCollateralTokenAmount.current
+
+    if (!market) return
+    if (!receiver) return
+    if (!initialCollateralToken) return
+
+    const tradeMode = latestTradeMode.current
+
+    const triggerPrice =
+      latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
+    const acceptablePrice = triggerPrice // TODO: apply price impact
+
+    const orderType = (() => {
+      // Swap not supported yet
+      switch (tradeMode) {
+        case TradeMode.Limit:
+          return OrderType.LimitIncrease
+        case TradeMode.Market:
+          return OrderType.MarketIncrease
+        default:
+          throw new Error('Unsupported trade mode')
+      }
+    })()
+
+    setIsPlacing(true)
+    toast.promise(
+      sendOrder(latestWallet.current, {
+        receiver,
+        market,
+        initialCollateralToken,
+        sizeDeltaUsd,
+        initialCollateralDeltaAmount,
+        orderType,
+        isLong,
+        triggerPrice,
+        acceptablePrice,
+        referralCode: 0,
+      }),
+      {
+        loading: 'Placing your order...',
+        description: 'Waiting for transaction confirmation',
+        success: data => {
+          void queryClient.invalidateQueries({
+            queryKey: ['orders', latestChainId.current, latestAccountAddress.current],
+          })
+          latestReset.current()
+          return (
+            <>
+              Order placed.
+              <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+                View tx
+              </a>
+            </>
+          )
+        },
+        finally: () => {
+          setIsPlacing(false)
+        },
+        error: error => {
+          return (
+            <>
+              <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
+            </>
+          )
+        },
+      },
+    )
+  }, [
+    connect,
+    latestCollateralTokenAddress,
+    latestCollateralTokenAmount,
+    latestMarketAddress,
+    latestTokenAmountUsd,
+    latestDerivedTokenPrice,
+    latestTradeMode,
+    latestTradeType,
+    latestWallet,
+    queryClient,
+    latestTokenDecimals,
+  ])
 
   return (
-    <div className='flex w-full max-w-xs flex-col'>
+    <div className='flex w-full min-w-80 max-w-sm flex-col'>
       <Card>
         <CardBody>
           <Tabs
             size='lg'
-            selectedKey={orderType}
-            onSelectionChange={setCurrentOrderType}
+            selectedKey={tradeType}
+            onSelectionChange={handleChangeTradeType}
             aria-label='Order type'
             classNames={{
               tabList: 'gap-2 w-full relative',
             }}
           >
-            {SUPPORTED_ORDER_TYPES.map(type => (
-              <Tab key={type} title={ORDER_TYPE_LABEL[type]} />
+            {SUPPORTED_TRADE_TYPES.map(type => (
+              <Tab key={type} title={TRADE_TYPE_LABEL[type]} />
             ))}
           </Tabs>
           <Tabs
             size='sm'
             variant='underlined'
-            selectedKey={executionType}
-            onSelectionChange={setCurrentExecutionType}
+            selectedKey={tradeMode}
+            onSelectionChange={handleChangeTradeMode}
             aria-label='Execution type'
           >
-            {AVAILABLE_EXECUTION_TYPES[orderType].map(type => (
-              <Tab key={type} title={EXECUTION_TYPE_LABEL[type]} />
+            {AVAILABLE_TRADE_MODES[tradeType].map(type => (
+              <Tab key={type} title={TRADE_MODE_LABEL[type]} />
             ))}
           </Tabs>
-          <Input
-            className='mt-4'
-            size='lg'
-            type='text'
-            label={`Pay: $604.37`}
-            placeholder='0.0'
-            // startContent={
-            //   <div className='pointer-events-none flex items-center'>
-            //     <span className='text-small text-default-400'>$</span>
-            //   </div>
-            // }
-            endContent={
-              <Select
-                aria-label='Select pay asset'
-                className='max-w-xs'
-                variant='bordered'
-                selectedKeys={[assetToPay]}
-                onSelectionChange={selection => {
-                  if (!selection.currentKey) return
-                  setAssetToPay(selection.currentKey)
-                }}
-                selectorIcon={<></>}
-                classNames={{
-                  base: 'w-min',
-                  label: 'visually-hidden',
-                  innerWrapper: 'group-data-[has-label=true]:pt-0 w-full',
-                  trigger: 'h-10 min-h-10 min-w-24 w-24 max-w-24',
-                  value: 'text-center',
-                }}
-              >
-                {SUPPORTED_ASSETS_TO_PAY.map(asset => (
-                  <SelectItem key={asset}>{asset}</SelectItem>
-                ))}
-              </Select>
-            }
-          />
-          <Input
-            className='mt-4'
-            size='lg'
-            type='text'
-            label={`${INPUT_2_LABEL[orderType]}: $8235.17`}
-            placeholder='0.0'
-            // startContent={
-            //   <div className='pointer-events-none flex items-center'>
-            //     <span className='text-small text-default-400'>$</span>
-            //   </div>
-            // }
-            endContent={
-              <div className='pointer-events-none flex h-full items-center justify-center'>
-                <span className='text-lg text-default-400'>ETH</span>
-              </div>
-            }
-          />
+          <div className='mt-2 flex w-full justify-between'>
+            <div className='flex items-center'>Pool</div>
+            <Dropdown backdrop='opaque'>
+              <DropdownTrigger>
+                <Button variant='flat'>{poolName}</Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label='Change pool' onAction={handlePoolChange}>
+                {availableMarkets.map(market => {
+                  return (
+                    <DropdownItem key={market.marketTokenAddress}>
+                      {getMarketPoolName(market)}
+                    </DropdownItem>
+                  )
+                })}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+          {tradeMode !== TradeMode.Trigger && (
+            <TokenInputs
+              tokenAddress={tokenAddress}
+              tradeType={tradeType}
+              tradeMode={tradeMode}
+              availablePayTokenAddresses={availableCollateralTokenAddresses}
+              payTokenAmount={payTokenAmount}
+              setPayTokenAmount={setPayTokenAmount}
+              payTokenAmountUsd={payTokenAmountUsd}
+              payTokenAddress={collateralTokenAddress}
+              setPayTokenAddress={setCollateralAddress}
+              tokenAmount={tokenAmount}
+              setTokenAmount={setTokenAmount}
+              tokenAmountUsd={tokenAmountUsd}
+              tokenPrice={tokenPrice}
+              setTokenPrice={setTokenPrice}
+            />
+          )}
           <Slider
             size='md'
             step={1}
@@ -212,7 +476,10 @@ export default function Controller() {
                   placement='left'
                 >
                   <input
-                    className='w-10 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary'
+                    className={clsx(
+                      'w-14 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+                      leverage > 0n && !isValidLeverage && 'border-danger-500',
+                    )}
                     type='text'
                     aria-label='Leverage value'
                     value={leverageInput}
@@ -220,18 +487,25 @@ export default function Controller() {
                       const v = e.target.value
                       setLeverageInput(v)
                     }}
-                    max={maxLeverage}
+                    max={maxLeverageNumber}
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         handleLeverageChange(leverageInput)
                       }
                     }}
+                    onFocus={() => {
+                      setLeverageInputFocused(true)
+                    }}
+                    onBlur={() => {
+                      setLeverageInputFocused(false)
+                    }}
                   />
                 </Tooltip>
               </output>
             )}
-            value={leverage}
+            value={leverageNumber}
             onChange={handleLeverageChange}
+            // TODO: generate marks based on maximum leverage
             marks={[
               {
                 value: 1,
@@ -260,27 +534,16 @@ export default function Controller() {
             ]}
           />
           <div className='mt-2 flex w-full justify-between'>
-            <div className='flex items-center'>Pool</div>
-            <Dropdown backdrop='blur'>
-              <DropdownTrigger>
-                <Button variant='flat'>{pool.join('/')}</Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label='Action event example' onAction={handlePoolChange}>
-                {POOLS.map(pool => (
-                  <DropdownItem key={pool.join('/')}>{pool.join('/')}</DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-          <div className='mt-2 flex w-full justify-between'>
             <div className='flex items-center'>Collateral in</div>
             <Dropdown backdrop='blur'>
               <DropdownTrigger>
-                <Button variant='flat'>{collateral}</Button>
+                <Button variant='flat'>{collateralTokenData?.symbol}</Button>
               </DropdownTrigger>
-              <DropdownMenu aria-label='Action event example' onAction={handleCollateralChange}>
-                {pool.map(token => (
-                  <DropdownItem key={token}>{token}</DropdownItem>
+              <DropdownMenu aria-label='Change collateral' onAction={handleCollateralChange}>
+                {availableCollateralTokenAddresses.map(tokenAddress => (
+                  <DropdownItem key={tokenAddress}>
+                    {tokensData ? tokensData.get(tokenAddress)?.symbol : ''}
+                  </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
@@ -289,34 +552,52 @@ export default function Controller() {
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Execution Price</div>
-              <div className='flex items-center'>$3,182.83</div>
+              <div className='flex items-center'>{executionPriceText}</div>
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Liquidation Price</div>
-              <div className='flex items-center'>$2,908.83</div>
+              <div className='flex items-center'>{liquidationPriceText}</div>
+            </div>
+            <div className='mt-2 flex w-full justify-between'>
+              <div className='flex items-center'>Available Liquidity</div>
+              <div
+                className={clsx(
+                  'flex items-center',
+                  tokenAmount > 0 && !isValidSize && 'text-danger-500',
+                )}
+              >
+                {availableLiquidityUsdText}
+              </div>
             </div>
           </div>
           <Divider className='mt-3 opacity-50' />
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Fee</div>
-              <div className='flex items-center'>-$0.04</div>
+              <div className='flex items-center'>$0</div>
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Network Fee</div>
-              <div className='flex items-center'>-$0.05</div>
+              <div className='flex items-center'>$0</div>
             </div>
           </div>
           <div className='mt-4 w-full'>
-            <Button color='primary' className='w-full' size='lg'>
-              Place
+            <Button
+              color='primary'
+              className='w-full'
+              size='lg'
+              onPress={handleSubmitBtnPress}
+              isDisabled={isConnected && !isValidOrder}
+              isLoading={isPlacing}
+            >
+              {!isConnected ? 'Connect Wallet' : !isPlacing ? 'Place Order' : 'Placing Order...'}
             </Button>
           </div>
         </CardBody>
       </Card>
-      <Card className='mt-4'>
+      {/* <Card className='mt-4'>
         <CardBody>
-          {`${ORDER_TYPE_LABEL[orderType]} ${pool[0]}`}
+          {`${TRADE_TYPE_LABEL[tradeType]} ...`}
           <Divider className='mt-3 opacity-50' />
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
@@ -346,7 +627,9 @@ export default function Controller() {
             </div>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
     </div>
   )
-}
+})
+
+export default Controller

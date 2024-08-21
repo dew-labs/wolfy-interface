@@ -11,7 +11,7 @@ declare module 'react' {
   }
   type MemoizedCallbackOrDispatch<T extends (...arg: [any]) => any> =
     | MemoizedCallback<T>
-    | Dispatch<Parameters<T>[0]>
+    | Dispatch<SetStateAction<Parameters<T>[0]>>
 
   function useCallback<T extends (...args: any[]) => any>(
     callback: T,

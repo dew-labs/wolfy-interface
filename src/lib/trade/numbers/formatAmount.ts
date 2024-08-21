@@ -1,5 +1,6 @@
 import type {BigNumberish} from 'starknet'
-import {formatUnits} from 'viem'
+
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 
 import limitDecimals from './limitDecimals'
 import {numberWithCommas} from './numberWithCommas'
@@ -24,7 +25,7 @@ export default function formatAmount(
     displayDecimals = 4
   }
 
-  let amountStr = formatUnits(BigInt(amount), tokenDecimals)
+  let amountStr = shrinkDecimals(amount, tokenDecimals)
 
   amountStr = limitDecimals(amountStr, displayDecimals)
   if (displayDecimals !== 0) {

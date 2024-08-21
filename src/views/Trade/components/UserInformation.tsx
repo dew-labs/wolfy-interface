@@ -1,5 +1,5 @@
 import {Tab, Tabs} from '@nextui-org/react'
-import {useCallback, useState} from 'react'
+import {memo, useCallback, useState} from 'react'
 
 import OrdersTab from './OrdersTab'
 import PositionsTab from './PositionsTab'
@@ -11,7 +11,12 @@ enum UserTabs {
   Claims = 'Claims',
 }
 
-const AVAILABLE_TABS = [UserTabs.Positions, UserTabs.Orders, UserTabs.Trades, UserTabs.Claims]
+const AVAILABLE_TABS = [
+  UserTabs.Positions,
+  UserTabs.Orders,
+  // UserTabs.Trades,
+  // UserTabs.Claims
+]
 
 const TABS_LABEL: Record<UserTabs, string> = {
   [UserTabs.Positions]: 'Positions',
@@ -28,7 +33,7 @@ function UserClaims() {
   return <div>Comming soon...</div>
 }
 
-export default function UserInformation() {
+export default memo(function UserInformation() {
   const [tab, setTab] = useState<UserTabs>(UserTabs.Positions)
 
   const handleChangeTab = useCallback((value: unknown) => {
@@ -54,4 +59,4 @@ export default function UserInformation() {
       {tab === UserTabs.Claims && <UserClaims />}
     </>
   )
-}
+})
