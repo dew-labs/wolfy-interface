@@ -6,8 +6,6 @@ export enum TriggerThresholdType {
 }
 
 export default function getTriggerThresholdType(orderType: OrderType, isLong: boolean) {
-  console.log(orderType)
-
   // limit order
   if (orderType === OrderType.LimitIncrease) {
     return isLong ? TriggerThresholdType.Below : TriggerThresholdType.Above

@@ -1,5 +1,7 @@
 import type {BigNumberish} from 'starknet'
 
+import formatLocaleNumber from './formatLocaleNumber'
+
 export default function expandDecimals(value: BigNumberish, decimals: number | bigint): bigint {
   if (!value) return 0n
 
@@ -22,8 +24,9 @@ export default function expandDecimals(value: BigNumberish, decimals: number | b
 export function shrinkDecimals(
   value: BigNumberish,
   decimals: number | bigint,
-  fractionPlaces?: number | bigint,
+  fractionPlaces?: number | bigint | undefined,
   exactFractionPlaces = false,
+  readable = false,
 ): string {
   decimals = Number(decimals)
   let display = (() => {
@@ -37,10 +40,11 @@ export function shrinkDecimals(
 
   display = display.padStart(decimals, '0')
 
-  const integer = display.slice(0, display.length - decimals)
+  let integer = display.slice(0, display.length - decimals)
+  if (readable) integer = formatLocaleNumber(BigInt(integer))
   let fraction = display.slice(display.length - decimals)
   fraction = fraction.replace(/0+$/, '')
-  if (fractionPlaces) fraction = fraction.slice(0, Number(fractionPlaces))
+  if (fractionPlaces || fractionPlaces === 0) fraction = fraction.slice(0, Number(fractionPlaces))
   if (fractionPlaces && exactFractionPlaces) fraction = fraction.padEnd(Number(fractionPlaces), '0')
   return `${negative ? '-' : ''}${integer || '0'}${fraction ? '.' + fraction : ''}`
 }

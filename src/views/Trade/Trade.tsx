@@ -9,7 +9,7 @@ import Controller from './components/Controller'
 import MarketInformation from './components/MarketInformation'
 import UserInformation from './components/UserInformation'
 
-export default function Home() {
+export default function Trade() {
   const [tokenAddress] = useTokenAddress()
 
   return (

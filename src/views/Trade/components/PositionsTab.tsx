@@ -37,7 +37,7 @@ export default memo(function PositionTab() {
 
           // const indexName = getMarketIndexName(position.marketData)
           const poolName = getMarketPoolName(position.marketData)
-          const marketPriceDecimals = calculatePriceDecimals(
+          const priceDecimals = calculatePriceDecimals(
             position.marketData.indexTokenAddress,
             tokensData,
           )
@@ -74,17 +74,17 @@ export default memo(function PositionTab() {
                 {position.isOpening
                   ? `Opening...`
                   : formatUsd(position.entryPrice, {
-                      displayDecimals: marketPriceDecimals,
+                      displayDecimals: priceDecimals,
                     })}
               </TableCell>
               <TableCell>
                 {formatUsd(position.markPrice, {
-                  displayDecimals: marketPriceDecimals,
+                  displayDecimals: priceDecimals,
                 })}
               </TableCell>
               <TableCell>
                 {formatUsd(position.liquidationPrice, {
-                  displayDecimals: marketPriceDecimals,
+                  displayDecimals: priceDecimals,
                 })}
               </TableCell>
               <TableCell>Close</TableCell>

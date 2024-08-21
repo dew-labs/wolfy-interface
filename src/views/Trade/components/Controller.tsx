@@ -14,7 +14,7 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import {memo, useCallback, useRef} from 'react'
+import {useCallback, useRef, useState} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
@@ -36,8 +36,11 @@ import useTradeType, {TradeType} from '@/lib/trade/states/useTradeType'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
+import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import createResetableComponent from '@/utils/reset-component/createResettableComponent'
 
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
 import useCollateralToken from './hooks/useCollateralToken'
@@ -78,7 +81,8 @@ const SUPPORTED_TRADE_TYPES: TradeType[] = [
   // TradeType.Swap,
 ]
 
-export default memo(function Controller() {
+const Controller = createResetableComponent(function ({reset}) {
+  const latestReset = useLatest(reset)
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
@@ -216,6 +220,9 @@ export default memo(function Controller() {
 
   const positionConstants = usePositionsConstants()
 
+  const priceDecimals =
+    tokenAddress && tokensData ? calculatePriceDecimals(tokenAddress, tokensData) : undefined
+
   const liquidationPrice =
     payTokenData &&
     marketData &&
@@ -235,7 +242,7 @@ export default memo(function Controller() {
     })
 
   const liquidationPriceText = liquidationPrice
-    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, 2, true)
+    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, priceDecimals, true)
     : '-'
 
   const executionPrice =
@@ -247,7 +254,7 @@ export default memo(function Controller() {
     })
 
   const executionPriceText = executionPrice
-    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, 2, true)
+    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, priceDecimals, true)
     : '-'
 
   const isConnected = useIsWalletConnected()
@@ -282,7 +289,7 @@ export default memo(function Controller() {
   })()
 
   const availableLiquidityUsdText = (() => {
-    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 2, true)
+    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 0, true, true)
   })()
 
   const isValidSize = tokenAmount > 0n && tokenAmount <= availableLiquidity
@@ -293,6 +300,8 @@ export default memo(function Controller() {
   const isValidTokenAmount = tokenAmount > 0n
   const isValidLeverage = leverage > 0n && leverage <= maxLeverage
   const isValidOrder = isValidLeverage && isValidTokenAmount && isValidPayTokenAmount && isValidSize
+
+  const [isPlacing, setIsPlacing] = useState(false)
 
   const handleSubmitBtnPress = useCallback(() => {
     if (!latestIsConnected.current || !latestWallet.current) {
@@ -329,6 +338,7 @@ export default memo(function Controller() {
       }
     })()
 
+    setIsPlacing(true)
     toast.promise(
       sendOrder(latestWallet.current, {
         receiver,
@@ -343,17 +353,29 @@ export default memo(function Controller() {
         referralCode: 0,
       }),
       {
-        loading: 'Placing order...',
+        loading: 'Placing your order...',
+        description: 'Waiting for transaction confirmation',
         success: data => {
           void queryClient.invalidateQueries({
             queryKey: ['orders', latestChainId.current, latestAccountAddress.current],
           })
+          latestReset.current()
           return (
             <>
               Order placed.
               <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
                 View tx
               </a>
+            </>
+          )
+        },
+        finally: () => {
+          setIsPlacing(false)
+        },
+        error: error => {
+          return (
+            <>
+              <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
             </>
           )
         },
@@ -566,8 +588,9 @@ export default memo(function Controller() {
               size='lg'
               onPress={handleSubmitBtnPress}
               isDisabled={isConnected && !isValidOrder}
+              isLoading={isPlacing}
             >
-              {!isConnected ? 'Connect Wallet' : 'Place Order'}
+              {!isConnected ? 'Connect Wallet' : !isPlacing ? 'Place Order' : 'Placing Order...'}
             </Button>
           </div>
         </CardBody>
@@ -608,3 +631,5 @@ export default memo(function Controller() {
     </div>
   )
 })
+
+export default Controller
