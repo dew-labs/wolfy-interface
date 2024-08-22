@@ -2,7 +2,7 @@ import {Tab, Tabs} from '@nextui-org/react'
 import type {MemoizedCallbackOrDispatch} from 'react'
 import type {Key} from 'react-aria-components'
 
-import {ChartInterval} from '@/lib/tvchart/datafeed/Datafeed.ts'
+import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 
 function TVLightWeightTimeFrame(props: {
   selectedInterval: ChartInterval

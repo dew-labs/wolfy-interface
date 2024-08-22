@@ -1,23 +1,21 @@
 import {Card} from '@nextui-org/react'
-import {useState} from 'react'
+import {memo, useCallback, useState} from 'react'
 import type {Key} from 'react-aria-components'
 
-import {Theme} from '@/lib/theme/theme.ts'
-import {useCurrentTheme} from '@/lib/theme/useCurrentTheme.ts'
-import {ChartInterval, isChartInterval} from '@/lib/tvchart/datafeed/Datafeed.ts'
+import {ChartInterval, isChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
+import getChartConfig, {type ChartConfig} from '@/lib/tvchart/configs/chartConfigs.ts'
 import TVLightWeightChart from '@/views/Trade/components/TVChart/TVLightWeightChart.tsx'
 import TVLightWeightTimeFrame from '@/views/Trade/components/TVChart/TVLightWeightTimeFrame.tsx'
 
-export default function Chart() {
-  const [currentTheme] = useCurrentTheme()
-  const isDark = currentTheme === Theme.Dark
+export default memo(function Chart() {
+  const chartConfigs: ChartConfig = getChartConfig()
   const [chartInterval, setChartInterval] = useState(ChartInterval['5m'])
 
-  function handleChartIntervalSelection(key: Key) {
+  const handleChartIntervalSelection = useCallback((key: Key) => {
     if (isChartInterval(key)) {
       setChartInterval(key)
     }
-  }
+  }, [])
 
   return (
     <Card className='my-4 p-2'>
@@ -27,11 +25,11 @@ export default function Chart() {
           onSelectInterval={handleChartIntervalSelection}
         />
         <TVLightWeightChart
-          textColor={isDark ? 'white' : 'black'}
-          gridColor={isDark ? '#ffffff1a' : ''}
+          textColor={chartConfigs.textColor}
+          gridColor={chartConfigs.gridColor}
           interval={chartInterval}
-        ></TVLightWeightChart>
+        />
       </div>
     </Card>
   )
-}
+})

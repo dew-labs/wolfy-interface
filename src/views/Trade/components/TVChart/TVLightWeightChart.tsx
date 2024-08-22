@@ -1,12 +1,22 @@
-import type {SeriesDataItemTypeMap, UTCTimestamp} from 'lightweight-charts'
+import type {
+  CandlestickSeriesPartialOptions,
+  SeriesDataItemTypeMap,
+  UTCTimestamp,
+} from 'lightweight-charts'
 import {ColorType, createChart, LineStyle} from 'lightweight-charts'
 import React, {type LegacyRef, useEffect, useMemo, useRef} from 'react'
 
-import type {ChartData, ChartInterval} from '@/lib/tvchart/datafeed/Datafeed.ts'
+import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
+import {
+  CANDLE_STICK_SERIES,
+  CANDLE_STICKS_TO_RIGHT_BORDER,
+  CHART_DATA_WS,
+  CHART_STYLE,
+} from '@/lib/tvchart/constants.ts'
+import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import binanaceDataToChartData, {
   type BinanceChartData,
 } from '@/lib/tvchart/utils/binanceDataToChartData.ts'
-import binanceHistoryDataToChartData from '@/lib/tvchart/utils/binanceHistoryDataToChartData.ts'
 
 function TVLightWeightChart(props: {
   textColor: string
@@ -15,11 +25,11 @@ function TVLightWeightChart(props: {
 }) {
   const chartStyle = useMemo(
     () => ({
-      backgroundColor: 'transparent',
-      lineColor: '#2962FF',
+      backgroundColor: CHART_STYLE.BACKGROUND_COLOR,
+      lineColor: CHART_STYLE.LINE_COLOR,
       textColor: props.textColor,
-      areaTopColor: '#2962FF',
-      areaBottomColor: 'rgba(41, 98, 255, 0.28)',
+      areaTopColor: CHART_STYLE.AREA_TOP_COLOR,
+      areaBottomColor: CHART_STYLE.AREA_BOTTOM_COLOR,
       gridColor: props.gridColor,
     }),
     [props.textColor, props.gridColor],
@@ -28,7 +38,6 @@ function TVLightWeightChart(props: {
   const chartContainerRef = useRef<HTMLElement | string>('')
 
   useEffect(() => {
-    let initialData: ChartData[] = []
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: {type: ColorType.Solid, color: chartStyle.backgroundColor},
@@ -56,39 +65,21 @@ function TVLightWeightChart(props: {
     const handleResize = () => {
       chart.applyOptions({width: (chartContainerRef.current as HTMLElement).clientWidth})
     }
+    const newSeries = chart.addCandlestickSeries({
+      upColor: CANDLE_STICK_SERIES.UP_COLOR,
+      downColor: CANDLE_STICK_SERIES.DOWN_COLOR,
+      borderVisible: CANDLE_STICK_SERIES.BORDER_VISIBLE,
+      wickUpColor: CANDLE_STICK_SERIES.WICK_UP_COLOR,
+      wickDownColor: CANDLE_STICK_SERIES.WICK_DOWN_COLOR,
+    } as CandlestickSeriesPartialOptions)
 
     const fetchChartData = async () => {
-      await fetch(
-        'https://testnet.binancefuture.com/fapi/v1/markPriceKlines?' +
-          new URLSearchParams({
-            symbol: 'ethusdt',
-            interval: props.interval,
-          }).toString(),
-      )
-        .then(async response => {
-          return response.json()
-        })
-        .then(data => {
-          if (data) {
-            initialData = binanceHistoryDataToChartData(data as [])
-          }
-        })
-
-      chart.timeScale().scrollToPosition(5, false)
-
-      const newSeries = chart.addCandlestickSeries({
-        upColor: '#26a69a',
-        downColor: '#ef5350',
-        borderVisible: false,
-        wickUpColor: '#26a69a',
-        wickDownColor: '#ef5350',
-      })
+      const initialData = await fetchChartHistoryData('ethusdt', props.interval)
       newSeries.setData(initialData as SeriesDataItemTypeMap<UTCTimestamp>['Candlestick'][])
-      const exampleSocket = new WebSocket(
-        'wss://fstream.binance.com/ws/ethusdt@kline_' + props.interval,
-      )
+      chart.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
 
-      exampleSocket.onmessage = event => {
+      const chartDataWS = new WebSocket(CHART_DATA_WS + props.interval)
+      chartDataWS.onmessage = event => {
         if (typeof event.data !== 'string') {
           return
         }
@@ -106,7 +97,6 @@ function TVLightWeightChart(props: {
 
     return () => {
       window.removeEventListener('resize', handleResize)
-
       chart.remove()
     }
   }, [chartStyle, props.interval])
