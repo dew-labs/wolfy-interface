@@ -1,16 +1,21 @@
 import {useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import {getTokensMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 
 export default function useToken(tradeMode: TradeMode) {
-  const tokensData = useTokensData()
+  const [chainId] = useChainId()
+  const tokensMetadata = getTokensMetadata(chainId)
   const [tokenAddress] = useTokenAddress()
-  const tokenData = tokenAddress ? tokensData?.get(tokenAddress) : undefined
+  const tokenMinPriceData = useTokenPrices(data => data.get(tokenAddress ?? '')?.min)
+
+  const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
   const tokenDecimals = tokenData?.decimals ?? 0
   const latestTokenDecimals = useLatest(tokenDecimals)
 
@@ -18,7 +23,7 @@ export default function useToken(tradeMode: TradeMode) {
   const latestTokenAmountUsd = useLatest(tokenAmountUsd)
   const [tokenPrice, setTokenPrice] = useState<bigint>()
   const derivedTokenPrice =
-    tokenPrice && tradeMode !== TradeMode.Market ? tokenPrice : (tokenData?.price.min ?? 0n)
+    tokenPrice && tradeMode !== TradeMode.Market ? tokenPrice : (tokenMinPriceData ?? 0n)
   const latestDerivedTokenPrice = useLatest(derivedTokenPrice)
 
   const tokenAmount = useMemo(() => {

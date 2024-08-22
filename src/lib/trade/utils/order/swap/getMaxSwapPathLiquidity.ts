@@ -1,14 +1,16 @@
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import getAvailableUsdLiquidityForCollateral from '@/lib/trade/utils/market/getAvailableUsdLiquidityForCollateral'
 import {getOppositeCollateral} from '@/lib/trade/utils/market/getOppositeCollateral'
 import {getTokenPoolType} from '@/lib/trade/utils/market/getTokenPoolType'
 
 export default function getMaxSwapPathLiquidity(p: {
   marketsData: MarketsData
+  tokenPricesData: TokenPricesData
   swapPath: string[]
   initialCollateralAddress: string
 }) {
-  const {marketsData: marketsInfoData, swapPath, initialCollateralAddress} = p
+  const {marketsData: marketsInfoData, swapPath, initialCollateralAddress, tokenPricesData} = p
 
   if (swapPath.length === 0) {
     return 0n
@@ -31,7 +33,11 @@ export default function getMaxSwapPathLiquidity(p: {
     }
 
     const isTokenOutLong = getTokenPoolType(marketInfo, tokenOut.address) === 'long'
-    const liquidity = getAvailableUsdLiquidityForCollateral(marketInfo, isTokenOutLong)
+    const liquidity = getAvailableUsdLiquidityForCollateral(
+      marketInfo,
+      tokenPricesData,
+      isTokenOutLong,
+    )
 
     if (!minMarketLiquidity || liquidity < minMarketLiquidity) {
       minMarketLiquidity = liquidity

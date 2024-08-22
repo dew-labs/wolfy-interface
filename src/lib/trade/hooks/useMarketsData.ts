@@ -5,38 +5,38 @@ import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {Market} from '@/lib/trade/services/fetchMarkets'
 import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
-import type {TokensData} from '@/lib/trade/services/fetchTokensData'
-import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
+import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
 
 import useMarkets from './useMarkets'
-import useTokensData from './useTokensData'
 
 function createGetMarketsDataQueryOptions(
   chainId: StarknetChainId,
   markets: Market[] | undefined,
-  tokensData: TokensData | undefined,
   accountAddress: string | undefined,
 ) {
   return queryOptions({
-    queryKey: ['marketsData', chainId, accountAddress, markets, tokensData] as const,
-    queryFn:
-      markets && tokensData
-        ? async () => {
-            return await fetchMarketsData(chainId, markets, tokensData, accountAddress)
-          }
-        : skipToken,
-    ...NO_REFETCH_OPTIONS,
+    queryKey: ['marketsData', chainId, accountAddress, markets] as const,
+    queryFn: markets
+      ? async () => {
+          const tokenPricesData = await fetchTokenPrices(chainId)
+          return await fetchMarketsData(chainId, markets, tokenPricesData, accountAddress)
+        }
+      : skipToken,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   })
 }
 
 export default function useMarketsData() {
   const [chainId] = useChainId()
   const markets = useMarkets()
-  const tokensData = useTokensData()
   const accountAddress = useAccountAddress()
 
   const {data: marketsData} = useQuery(
-    createGetMarketsDataQueryOptions(chainId, markets, tokensData, accountAddress),
+    createGetMarketsDataQueryOptions(chainId, markets, accountAddress),
   )
 
   return marketsData

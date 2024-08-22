@@ -11,12 +11,12 @@ import {
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {hashedPositionKey} from '@/constants/dataStore'
+import {getTokenMetadata} from '@/constants/tokens'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import type {Market} from './fetchMarkets'
 import type {MarketsData} from './fetchMarketsData'
-import type {Price} from './fetchTokenPrices'
-import type {TokensData} from './fetchTokensData'
+import type {Price, TokenPricesData} from './fetchTokenPrices'
 
 export function getStringReprenetationOfPosition(
   account: string,
@@ -53,19 +53,26 @@ export interface MarketPrice {
   }
 }
 
-export function getMarketPrice(tokensData: TokensData, market: Market): MarketPrice | undefined {
-  const indexToken = tokensData.get(market.indexTokenAddress)
-  const longToken = tokensData.get(market.longTokenAddress)
-  const shortToken = tokensData.get(market.shortTokenAddress)
+export function getMarketPrice(
+  chainId: StarknetChainId,
+  tokenPricesData: TokenPricesData,
+  market: Market,
+): MarketPrice | undefined {
+  const indexTokenPrice = tokenPricesData.get(market.indexTokenAddress)
+  const longTokenPrice = tokenPricesData.get(market.longTokenAddress)
+  const shortTokenPrice = tokenPricesData.get(market.shortTokenAddress)
 
-  if (!indexToken || !longToken || !shortToken) {
+  const indexToken = getTokenMetadata(chainId, market.indexTokenAddress)
+  const longToken = getTokenMetadata(chainId, market.longTokenAddress)
+  const shortToken = getTokenMetadata(chainId, market.shortTokenAddress)
+
+  if (!indexTokenPrice || !longTokenPrice || !shortTokenPrice) {
     return undefined
   }
-
   return {
-    index_token_price: convertToContractTokenPrices(indexToken.price, indexToken.decimals),
-    long_token_price: convertToContractTokenPrices(longToken.price, longToken.decimals),
-    short_token_price: convertToContractTokenPrices(shortToken.price, shortToken.decimals),
+    index_token_price: convertToContractTokenPrices(indexTokenPrice, indexToken.decimals),
+    long_token_price: convertToContractTokenPrices(longTokenPrice, longToken.decimals),
+    short_token_price: convertToContractTokenPrices(shortTokenPrice, shortToken.decimals),
   }
 }
 
@@ -104,7 +111,7 @@ export type PositionsData = Map<string, Position>
 export default async function fetchPositions(
   chainId: StarknetChainId,
   marketsData: MarketsData,
-  tokensData: TokensData,
+  tokenPricesData: TokenPricesData,
   account: string | undefined,
 ): Promise<PositionsData> {
   if (!account) return new Map()
@@ -129,8 +136,7 @@ export default async function fetchPositions(
   // const stringPositions: string[] = [] // allPositionsKeys
 
   Array.from(marketsData.values()).forEach(market => {
-    const marketPrice = getMarketPrice(tokensData, market)
-
+    const marketPrice = getMarketPrice(chainId, tokenPricesData, market)
     if (!marketPrice) return
 
     const collaterals = market.isSameCollaterals

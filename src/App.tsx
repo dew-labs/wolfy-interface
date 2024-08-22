@@ -29,6 +29,7 @@ import {DEBUG} from './constants/config'
 import Head from './lib/head/Head'
 import ThemeSubscriber from './lib/theme/ThemeSubscriber'
 import ThemeUpdater from './lib/theme/ThemeUpdater'
+import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
 import {createQueryClient} from './queries/queries'
 import {createRouter} from './router'
 import ErrorComponent from './views/Error/ErrorComponent'
@@ -85,6 +86,7 @@ function App() {
             <ChainSwitchSubscriber />
             <GoogleOneTapLogin router={router} />
             <AuthUpdater router={router} />
+            <TokenPricesUpdater />
             <RouterProvider router={router} />
           </QueryErrorBoundary>
           <ReactQueryDevtools initialIsOpen={false} />

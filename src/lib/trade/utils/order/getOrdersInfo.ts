@@ -1,6 +1,9 @@
+import type {StarknetChainId} from 'satoru-sdk'
+
+import {getTokensMetadata, type Token} from '@/constants/tokens'
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Order, OrdersData} from '@/lib/trade/services/fetchOrders'
-import type {TokenData, TokensData} from '@/lib/trade/services/fetchTokensData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import getTokensRatioByAmounts, {
@@ -21,31 +24,38 @@ export type SwapOrderInfo = Order & {
   title: string
   swapPathStats?: SwapPathStats | undefined
   triggerRatio?: TokensRatio
-  initialCollateralToken: TokenData
-  targetCollateralToken: TokenData
+  initialCollateralToken: Token
+  targetCollateralToken: Token
 }
 
 export type PositionOrderInfo = Order & {
   title: string
   marketData: MarketData
   swapPathStats?: SwapPathStats | undefined
-  indexToken: TokenData
-  initialCollateralToken: TokenData
-  targetCollateralToken: TokenData
+  indexToken: Token
+  initialCollateralToken: Token
+  targetCollateralToken: Token
   acceptablePrice: bigint
   triggerPrice: bigint
   triggerThresholdType: TriggerThresholdType
 }
 
 export default function getOrdersInfo(
+  chainId: StarknetChainId,
   marketsData: MarketsData,
-  tokensData: TokensData,
   ordersData: OrdersData,
+  tokenPricesData: TokenPricesData,
 ) {
+  const tokensMetadata = getTokensMetadata(chainId)
+
   ordersData.forEach((order, key) => {
     try {
+      const initialCollateralToken = tokensMetadata.get(order.initialCollateralTokenAddress)
+      const initialCollateralTokenPrice = tokenPricesData.get(order.initialCollateralTokenAddress)
+
+      if (!initialCollateralToken || !initialCollateralTokenPrice) return
+
       if (isSwapOrderType(order.orderType)) {
-        const initialCollateralToken = tokensData.get(order.initialCollateralTokenAddress)
         const {outTokenAddress} = getSwapPathOutputAddresses({
           marketsData,
           swapPath: order.swapPath,
@@ -55,20 +65,22 @@ export default function getOrdersInfo(
 
         if (!outTokenAddress) return
 
-        const targetCollateralToken = tokensData.get(outTokenAddress)
+        const targetCollateralToken = tokensMetadata.get(outTokenAddress)
+        const targetCollateralTokenPrice = tokenPricesData.get(outTokenAddress)
 
-        if (!initialCollateralToken || !targetCollateralToken) {
+        if (!targetCollateralToken || !targetCollateralTokenPrice) {
           return
         }
 
         const swapPathStats = getSwapPathStats({
           marketsData,
+          tokenPricesData,
           swapPath: order.swapPath,
           initialCollateralAddress: order.initialCollateralTokenAddress,
           usdIn: convertTokenAmountToUsd(
             order.initialCollateralDeltaAmount,
             initialCollateralToken.decimals,
-            initialCollateralToken.price.min,
+            initialCollateralTokenPrice.min,
           ),
           shouldApplyPriceImpact: true,
         })
@@ -77,7 +89,7 @@ export default function getOrdersInfo(
           ? convertUsdToTokenAmount(
               swapPathStats.totalSwapPriceImpactDeltaUsd,
               targetCollateralToken.decimals,
-              targetCollateralToken.price.min,
+              targetCollateralTokenPrice.min,
             )
           : 0n
 
@@ -85,7 +97,7 @@ export default function getOrdersInfo(
           ? convertUsdToTokenAmount(
               swapPathStats.totalSwapFeeUsd,
               targetCollateralToken.decimals,
-              targetCollateralToken.price.min,
+              targetCollateralTokenPrice.min,
             )
           : 0n
 
@@ -119,7 +131,6 @@ export default function getOrdersInfo(
         const marketInfo = marketsData.get(order.marketAddress)
         const indexToken = marketInfo?.indexToken
 
-        const initialCollateralToken = tokensData.get(order.initialCollateralTokenAddress)
         const {outTokenAddress} = getSwapPathOutputAddresses({
           marketsData,
           swapPath: order.swapPath,
@@ -129,9 +140,9 @@ export default function getOrdersInfo(
 
         if (!outTokenAddress) return
 
-        const targetCollateralToken = tokensData.get(outTokenAddress)
+        const targetCollateralToken = tokensMetadata.get(outTokenAddress)
 
-        if (!marketInfo || !indexToken || !initialCollateralToken || !targetCollateralToken) {
+        if (!marketInfo || !indexToken || !targetCollateralToken) {
           return
         }
 
@@ -150,12 +161,13 @@ export default function getOrdersInfo(
 
         const swapPathStats = getSwapPathStats({
           marketsData,
+          tokenPricesData,
           swapPath: order.swapPath,
           initialCollateralAddress: order.initialCollateralTokenAddress,
           usdIn: convertTokenAmountToUsd(
             order.initialCollateralDeltaAmount,
             initialCollateralToken.decimals,
-            initialCollateralToken.price.min,
+            initialCollateralTokenPrice.min,
           ),
           shouldApplyPriceImpact: true,
         })

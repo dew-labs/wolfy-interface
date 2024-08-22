@@ -1,5 +1,8 @@
-import {StarknetChainId, toStarknetHexString} from 'satoru-sdk'
+import {PriceServiceConnection} from '@pythnetwork/price-service-client'
+import {StarknetChainId} from 'satoru-sdk'
 
+import {getTokensMetadata} from '@/constants/tokens'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 export interface Price {
@@ -7,37 +10,42 @@ export interface Price {
   max: bigint
 }
 
-const usds = [
-  '0x0585593986c67a9802555dab7c7728270b603da6721ed6f754063eb8fd51f0aa',
-  '0x048083d5ab62164271184b3333e3acf9ef88b99e6d1f6a27e7a1e8b7e75d2127',
-].map(toStarknetHexString)
+export type TokenPricesData = Map<string, Price>
 
-const eth = toStarknetHexString(
-  '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
-)
-const strk = toStarknetHexString(
-  '0x0257f31f11fa095874ded95a8ad6c8dca9fb851557df83e7cd384bde65c4d1c4',
-)
-const btc = toStarknetHexString(
-  '0x07e3b6dce9c3b052e96a63d63f26aa129a1c5342343a7bb9a20754812bf4e614',
-)
+export default async function fetchTokenPrices(chainId: StarknetChainId) {
+  const tokensMetadata = getTokensMetadata(chainId)
 
-function randomPrice(value: bigint, decimals = 18) {
-  const rand = BigInt(Math.round(Math.random() * Number(expandDecimals(1, decimals + 1))))
-  const rand2 = BigInt(Math.round(Math.random() * Number(expandDecimals(1, decimals + 1))))
-  return {
-    min: value + rand,
-    max: value + rand + rand2,
-  }
-}
+  const connection = new PriceServiceConnection('https://hermes-beta.pyth.network')
+  const data: TokenPricesData = new Map()
 
-export default async function fetchTokenPrices(_chainId: StarknetChainId) {
-  return Promise.resolve(
-    new Map<string, Price>([
-      ...usds.map(usd => [usd, {min: 1_000000000000000000n, max: 1_000000000000000000n}] as const),
-      [eth, randomPrice(3699_531877496039000000n)],
-      [strk, randomPrice(35_3170000000000000n)],
-      [btc, randomPrice(63867_756237461927468276n, 8)],
-    ]),
-  )
+  const tokens = Array.from(tokensMetadata.values())
+    .map(token => {
+      if (token.pythFeedId) return token
+    })
+    .filter(Boolean)
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed
+  const feedIds = tokens.map(token => token.pythFeedId!)
+
+  const priceFeeds = await connection.getLatestPriceFeeds(feedIds)
+
+  if (!priceFeeds) return data
+
+  priceFeeds.forEach((priceFeed, index) => {
+    const token = tokens.at(index)
+    if (!token) return
+
+    const priceData = priceFeed.getPriceNoOlderThan(60)
+    const decimals = priceData ? Math.abs(priceData.expo) : 0
+    const price = !!priceData?.price && expandDecimals(priceData.price, USD_DECIMALS - decimals)
+
+    if (!price) return
+
+    data.set(token.address, {
+      min: price,
+      max: price + 1n,
+    })
+  })
+
+  return data
 }

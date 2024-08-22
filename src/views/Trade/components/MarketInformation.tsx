@@ -20,13 +20,14 @@ import {groupBy} from 'remeda'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import max from '@/utils/numbers/bigint/max'
-import expandDecimals from '@/utils/numbers/expandDecimals'
+import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
 
 interface TokenOption {
@@ -40,23 +41,27 @@ export default memo(function MarketInformation() {
   const [chainId] = useChainId()
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
+  const tokenPricesData = useTokenPrices(data => data)
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
 
   const marketsData = useMarketsData()
 
-  const dataIsLoaded = !!marketsData
+  const dataIsLoaded = !!marketsData && !!tokenPricesData
 
   const availableTokens: AvailableTokens | undefined = useMemo(() => {
-    if (marketsData) {
-      return getAvailableTokens(marketsData)
+    if (marketsData && tokenPricesData) {
+      return getAvailableTokens(marketsData, tokenPricesData)
     }
-  }, [marketsData])
+  }, [marketsData, tokenPricesData])
 
   const marketsWithLiquidityGrouppedByIndexToken = useMemo(() => {
-    const allMarkets = availableTokens?.allMarkets ? Array.from(availableTokens.allMarkets) : []
+    if (!tokenPricesData || !availableTokens?.allMarkets) return new Map<string, TokenOption[]>()
+
+    const allMarkets = Array.from(availableTokens.allMarkets)
+
     const marketsWithMaxReservedUsd = allMarkets.map(marketInfo => {
-      const longLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, true)
-      const shortLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, false)
+      const longLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, true)
+      const shortLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, false)
 
       return {
         longLiquidity: longLiquidity > 0n ? longLiquidity : 0n,
@@ -71,7 +76,7 @@ export default memo(function MarketInformation() {
     )
 
     return new Map(Object.entries(indexes))
-  }, [availableTokens?.allMarkets])
+  }, [availableTokens?.allMarkets, tokenPricesData])
 
   const indexTokensWithLiquidityInformation = useMemo(() => {
     const indexes = new Map<
@@ -180,6 +185,12 @@ export default memo(function MarketInformation() {
     [setTokenAddress],
   )
 
+  const priceIndex = tokenPricesData && tokenAddress && tokenPricesData.get(tokenAddress)?.max
+  const priceMark = tokenPricesData && tokenAddress && tokenPricesData.get(tokenAddress)?.min
+
+  const priceIndexText = priceIndex ? shrinkDecimals(priceIndex, USD_DECIMALS, 2, true, true) : '--'
+  const priceMarkText = priceMark ? shrinkDecimals(priceMark, USD_DECIMALS, 2, true, true) : '--'
+
   return (
     <Card>
       <CardBody className='flex flex-row items-center gap-6'>
@@ -240,8 +251,8 @@ export default memo(function MarketInformation() {
         </Popover>
         <div className='flex flex-1 flex-row gap-4'>
           <div className='flex flex-col items-start justify-center'>
-            <div className='text-2xl leading-6'>$3,145.20</div>
-            <div className='text-xs opacity-70'>$3,145.20</div>
+            <div className='text-2xl leading-6'>${priceIndexText}</div>
+            <div className='text-xs opacity-70'>${priceMarkText}</div>
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-xs opacity-70'>24h Change</div>

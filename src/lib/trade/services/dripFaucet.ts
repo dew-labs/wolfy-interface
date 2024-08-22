@@ -7,6 +7,11 @@ import expandDecimals from '@/utils/numbers/expandDecimals'
 export default async function dripFaucet(wallet: WalletAccount) {
   const chainId = await wallet.getChainId()
 
+  // TODO: add asset to wallet
+  // wallet.watchAsset({
+
+  // })
+
   const tokens = getTokensMetadata(chainId)
 
   const calls: Call[] = []

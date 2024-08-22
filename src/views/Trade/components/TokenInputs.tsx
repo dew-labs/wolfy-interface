@@ -2,7 +2,9 @@ import {Input, Select, SelectItem} from '@nextui-org/react'
 import clsx from 'clsx'
 import {memo, type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
 
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import {getTokensMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import {TradeType} from '@/lib/trade/states/useTradeType'
@@ -54,13 +56,15 @@ export default memo(function TokenInputs({
   tokenAmountUsd,
   setTokenAmount,
 }: Props) {
-  const tokensData = useTokensData()
+  const [chainId] = useChainId()
+  const tokensMetadata = getTokensMetadata(chainId)
+  const tokenBalances = useTokenBalances()
 
   // -------------------------------------------------------------------------------------------------------------------
 
-  const payTokenData = tokensData && payTokenAddress ? tokensData.get(payTokenAddress) : undefined
+  const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
-  const payTokenBalance = payTokenData?.balance ?? 0n
+  const payTokenBalance = tokenBalances?.get(payTokenAddress ?? '') ?? 0n
   const payTokenBalanceShrinked = shrinkDecimals(payTokenBalance, payTokenDecimals, 2, true)
 
   const [payTokenAmountInput, setPayTokenAmountInput] = useState(() =>
@@ -102,7 +106,7 @@ export default memo(function TokenInputs({
 
   // -------------------------------------------------------------------------------------------------------------------
 
-  const tokenData = tokensData && tokenAddress ? tokensData.get(tokenAddress) : undefined
+  const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
 
   const tokenDecimals = tokenData?.decimals ?? 0
   const [tokenAmountInput, setTokenAmountInput] = useState(() =>
@@ -156,9 +160,7 @@ export default memo(function TokenInputs({
   // -------------------------------------------------------------------------------------------------------------------
 
   const isValidPayTokenAmount =
-    !!tokensData &&
-    !!payTokenAddress &&
-    payTokenAmount <= (tokensData.get(payTokenAddress)?.balance ?? 0n)
+    !!payTokenAddress && payTokenAmount <= (tokenBalances?.get(payTokenAddress) ?? 0n)
 
   return (
     <>
@@ -229,9 +231,7 @@ export default memo(function TokenInputs({
               }}
             >
               {availablePayTokenAddresses.map(address => (
-                <SelectItem key={address}>
-                  {tokensData ? tokensData.get(address)?.symbol : ''}
-                </SelectItem>
+                <SelectItem key={address}>{tokensMetadata.get(address)?.symbol}</SelectItem>
               ))}
             </Select>
           </>

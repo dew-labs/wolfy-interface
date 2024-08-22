@@ -3,7 +3,7 @@ import {t} from 'i18next'
 import {memo, useState} from 'react'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import formatDeltaUsd from '@/lib/trade/numbers/formatDeltaUsd'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
 // import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
@@ -13,7 +13,7 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 
 export default memo(function PositionTab() {
   const positionsInfo = usePositionsInfoData()
-  const tokensData = useTokensData()
+  const tokenPricesData = useTokenPrices(data => data)
 
   const positions = positionsInfo ? Array.from(positionsInfo.values()) : []
   const [savedShowPnlAfterFees] = useState(true)
@@ -33,13 +33,15 @@ export default memo(function PositionTab() {
       </TableHeader>
       <TableBody emptyContent={'No position.'} items={positions}>
         {position => {
-          if (!tokensData) return <></>
+          if (!tokenPricesData) return <></>
+
+          const tokenPrice = tokenPricesData.get(position.marketData.indexTokenAddress)
 
           // const indexName = getMarketIndexName(position.marketData)
           const poolName = getMarketPoolName(position.marketData)
           const priceDecimals = calculatePriceDecimals(
             position.marketData.indexTokenAddress,
-            tokensData,
+            tokenPrice,
           )
 
           const displayedPnl = savedShowPnlAfterFees ? position.pnlAfterFees : position.pnl

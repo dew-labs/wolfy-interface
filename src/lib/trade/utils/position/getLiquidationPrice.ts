@@ -1,6 +1,6 @@
+import type {Token} from '@/constants/tokens'
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import type {TokenData} from '@/lib/trade/services/fetchTokensData'
 import type {ReferralInfo} from '@/lib/trade/services/referral/fetchReferralInfo'
 import {getPositionFee} from '@/lib/trade/utils/fee/getPositionFee'
 import getPriceImpactForPosition from '@/lib/trade/utils/fee/getPriceImpactForPosition'
@@ -14,7 +14,7 @@ export default function getLiquidationPrice(p: {
   sizeInTokens: bigint
   collateralAmount: bigint
   collateralUsd: bigint
-  collateralToken: TokenData
+  collateralToken: Token
   marketInfo: MarketData
   pendingFundingFeesUsd: bigint
   pendingBorrowingFeesUsd: bigint

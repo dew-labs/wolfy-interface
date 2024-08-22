@@ -1,5 +1,6 @@
+import type {Token} from '@/constants/tokens'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import type {TokenData} from '@/lib/trade/services/fetchTokensData'
+import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import {getTokenPoolType} from '@/lib/trade/utils/market/getTokenPoolType'
 
 import getNextPoolAmountsParams from './getNextPoolAmountsParams'
@@ -7,8 +8,10 @@ import getPriceImpactUsd from './getPriceImpactUsd'
 
 export default function getPriceImpactForSwap(
   marketInfo: MarketData,
-  tokenA: TokenData,
-  tokenB: TokenData,
+  tokenA: Token,
+  tokenB: Token,
+  tokenAPrice: Price,
+  tokenBPrice: Price,
   usdDeltaTokenA: bigint,
   usdDeltaTokenB: bigint,
   opts: {fallbackToZero?: boolean} = {},
@@ -27,6 +30,8 @@ export default function getPriceImpactForSwap(
   }
 
   const [longToken, shortToken] = tokenAPoolType === 'long' ? [tokenA, tokenB] : [tokenB, tokenA]
+  const [longTokenPrice, shortTokenPrice] =
+    tokenAPoolType === 'long' ? [tokenAPrice, tokenBPrice] : [tokenBPrice, tokenAPrice]
   const [longDeltaUsd, shortDeltaUsd] =
     tokenAPoolType === 'long' ? [usdDeltaTokenA, usdDeltaTokenB] : [usdDeltaTokenB, usdDeltaTokenA]
 
@@ -34,6 +39,8 @@ export default function getPriceImpactForSwap(
     marketInfo,
     longToken,
     shortToken,
+    longTokenPrice,
+    shortTokenPrice,
     longPoolAmount: marketInfo.longPoolAmount,
     shortPoolAmount: marketInfo.shortPoolAmount,
     longDeltaUsd,
@@ -66,6 +73,8 @@ export default function getPriceImpactForSwap(
     marketInfo,
     longToken,
     shortToken,
+    longTokenPrice,
+    shortTokenPrice,
     longPoolAmount: virtualInventoryLong,
     shortPoolAmount: virtualInventoryShort,
     longDeltaUsd,

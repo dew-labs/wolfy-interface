@@ -1,5 +1,6 @@
 import type {Token} from '@/constants/tokens'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {getCappedPoolPnl} from '@/lib/trade/utils/market/getCappedPoolPnl'
 import {getPoolUsdWithoutPnl} from '@/lib/trade/utils/market/getPoolUsdWithoutPnl'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
@@ -17,12 +18,13 @@ export function getPositionValueUsd(p: {
 
 export default function getPositionPnlUsd(p: {
   marketInfo: MarketData
+  tokenPricesData: TokenPricesData
   sizeInUsd: bigint
   sizeInTokens: bigint
   markPrice: bigint
   isLong: boolean
 }) {
-  const {marketInfo, sizeInUsd, sizeInTokens, markPrice, isLong} = p
+  const {marketInfo, sizeInUsd, sizeInTokens, markPrice, isLong, tokenPricesData} = p
 
   const positionValueUsd = getPositionValueUsd({
     indexToken: marketInfo.indexToken,
@@ -37,7 +39,7 @@ export default function getPositionPnlUsd(p: {
   }
 
   const poolPnl = isLong ? p.marketInfo.pnlLongMax : p.marketInfo.pnlShortMax
-  const poolUsd = getPoolUsdWithoutPnl(marketInfo, isLong, 'min')
+  const poolUsd = getPoolUsdWithoutPnl(marketInfo, tokenPricesData, isLong, 'min')
 
   const cappedPnl = getCappedPoolPnl({
     marketInfo,

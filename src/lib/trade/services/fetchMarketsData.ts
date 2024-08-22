@@ -40,17 +40,19 @@ import {
   virtualMarketIdKey,
   virtualTokenIdKey,
 } from '@/constants/dataStore'
+import type {Token} from '@/constants/tokens'
+import {getTokensMetadata} from '@/constants/tokens'
 import {type Market} from '@/lib/trade/services/fetchMarkets'
 import {logError} from '@/utils/logger'
 
-import type {TokenData} from './fetchTokensData'
+import type {TokenPricesData} from './fetchTokenPrices'
 
 export interface MarketData extends Market {
   isDisabled: boolean
 
-  longToken: TokenData
-  shortToken: TokenData
-  indexToken: TokenData
+  longToken: Token
+  shortToken: Token
+  indexToken: Token
 
   longPoolAmount: bigint
   shortPoolAmount: bigint
@@ -153,22 +155,36 @@ export type MarketsData = Map<string, MarketData>
 export default async function fetchMarketsData(
   chainId: StarknetChainId,
   markets: Market[],
-  tokensData: Map<string, TokenData>,
+  tokenPriceData: TokenPricesData,
   accountAddress: string | undefined,
 ): Promise<MarketsData> {
+  const tokensData = getTokensMetadata(chainId)
+
   const results = await Promise.allSettled(
     markets
       .map(async market => {
+        const indexToken = tokensData.get(market.indexTokenAddress)
         const longToken = tokensData.get(market.longTokenAddress)
         const shortToken = tokensData.get(market.shortTokenAddress)
-        const indexToken = tokensData.get(market.indexTokenAddress)
 
-        if (!longToken || !shortToken || !indexToken) return false
+        const indexTokenPrice = tokenPriceData.get(market.indexTokenAddress)
+        const longTokenPrice = tokenPriceData.get(market.shortTokenAddress)
+        const shortTokenPrice = tokenPriceData.get(market.longTokenAddress)
+
+        if (
+          !longToken ||
+          !shortToken ||
+          !indexToken ||
+          !indexTokenPrice ||
+          !shortTokenPrice ||
+          !longTokenPrice
+        )
+          return false
 
         const tokenPricesInMarket = {
-          index_token_price: indexToken.price,
-          long_token_price: longToken.price,
-          short_token_price: shortToken.price,
+          index_token_price: indexTokenPrice,
+          long_token_price: longTokenPrice,
+          short_token_price: shortTokenPrice,
         }
 
         const marketProps = {

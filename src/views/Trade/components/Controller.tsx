@@ -20,6 +20,7 @@ import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
 
+import {getTokensMetadata} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
@@ -28,7 +29,8 @@ import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import useGasPrice from '@/lib/trade/hooks/useGasPrice'
 import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
 import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/sendOrder'
 import useTradeMode, {TradeMode} from '@/lib/trade/states/useTradeMode'
@@ -82,15 +84,16 @@ const SUPPORTED_TRADE_TYPES: TradeType[] = [
 ]
 
 const Controller = createResetableComponent(function ({reset}) {
+  const [chainId] = useChainId()
   const latestReset = useLatest(reset)
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
   const accountAddress = useAccountAddress()
   const latestAccountAddress = useLatest(accountAddress)
-  const tokensData = useTokensData()
+  const tokensMetadata = getTokensMetadata(chainId)
   const _gasPrice = useGasPrice()
-  const [chainId] = useChainId()
+  const tokenBalancesData = useTokenBalances()
   const latestChainId = useRef(chainId)
 
   const [tradeType, setTradeType] = useTradeType()
@@ -123,6 +126,14 @@ const Controller = createResetableComponent(function ({reset}) {
     poolName,
     marketData,
   } = useMarket()
+
+  const tokenPricesData = useTokenPrices(data => {
+    return {
+      tokenPrice: data.get(tokenAddress ?? ''),
+      longTokenPrice: data.get(marketData?.longTokenAddress ?? ''),
+      shortTokenPrice: data.get(marketData?.shortTokenAddress ?? ''),
+    }
+  })
 
   ;(function setDefaultMarketAddress() {
     if (!tokenAddress || !availableMarkets.length) return
@@ -221,7 +232,9 @@ const Controller = createResetableComponent(function ({reset}) {
   const positionConstants = usePositionsConstants()
 
   const priceDecimals =
-    tokenAddress && tokensData ? calculatePriceDecimals(tokenAddress, tokensData) : undefined
+    tokenAddress && tokenPricesData
+      ? calculatePriceDecimals(tokenAddress, tokenPricesData.tokenPrice)
+      : undefined
 
   const liquidationPrice =
     payTokenData &&
@@ -273,8 +286,8 @@ const Controller = createResetableComponent(function ({reset}) {
     const longTokenDecimals = marketData?.longToken.decimals ?? 0
     const shortTokenDecimals = marketData?.shortToken.decimals ?? 0
 
-    let longTokenPrice = marketData?.longToken.price.min ?? 0n
-    let shortTokenPrice = marketData?.shortToken.price.min ?? 0n
+    let longTokenPrice = tokenPricesData?.longTokenPrice?.min ?? 0n
+    let shortTokenPrice = tokenPricesData?.longTokenPrice?.min ?? 0n
 
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
       if (tokenAddress === longTokenAddress) longTokenPrice = tokenPrice ?? 0n
@@ -294,9 +307,9 @@ const Controller = createResetableComponent(function ({reset}) {
 
   const isValidSize = tokenAmount > 0n && tokenAmount <= availableLiquidity
   const isValidPayTokenAmount =
-    !!tokensData &&
+    !!tokenBalancesData &&
     !!payTokenAddress &&
-    payTokenAmount <= (tokensData.get(payTokenAddress)?.balance ?? 0n)
+    payTokenAmount <= (tokenBalancesData.get(payTokenAddress) ?? 0n)
   const isValidTokenAmount = tokenAmount > 0n
   const isValidLeverage = leverage > 0n && leverage <= maxLeverage
   const isValidOrder = isValidLeverage && isValidTokenAmount && isValidPayTokenAmount && isValidSize
@@ -323,7 +336,9 @@ const Controller = createResetableComponent(function ({reset}) {
     const tradeMode = latestTradeMode.current
 
     const triggerPrice =
-      latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
+      tradeMode === TradeMode.Market
+        ? 0n
+        : latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
     const acceptablePrice = triggerPrice // TODO: apply price impact
 
     const orderType = (() => {
@@ -477,8 +492,10 @@ const Controller = createResetableComponent(function ({reset}) {
                 >
                   <input
                     className={clsx(
-                      'w-14 rounded-small border-medium border-transparent bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
-                      leverage > 0n && !isValidLeverage && 'border-danger-500',
+                      'w-14 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+                      leverage > 0n && !isValidLeverage
+                        ? 'border-danger-500'
+                        : 'border-transparent',
                     )}
                     type='text'
                     aria-label='Leverage value'
@@ -542,7 +559,7 @@ const Controller = createResetableComponent(function ({reset}) {
               <DropdownMenu aria-label='Change collateral' onAction={handleCollateralChange}>
                 {availableCollateralTokenAddresses.map(tokenAddress => (
                   <DropdownItem key={tokenAddress}>
-                    {tokensData ? tokensData.get(tokenAddress)?.symbol : ''}
+                    {tokensMetadata.get(tokenAddress)?.symbol ?? ''}
                   </DropdownItem>
                 ))}
               </DropdownMenu>

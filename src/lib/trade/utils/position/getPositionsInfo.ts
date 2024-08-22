@@ -1,10 +1,11 @@
-import type {Token} from '@/constants/tokens'
+import type {StarknetChainId} from 'satoru-sdk'
+
+import {getTokensMetadata, type Token} from '@/constants/tokens'
 import {getBasisPoints} from '@/lib/trade/numbers/getBasisPoints'
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Position, PositionsData} from '@/lib/trade/services/fetchPositions'
 import type {PositionConstants} from '@/lib/trade/services/fetchPositionsConstants'
-import type {Price} from '@/lib/trade/services/fetchTokenPrices'
-import type {TokenData, TokensData} from '@/lib/trade/services/fetchTokensData'
+import type {Price, TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import type {ReferralInfo} from '@/lib/trade/services/referral/fetchReferralInfo'
 import {getPositionFee} from '@/lib/trade/utils/fee/getPositionFee'
 import getPriceImpactForPosition from '@/lib/trade/utils/fee/getPriceImpactForPosition'
@@ -43,9 +44,9 @@ export function getEntryPrice(p: {sizeInUsd: bigint; sizeInTokens: bigint; index
 
 export type PositionInfo = Position & {
   marketData: MarketData
-  indexToken: TokenData
-  collateralToken: TokenData
-  pnlToken: TokenData
+  indexToken: Token
+  collateralToken: Token
+  pnlToken: Token
   markPrice: bigint
   entryPrice: bigint | undefined
   liquidationPrice: bigint | undefined
@@ -69,8 +70,9 @@ export type PositionInfo = Position & {
 export type PositionsInfoData = Map<string, PositionInfo>
 
 export default function getPositionsInfo(
+  chainId: StarknetChainId,
   marketsData: MarketsData,
-  tokensData: TokensData,
+  tokenPricesData: TokenPricesData,
   positionsData: PositionsData,
   positionConstants: PositionConstants,
   uiFeeFactor: bigint,
@@ -78,6 +80,7 @@ export default function getPositionsInfo(
   referralInfo?: ReferralInfo | undefined | null,
 ): PositionsInfoData {
   const {minCollateralUsd} = positionConstants
+  const tokensMetadata = getTokensMetadata(chainId)
 
   const positionsInfo = new Map<string, PositionInfo>()
 
@@ -85,16 +88,23 @@ export default function getPositionsInfo(
     const marketData = marketsData.get(position.marketAddress)
     const indexToken = marketData?.indexToken
     const pnlToken = position.isLong ? marketData?.longToken : marketData?.shortToken
-    const collateralToken = tokensData.get(position.collateralTokenAddress)
+    const collateralToken = tokensMetadata.get(position.collateralTokenAddress)
 
     if (!marketData || !indexToken || !pnlToken || !collateralToken) return
 
+    const indexTokenPrice = tokenPricesData.get(marketData.indexToken.address)
+    const collateralTokenPrice = tokenPricesData.get(collateralToken.address)
+    const longTokenPrice = tokenPricesData.get(marketData.longToken.address)
+    const shortTokenPrice = tokenPricesData.get(marketData.shortToken.address)
+
+    if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) return
+
     const markPrice = getMarkPrice({
-      price: indexToken.price,
+      price: indexTokenPrice,
       isLong: position.isLong,
       isIncrease: false,
     })
-    const collateralMinPrice = collateralToken.price.min
+    const collateralMinPrice = collateralTokenPrice.min
     const entryPrice = getEntryPrice({
       sizeInTokens: position.sizeInTokens,
       sizeInUsd: position.sizeInUsd,
@@ -104,18 +114,18 @@ export default function getPositionsInfo(
     const pendingFundingFeesUsd = convertTokenAmountToUsd(
       position.fundingFeeAmount,
       collateralToken.decimals,
-      collateralToken.price.min,
+      collateralTokenPrice.min,
     )
 
     const pendingClaimableFundingFeesLongUsd = convertTokenAmountToUsd(
       position.claimableLongTokenAmount,
       marketData.longToken.decimals,
-      marketData.longToken.price.min,
+      longTokenPrice.min,
     )
     const pendingClaimableFundingFeesShortUsd = convertTokenAmountToUsd(
       position.claimableShortTokenAmount,
       marketData.shortToken.decimals,
-      marketData.shortToken.price.min,
+      shortTokenPrice.min,
     )
 
     const pendingClaimableFundingFeesUsd =
@@ -160,6 +170,7 @@ export default function getPositionsInfo(
 
     const pnl = getPositionPnlUsd({
       marketInfo: marketData,
+      tokenPricesData,
       sizeInUsd: position.sizeInUsd,
       sizeInTokens: position.sizeInTokens,
       markPrice,
