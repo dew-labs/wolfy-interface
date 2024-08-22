@@ -1,4 +1,5 @@
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {getOppositeCollateral} from '@/lib/trade/utils/market/getOppositeCollateral'
 
 import getSwapStats from './getStapStats'
@@ -33,12 +34,20 @@ export interface SwapPathStats {
 
 export default function getSwapPathStats(p: {
   marketsData: MarketsData
+  tokenPricesData: TokenPricesData
   swapPath: string[]
   initialCollateralAddress: string
   usdIn: bigint
   shouldApplyPriceImpact: boolean
 }): SwapPathStats | undefined {
-  const {marketsData, swapPath, initialCollateralAddress, usdIn, shouldApplyPriceImpact} = p
+  const {
+    marketsData,
+    swapPath,
+    initialCollateralAddress,
+    usdIn,
+    shouldApplyPriceImpact,
+    tokenPricesData,
+  } = p
 
   if (swapPath.length === 0) {
     return undefined
@@ -66,6 +75,7 @@ export default function getSwapPathStats(p: {
 
     const swapStep = getSwapStats({
       marketInfo,
+      tokenPricesData,
       tokenInAddress,
       tokenOutAddress,
       usdIn: usdOut,

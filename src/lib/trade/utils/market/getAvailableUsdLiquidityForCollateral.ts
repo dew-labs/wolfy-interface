@@ -1,20 +1,22 @@
 import {PRECISION} from '@/lib/trade/numbers/constants'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 
 import {getPoolUsdWithoutPnl} from './getPoolUsdWithoutPnl'
 import {getReservedUsd} from './getReservedUsd'
 
 export default function getAvailableUsdLiquidityForCollateral(
   marketInfo: MarketData,
+  tokenPricesData: TokenPricesData,
   isLong: boolean,
 ) {
-  const poolUsd = getPoolUsdWithoutPnl(marketInfo, isLong, 'min')
+  const poolUsd = getPoolUsdWithoutPnl(marketInfo, tokenPricesData, isLong, 'min')
 
   if (marketInfo.isSpotOnly) {
     return poolUsd
   }
 
-  const reservedUsd = getReservedUsd(marketInfo, isLong)
+  const reservedUsd = getReservedUsd(marketInfo, tokenPricesData, isLong)
   const maxReserveFactor = isLong ? marketInfo.reserveFactorLong : marketInfo.reserveFactorShort
 
   if (maxReserveFactor === 0n) {

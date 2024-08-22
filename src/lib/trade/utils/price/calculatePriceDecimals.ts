@@ -1,16 +1,14 @@
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import {type TokensData} from '@/lib/trade/services/fetchTokensData'
+import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 
 export default function calculatePriceDecimals(
   tokenAddress: string,
-  tokensData: TokensData,
+  tokenPrice?: Price | undefined,
   decimals = USD_DECIMALS,
 ) {
-  const token = tokensData.get(tokenAddress)
+  if (!tokenPrice) return
 
-  if (!token) return
-
-  const price = token.price.min
+  const price = tokenPrice.min
 
   if (price === 0n) return 2
   const priceNumber = Number(price.toString()) / Math.pow(10, decimals)

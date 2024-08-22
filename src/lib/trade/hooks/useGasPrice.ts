@@ -15,7 +15,7 @@ function createGetGasPriceQueryOptions(wallet: WalletAccount | undefined) {
       : skipToken,
     refetchInterval: 60000, // 1 minute
     refetchIntervalInBackground: false,
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })

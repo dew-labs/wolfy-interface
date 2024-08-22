@@ -2,7 +2,9 @@ import {type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, use
 import {useLatest} from 'react-use'
 
 import {LEVERAGE_DECIMALS, LEVERAGE_PRECISION} from '@/constants/config'
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import {getTokensMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -19,16 +21,18 @@ export default function usePayToken(
   tokenAmountUsd: bigint,
   setTokenAmountUsd: Dispatch<SetStateAction<bigint>>,
 ) {
-  const tokensData = useTokensData()
+  const [chainId] = useChainId()
+  const tokensMetadata = getTokensMetadata(chainId)
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
+  const payTokenMinPriceData = useTokenPrices(data => data.get(payTokenAddress ?? '')?.min)
 
-  const payTokenData = payTokenAddress ? tokensData?.get(payTokenAddress) : undefined
+  const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
   const latestPayTokenDecimals = useLatest(payTokenDecimals)
   const payTokenPrice = (() => {
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) return tokenPrice ?? 0n
-    return payTokenData?.price.min ?? 0n
+    return payTokenMinPriceData ?? 0n
   })()
   const latestPayTokenPrice = useLatest(payTokenPrice)
 

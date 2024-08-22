@@ -1,15 +1,16 @@
 import {useState} from 'react'
 import {useLatest} from 'react-use'
 
-import useTokensData from '@/lib/trade/hooks/useTokensData'
+import {getTokenMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 
 export default function useCollateralToken() {
-  const tokensData = useTokensData()
+  const [chainId] = useChainId()
 
   const [collateralTokenAddress, setCollateralAddress] = useState<string>()
   const latestCollateralTokenAddress = useLatest(collateralTokenAddress)
   const collateralTokenData = collateralTokenAddress
-    ? tokensData?.get(collateralTokenAddress)
+    ? getTokenMetadata(chainId, collateralTokenAddress)
     : undefined
   const [collateralTokenAmount, setCollateralTokenAmount] = useState(0n)
   const latestCollateralTokenAmount = useLatest(collateralTokenAmount)

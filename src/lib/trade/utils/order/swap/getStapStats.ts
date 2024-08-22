@@ -1,4 +1,5 @@
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {applySwapImpactWithCap} from '@/lib/trade/utils/fee/applySwapImpactWithCap'
 import getPriceImpactForSwap from '@/lib/trade/utils/fee/getPriceImpactForSwap'
 import getSwapFee from '@/lib/trade/utils/fee/getSwapFee'
@@ -11,12 +12,20 @@ import type {SwapStats} from './getSwapPathStats'
 
 export default function getSwapStats(p: {
   marketInfo: MarketData
+  tokenPricesData: TokenPricesData
   tokenInAddress: string
   tokenOutAddress: string
   usdIn: bigint
   shouldApplyPriceImpact: boolean
 }): SwapStats {
-  const {marketInfo, tokenInAddress, tokenOutAddress, usdIn, shouldApplyPriceImpact} = p
+  const {
+    marketInfo,
+    tokenInAddress,
+    tokenOutAddress,
+    usdIn,
+    shouldApplyPriceImpact,
+    tokenPricesData,
+  } = p
 
   const tokenIn =
     getTokenPoolType(marketInfo, tokenInAddress) === 'long'
@@ -28,15 +37,28 @@ export default function getSwapStats(p: {
       ? marketInfo.longToken
       : marketInfo.shortToken
 
-  const priceIn = tokenIn.price.min
-  const priceOut = tokenOut.price.max
+  const tokenInPrice = tokenPricesData.get(tokenIn.address)
+  const tokenOutPrice = tokenPricesData.get(tokenOut.address)
+
+  if (!tokenInPrice || !tokenOutPrice) throw new Error('Token prices not found')
+
+  const priceIn = tokenInPrice.min
+  const priceOut = tokenOutPrice.max
 
   const amountIn = convertUsdToTokenAmount(usdIn, tokenIn.decimals, priceIn)
 
   let priceImpactDeltaUsd: bigint
 
   try {
-    priceImpactDeltaUsd = getPriceImpactForSwap(marketInfo, tokenIn, tokenOut, usdIn, usdIn * -1n)
+    priceImpactDeltaUsd = getPriceImpactForSwap(
+      marketInfo,
+      tokenIn,
+      tokenOut,
+      tokenInPrice,
+      tokenOutPrice,
+      usdIn,
+      usdIn * -1n,
+    )
   } catch {
     return {
       swapFeeUsd: 0n,
@@ -69,6 +91,7 @@ export default function getSwapStats(p: {
     const {impactDeltaAmount: positiveImpactAmountTokenOut, cappedDiffUsd} = applySwapImpactWithCap(
       marketInfo,
       tokenOut,
+      tokenOutPrice,
       priceImpactDeltaUsd,
     )
     cappedImpactDeltaUsd = convertTokenAmountToUsd(
@@ -82,6 +105,7 @@ export default function getSwapStats(p: {
       const {impactDeltaAmount: positiveImpactAmountTokenIn} = applySwapImpactWithCap(
         marketInfo,
         tokenIn,
+        tokenInPrice,
         cappedDiffUsd,
       )
       if (positiveImpactAmountTokenIn > 0) {
@@ -96,6 +120,7 @@ export default function getSwapStats(p: {
     const {impactDeltaAmount: negativeImpactAmount} = applySwapImpactWithCap(
       marketInfo,
       tokenIn,
+      tokenInPrice,
       priceImpactDeltaUsd,
     )
     cappedImpactDeltaUsd = convertTokenAmountToUsd(negativeImpactAmount, tokenIn.decimals, priceIn)
@@ -113,6 +138,7 @@ export default function getSwapStats(p: {
 
   const liquidity = getAvailableUsdLiquidityForCollateral(
     marketInfo,
+    tokenPricesData,
     getTokenPoolType(marketInfo, tokenOutAddress) === 'long',
   )
 

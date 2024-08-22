@@ -13,6 +13,7 @@ export interface Token {
   explorerUrl?: string
   reservesUrl?: string
   imageUrl?: string
+  pythFeedId?: string
 }
 
 const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
@@ -44,15 +45,16 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
       //   coingeckoUrl: 'https://www.coingecko.com/en/coins/wrapped-steth',
       // },
       [
-        '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+        '0x07d2da5ff2548727ecdc1c2ec8c9c3b552cbe7a9800abc1f69579e75c01b90a5',
         {
-          name: 'Wolfy ETH',
-          symbol: 'wfETH',
+          name: 'Dew USD',
+          symbol: 'DUSD',
           decimals: 18,
-          address: '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+          address: '0x07d2da5ff2548727ecdc1c2ec8c9c3b552cbe7a9800abc1f69579e75c01b90a5',
           priceDecimals: 18,
-          imageUrl: 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
-          coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
+          imageUrl: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/usdt',
+          pythFeedId: '0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588',
         },
       ],
       [
@@ -65,6 +67,20 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/usdc',
+          pythFeedId: '0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588',
+        },
+      ],
+      [
+        '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+        {
+          name: 'Wolfy ETH',
+          symbol: 'wfETH',
+          decimals: 18,
+          address: '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+          priceDecimals: 18,
+          imageUrl: 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
+          pythFeedId: '0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6',
         },
       ],
       [
@@ -77,6 +93,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/26433/standard/starknet.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/strk',
+          pythFeedId: '0xf43ec4cc582241061daceec80cbbdeb0ffae4f5d9870c96a63b08d76aa8bea5e',
         },
       ],
       [
@@ -89,18 +106,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/1/standard/bitcoin.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/btc',
-        },
-      ],
-      [
-        '0x048083d5ab62164271184b3333e3acf9ef88b99e6d1f6a27e7a1e8b7e75d2127',
-        {
-          name: 'WUSD',
-          symbol: 'WUSD',
-          decimals: 18,
-          address: '0x048083d5ab62164271184b3333e3acf9ef88b99e6d1f6a27e7a1e8b7e75d2127',
-          priceDecimals: 18,
-          imageUrl: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
-          coingeckoUrl: 'https://www.coingecko.com/en/coins/usdt',
+          pythFeedId: '0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b',
         },
       ],
     ]),

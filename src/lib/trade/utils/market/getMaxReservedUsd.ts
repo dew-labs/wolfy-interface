@@ -1,10 +1,15 @@
 import {PRECISION} from '@/lib/trade/numbers/constants'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 
 import {getPoolUsdWithoutPnl} from './getPoolUsdWithoutPnl'
 
-export function getMaxReservedUsd(marketInfo: MarketData, isLong: boolean) {
-  const poolUsd = getPoolUsdWithoutPnl(marketInfo, isLong, 'min')
+export function getMaxReservedUsd(
+  marketInfo: MarketData,
+  tokenPricesData: TokenPricesData,
+  isLong: boolean,
+) {
+  const poolUsd = getPoolUsdWithoutPnl(marketInfo, tokenPricesData, isLong, 'min')
 
   let reserveFactor = isLong ? marketInfo.reserveFactorLong : marketInfo.reserveFactorShort
 

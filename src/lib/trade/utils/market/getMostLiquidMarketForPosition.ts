@@ -1,4 +1,5 @@
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 
 import {getAvailableUsdLiquidityForPosition} from './getAvailableUsdLiquidityForPosition'
 import isMarketCollateral from './isMarketCollateral'
@@ -6,6 +7,7 @@ import isMarketIndexToken from './isMarketIndexToken'
 
 export default function getMostLiquidMarketForPosition(
   marketsInfo: MarketData[],
+  tokenPricesData: TokenPricesData,
   indexTokenAddress: string,
   collateralTokenAddress: string | undefined,
   isLong: boolean,
@@ -25,7 +27,7 @@ export default function getMostLiquidMarketForPosition(
     }
 
     if (isCandidate) {
-      const liquidity = getAvailableUsdLiquidityForPosition(marketInfo, isLong)
+      const liquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, isLong)
 
       if (liquidity && liquidity > (bestLiquidity ?? 0)) {
         bestMarket = marketInfo

@@ -3,27 +3,25 @@ import type {StarknetChainId} from 'satoru-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import fetchTokensData from '@/lib/trade/services/fetchTokensData'
+import fetchTokenBalances from '@/lib/trade/services/fetchTokenBalances'
 
-function createGetTokensQueryOptions(chainId: StarknetChainId, accountAddress: string | undefined) {
+function createGetTokenBalancesQueryOptions(chainId: StarknetChainId, accountAddress: string) {
   return queryOptions({
-    queryKey: ['tokens', chainId, accountAddress],
+    queryKey: ['tokenBalances', chainId, accountAddress] as const,
     queryFn: async () => {
-      return await fetchTokensData(chainId, accountAddress)
+      return await fetchTokenBalances(chainId, accountAddress)
     },
     refetchInterval: 5000,
     refetchIntervalInBackground: false,
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function useTokensData() {
+export default function useTokenBalances() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
-
-  const {data: tokensData} = useQuery(createGetTokensQueryOptions(chainId, accountAddress))
-
-  return tokensData
+  const {data} = useQuery(createGetTokenBalancesQueryOptions(chainId, accountAddress))
+  return data
 }

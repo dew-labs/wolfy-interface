@@ -1,5 +1,6 @@
+import type {Token} from '@/constants/tokens'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import type {TokenData} from '@/lib/trade/services/fetchTokensData'
+import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import {getTokenPoolType} from '@/lib/trade/utils/market/getTokenPoolType'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import roundUpMagnitudeDivision from '@/utils/numbers/bigint/roundUpMagnitudeDivision'
@@ -7,7 +8,8 @@ import expandDecimals from '@/utils/numbers/expandDecimals'
 
 export function applySwapImpactWithCap(
   marketInfo: MarketData,
-  token: TokenData,
+  token: Token,
+  tokenPrice: Price,
   priceImpactDeltaUsd: bigint,
 ) {
   const tokenPoolType = getTokenPoolType(marketInfo, token.address)
@@ -19,7 +21,7 @@ export function applySwapImpactWithCap(
   }
 
   const isLongCollateral = tokenPoolType === 'long'
-  const price = priceImpactDeltaUsd > 0 ? token.price.max : token.price.min
+  const price = priceImpactDeltaUsd > 0 ? tokenPrice.max : tokenPrice.min
 
   let impactDeltaAmount: bigint
   let cappedDiffUsd = 0n

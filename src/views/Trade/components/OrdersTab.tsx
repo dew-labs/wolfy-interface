@@ -17,6 +17,7 @@ import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import useOrders from '@/lib/trade/hooks/useOrders'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
@@ -36,6 +37,7 @@ export default memo(function OrdersTab() {
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
+  const tokenPricesData = useTokenPrices(data => data)
 
   const orders = useOrders()
 
@@ -74,25 +76,36 @@ export default memo(function OrdersTab() {
         <TableColumn>Mark Price</TableColumn>
         <TableColumn> </TableColumn>
       </TableHeader>
-      <TableBody emptyContent={'No order.'} items={orders ?? []}>
+      <TableBody emptyContent={'No order.'} items={orders}>
         {order => {
+          if (!tokenPricesData) return <></>
+
+          const indexTokenPrice = tokenPricesData.get(order.indexToken.address)
+
+          if (!indexTokenPrice) return <></>
+
           const indexName = getMarketIndexName(order.marketData)
           const poolName = getMarketPoolName(order.marketData)
 
+          const initialCollateralToken = order.initialCollateralToken
+          const targetCollateralToken = order.targetCollateralToken
+
           const collateralText = (function () {
-            const initialCollateralToken = order.initialCollateralToken
-            const targetCollateralToken = order.targetCollateralToken
+            const initialCollateralTokenPrice = tokenPricesData.get(initialCollateralToken.address)
+            const targetCollateralTokenPrice = tokenPricesData.get(targetCollateralToken.address)
+
+            if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
 
             const collateralUsd = convertTokenAmountToUsd(
               order.initialCollateralDeltaAmount,
               initialCollateralToken.decimals,
-              initialCollateralToken.price.min,
+              initialCollateralTokenPrice.min,
             )
 
             const targetCollateralAmount = convertUsdToTokenAmount(
               collateralUsd,
               targetCollateralToken.decimals,
-              targetCollateralToken.price.min,
+              targetCollateralTokenPrice.min,
             )
 
             const tokenAmountText = formatTokenAmount(
@@ -107,7 +120,7 @@ export default memo(function OrdersTab() {
           const triggerPriceText = `${order.triggerThresholdType} ${formatUsd(order.triggerPrice)}`
 
           const markPrice = getMarkPrice({
-            price: order.indexToken.price,
+            price: indexTokenPrice,
             isIncrease: isIncreaseOrderType(order.orderType),
             isLong: order.isLong,
           })
