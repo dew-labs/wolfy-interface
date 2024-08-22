@@ -1,7 +1,7 @@
 import type {CandlestickData, UTCTimestamp} from 'lightweight-charts'
 
-import type {ChartInterval} from '@/lib/tvchart/datafeed/Datafeed.ts'
-import {ChartIntervalTime} from '@/lib/tvchart/datafeed/Datafeed.ts'
+import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
+import {ChartIntervalTime} from '@/lib/tvchart/chartdata/ChartData.ts'
 
 export interface BinanceChartData {
   e: string
