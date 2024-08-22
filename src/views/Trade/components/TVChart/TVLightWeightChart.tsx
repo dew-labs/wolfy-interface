@@ -1,4 +1,5 @@
 import type {
+  CandlestickData,
   CandlestickSeriesPartialOptions,
   SeriesDataItemTypeMap,
   UTCTimestamp,
@@ -14,9 +15,7 @@ import {
   CHART_STYLE,
 } from '@/lib/tvchart/constants.ts'
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
-import binanaceDataToChartData, {
-  type BinanceChartData,
-} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
+import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
 
 function TVLightWeightChart(props: {
   textColor: string
@@ -87,7 +86,9 @@ function TVLightWeightChart(props: {
         const binanceData = JSON.parse(event.data)
 
         if (binanceData) {
-          newSeries.update(binanaceDataToChartData(binanceData as BinanceChartData, props.interval))
+          newSeries.update(
+            parseChartData(binanceData, props.interval) as CandlestickData<UTCTimestamp>,
+          )
         }
       }
 
