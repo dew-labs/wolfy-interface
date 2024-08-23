@@ -12,8 +12,8 @@ import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {
   CANDLE_STICK_SERIES,
   CANDLE_STICKS_TO_RIGHT_BORDER,
-  CHART_DATA_WS,
   CHART_STYLE,
+  getChartWssUrl,
 } from '@/lib/tvchart/constants.ts'
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
@@ -105,7 +105,8 @@ export default memo(function TVLightWeightChart(props: {
 
   useEffect(
     function updateRealTimeData() {
-      const chartDataWS = new WebSocket(CHART_DATA_WS + props.interval)
+      const wssUrl = getChartWssUrl(props.asset, props.interval)
+      const chartDataWS = new WebSocket(wssUrl)
 
       const eventHandler = (event: MessageEvent<unknown>) => {
         if (!chartMainCandlestickSeries.current) return
@@ -127,7 +128,7 @@ export default memo(function TVLightWeightChart(props: {
         chartDataWS.removeEventListener('message', eventHandler)
       }
     },
-    [props.interval],
+    [props.interval, props.asset],
   )
 
   useEffect(function resizeChartWhenContainerResize() {
