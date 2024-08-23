@@ -149,8 +149,14 @@ export default function ClosePositionModal() {
         ? latestPosition.current.collateralAmount
         : latestCollateralTokenAmountToDecrease.current
 
+      const currentPrice =
+        latestPosition.current.markPrice /
+        expandDecimals(1, latestPosition.current.indexToken.decimals)
+
       const triggerPrice = 0n
-      const acceptablePrice = latestPosition.current.markPrice
+      // TODO: 0.3% price impact
+      const factor = isLong ? 997n : 1003n
+      const acceptablePrice = (currentPrice * factor) / 1000n
 
       const orderType = OrderType.MarketDecrease
 
