@@ -47,7 +47,8 @@ export default memo(function UserInformation() {
         variant='light'
         selectedKey={tab}
         onSelectionChange={handleChangeTab}
-        aria-label='Execution type'
+        aria-label='Tabs'
+        className='mt-2'
       >
         {AVAILABLE_TABS.map(tab => (
           <Tab key={tab} title={TABS_LABEL[tab]} />

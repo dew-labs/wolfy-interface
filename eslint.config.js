@@ -33,7 +33,7 @@ import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
-import pluginTestingLibrary from 'eslint-plugin-testing-library'
+// import pluginTestingLibrary from 'eslint-plugin-testing-library' // TODO: check why this plugin is causing issues
 import pluginVitest from 'eslint-plugin-vitest'
 import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
@@ -87,7 +87,7 @@ function createApplyTo(include, exclude = []) {
   }
 }
 
-const applyToAll = createApplyTo(['**/*.?(c|m)[jt]s?(x)', '**/*.json?(c|5)'])
+const applyToAll = createApplyTo(['**/*.{?(c|m)[jt]s?(x),json?(c|5)}'])
 const applyToScript = createApplyTo(['**/*.?(c|m)[jt]s?(x)'])
 const applyToJson = createApplyTo(
   ['**/*.json'],
@@ -104,19 +104,19 @@ const applyToVitest = createApplyTo(
   ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
   ['**/cypress/**/*'],
 )
-const applyToVitestNotReact = createApplyTo(
-  ['**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)', '**/!(use)*.{test,spec}.?(c|m)[jt]s!(x)'],
-  ['**/cypress/**/*'],
-)
-const applyToVitestReact = createApplyTo(
-  [
-    '**/__tests__/**/*.?(c|m)[jt]sx',
-    '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
-    '**/*.{test,spec}.?(c|m)[jt]sx',
-    '**/use*.{test,spec}.?(c|m)[jt]s?(x)',
-  ],
-  ['**/cypress/**/*'],
-)
+// const applyToVitestNotReact = createApplyTo(
+//   ['**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)', '**/!(use)*.{test,spec}.?(c|m)[jt]s!(x)'],
+//   ['**/cypress/**/*'],
+// )
+// const applyToVitestReact = createApplyTo(
+//   [
+//     '**/__tests__/**/*.?(c|m)[jt]sx',
+//     '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
+//     '**/*.{test,spec}.?(c|m)[jt]sx',
+//     '**/use*.{test,spec}.?(c|m)[jt]s?(x)',
+//   ],
+//   ['**/cypress/**/*'],
+// )
 
 //------------------------------------------------------------------------------
 
@@ -366,6 +366,7 @@ const reactConfigs = [
           staticHooks: {
             useState: [false, true, true], // means [unstable, stable, stable]
             useAtom: [false, true],
+            useSetAtom: true,
             useMutative: [false, true],
             useMutativeReducer: [false, true],
             useLatest: true,
@@ -407,8 +408,8 @@ const reactConfigs = [
 // ]
 
 const testConfigs = [
-  ...applyToVitestNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
-  ...applyToVitestReact('testing/react', pluginTestingLibrary.configs['flat/react']),
+  // ...applyToVitestNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
+  // ...applyToVitestReact('testing/react', pluginTestingLibrary.configs['flat/react']),
   ...applyToVitest('testing/vitest', {
     plugins: {
       vitest: pluginVitest,

@@ -33,8 +33,8 @@ import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/sendOrder'
-import useTradeMode, {TradeMode} from '@/lib/trade/states/useTradeMode'
-import useTradeType, {TradeType} from '@/lib/trade/states/useTradeType'
+import useTradeMode, {TRADE_MODE_LABEL, TradeMode} from '@/lib/trade/states/useTradeMode'
+import useTradeType, {TRADE_TYPE_LABEL, TradeType} from '@/lib/trade/states/useTradeType'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
@@ -51,12 +51,6 @@ import usePayToken from './hooks/usePayToken'
 import useToken from './hooks/useToken'
 import TokenInputs from './TokenInputs'
 
-const TRADE_TYPE_LABEL: Record<TradeType, string> = {
-  [TradeType.Long]: 'Long',
-  [TradeType.Short]: 'Short',
-  [TradeType.Swap]: 'Swap',
-}
-
 const AVAILABLE_TRADE_MODES: Record<TradeType, TradeMode[]> = {
   [TradeType.Long]: [
     TradeMode.Market,
@@ -69,12 +63,6 @@ const AVAILABLE_TRADE_MODES: Record<TradeType, TradeMode[]> = {
     // TradeMode.Trigger
   ],
   [TradeType.Swap]: [TradeMode.Market, TradeMode.Limit],
-}
-
-const TRADE_MODE_LABEL: Record<TradeMode, string> = {
-  [TradeMode.Market]: 'Market',
-  [TradeMode.Limit]: 'Limit',
-  [TradeMode.Trigger]: 'TP/SL',
 }
 
 const SUPPORTED_TRADE_TYPES: TradeType[] = [
@@ -233,7 +221,7 @@ const Controller = createResetableComponent(function ({reset}) {
 
   const priceDecimals =
     tokenAddress && tokenPricesData
-      ? calculatePriceDecimals(tokenAddress, tokenPricesData.tokenPrice)
+      ? calculatePriceDecimals(tokenPricesData.tokenPrice?.min)
       : undefined
 
   const liquidationPrice =
@@ -339,7 +327,7 @@ const Controller = createResetableComponent(function ({reset}) {
       tradeMode === TradeMode.Market
         ? 0n
         : latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
-    const acceptablePrice = triggerPrice // TODO: apply price impact
+    const acceptablePrice = latestDerivedTokenPrice.current // TODO: apply price impact
 
     const orderType = (() => {
       // Swap not supported yet
@@ -390,7 +378,7 @@ const Controller = createResetableComponent(function ({reset}) {
         error: error => {
           return (
             <>
-              <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
+              <div>{errorMessageOrUndefined(error) ?? 'Place order failed.'}</div>
             </>
           )
         },
@@ -418,7 +406,7 @@ const Controller = createResetableComponent(function ({reset}) {
             size='lg'
             selectedKey={tradeType}
             onSelectionChange={handleChangeTradeType}
-            aria-label='Order type'
+            aria-label='Trade type'
             classNames={{
               tabList: 'gap-2 w-full relative',
             }}
@@ -432,7 +420,7 @@ const Controller = createResetableComponent(function ({reset}) {
             variant='underlined'
             selectedKey={tradeMode}
             onSelectionChange={handleChangeTradeMode}
-            aria-label='Execution type'
+            aria-label='Trade mode'
           >
             {AVAILABLE_TRADE_MODES[tradeType].map(type => (
               <Tab key={type} title={TRADE_MODE_LABEL[type]} />

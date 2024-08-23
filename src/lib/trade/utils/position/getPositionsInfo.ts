@@ -67,7 +67,7 @@ export type PositionInfo = Position & {
   pendingClaimableFundingFeesUsd: bigint
 }
 
-export type PositionsInfoData = Map<string, PositionInfo>
+export type PositionsInfoData = Map<bigint, PositionInfo>
 
 export default function getPositionsInfo(
   chainId: StarknetChainId,
@@ -82,7 +82,7 @@ export default function getPositionsInfo(
   const {minCollateralUsd} = positionConstants
   const tokensMetadata = getTokensMetadata(chainId)
 
-  const positionsInfo = new Map<string, PositionInfo>()
+  const positionsInfo = new Map<bigint, PositionInfo>()
 
   positionsData.forEach((position, positionKey) => {
     const marketData = marketsData.get(position.marketAddress)

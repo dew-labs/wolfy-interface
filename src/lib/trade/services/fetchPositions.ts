@@ -18,14 +18,14 @@ import type {Market} from './fetchMarkets'
 import type {MarketsData} from './fetchMarketsData'
 import type {Price, TokenPricesData} from './fetchTokenPrices'
 
-export function getStringReprenetationOfPosition(
-  account: string,
-  marketAddress: string,
-  collateralAddress: string,
-  isLong: boolean,
-) {
-  return `${account}:${marketAddress}:${collateralAddress}:${isLong}`
-}
+// export function getStringReprenetationOfPosition(
+//   account: string,
+//   marketAddress: string,
+//   collateralAddress: string,
+//   isLong: boolean,
+// ) {
+//   return `${account}:${marketAddress}:${collateralAddress}:${isLong}`
+// }
 
 export function convertToContractPrice(price: bigint, tokenDecimals: number) {
   return price / expandDecimals(1, tokenDecimals)
@@ -87,8 +87,7 @@ export interface PendingPositionUpdate {
 }
 
 export interface Position {
-  key: string
-  contractKey: bigint
+  key: bigint
   account: string
   marketAddress: string
   collateralTokenAddress: string
@@ -106,7 +105,7 @@ export interface Position {
   pendingUpdate?: PendingPositionUpdate
 }
 
-export type PositionsData = Map<string, Position>
+export type PositionsData = Map<bigint, Position>
 
 export default async function fetchPositions(
   chainId: StarknetChainId,
@@ -180,11 +179,11 @@ export default async function fetchPositions(
     UI_FEE_RECEIVER_ADDRESS,
   )
 
-  const positionsData = new Map<string, Position>()
+  const positionsData = new Map<bigint, Position>()
 
   positionsInfo.forEach((positionInfo, index) => {
-    const contractKey = positionHashes[index]
-    if (!contractKey) return
+    const key = positionHashes[index]
+    if (!key) return
 
     const {position, fees} = positionInfo
     const {
@@ -205,16 +204,15 @@ export default async function fetchPositions(
     const marketAddress = toStarknetHexString(market)
     const collateralTokenAddress = toStarknetHexString(collateral_token)
 
-    const stringPosition = getStringReprenetationOfPosition(
-      accountAddress,
-      marketAddress,
-      collateralTokenAddress,
-      is_long,
-    )
+    // const stringPosition = getStringReprenetationOfPosition(
+    //   accountAddress,
+    //   marketAddress,
+    //   collateralTokenAddress,
+    //   is_long,
+    // )
 
-    positionsData.set(stringPosition, {
-      key: stringPosition,
-      contractKey: contractKey,
+    positionsData.set(key, {
+      key: key,
       account: accountAddress,
       marketAddress: marketAddress,
       collateralTokenAddress: collateralTokenAddress,

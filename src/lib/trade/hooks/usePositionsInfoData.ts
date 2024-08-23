@@ -11,11 +11,11 @@ import useUiFeeFactor from './useUiFeeFactor'
 export default function usePositionsInfoData() {
   const [chainId] = useChainId()
   const marketsData = useMarketsData()
-  const positionsData = usePositionsData()
   const positionConstants = usePositionConstants()
   const uiFeeFactor = useUiFeeFactor()
   const referralInfo = useReferralInfo()
   const tokenPricesData = useTokenPrices(data => data)
+  const positionsData = usePositionsData()
 
   let positionsInfoData
 

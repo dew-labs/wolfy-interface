@@ -8,6 +8,7 @@ import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import {TradeType} from '@/lib/trade/states/useTradeType'
+import {cleanNumberString} from '@/utils/numberInputs'
 import abs from '@/utils/numbers/bigint/abs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 
@@ -15,10 +16,6 @@ const INPUT_2_LABEL: Record<TradeType, string> = {
   [TradeType.Long]: 'To long',
   [TradeType.Short]: 'To short',
   [TradeType.Swap]: 'To receive',
-}
-
-function cleanNumberString(str: string) {
-  return str.replace(/[^0-9.]/g, '').replace(/^0+(?=\d)/, '')
 }
 
 interface Props {

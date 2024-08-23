@@ -19,7 +19,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 3
+          return failureCount < 1
         },
       },
       mutations: {
@@ -27,7 +27,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 3
+          return failureCount < 1
         },
       },
     },
