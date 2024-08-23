@@ -1,5 +1,16 @@
-export const CHART_HISTORY_DATA_URL = 'https://testnet.binancefuture.com/fapi/v1/markPriceKlines?'
-export const CHART_DATA_WS = 'wss://fstream.binance.com/ws/ethusdt@kline_'
+import type {ChartInterval} from './chartdata/ChartData'
+
+export function getChartHistoryUrl(symbol: string, interval: ChartInterval) {
+  return (
+    'https://testnet.binancefuture.com/fapi/v1/markPriceKlines?' +
+    new URLSearchParams({symbol, interval}).toString()
+  )
+}
+
+export function getChartWssUrl(symbol: string, interval: ChartInterval) {
+  return `wss://fstream.binance.com/ws/${symbol}usdt@kline_${interval}`
+}
+
 export const CANDLE_STICKS_TO_RIGHT_BORDER = 5
 export const CHART_STYLE = {
   BACKGROUND_COLOR: 'transparent',
