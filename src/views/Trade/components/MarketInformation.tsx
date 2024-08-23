@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {Selection} from '@react-types/shared'
-import {memo, useCallback, useMemo, useState} from 'react'
+import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
 import {getTokensMetadata} from '@/constants/tokens'
@@ -157,12 +157,14 @@ export default memo(function MarketInformation() {
     [indexTokensWithLiquidityInformationList],
   )
 
-  if (
-    (!tokenAddress || (dataIsLoaded && !indexTokenAddressList.includes(tokenAddress))) &&
-    indexTokenAddressList[0]
-  ) {
-    setTokenAddress(indexTokenAddressList[0])
-  }
+  useEffect(() => {
+    if (
+      (!tokenAddress || (dataIsLoaded && !indexTokenAddressList.includes(tokenAddress))) &&
+      indexTokenAddressList[0]
+    ) {
+      setTokenAddress(indexTokenAddressList[0])
+    }
+  }, [dataIsLoaded, indexTokenAddressList, setTokenAddress, tokenAddress])
 
   const tokenMetadata = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
 

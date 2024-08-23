@@ -31,7 +31,7 @@ export default memo(function Chart() {
   }, [])
 
   return (
-    <Card className='my-4 p-2'>
+    <Card className='mt-4 p-2'>
       <div className='w-full'>
         <TVLightWeightTimeFrame
           selectedInterval={chartInterval}
