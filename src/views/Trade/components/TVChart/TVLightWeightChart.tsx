@@ -21,6 +21,7 @@ import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
 const CHART_HEIGHT = 300
 
 export default memo(function TVLightWeightChart(props: {
+  asset: string
   textColor: string
   gridColor: string
   interval: ChartInterval
@@ -81,7 +82,7 @@ export default memo(function TVLightWeightChart(props: {
     })
 
     void (async function updateChartWithHistoricalData() {
-      const initialData = await fetchChartHistoryData('ethusdt', props.interval)
+      const initialData = await fetchChartHistoryData(`${props.asset}usdt`, props.interval)
       if (!chartMainCandlestickSeries.current) return
       chartMainCandlestickSeries.current.setData(initialData)
       if (chartRef.current)
@@ -91,7 +92,7 @@ export default memo(function TVLightWeightChart(props: {
     return () => {
       chart.remove()
     }
-  }, [props.interval])
+  }, [props.interval, props.asset])
 
   useEffect(
     function applyNewChartStyle() {
