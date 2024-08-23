@@ -26,3 +26,9 @@ export function isPosition(type: TradeType): type is TradeType.Long | TradeType.
 export function isIncrease(type: TradeType, mode: TradeMode) {
   return isPosition(type) && isNotTrigger(mode)
 }
+
+export const TRADE_TYPE_LABEL: Record<TradeType, string> = {
+  [TradeType.Long]: 'Long',
+  [TradeType.Short]: 'Short',
+  [TradeType.Swap]: 'Swap',
+}

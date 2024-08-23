@@ -20,3 +20,9 @@ export function useSetTradeMode() {
 export function isNotTrigger(mode: TradeMode): mode is TradeMode.Market | TradeMode.Limit {
   return mode !== TradeMode.Trigger
 }
+
+export const TRADE_MODE_LABEL: Record<TradeMode, string> = {
+  [TradeMode.Market]: 'Market',
+  [TradeMode.Limit]: 'Limit',
+  [TradeMode.Trigger]: 'TP/SL',
+}

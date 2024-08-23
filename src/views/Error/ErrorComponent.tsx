@@ -1,3 +1,5 @@
+import {useEffect} from 'react'
+
 import HeadTags from '@/lib/head/HeadTags'
 
 import style from './ErrorComponent.module.scss'
@@ -9,6 +11,10 @@ interface Props {
 }
 
 export default function ErrorComponent({reset, errorCode, errorMessage}: Readonly<Props>) {
+  useEffect(() => {
+    localStorage.clear()
+  }, [])
+
   return (
     <div className={style.Page}>
       <HeadTags title='Error' />
