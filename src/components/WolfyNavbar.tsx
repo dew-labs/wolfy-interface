@@ -22,12 +22,16 @@ import BoringAvatar from 'boring-avatars'
 import {memo, useCallback, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 
+import wolfyLogoDarkSvg from '@/assets/icons/wolfy-text-dark.svg'
+import wolfyLogoLightSvg from '@/assets/icons/wolfy-text-light.svg'
 import ChainSelect from '@/lib/starknet/components/ChainSelect'
 import ConnectModal from '@/lib/starknet/components/ConnectModal'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import {Theme} from '@/lib/theme/theme'
+import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import useDripFaucet from '@/lib/trade/hooks/useFaucetDrip'
 import {TradeRoute} from '@/routeRegistry'
 import middleEllipsis from '@/utils/middleEllipsis'
@@ -51,6 +55,8 @@ const menuItems = [
 
 export default memo(function WolfyNavbar(props: NavbarProps) {
   const {t} = useTranslation()
+  const [theme] = useCurrentTheme()
+  const logoSvg = theme === Theme.Dark ? wolfyLogoDarkSvg : wolfyLogoLightSvg
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const connect = useConnect()
@@ -70,7 +76,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
       <Navbar
         {...props}
         classNames={{
-          base: cn('border-default-100', {
+          base: cn('mt-4 border-default-100', {
             'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
           }),
           wrapper: 'w-full justify-center',
@@ -83,15 +89,14 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
       >
         <NavbarMenuToggle className='text-default-400 md:hidden' />
         {/* Left Content */}
-        <NavbarBrand className='flex-grow-0'>
-          {/* <div className='rounded-full bg-foreground text-background'>
-            <Icon icon='solar:alt-arrow-right-linear' />
-          </div> */}
-          <span className='text-large font-medium'>{t('Wolfy')}</span>
+        <NavbarBrand className='flex flex-grow-0'>
+          <div className='mb-3 w-24'>
+            <img src={logoSvg} alt='Wolfy Trade ' />
+          </div>
         </NavbarBrand>
 
         {/* Center Content */}
-        <NavbarContent justify='start'>
+        <NavbarContent justify='start' className='align-center flex'>
           {menuItems.map(item => {
             return (
               <NavbarItem key={item.label}>

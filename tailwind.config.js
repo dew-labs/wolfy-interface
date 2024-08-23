@@ -12,5 +12,32 @@ export default {
     extend: {},
   },
   darkMode: 'class',
-  plugins: [nextui()],
+  plugins: [
+    nextui({
+      themes: {
+        dark: {
+          colors: {
+            primary: {
+              // DEFAULT: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',
+              DEFAULT: '#9b1629',
+              foreground: '#FFF',
+            },
+            // focus: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',
+            focus: '#9b1629',
+          },
+        },
+        light: {
+          colors: {
+            primary: {
+              // DEFAULT: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',
+              DEFAULT: '#9b1629',
+              foreground: '#FFF',
+            },
+            // focus: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',
+            focus: '#9b1629',
+          },
+        },
+      },
+    }),
+  ],
 }
