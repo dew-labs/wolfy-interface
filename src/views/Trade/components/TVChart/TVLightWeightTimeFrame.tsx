@@ -1,10 +1,10 @@
 import {Tab, Tabs} from '@nextui-org/react'
-import type {MemoizedCallbackOrDispatch} from 'react'
+import {memo, type MemoizedCallbackOrDispatch} from 'react'
 import type {Key} from 'react-aria-components'
 
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 
-function TVLightWeightTimeFrame(props: {
+export default memo(function TVLightWeightTimeFrame(props: {
   selectedInterval: ChartInterval
   onSelectInterval: MemoizedCallbackOrDispatch<(key: Key) => void>
 }) {
@@ -24,6 +24,4 @@ function TVLightWeightTimeFrame(props: {
       </Tabs>
     </div>
   )
-}
-
-export default TVLightWeightTimeFrame
+})

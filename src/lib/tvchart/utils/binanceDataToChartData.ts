@@ -1,5 +1,6 @@
 import {type Static, Type} from '@sinclair/typebox'
 import {TypeCompiler} from '@sinclair/typebox/compiler'
+import type {UTCTimestamp} from 'lightweight-charts'
 
 import type {ChartData, ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {ChartIntervalTime} from '@/lib/tvchart/chartdata/ChartData.ts'
@@ -29,7 +30,7 @@ export function binanaceDataToChartData(
   const rounded = new Date(Math.floor(date.getTime() / coeff) * coeff)
 
   return {
-    time: rounded.getTime() / 1000,
+    time: (rounded.getTime() / 1000) as UTCTimestamp,
     open: Number(binanceData.k.o),
     high: Number(binanceData.k.h),
     low: Number(binanceData.k.l),

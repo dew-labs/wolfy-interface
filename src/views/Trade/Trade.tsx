@@ -25,7 +25,7 @@ export default function Trade() {
           {...skipTargetProps('main-content')}
         >
           <div className='flex w-full flex-row gap-4'>
-            <div className='w-full'>
+            <div className='max-w-[calc(100%_-_21rem)] flex-1'>
               <MarketInformation />
               <Chart />
               <UserInformation />

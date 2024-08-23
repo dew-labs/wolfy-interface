@@ -1,3 +1,5 @@
+import type {UTCTimestamp} from 'lightweight-charts'
+
 export enum ChartInterval {
   '1m' = '1m',
   '5m' = '5m',
@@ -21,7 +23,7 @@ export enum ChartIntervalTime {
 }
 
 export interface ChartData {
-  time: number
+  time: UTCTimestamp
   low: number
   high: number
   open: number

@@ -6,7 +6,7 @@ export interface ChartConfig {
   gridColor: string
 }
 
-export default function getChartConfig(): ChartConfig {
+export default function useChartConfig(): ChartConfig {
   const [currentTheme] = useCurrentTheme()
   const isDark = currentTheme === Theme.Dark
 

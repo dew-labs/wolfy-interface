@@ -1,11 +1,12 @@
-import type {
-  CandlestickData,
-  CandlestickSeriesPartialOptions,
-  SeriesDataItemTypeMap,
-  UTCTimestamp,
+import {
+  ColorType,
+  createChart,
+  type IChartApi,
+  type ISeriesApi,
+  LineStyle,
 } from 'lightweight-charts'
-import {ColorType, createChart, LineStyle} from 'lightweight-charts'
-import React, {type LegacyRef, useEffect, useMemo, useRef} from 'react'
+import {memo, useEffect, useMemo, useRef} from 'react'
+import {useLatest} from 'react-use'
 
 import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {
@@ -17,38 +18,35 @@ import {
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
 
-function TVLightWeightChart(props: {
+const CHART_HEIGHT = 300
+
+export default memo(function TVLightWeightChart(props: {
   textColor: string
   gridColor: string
   interval: ChartInterval
 }) {
+  const chartContainerRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<IChartApi>()
+  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>()
+
+  // NOTE: Unused?
+  // CHART_STYLE.LINE_COLOR
+  // CHART_STYLE.AREA_TOP_COLOR
+  // CHART_STYLE.AREA_BOTTOM_COLOR
+
   const chartStyle = useMemo(
     () => ({
-      backgroundColor: CHART_STYLE.BACKGROUND_COLOR,
-      lineColor: CHART_STYLE.LINE_COLOR,
-      textColor: props.textColor,
-      areaTopColor: CHART_STYLE.AREA_TOP_COLOR,
-      areaBottomColor: CHART_STYLE.AREA_BOTTOM_COLOR,
-      gridColor: props.gridColor,
-    }),
-    [props.textColor, props.gridColor],
-  )
-
-  const chartContainerRef = useRef<HTMLElement | string>('')
-
-  useEffect(() => {
-    const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: {type: ColorType.Solid, color: chartStyle.backgroundColor},
-        textColor: chartStyle.textColor,
+        background: {type: ColorType.Solid, color: CHART_STYLE.BACKGROUND_COLOR},
+        textColor: props.textColor,
       },
       grid: {
         vertLines: {
-          color: chartStyle.gridColor,
+          color: props.gridColor,
           style: LineStyle.Dashed,
         },
         horzLines: {
-          color: chartStyle.gridColor,
+          color: props.gridColor,
           style: LineStyle.Dashed,
         },
       },
@@ -58,51 +56,91 @@ function TVLightWeightChart(props: {
       timeScale: {
         borderVisible: false,
       },
-      width: (chartContainerRef.current as HTMLElement).clientWidth,
-      height: 300,
+    }),
+    [props.gridColor, props.textColor],
+  )
+  const latestChartStyle = useLatest(chartStyle)
+
+  useEffect(() => {
+    if (!chartContainerRef.current) return
+
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: CHART_HEIGHT,
+      ...latestChartStyle.current,
     })
-    const handleResize = () => {
-      chart.applyOptions({width: (chartContainerRef.current as HTMLElement).clientWidth})
-    }
-    const newSeries = chart.addCandlestickSeries({
+
+    chartRef.current = chart
+
+    chartMainCandlestickSeries.current = chartRef.current.addCandlestickSeries({
       upColor: CANDLE_STICK_SERIES.UP_COLOR,
       downColor: CANDLE_STICK_SERIES.DOWN_COLOR,
       borderVisible: CANDLE_STICK_SERIES.BORDER_VISIBLE,
       wickUpColor: CANDLE_STICK_SERIES.WICK_UP_COLOR,
       wickDownColor: CANDLE_STICK_SERIES.WICK_DOWN_COLOR,
-    } as CandlestickSeriesPartialOptions)
+    })
 
-    const fetchChartData = async () => {
+    void (async function updateChartWithHistoricalData() {
       const initialData = await fetchChartHistoryData('ethusdt', props.interval)
-      newSeries.setData(initialData as SeriesDataItemTypeMap<UTCTimestamp>['Candlestick'][])
-      chart.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
+      if (!chartMainCandlestickSeries.current) return
+      chartMainCandlestickSeries.current.setData(initialData)
+      if (chartRef.current)
+        chartRef.current.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
+    })()
 
+    return () => {
+      chart.remove()
+    }
+  }, [props.interval])
+
+  useEffect(
+    function applyNewChartStyle() {
+      if (!chartRef.current) return
+
+      chartRef.current.applyOptions(chartStyle)
+    },
+    [chartStyle],
+  )
+
+  useEffect(
+    function updateRealTimeData() {
       const chartDataWS = new WebSocket(CHART_DATA_WS + props.interval)
-      chartDataWS.onmessage = event => {
+
+      const eventHandler = (event: MessageEvent<unknown>) => {
+        if (!chartMainCandlestickSeries.current) return
         if (typeof event.data !== 'string') {
           return
         }
 
-        const binanceData = JSON.parse(event.data)
+        const rawData = JSON.parse(event.data)
+        const data = parseChartData(rawData, props.interval)
 
-        if (binanceData) {
-          newSeries.update(
-            parseChartData(binanceData, props.interval) as CandlestickData<UTCTimestamp>,
-          )
+        if (data) {
+          chartMainCandlestickSeries.current.update(data)
         }
       }
 
-      window.addEventListener('resize', handleResize)
+      chartDataWS.addEventListener('message', eventHandler)
+
+      return () => {
+        chartDataWS.removeEventListener('message', eventHandler)
+      }
+    },
+    [props.interval],
+  )
+
+  useEffect(function resizeChartWhenContainerResize() {
+    const handleResize = () => {
+      if (!chartContainerRef.current || !chartRef.current) return
+      chartRef.current.applyOptions({width: chartContainerRef.current.clientWidth})
     }
-    void fetchChartData()
+
+    window.addEventListener('resize', handleResize)
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      chart.remove()
     }
-  }, [chartStyle, props.interval])
+  }, [])
 
-  return <div ref={chartContainerRef as LegacyRef<HTMLDivElement>} />
-}
-
-export default TVLightWeightChart
+  return <div ref={chartContainerRef} />
+})
