@@ -59,8 +59,11 @@ export default memo(function PositionTab() {
             ? position.pnlAfterFeesPercentage
             : position.pnlPercentage
           return (
-            <TableRow key={position.key}>
+            <TableRow key={position.key} className='relative'>
               <TableCell>
+                <div
+                  className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                />
                 <div>{position.isLong ? t('Long') : t('Short')}</div>
                 <div>{position.marketData.indexToken.symbol}</div>
                 {/* <div className='flex items-center'>
@@ -73,8 +76,10 @@ export default memo(function PositionTab() {
                 </div>
               </TableCell>
               <TableCell>
-                {formatUsd(position.netValue)}
-                <div>{formatDeltaUsd(displayedPnl, displayedPnlPercentage)}</div>
+                <div>{formatUsd(position.netValue)}</div>
+                <div className={position.pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                  {formatDeltaUsd(displayedPnl, displayedPnlPercentage)}
+                </div>
               </TableCell>
               <TableCell>
                 <div>{formatUsd(position.sizeInUsd)}</div>

@@ -328,7 +328,7 @@ const Controller = createResetableComponent(function ({reset}) {
 
     const triggerPrice = tradeMode === TradeMode.Market ? 0n : currentPrice
     // TODO: 0.3% price impact
-    const factor = isLong ? 997n : 1003n
+    const factor = !isLong ? 997n : 1003n
     const acceptablePrice = (currentPrice * factor) / 1000n
 
     const orderType = (() => {
