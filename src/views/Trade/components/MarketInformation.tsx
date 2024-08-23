@@ -26,6 +26,7 @@ import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
+import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import max from '@/utils/numbers/bigint/max'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
@@ -187,11 +188,17 @@ export default memo(function MarketInformation() {
     [setTokenAddress],
   )
 
-  const priceIndex = tokenPricesData && tokenAddress && tokenPricesData.get(tokenAddress)?.max
-  const priceMark = tokenPricesData && tokenAddress && tokenPricesData.get(tokenAddress)?.min
+  const priceIndex = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.max : 0n
+  const priceMark = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.min : 0n
 
-  const priceIndexText = priceIndex ? shrinkDecimals(priceIndex, USD_DECIMALS, 2, true, true) : '--'
-  const priceMarkText = priceMark ? shrinkDecimals(priceMark, USD_DECIMALS, 2, true, true) : '--'
+  const priceDecimals = calculatePriceDecimals(priceIndex)
+
+  const priceIndexText = priceIndex
+    ? shrinkDecimals(priceIndex, USD_DECIMALS, priceDecimals, true, true)
+    : '--'
+  const priceMarkText = priceMark
+    ? shrinkDecimals(priceMark, USD_DECIMALS, priceDecimals, true, true)
+    : '--'
 
   return (
     <Card>

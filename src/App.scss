@@ -30,7 +30,11 @@ $nextUiPrimaryHover: hsl(var(--nextui-primary) / var(--nextui-hover-opacity, var
 $nextUiBackground: hsl(
   var(--nextui-background) / var(--nextui-background-opacity, var(--tw-bg-opacity))
 );
-
+/* stylelint-disable scss/operator-no-newline-after */
+$nextUiForeground: hsl(
+  var(--nextui-primary-foreground) /
+    var(--nextui-primary-foreground-opacity, var(--tw-text-opacity))
+);
 /* stylelint-enable custom-property-pattern */
 
 * {
@@ -52,7 +56,7 @@ $nextUiBackground: hsl(
   padding-block: 0.5rem;
   padding-inline: 1rem;
 
-  color: #fff;
+  color: $nextUiForeground;
   text-decoration: none;
 
   background-color: $nextUiPrimary;
