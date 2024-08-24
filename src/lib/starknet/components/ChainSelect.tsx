@@ -24,7 +24,7 @@ export default memo(function ChainSelect() {
           setChainId(selection.currentKey)
         }}
         classNames={{
-          base: 'min-w-0 w-fit',
+          base: 'min-w-0 w-fit min-w-min',
           innerWrapper: 'w-full min-w-0',
           popoverContent: 'min-w-28',
         }}

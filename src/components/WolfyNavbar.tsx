@@ -79,7 +79,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
           base: cn('border-default-100 py-2', {
             'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
           }),
-          wrapper: 'gap-2 sm:gap-4 w-full justify-center',
+          wrapper: 'gap-2 sm:gap-4 w-full justify-center px-2 sm:px-4',
           item: 'hidden md:flex',
         }}
         height='60px'
@@ -87,10 +87,10 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         onMenuOpenChange={setIsMenuOpen}
         maxWidth='2xl'
       >
-        <NavbarMenuToggle className='text-default-400 md:hidden' />
+        <NavbarMenuToggle className='mb-1 text-default-400 md:hidden' />
         {/* Left Content */}
         <NavbarBrand className='flex flex-grow-0'>
-          <div className='mb-1 w-24'>
+          <div className='mb-1 w-20 md:w-24'>
             <img src={logoSvg} alt='Wolfy Trade ' />
           </div>
         </NavbarBrand>
@@ -129,15 +129,26 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
               </>
             )}
             {isConnected && (
-              <Button
-                onPress={handleOnDrip}
-                color='success'
-                endContent={<Icon icon='fa6-solid:faucet-drip' />}
-                className={'w-full'}
-                isLoading={isDripping}
-              >
-                {!isDripping ? t('Faucet') : t('Dripping...')}
-              </Button>
+              <>
+                <Button
+                  onPress={handleOnDrip}
+                  color='success'
+                  endContent={<Icon icon='fa6-solid:faucet-drip' />}
+                  className={'hidden md:flex'}
+                  isLoading={isDripping}
+                >
+                  {!isDripping ? t('Faucet') : t('Dripping...')}
+                </Button>
+                <Button
+                  onPress={handleOnDrip}
+                  color='success'
+                  className={'md:hidden'}
+                  isLoading={isDripping}
+                  isIconOnly
+                >
+                  <Icon icon='fa6-solid:faucet-drip' />
+                </Button>
+              </>
             )}
             {isConnected && (
               <>
