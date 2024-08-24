@@ -43,12 +43,12 @@ const menuItems = [
     label: 'Trade',
     to: TradeRoute.fullPath,
   },
+  {
+    label: 'Pools',
+    to: '',
+  },
   // {
   //   label: 'Stake',
-  //   to: '',
-  // },
-  // {
-  //   label: 'Pools',
   //   to: '',
   // },
 ]
@@ -76,10 +76,10 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
       <Navbar
         {...props}
         classNames={{
-          base: cn('mt-4 border-default-100', {
+          base: cn('border-default-100 py-2', {
             'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
           }),
-          wrapper: 'w-full justify-center',
+          wrapper: 'gap-2 sm:gap-4 w-full justify-center px-2 sm:px-4',
           item: 'hidden md:flex',
         }}
         height='60px'
@@ -87,20 +87,20 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         onMenuOpenChange={setIsMenuOpen}
         maxWidth='2xl'
       >
-        <NavbarMenuToggle className='text-default-400 md:hidden' />
+        <NavbarMenuToggle className='mb-1 text-default-400 md:hidden' />
         {/* Left Content */}
         <NavbarBrand className='flex flex-grow-0'>
-          <div className='mb-3 w-24'>
+          <div className='mb-1 w-20 md:w-24'>
             <img src={logoSvg} alt='Wolfy Trade ' />
           </div>
         </NavbarBrand>
 
         {/* Center Content */}
-        <NavbarContent justify='start' className='align-center flex'>
+        <NavbarContent justify='start' className='align-center hidden md:flex'>
           {menuItems.map(item => {
             return (
               <NavbarItem key={item.label}>
-                <Link className='text-sm text-default-500' to={item.to}>
+                <Link className='mt-2 text-sm text-default-500' to={item.to}>
                   {t(item.label)}
                 </Link>
               </NavbarItem>
@@ -119,22 +119,36 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   onPress={connect}
                   color='primary'
                   endContent={<Icon icon='solar:alt-arrow-right-linear' />}
-                  className={'w-full'}
+                  className={'hidden md:flex'}
                 >
                   {t('Connect')}
+                </Button>
+                <Button onPress={connect} color='primary' isIconOnly className={'md:hidden'}>
+                  <Icon icon='lets-icons:sign-in-squre-fill' />
                 </Button>
               </>
             )}
             {isConnected && (
-              <Button
-                onPress={handleOnDrip}
-                color='success'
-                endContent={<Icon icon='fa6-solid:faucet-drip' />}
-                className={'w-full'}
-                isLoading={isDripping}
-              >
-                {!isDripping ? t('Faucet') : t('Dripping...')}
-              </Button>
+              <>
+                <Button
+                  onPress={handleOnDrip}
+                  color='success'
+                  endContent={<Icon icon='fa6-solid:faucet-drip' />}
+                  className={'hidden md:flex'}
+                  isLoading={isDripping}
+                >
+                  {!isDripping ? t('Faucet') : t('Dripping...')}
+                </Button>
+                <Button
+                  onPress={handleOnDrip}
+                  color='success'
+                  className={'md:hidden'}
+                  isLoading={isDripping}
+                  isIconOnly
+                >
+                  <Icon icon='fa6-solid:faucet-drip' />
+                </Button>
+              </>
             )}
             {isConnected && (
               <>
@@ -166,7 +180,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         </NavbarContent>
 
         <NavbarMenu
-          className='top-[calc(var(--navbar-height)_-_1px)] max-h-fit bg-default-200/50 pb-6 pt-6 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
+          className='top-[calc(var(--navbar-height)_-_1px)] mt-4 max-h-fit bg-default-200/50 pb-2 pt-4 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
           motionProps={{
             initial: {opacity: 0, y: -20},
             animate: {opacity: 1, y: 0},

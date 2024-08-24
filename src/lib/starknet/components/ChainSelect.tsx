@@ -16,12 +16,18 @@ export default memo(function ChainSelect() {
         aria-label='Select Network'
         items={SUPPORTED_CHAINS}
         selectedKeys={[chainId]}
+        selectorIcon={<></>}
+        disableSelectorIconRotation
         onSelectionChange={selection => {
           if (!selection.currentKey) return
           if (!isChainIdSupported(selection.currentKey)) return
           setChainId(selection.currentKey)
         }}
-        className='min-w-28'
+        classNames={{
+          base: 'min-w-0 w-fit min-w-min',
+          innerWrapper: 'w-full min-w-0',
+          popoverContent: 'min-w-28',
+        }}
       >
         {chain => <SelectItem key={chain.chainId}>{chain.name}</SelectItem>}
       </Select>
