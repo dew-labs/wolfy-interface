@@ -323,11 +323,13 @@ const Controller = createResetableComponent(function ({reset}) {
 
     const tradeMode = latestTradeMode.current
 
-    const triggerPrice =
-      tradeMode === TradeMode.Market
-        ? 0n
-        : latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
-    const acceptablePrice = latestDerivedTokenPrice.current // TODO: apply price impact
+    const currentPrice =
+      latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
+
+    const triggerPrice = tradeMode === TradeMode.Market ? 0n : currentPrice
+    // TODO: 0.3% price impact
+    const factor = !isLong ? 997n : 1003n
+    const acceptablePrice = (currentPrice * factor) / 1000n
 
     const orderType = (() => {
       // Swap not supported yet

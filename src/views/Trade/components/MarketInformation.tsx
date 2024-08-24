@@ -263,7 +263,7 @@ export default memo(function MarketInformation() {
             <div className='text-2xl leading-6'>${priceIndexText}</div>
             <div className='text-xs opacity-70'>${priceMarkText}</div>
           </div>
-          <div className='flex flex-col items-start justify-center'>
+          {/* <div className='flex flex-col items-start justify-center'>
             <div className='text-xs opacity-70'>24h Change</div>
             <div className='text-lg'>-1.26%</div>
           </div>
@@ -274,7 +274,7 @@ export default memo(function MarketInformation() {
           <div className='flex flex-col items-start justify-center'>
             <div className='text-xs opacity-70'>24h Low</div>
             <div className='text-lg'>3,077.70</div>
-          </div>
+          </div> */}
         </div>
       </CardBody>
     </Card>
