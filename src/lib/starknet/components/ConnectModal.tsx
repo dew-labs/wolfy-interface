@@ -17,7 +17,9 @@ import {useAtom} from 'jotai'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
 import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
+import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
+import {UAParser} from 'ua-parser-js'
 
 import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
@@ -36,6 +38,7 @@ interface AvailableWalletProps {
 
 interface UnavailableWalletProps {
   wallet: WalletProvider
+  isNotAvailable?: boolean
 }
 
 const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWalletProps) {
@@ -53,19 +56,41 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
     }
   })()
 
+  const handlePress = useCallback(() => {
+    if ('isNotAvailable' in props && props.isNotAvailable) {
+      const {browser} = UAParser(navigator.userAgent)
+      const urls = props.wallet.downloads
+
+      if (browser.name?.toLowerCase().includes('chrom') && 'chrome' in urls) {
+        window.open(urls.chrome, '_blank')
+      } else if (browser.name?.toLowerCase().includes('firefox') && 'firefox' in urls) {
+        window.open(urls.firefox, '_blank')
+      } else if (browser.name?.toLowerCase().includes('edge') && 'edge' in urls) {
+        window.open(urls.edge, '_blank')
+      } else {
+        toast.error(
+          'Browser not supported. Please install Chrome, Firefox, or Edge to connect to StarkNet.',
+        )
+      }
+
+      return
+    }
+
+    if (!('connect' in props)) return
+
+    try {
+      props.connect(props.wallet)
+    } catch (error) {
+      throw new UnexpectedError(error)
+    }
+  }, [props])
+
   return (
     <li>
       <Card
         shadow='sm'
         isPressable
-        onPress={() => {
-          if (!('connect' in props)) return
-          try {
-            props.connect(props.wallet)
-          } catch (error) {
-            throw new UnexpectedError(error)
-          }
-        }}
+        onPress={handlePress}
         className='align-center justify-content-center w-full'
       >
         <CardBody className='align-center flex flex-row justify-center gap-2 p-2'>
@@ -76,6 +101,9 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
             </div>
             {'isLastConnected' in props && props.isLastConnected && (
               <div className='text-default-500'>(Last connected)</div>
+            )}
+            {'isNotAvailable' in props && props.isNotAvailable && (
+              <div className='text-default-500'>(Not installed)</div>
             )}
           </div>
         </CardBody>
@@ -210,7 +238,7 @@ export default memo(function ConnectModal() {
                 <Wallet key={wallet.id} wallet={wallet} connect={connect} />
               ))}
               {unavailableWallets.map(wallet => (
-                <Wallet key={wallet.id} wallet={wallet} />
+                <Wallet key={wallet.id} wallet={wallet} isNotAvailable />
               ))}
             </ul>
           )}
