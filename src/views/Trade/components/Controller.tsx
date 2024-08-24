@@ -401,7 +401,7 @@ const Controller = createResetableComponent(function ({reset}) {
   ])
 
   return (
-    <div className='flex w-full min-w-80 max-w-sm flex-col'>
+    <div className='flex w-full min-w-80 flex-col md:max-w-sm'>
       <Card>
         <CardBody>
           <Tabs

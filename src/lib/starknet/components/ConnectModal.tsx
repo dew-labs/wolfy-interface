@@ -220,7 +220,7 @@ export default memo(function ConnectModal() {
   }, [lastConnectedWallet, connect])
 
   return (
-    <Modal isOpen={isOpen} placement={'top-center'} onOpenChange={handleClose} backdrop='blur'>
+    <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
       <ModalContent>
         <ModalHeader className='flex flex-col gap-1'>Select a wallet</ModalHeader>
         <ModalBody className='mb-4 w-full'>

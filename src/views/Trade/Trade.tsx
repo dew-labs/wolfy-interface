@@ -24,8 +24,8 @@ export default function Trade() {
           className='mx-auto flex max-w-[1536px] items-center justify-center px-4 py-2'
           {...skipTargetProps('main-content')}
         >
-          <div className='flex w-full flex-row gap-4'>
-            <div className='max-w-[calc(100%_-_21rem)] flex-1'>
+          <div className='flex w-full flex-row flex-col gap-4 md:flex-row'>
+            <div className='flex-1 md:max-w-[calc(100%_-_21rem)]'>
               <MarketInformation />
               <Chart />
               <UserInformation />
