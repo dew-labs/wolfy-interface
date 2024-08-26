@@ -11,14 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TradeRouteImport } from './routes/trade/route'
 import { Route as IndexRouteImport } from './routes/index/route'
 
 // Create/Update Routes
 
+const TradeRouteRoute = TradeRouteImport.update({
+  path: '/trade',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/trade/route.lazy').then((d) => d.Route))
+
 const IndexRouteRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/index/route.lazy').then((d) => d.Route))
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -31,12 +37,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRoute
     }
+    '/trade': {
+      id: '/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof TradeRouteImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({ IndexRouteRoute })
+export const routeTree = rootRoute.addChildren({
+  IndexRouteRoute,
+  TradeRouteRoute,
+})
 
 /* prettier-ignore-end */
 
@@ -46,11 +62,15 @@ export const routeTree = rootRoute.addChildren({ IndexRouteRoute })
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/trade"
       ]
     },
     "/": {
       "filePath": "index/route.tsx"
+    },
+    "/trade": {
+      "filePath": "trade/route.tsx"
     }
   }
 }
