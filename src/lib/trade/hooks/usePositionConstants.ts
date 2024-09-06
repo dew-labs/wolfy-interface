@@ -11,6 +11,7 @@ function createGetPositionsConstantsQueryOptions(chainId: StarknetChainId) {
     queryFn: async () => {
       return await fetchPositionsConstants(chainId)
     },
+    structuralSharing: false,
     ...NO_REFETCH_OPTIONS,
   })
 }

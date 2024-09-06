@@ -1,23 +1,23 @@
 export default function VisuallyHidden<
-  T extends keyof JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
+  T extends keyof React.JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
 >({
   as,
   strict,
   isNotHiddenAnymore,
   ...props
-}: T extends keyof JSX.IntrinsicElements
+}: T extends keyof React.JSX.IntrinsicElements
   ? {
       as?: T
       strict?: boolean
       isNotHiddenAnymore?: boolean
-    } & JSX.IntrinsicElements[T]
+    } & React.JSX.IntrinsicElements[T]
   : {
       as?: T
       strict?: boolean
       isNotHiddenAnymore?: boolean
       // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
-    } & React.ComponentProps<T>): JSX.Element {
-  const Tag = (as ?? 'span') as JSX.ElementType
+    } & React.ComponentProps<T>): React.JSX.Element {
+  const Tag = (as ?? 'span') as React.JSX.ElementType
 
   const classNames = []
   if ('className' in props && typeof props.className === 'string') {

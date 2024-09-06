@@ -21,7 +21,7 @@ export default function Trade() {
         <SkipLink title='Skip to main content' to='#main-content' />
         <WolfyNavbar />
         <main
-          className='mx-auto flex max-w-[1536px] items-center justify-center px-4 py-2'
+          className='flex items-center justify-center px-4 py-2'
           {...skipTargetProps('main-content')}
         >
           <div className='flex w-full flex-row flex-col gap-4 md:flex-row'>

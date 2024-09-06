@@ -13,6 +13,7 @@ function createGetGasPriceQueryOptions(wallet: WalletAccount | undefined) {
           return await fetchGasPrice(wallet)
         }
       : skipToken,
+    structuralSharing: false,
     refetchInterval: 60000, // 1 minute
     refetchIntervalInBackground: false,
     refetchOnMount: false,

@@ -85,7 +85,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         height='60px'
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
-        maxWidth='2xl'
+        maxWidth='full'
       >
         <NavbarMenuToggle className='mb-1 text-default-400 md:hidden' />
         {/* Left Content */}

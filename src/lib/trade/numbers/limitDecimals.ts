@@ -13,7 +13,7 @@ export default function limitDecimals(amount: BigNumberish, maxDecimals?: number
   if (dotIndex !== -1) {
     const decimals = amountStr.length - dotIndex - 1
     if (decimals > maxDecimals) {
-      amountStr = amountStr.substr(0, amountStr.length - (decimals - maxDecimals))
+      amountStr = amountStr.substring(0, amountStr.length - (decimals - maxDecimals))
     }
   }
 
