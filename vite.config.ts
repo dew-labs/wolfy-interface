@@ -139,7 +139,7 @@ export default defineConfig(({mode}) => {
               },
             ]
           : false,
-      ].filter(Boolean) as [string, Record<string, unknown>][], // Don't know why typescript cannot infer the type here
+      ].filter(Boolean),
     }),
     // Babel React for react compiler
     // react({

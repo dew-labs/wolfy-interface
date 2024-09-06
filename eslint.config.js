@@ -5,9 +5,11 @@ import {fixupConfigRules} from '@eslint/compat'
 import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
+// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReact from '@eslint-react/eslint-plugin'
 // eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginQuery from '@tanstack/eslint-plugin-query'
+// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
@@ -32,8 +34,9 @@ import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
-import pluginSonarjs from 'eslint-plugin-sonarjs'
+// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: enable later
 // import pluginTestingLibrary from 'eslint-plugin-testing-library' // TODO: check why this plugin is causing issues
+// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginVitest from 'eslint-plugin-vitest'
 import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
@@ -124,7 +127,7 @@ const coreConfigs = [
   ...applyToAll('core/eslint-recommended', eslint.configs.recommended),
   ...applyToAll('core/security', pluginSecurity.configs.recommended),
   ...applyToAll('core/promise', pluginPromise.configs['flat/recommended']),
-  ...applyToAll('core/import-x', ...compat.config(pluginImportX.configs.recommended)),
+  ...applyToAll('core/import-x', pluginImportX.flatConfigs.recommended),
   ...applyToAll('core/no-use-extend-native', pluginNoUseExtendNative.configs.recommended),
   ...applyToAll('core/eslint-comments', {
     ...pluginEslintComments.configs.recommended,
@@ -139,7 +142,12 @@ const coreConfigs = [
     fixupConfigRules(compat.extends('plugin:ssr-friendly/recommended')),
   ),
   ...applyToAll('core/depend', pluginDepend.configs['flat/recommended']),
-  ...applyToAll('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
+  // ...applyToAll('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
+  // ...applyToAll('core/sonarjs/custom-rules', {
+  //   rules: {
+  //     'sonarjs/no-duplicate-string': 'warn',
+  //   }
+  // })
   ...applyToAll('core/no-relative-import-paths', {
     plugins: {
       'no-relative-import-paths': pluginNoRelativeImportPaths,
@@ -222,7 +230,7 @@ const scriptConfigs = [
 
 const typescriptConfigs = [
   ...applyToTypescript('typescript/import-x', {
-    ...pluginImportX.configs.typescript,
+    ...pluginImportX.flatConfigs.typescript,
     settings: {
       'import-x/parsers': {
         '@typescript-eslint/parser': ['.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx'],
@@ -293,6 +301,7 @@ const reactConfigs = [
     'react/hooks',
     fixupConfigRules(compat.extends('plugin:react-hooks/recommended')),
   ),
+  ...applyToReact('react/import-x', pluginImportX.flatConfigs.react),
   ...applyToReact('react/a11y', {
     ...pluginJsxA11y.flatConfigs.strict,
     settings: {
@@ -495,7 +504,6 @@ const config = tsEslint.config(
         'error',
         {ignore: ['eslint-enable']},
       ],
-      'sonarjs/no-duplicate-string': 'warn',
       'promise/always-return': ['warn', {ignoreLastCallback: true}],
       'promise/no-callback-in-promise': [
         'warn',

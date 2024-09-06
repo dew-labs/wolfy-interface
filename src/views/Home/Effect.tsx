@@ -16,7 +16,7 @@ import {easing} from 'maath'
 import {useLayoutEffect, useRef, useState} from 'react'
 import * as THREE from 'three'
 
-export function App() {
+export default function  Effect() {
   const [degraded, degrade] = useState(false)
   return (
     <Canvas
@@ -26,7 +26,7 @@ export function App() {
       camera={{position: [5, 0, 15], fov: 30}}
     >
       <ambientLight intensity={0.1} />
-      <Porsche scale={20} position={[0, -1.5, 0]} rotation={[0.2, Math.PI / 10, 0.125]} />
+      <Porsche scale={20} position={[0.25, -1.5, 0]} rotation={[0.2, Math.PI / 10, 0.125]} />
       <AccumulativeShadows position={[0, -1.16, 0]} frames={100} alphaTest={0.125} scale={10}>
         <RandomizedLight amount={10} radius={10} ambient={0.5} position={[0, 0, 0]} />
       </AccumulativeShadows>

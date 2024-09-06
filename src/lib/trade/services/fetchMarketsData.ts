@@ -752,8 +752,8 @@ export default async function fetchMarketsData(
 
           const {next_funding: nextFunding, virtual_inventory: virtualInventory} = marketInfo
 
-          const {0: _priceMin, 1: poolValueInfoMin} = marketTokenPriceMin
-          const {0: _priceMax, 1: poolValueInfoMax} = marketTokenPriceMax
+          const {1: poolValueInfoMin} = marketTokenPriceMin
+          const {1: poolValueInfoMax} = marketTokenPriceMax
 
           return {
             ...market,

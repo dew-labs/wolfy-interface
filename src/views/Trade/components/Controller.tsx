@@ -471,7 +471,7 @@ const Controller = createResetableComponent(function ({reset}) {
             maxValue={100}
             minValue={1}
             defaultValue={1}
-            className='mt-4 max-w-md'
+            className='mt-4'
             renderValue={({_, ...props}) => (
               <output {...props}>
                 {'x '}

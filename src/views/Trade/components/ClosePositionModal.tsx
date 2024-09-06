@@ -106,17 +106,14 @@ export default function ClosePositionModal() {
     shrinkDecimals(maximumSizeUsdToDecrease, USD_DECIMALS),
   )
 
-  const handleSizeUsdInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      const valueInput = cleanNumberString(value)
-      const valueBigint = expandDecimals(valueInput, collateralTokenDecimals)
+  const handleSizeUsdInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const valueInput = cleanNumberString(value)
+    const valueBigint = expandDecimals(valueInput, USD_DECIMALS)
 
-      setSizeUsdToDecreaseInput(valueInput)
-      setSizeUsdToDecrease(valueBigint)
-    },
-    [collateralTokenDecimals],
-  )
+    setSizeUsdToDecreaseInput(valueInput)
+    setSizeUsdToDecrease(valueBigint)
+  }, [])
 
   const isValidSizeUsdToDecrease =
     sizeUsdToDecrease >= 0 && sizeUsdToDecrease <= maximumSizeUsdToDecrease

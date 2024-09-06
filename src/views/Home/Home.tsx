@@ -1,4 +1,4 @@
-import {App} from './Effect'
+import Effect from './Effect'
 
 // function Overlay() {
 //   return (
@@ -33,11 +33,11 @@ function Background() {
   )
 }
 
-export default function Effect() {
+export default function Home() {
   return (
     <>
       <Background />
-      <App />
+      <Effect />
       {/* <Overlay /> */}
     </>
   )
