@@ -49,10 +49,8 @@ export default function ClosePositionModal() {
   const collateralTokenSymbol = position?.collateralToken.symbol
   const collateralTokenDecimals = position?.collateralToken.decimals ?? 0
 
-  const triggerPrice = position?.markPrice ?? 0n
-
   const maximumCollateralUsdToDecrease = position?.netValue ?? 0n
-  const maximumSizeUsdToDecrease = (position?.sizeInTokens ?? 0n) * triggerPrice
+  const maximumSizeUsdToDecrease = position?.sizeInUsd ?? 0n
   const maximumCollateralTokenToDecrease =
     expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) /
     (collateralTokenPrice?.min ?? 1n)
@@ -66,7 +64,7 @@ export default function ClosePositionModal() {
   )
   const maximumSizeUsdToDecreaseText = shrinkDecimals(
     maximumSizeUsdToDecrease,
-    USD_DECIMALS + collateralTokenDecimals,
+    USD_DECIMALS,
     2,
     true,
     true,
@@ -150,7 +148,7 @@ export default function ClosePositionModal() {
         latestPosition.current.markPrice /
         expandDecimals(1, latestPosition.current.indexToken.decimals)
 
-      const triggerPrice = 0n
+      const triggerPrice = 0n // TODO: support limit decrease
       // TODO: 0.3% price impact
       const factor = isLong ? 997n : 1003n // note that this a opposite of when increase order
       const acceptablePrice = (currentPrice * factor) / 1000n
