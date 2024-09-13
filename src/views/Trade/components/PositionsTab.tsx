@@ -83,7 +83,9 @@ export default memo(function PositionTab() {
               </TableCell>
               <TableCell>
                 <div>{formatUsd(position.sizeInUsd)}</div>
-                <div className='opacity-50'>{formatLeverage(position.leverage) ?? '...'}</div>
+                <div className='opacity-50'>
+                  {formatLeverage(position.leverage) ?? 'Liquidated'}
+                </div>
               </TableCell>
               <TableCell>
                 <div>

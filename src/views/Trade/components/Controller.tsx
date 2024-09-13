@@ -468,7 +468,7 @@ const Controller = createResetableComponent(function ({reset}) {
             step={1}
             color='foreground'
             label='Leverage'
-            maxValue={100}
+            maxValue={maxLeverageNumber}
             minValue={1}
             defaultValue={1}
             className='mt-4'
@@ -513,32 +513,32 @@ const Controller = createResetableComponent(function ({reset}) {
             value={leverageNumber}
             onChange={handleLeverageChange}
             // TODO: generate marks based on maximum leverage
-            marks={[
-              {
-                value: 1,
-                label: '1',
-              },
-              {
-                value: 10,
-                label: '10',
-              },
-              {
-                value: 25,
-                label: '25',
-              },
-              {
-                value: 50,
-                label: '50',
-              },
-              {
-                value: 75,
-                label: '75',
-              },
-              {
-                value: 100,
-                label: '100',
-              },
-            ]}
+            // marks={[
+            //   {
+            //     value: 1,
+            //     label: '1',
+            //   },
+            //   {
+            //     value: 10,
+            //     label: '10',
+            //   },
+            //   {
+            //     value: 25,
+            //     label: '25',
+            //   },
+            //   {
+            //     value: 50,
+            //     label: '50',
+            //   },
+            //   {
+            //     value: 75,
+            //     label: '75',
+            //   },
+            //   {
+            //     value: 100,
+            //     label: '100',
+            //   },
+            // ]}
           />
           <div className='mt-2 flex w-full justify-between'>
             <div className='flex items-center'>Collateral in</div>

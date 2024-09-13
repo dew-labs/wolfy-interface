@@ -14,6 +14,8 @@ function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   return (tokenAmountUsd * LEVERAGE_PRECISION) / payTokenAmountUsd
 }
 
+export const MAX_LEVERAGE = 1000
+
 export default function usePayToken(
   tradeMode: TradeMode,
   tokenAddress: string | undefined,
@@ -70,7 +72,7 @@ export default function usePayToken(
 
   // ------------------------------------------------------------------------------------------------------------------
 
-  const [maxLeverage] = useState(100n * LEVERAGE_PRECISION) // 100
+  const [maxLeverage] = useState(() => BigInt(MAX_LEVERAGE) * LEVERAGE_PRECISION)
   const maxLeverageNumber = Number(shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS))
   const latestMaxLeverage = useLatest(maxLeverage)
 
