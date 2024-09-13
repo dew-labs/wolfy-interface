@@ -6,6 +6,7 @@ import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
 
+import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
@@ -149,9 +150,11 @@ export default function ClosePositionModal() {
         expandDecimals(1, latestPosition.current.indexToken.decimals)
 
       const triggerPrice = 0n // TODO: support limit decrease
-      // TODO: 0.3% price impact
-      const factor = isLong ? 997n : 1003n // note that this a opposite of when increase order
-      const acceptablePrice = (currentPrice * factor) / 1000n
+      let differences = (currentPrice * DEFAULT_SLIPPAGE) / SLIPPAGE_PRECISION
+      if (isLong) {
+        differences = -differences
+      }
+      const acceptablePrice = currentPrice + differences
 
       const orderType = OrderType.MarketDecrease
 

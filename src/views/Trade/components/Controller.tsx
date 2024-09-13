@@ -20,6 +20,7 @@ import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
 
+import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -327,10 +328,11 @@ const Controller = createResetableComponent(function ({reset}) {
       latestDerivedTokenPrice.current / expandDecimals(1, latestTokenDecimals.current)
 
     const triggerPrice = tradeMode === TradeMode.Market ? 0n : currentPrice
-    // TODO: 0.3% price impact
-    const factor = !isLong ? 997n : 1003n
-    const acceptablePrice = (currentPrice * factor) / 1000n
-
+    let differences = (currentPrice * DEFAULT_SLIPPAGE) / SLIPPAGE_PRECISION
+    if (!isLong) {
+      differences = -differences
+    }
+    const acceptablePrice = currentPrice + differences
     const orderType = (() => {
       // Swap not supported yet
       switch (tradeMode) {
