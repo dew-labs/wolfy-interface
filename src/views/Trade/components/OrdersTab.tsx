@@ -131,6 +131,8 @@ export default memo(function OrdersTab() {
             <TableRow key={order.key}>
               <TableCell>
                 {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
+                {` `}
+                {order.isLong ? 'Long' : 'Short'}
               </TableCell>
               <TableCell>
                 <div>{indexName}</div>
