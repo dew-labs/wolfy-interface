@@ -31,7 +31,7 @@ export function useSetWalletAccount() {
   const setAccountAddress = useSetAccountAddress()
 
   return useCallback(
-    (walletAccount?: WalletAccount | undefined) => {
+    (walletAccount?: WalletAccount) => {
       setWalletAccount(walletAccount)
       setAccountAddress(walletAccount?.address ?? '')
     },

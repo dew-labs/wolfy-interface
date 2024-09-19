@@ -19,7 +19,7 @@ const MOCK_SYMBOL_MAP: Record<string, string> = {
 export default memo(function Chart() {
   const [chainId] = useChainId()
   const chartConfigs = useChartConfig()
-  const [chartInterval, setChartInterval] = useState(ChartInterval['5m'])
+  const [chartInterval, setChartInterval] = useState(ChartInterval['1h'])
   const [tokenAddress] = useTokenAddress()
   const tokenMetadata = getTokensMetadata(chainId)
   const asset = MOCK_SYMBOL_MAP[tokenMetadata.get(tokenAddress ?? '')?.symbol ?? '']

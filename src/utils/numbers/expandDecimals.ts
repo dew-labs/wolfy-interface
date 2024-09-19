@@ -24,7 +24,7 @@ export default function expandDecimals(value: BigNumberish, decimals: number | b
 export function shrinkDecimals(
   value: BigNumberish,
   decimals: number | bigint,
-  fractionPlaces?: number | bigint | undefined,
+  fractionPlaces?: number | bigint,
   exactFractionPlaces = false,
   readable = false,
 ): string {

@@ -77,7 +77,7 @@ export default function getPositionsInfo(
   positionConstants: PositionConstants,
   uiFeeFactor: bigint,
   showPnlInLeverage: boolean,
-  referralInfo?: ReferralInfo | undefined | null,
+  referralInfo?: ReferralInfo | null,
 ): PositionsInfoData {
   const {minCollateralUsd} = positionConstants
   const tokensMetadata = getTokensMetadata(chainId)

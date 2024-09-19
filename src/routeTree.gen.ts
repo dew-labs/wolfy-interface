@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as TradeRouteImport } from './routes/trade/route'
+import { Route as PoolsRouteImport } from './routes/pools/route'
 import { Route as IndexRouteImport } from './routes/index/route'
 
 // Create/Update Routes
@@ -20,6 +21,11 @@ const TradeRouteRoute = TradeRouteImport.update({
   path: '/trade',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/trade/route.lazy').then((d) => d.Route))
+
+const PoolsRouteRoute = PoolsRouteImport.update({
+  path: '/pools',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/pools/route.lazy').then((d) => d.Route))
 
 const IndexRouteRoute = IndexRouteImport.update({
   path: '/',
@@ -37,6 +43,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRoute
     }
+    '/pools': {
+      id: '/pools'
+      path: '/pools'
+      fullPath: '/pools'
+      preLoaderRoute: typeof PoolsRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/trade': {
       id: '/trade'
       path: '/trade'
@@ -49,10 +62,49 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  IndexRouteRoute,
-  TradeRouteRoute,
-})
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRouteRoute
+  '/pools': typeof PoolsRouteRoute
+  '/trade': typeof TradeRouteRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRouteRoute
+  '/pools': typeof PoolsRouteRoute
+  '/trade': typeof TradeRouteRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRouteRoute
+  '/pools': typeof PoolsRouteRoute
+  '/trade': typeof TradeRouteRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/pools' | '/trade'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/pools' | '/trade'
+  id: '__root__' | '/' | '/pools' | '/trade'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRouteRoute: typeof IndexRouteRoute
+  PoolsRouteRoute: typeof PoolsRouteRoute
+  TradeRouteRoute: typeof TradeRouteRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRouteRoute: IndexRouteRoute,
+  PoolsRouteRoute: PoolsRouteRoute,
+  TradeRouteRoute: TradeRouteRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
 
@@ -63,11 +115,15 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/pools",
         "/trade"
       ]
     },
     "/": {
       "filePath": "index/route.tsx"
+    },
+    "/pools": {
+      "filePath": "pools/route.tsx"
     },
     "/trade": {
       "filePath": "trade/route.tsx"

@@ -1,9 +1,6 @@
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 
-export default function calculatePriceDecimals(
-  price?: bigint | undefined,
-  decimals = USD_DECIMALS,
-) {
+export default function calculatePriceDecimals(price?: bigint, decimals = USD_DECIMALS) {
   if (!price) return
 
   if (price === 0n) return 2

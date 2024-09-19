@@ -15,6 +15,7 @@ import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import pluginDeprecation from 'eslint-plugin-deprecation'
 import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
+// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginI18next from 'eslint-plugin-i18next'
 import pluginImportX from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'

@@ -33,7 +33,7 @@ import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import useDripFaucet from '@/lib/trade/hooks/useFaucetDrip'
-import {TradeRoute} from '@/routeRegistry'
+import {PoolsRoute, TradeRoute} from '@/routeRegistry'
 import middleEllipsis from '@/utils/middleEllipsis'
 
 import ThemeSwitchButton from './ThemeSwitchButton'
@@ -45,12 +45,20 @@ const menuItems = [
   },
   {
     label: 'Pools',
+    to: PoolsRoute.fullPath,
+  },
+  {
+    label: 'Referrals',
     to: '',
   },
-  // {
-  //   label: 'Stake',
-  //   to: '',
-  // },
+  {
+    label: 'Leaderboard',
+    to: '',
+  },
+  {
+    label: 'Docs',
+    to: '',
+  },
 ]
 
 export default memo(function WolfyNavbar(props: NavbarProps) {
