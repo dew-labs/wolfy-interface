@@ -1,25 +1,20 @@
-import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
+import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
 import type {StarknetChainId} from 'satoru-sdk'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {Market} from '@/lib/trade/services/fetchMarkets'
-import fetchMarketsData from '@/lib/trade/services/fetchMarketsData'
+import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
 
 import useMarkets from './useMarkets'
 
-function createGetMarketsDataQueryOptions(
-  chainId: StarknetChainId,
-  markets: Market[] | undefined,
-  accountAddress: string | undefined,
-) {
+function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Market[] | undefined) {
   return queryOptions({
-    queryKey: ['marketsData', chainId, accountAddress, markets] as const,
+    queryKey: ['marketsData', chainId, markets] as const,
     queryFn: markets
       ? async () => {
           const tokenPricesData = await fetchTokenPrices(chainId)
-          return await fetchMarketsData(chainId, markets, tokenPricesData, accountAddress)
+          return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
     refetchInterval: 60000,
@@ -33,11 +28,21 @@ function createGetMarketsDataQueryOptions(
 export default function useMarketsData() {
   const [chainId] = useChainId()
   const markets = useMarkets()
-  const accountAddress = useAccountAddress()
 
-  const {data: marketsData} = useQuery(
-    createGetMarketsDataQueryOptions(chainId, markets, accountAddress),
-  )
+  const queryClient = useQueryClient()
+
+  const {data: marketsData} = useQuery({
+    ...createGetMarketsDataQueryOptions(chainId, markets),
+    initialData: () => {
+      const initialData = queryClient.getQueryData<MarketsData>([
+        'marketsData',
+        chainId,
+        markets,
+        null,
+      ])
+      return initialData ?? undefined
+    },
+  })
 
   return marketsData
 }

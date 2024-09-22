@@ -40,7 +40,7 @@ export default defineConfig(configEnv =>
           //   autoUpdate: true,
           // },
           include: ['src/**/*'],
-          exclude: ['setupTest.ts', ...coverageConfigDefaults.exclude],
+          exclude: ['src/setupTest.ts', ...coverageConfigDefaults.exclude],
         },
       },
     }),

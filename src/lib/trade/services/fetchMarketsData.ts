@@ -8,21 +8,19 @@ import {
   satoruMulticall,
   type StarknetChainId,
 } from 'satoru-sdk'
-
 import {
   borrowingExponentFactorKey,
   borrowingFactorKey,
-  claimableFundingAmountKey,
   fundingExponentFactorKey,
   fundingFactorKey,
   isMarketDisabledKey,
-  MAX_PNL_FACTOR_FOR_TRADERS_KEY,
+  MAX_PNL_FACTOR_FOR_TRADERS,
   maxOpenInterestKey,
   maxPnlFactorKey,
   maxPoolAmountKey,
   maxPositionImpactFactorForLiquidationsKey,
   maxPositionImpactFactorKey,
-  minCollateralFactorForOpenInterest,
+  minCollateralFactorForOpenInterestMultiplierKey,
   minCollateralFactorKey,
   openInterestInTokensKey,
   openInterestKey,
@@ -39,7 +37,8 @@ import {
   swapImpactPoolAmountKey,
   virtualMarketIdKey,
   virtualTokenIdKey,
-} from '@/constants/dataStore'
+} from 'satoru-sdk/dataStore'
+
 import type {Token} from '@/constants/tokens'
 import {getTokensMetadata} from '@/constants/tokens'
 import {type Market} from '@/lib/trade/services/fetchMarkets'
@@ -112,9 +111,6 @@ export interface MarketData extends Market {
   netPnlMin: bigint
   netPnlMax: bigint
 
-  claimableFundingAmountLong?: bigint
-  claimableFundingAmountShort?: bigint
-
   longInterestUsd: bigint
   shortInterestUsd: bigint
   longInterestInTokens: bigint
@@ -156,7 +152,6 @@ export default async function fetchMarketsData(
   chainId: StarknetChainId,
   markets: Market[],
   tokenPriceData: TokenPricesData,
-  accountAddress: string | undefined,
 ): Promise<MarketsData> {
   const tokensData = getTokensMetadata(chainId)
 
@@ -280,7 +275,7 @@ export default async function fetchMarketsData(
                 tokenPricesInMarket.index_token_price,
                 tokenPricesInMarket.long_token_price,
                 tokenPricesInMarket.short_token_price,
-                MAX_PNL_FACTOR_FOR_TRADERS_KEY,
+                MAX_PNL_FACTOR_FOR_TRADERS,
                 true,
               ],
             ),
@@ -298,7 +293,7 @@ export default async function fetchMarketsData(
                 tokenPricesInMarket.index_token_price,
                 tokenPricesInMarket.long_token_price,
                 tokenPricesInMarket.short_token_price,
-                MAX_PNL_FACTOR_FOR_TRADERS_KEY,
+                MAX_PNL_FACTOR_FOR_TRADERS,
                 false,
               ],
             ),
@@ -492,7 +487,7 @@ export default async function fetchMarketsData(
               SatoruContract.DataStore,
               DataStoreABI,
               'get_u256',
-              [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS_KEY, market.marketTokenAddress, true)],
+              [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS, market.marketTokenAddress, true)],
             ),
             // maxPnlFactorForTradersShort
             createSatoruMulticallRequest(
@@ -500,7 +495,7 @@ export default async function fetchMarketsData(
               SatoruContract.DataStore,
               DataStoreABI,
               'get_u256',
-              [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS_KEY, market.marketTokenAddress, false)],
+              [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS, market.marketTokenAddress, false)],
             ),
             // positionFeeFactorForPositiveImpact
             createSatoruMulticallRequest(
@@ -572,7 +567,7 @@ export default async function fetchMarketsData(
               SatoruContract.DataStore,
               DataStoreABI,
               'get_u256',
-              [minCollateralFactorForOpenInterest(market.marketTokenAddress, true)],
+              [minCollateralFactorForOpenInterestMultiplierKey(market.marketTokenAddress, true)],
             ),
             // minCollateralFactorForOpenInterestShort
             createSatoruMulticallRequest(
@@ -580,7 +575,7 @@ export default async function fetchMarketsData(
               SatoruContract.DataStore,
               DataStoreABI,
               'get_u256',
-              [minCollateralFactorForOpenInterest(market.marketTokenAddress, false)],
+              [minCollateralFactorForOpenInterestMultiplierKey(market.marketTokenAddress, false)],
             ),
             // positionImpactExponentFactor
             createSatoruMulticallRequest(
@@ -696,44 +691,6 @@ export default async function fetchMarketsData(
             ),
           ] as const)
 
-          let claimableFundingAmountLong, claimableFundingAmountShort
-
-          if (accountAddress) {
-            ;[claimableFundingAmountLong, claimableFundingAmountShort] = await satoruMulticall(
-              chainId,
-              [
-                // claimableFundingAmountLong
-                createSatoruMulticallRequest(
-                  chainId,
-                  SatoruContract.DataStore,
-                  DataStoreABI,
-                  'get_u256',
-                  [
-                    claimableFundingAmountKey(
-                      market.marketTokenAddress,
-                      market.longTokenAddress,
-                      accountAddress,
-                    ),
-                  ],
-                ),
-                // claimableFundingAmountShort
-                createSatoruMulticallRequest(
-                  chainId,
-                  SatoruContract.DataStore,
-                  DataStoreABI,
-                  'get_u256',
-                  [
-                    claimableFundingAmountKey(
-                      market.marketTokenAddress,
-                      market.shortTokenAddress,
-                      accountAddress,
-                    ),
-                  ],
-                ),
-              ] as const,
-            )
-          }
-
           const marketDivisor = market.isSameCollaterals ? 2n : 1n
 
           const longInterestUsd =
@@ -805,14 +762,6 @@ export default async function fetchMarketsData(
             minCollateralFactorForOpenInterestShort: cairoIntToBigInt(
               minCollateralFactorForOpenInterestShort,
             ),
-
-            claimableFundingAmountLong: claimableFundingAmountLong
-              ? cairoIntToBigInt(claimableFundingAmountLong) / marketDivisor
-              : 0n,
-
-            claimableFundingAmountShort: claimableFundingAmountShort
-              ? cairoIntToBigInt(claimableFundingAmountShort) / marketDivisor
-              : 0n,
 
             positionFeeFactorForPositiveImpact: cairoIntToBigInt(
               positionFeeFactorForPositiveImpact,

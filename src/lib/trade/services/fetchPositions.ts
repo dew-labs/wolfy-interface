@@ -1,16 +1,16 @@
-import type {StarknetChainId} from 'satoru-sdk'
+import type {Hashable, StarknetChainId} from 'satoru-sdk'
 import {
   cairoIntToBigInt,
   createSatoruContract,
   DataStoreABI,
   getSatoruContractAddress,
+  poseidonHash,
   ReaderABI,
   SatoruContract,
   toStarknetHexString,
 } from 'satoru-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
-import {hashedPositionKey} from '@/constants/dataStore'
 import {getTokenMetadata} from '@/constants/tokens'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
@@ -26,6 +26,15 @@ import type {Price, TokenPricesData} from './fetchTokenPrices'
 // ) {
 //   return `${account}:${marketAddress}:${collateralAddress}:${isLong}`
 // }
+
+export function hashedPositionKey(
+  account: Hashable,
+  market: Hashable,
+  collateralToken: Hashable,
+  isLong: boolean,
+) {
+  return poseidonHash([account, market, collateralToken, isLong])
+}
 
 export function convertToContractPrice(price: bigint, tokenDecimals: number) {
   return price / expandDecimals(1, tokenDecimals)

@@ -21,15 +21,15 @@
     "test:ui": "pnpm run test --ui",
     "test:bench": "pnpm run test bench",
     "test:update-snapshot": "pnpm run test -u",
-    "typecheck": "pnpm run gen-typed-scss-modules && tsc --pretty",
+    "type-check": "pnpm run gen-typed-scss-modules && tsc --pretty",
     "partytown": "partytown copylib public/~partytown",
-    "prebuild": "pnpm run typecheck && pnpm run partytown",
+    "prebuild": "pnpm run type-check && pnpm run partytown",
     "build": "vite build",
     "postbuild": "find dist/ -name \"*.map\" -type f -delete",
     "analyzebundle": "pnpm dlx vite-bundle-visualizer",
     "preview": "vite preview",
     "prepare": "husky",
-    "check": "rm -rf .eslintcache && rm -rf tsconfig.tsbuildinfo && CI=true pnpm run --parallel --aggregate-output --reporter-hide-prefix '/^(fix|typecheck|test)$/'",
+    "check": "rm -rf .eslintcache && rm -rf tsconfig.tsbuildinfo && CI=true pnpm run --parallel --aggregate-output --reporter-hide-prefix '/^(fix|type-check|test)$/'",
     "eslint:inspect": "pnpm dlx @eslint/config-inspector@latest",
     "lighthouse:stag": "pnpm dlx unlighthouse --site 'https://ready2.react/'",
     "lighthouse:prod": "pnpm dlx unlighthouse --site 'https://ready2.react/'",
@@ -89,7 +89,7 @@
     "react-i18next": "^15.0.2",
     "react-use": "^17.5.1",
     "remeda": "^2.14.0",
-    "satoru-sdk": "^1.0.10",
+    "satoru-sdk": "^1.1.3",
     "sonner": "^1.5.0",
     "starknet": "6.12.1",
     "tailwind-merge": "^2.5.2",
@@ -241,5 +241,5 @@
       "eslint-plugin-react-hooks@4.6.2": "patches/eslint-plugin-react-hooks@4.6.2.patch"
     }
   },
-  "packageManager": "pnpm@9.10.0"
+  "packageManager": "pnpm@9.11.0"
 }

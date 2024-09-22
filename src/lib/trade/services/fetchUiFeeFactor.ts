@@ -2,12 +2,17 @@ import {
   cairoIntToBigInt,
   createSatoruContract,
   DataStoreABI,
+  poseidonHash,
   SatoruContract,
   StarknetChainId,
 } from 'satoru-sdk'
+import {UI_FEE_FACTOR} from 'satoru-sdk/dataStore'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
-import {uiFeeFactorKey} from '@/constants/dataStore'
+
+function uiFeeFactorKey(account: string) {
+  return poseidonHash([UI_FEE_FACTOR, account])
+}
 
 export default async function fetchUIFeeFactor(
   chainId: StarknetChainId,

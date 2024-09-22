@@ -6,17 +6,16 @@ import {
   satoruMulticall,
   type StarknetChainId,
 } from 'satoru-sdk'
-
 import {
-  DECREASE_ORDER_GAS_LIMIT_KEY,
+  DECREASE_ORDER_GAS_LIMIT,
   depositGasLimitKey,
-  ESTIMATED_GAS_FEE_BASE_AMOUNT_KEY,
-  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR_KEY,
-  INCREASE_ORDER_GAS_LIMIT_KEY,
-  SINGLE_SWAP_GAS_LIMIT_KEY,
-  SWAP_ORDER_GAS_LIMIT_KEY,
-  WITHDRAWAL_GAS_LIMIT_KEY,
-} from '@/constants/dataStore'
+  ESTIMATED_GAS_FEE_BASE_AMOUNT,
+  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
+  INCREASE_ORDER_GAS_LIMIT,
+  SINGLE_SWAP_GAS_LIMIT,
+  SWAP_ORDER_GAS_LIMIT,
+  WITHDRAWAL_GAS_LIMIT,
+} from 'satoru-sdk/dataStore'
 
 export default async function fetchGasLimits(chainId: StarknetChainId) {
   const [
@@ -37,25 +36,25 @@ export default async function fetchGasLimits(chainId: StarknetChainId) {
       depositGasLimitKey(false),
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      WITHDRAWAL_GAS_LIMIT_KEY,
+      WITHDRAWAL_GAS_LIMIT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      SINGLE_SWAP_GAS_LIMIT_KEY,
+      SINGLE_SWAP_GAS_LIMIT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      SWAP_ORDER_GAS_LIMIT_KEY,
+      SWAP_ORDER_GAS_LIMIT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      INCREASE_ORDER_GAS_LIMIT_KEY,
+      INCREASE_ORDER_GAS_LIMIT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      DECREASE_ORDER_GAS_LIMIT_KEY,
+      DECREASE_ORDER_GAS_LIMIT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      ESTIMATED_GAS_FEE_BASE_AMOUNT_KEY,
+      ESTIMATED_GAS_FEE_BASE_AMOUNT,
     ]),
     createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR_KEY,
+      ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
     ]),
   ])
 
