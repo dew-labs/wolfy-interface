@@ -276,7 +276,7 @@ const Controller = createResetableComponent(function ({reset}) {
     const shortTokenDecimals = marketData?.shortToken.decimals ?? 0
 
     let longTokenPrice = tokenPricesData?.longTokenPrice?.min ?? 0n
-    let shortTokenPrice = tokenPricesData?.longTokenPrice?.min ?? 0n
+    let shortTokenPrice = tokenPricesData?.shortTokenPrice?.min ?? 0n
 
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
       if (tokenAddress === longTokenAddress) longTokenPrice = tokenPrice ?? 0n

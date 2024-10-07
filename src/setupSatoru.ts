@@ -98,21 +98,21 @@ function registerContractAddresses() {
       [SatoruContract.Multicall]:
         '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
       [SatoruContract.DataStore]:
-        '0x62e59aa82c0fe675f69a81a04e17df0b762486c2335c3bf0d6475b6439dfc22',
+        '0x2d381da55fc89d342836b2d3bdd3d8c2ab08f0130e6c0ff33cb02a02382d7e5',
       [SatoruContract.EventEmitter]:
-        '0x4e97bf347484e9fbc01622e1f67a3c6d1a2b957b92eafe3e2f167f7f7c53168',
+        '0x654fe6cd51eeee5195d5fb253d70d67140d3ae0986f10603dae22c5f41151c7',
       [SatoruContract.ReferralStorage]:
-        '0xf9208f924dba6fa36212b84a4d45845ce04f45bb00e0211930a52d5077983a',
+        '0x48ea140b7998e8920399e6cc7e9e92807dc9ef746a12d104f7054ea104aaeca',
       [SatoruContract.OrderVault]:
-        '0x56762a786d8d57a15d2d2d9da4dc62a245c4469184b3ab588e36716ed43aab1',
+        '0x6de8e205d85fb0ab6f31d0d982cc8cc77d183e04fa94d4eb5c11ddc5a20f2ab',
       [SatoruContract.DepositVault]:
-        '0x31e1a61f54ee6d7beda440603502cdc7a661ca9a62e1cbd7a5f3255e94eb038',
+        '0x51612feaf2dd070bd6f9d50fe95bf2deaba9342298d4c1b754a4fd6dfc28daf',
       [SatoruContract.WithdrawalVault]:
-        '0x300bf6441ccf1309961c93d8af91ea2e7b7c227a3a65704bc1c9f9658c3886f',
-      [SatoruContract.Reader]: '0x5cdcfcb7ddb42ee731146d0a86c601ca6b0254c03ad2e2a2e88e29639b32746',
-      [SatoruContract.Router]: '0x26ef9bd892195c4e29350fd4b8fdd4ef6f790c5fd7d840b82ce08c0093c44b0',
+        '0x2b828a4a5ee82d91a5872c72f51f0d0103fa4d5dbb06dbc1282855e8e65c243',
+      [SatoruContract.Reader]: '0x6b100e189c1af605bda2b3dc26ffad0ab5163d9781ea57158e6423c4a4eea2',
+      [SatoruContract.Router]: '0x5d37a0a926bf4313cb4c49fb9854c00210e40c5a61182f628eb7fe2bc85f774',
       [SatoruContract.ExchangeRouter]:
-        '0x5dd9328718a26da94e057d7d184656022aac7d70c4b4aad70d0b49b4e4a2c6f',
+        '0x5e5f72460e15179b0770f1b3b3fb88a4e643a948002d21676f250475d24bae',
     },
     // Not available
     [StarknetChainId.SN_MAIN]: {

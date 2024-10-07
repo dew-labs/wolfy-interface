@@ -60,7 +60,7 @@ export default memo(function MarketInformation() {
 
     const allMarkets = Array.from(availableTokens.allMarkets)
 
-    const marketsWithMaxReservedUsd = allMarkets.map(marketInfo => {
+    const marketsWithLiquidity = allMarkets.map(marketInfo => {
       const longLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, true)
       const shortLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, false)
 
@@ -72,7 +72,7 @@ export default memo(function MarketInformation() {
       }
     })
     const indexes: Record<string, TokenOption[]> = groupBy(
-      marketsWithMaxReservedUsd,
+      marketsWithLiquidity,
       market => market.indexTokenAddress,
     )
 
