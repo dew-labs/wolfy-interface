@@ -28,9 +28,9 @@ import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import max from '@/utils/numbers/bigint/max'
+import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
-
 interface TokenOption {
   longLiquidity: bigint
   shortLiquidity: bigint
@@ -61,8 +61,24 @@ export default memo(function MarketInformation() {
     const allMarkets = Array.from(availableTokens.allMarkets)
 
     const marketsWithLiquidity = allMarkets.map(marketInfo => {
-      const longLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, true)
-      const shortLiquidity = getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, false)
+      const longTokenPrice = tokenPricesData.get(marketInfo.longToken.address)?.max ?? 0n
+      const shortTokenPrice = tokenPricesData.get(marketInfo.shortToken.address)?.max ?? 0n
+
+      const longPoolAmountUsd =
+        (longTokenPrice * marketInfo.longPoolAmount) /
+        expandDecimals(1, marketInfo.longToken.decimals)
+      const shortPoolAmountUsd =
+        (shortTokenPrice * marketInfo.shortPoolAmount) /
+        expandDecimals(1, marketInfo.shortToken.decimals)
+
+      const longLiquidity = min(
+        getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, true),
+        longPoolAmountUsd,
+      )
+      const shortLiquidity = min(
+        getAvailableUsdLiquidityForPosition(marketInfo, tokenPricesData, false),
+        shortPoolAmountUsd,
+      )
 
       return {
         longLiquidity: longLiquidity > 0n ? longLiquidity : 0n,

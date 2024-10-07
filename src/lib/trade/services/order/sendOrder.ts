@@ -27,7 +27,7 @@ interface OrderParams {
   referralCode: number
 }
 
-function createOrderPrams(props: OrderParams) {
+function createOrderParams(props: OrderParams) {
   return {
     callback_contract: '0',
     ui_fee_receiver: UI_FEE_RECEIVER_ADDRESS,
@@ -50,9 +50,9 @@ function createOrderPrams(props: OrderParams) {
 }
 
 export default async function sendOrder(wallet: WalletAccount, props: OrderParams) {
-  const createOrderParams = createOrderPrams(props)
+  const params = createOrderParams(props)
 
-  console.log(createOrderParams)
+  console.log(params)
 
   const chainId = await wallet.getChainId()
 
@@ -75,13 +75,14 @@ export default async function sendOrder(wallet: WalletAccount, props: OrderParam
     )
   }
 
-  calls.push(createCall(exchangeRouterContract, 'create_order', [createOrderParams]))
+  calls.push(createCall(exchangeRouterContract, 'create_order', [params]))
 
   const result = await wallet.execute(calls)
 
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
+    console.log(receipt.events)
     const orderKey = receipt.events[1]?.data[0]
     console.log(orderKey)
     return {
