@@ -15,6 +15,7 @@ import {toast} from 'sonner'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
+import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendDeposit from '@/lib/trade/services/market/sendDeposit'
@@ -47,6 +48,7 @@ export default function DepositModal({
   const tokenPrices = useTokenPrices(data => data)
   const marketsData = useMarketsData()
   const marketTokensData = useMarketTokensData()
+  const tokenBalances = useTokenBalances()
 
   const marketData = useMemo(
     () => marketsData?.get(marketTokenAddress),
@@ -98,7 +100,6 @@ export default function DepositModal({
     // This is a simplified calculation and should be replaced with the actual formula
     // based on your protocol's specifics
     const calculatedAmount = Number(totalValueUsd) / Number(price)
-    console.log('calculatedAmount', calculatedAmount)
 
     const amountDecimals = calculatePriceDecimals(
       BigInt(Math.floor(calculatedAmount / 10 ** USD_DECIMALS)),
@@ -114,19 +115,41 @@ export default function DepositModal({
     price,
   ])
 
+  const [longTokenBalance, shortTokenBalance] = useMemo(() => {
+    if (!marketData || !tokenBalances) return [0n, 0n]
+    return [
+      tokenBalances.get(marketData.longTokenAddress) ?? 0n,
+      tokenBalances.get(marketData.shortTokenAddress) ?? 0n,
+    ]
+  }, [marketData, tokenBalances])
+
+  const maxLongToken = Number(
+    shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
+  )
+
   const handleLongTokenAmountChange = (value: string) => {
     setLongTokenAmount(value)
   }
+
+  const maxShortToken = Number(
+    shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
+  )
+
+  console.log('maxShortToken', maxShortToken, 'shortAmount', parseFloat(shortTokenAmount))
 
   const handleShortTokenAmountChange = (value: string) => {
     setShortTokenAmount(value)
   }
 
   const isInputValid = useMemo(() => {
-    const longAmount = parseFloat(longTokenAmount)
-    const shortAmount = parseFloat(shortTokenAmount)
-    return (!isNaN(longAmount) && longAmount > 0) || (!isNaN(shortAmount) && shortAmount > 0)
-  }, [longTokenAmount, shortTokenAmount])
+    const longAmount = parseFloat(longTokenAmount) || 0
+    const shortAmount = parseFloat(shortTokenAmount) || 0
+    return (
+      (longAmount > 0 || shortAmount > 0) &&
+      longAmount <= maxLongToken &&
+      shortAmount <= maxShortToken
+    )
+  }, [longTokenAmount, shortTokenAmount, maxLongToken, maxShortToken])
 
   const handleSubmit = (_e: PressEvent) => {
     if (!marketData || !wallet || !marketTokenData || !isInputValid) return
@@ -201,17 +224,23 @@ export default function DepositModal({
         <ModalBody>
           <p>Current Market Price: ${priceNumber}</p>
           <Input
-            label={`${marketData.longToken.symbol} Amount`}
+            label={`${marketData.longToken.symbol} Amount (Max: ${Number(shrinkDecimals(longTokenBalance, marketData.longToken.decimals)).toFixed(4)})`}
             placeholder='Enter long token amount'
             value={longTokenAmount}
+            type='number'
+            min={0}
+            max={maxLongToken}
             onChange={e => {
               handleLongTokenAmountChange(e.target.value)
             }}
           />
           <Input
-            label={`${marketData.shortToken.symbol} Amount`}
+            label={`${marketData.shortToken.symbol} Amount (Max: ${Number(shrinkDecimals(shortTokenBalance, marketData.shortToken.decimals)).toFixed(4)})`}
             placeholder='Enter short token amount'
             value={shortTokenAmount}
+            type='number'
+            min={0}
+            max={maxShortToken}
             onChange={e => {
               handleShortTokenAmountChange(e.target.value)
             }}
