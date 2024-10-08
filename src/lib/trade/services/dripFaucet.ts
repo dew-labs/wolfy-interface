@@ -1,5 +1,5 @@
 import {createCall, createTokenContract} from 'satoru-sdk'
-import type {Call, WalletAccount} from 'starknet'
+import {type Call, type WalletAccount} from 'starknet'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import expandDecimals from '@/utils/numbers/expandDecimals'
@@ -7,12 +7,16 @@ import expandDecimals from '@/utils/numbers/expandDecimals'
 export default async function dripFaucet(wallet: WalletAccount) {
   const chainId = await wallet.getChainId()
 
-  // TODO: add asset to wallet
-  // wallet.watchAsset({
-
-  // })
-
   const tokens = getTokensMetadata(chainId)
+
+  for (const token of tokens) {
+    await wallet.watchAsset({
+      type: 'ERC20',
+      options: {
+        address: token[1].address,
+      },
+    })
+  }
 
   const calls: Call[] = []
 
