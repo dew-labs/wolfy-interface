@@ -23,6 +23,7 @@ import {UAParser} from 'ua-parser-js'
 
 import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
+import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import {Theme} from '@/lib/theme/theme'
@@ -117,6 +118,7 @@ export default memo(function ConnectModal() {
 
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
+  const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
 
   const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
   const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
@@ -202,22 +204,26 @@ export default memo(function ConnectModal() {
 
         setWalletAccount(walletAccount)
         setWalletChainId(connectedWalletChainId)
+        setShouldReconnect(true)
       } catch (error: unknown) {
         console.error(error)
         toastErrorMessage(error, 'Unexpected error occurred while connecting to the wallet')
         void getStarknetCore.disconnect()
+        setShouldReconnect(false)
       }
+
       setIsConnecting(false)
       setIsOpen(false)
     },
-    [setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
+    [setShouldReconnect, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
   )
   useEffect(() => {
     console.log('lastConnectedWallet:', lastConnectedWallet)
     if (!lastConnectedWallet) return
+    if (!shouldReconnect) return
 
     void connect(lastConnectedWallet)
-  }, [lastConnectedWallet, connect])
+  }, [lastConnectedWallet, connect, shouldReconnect])
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
