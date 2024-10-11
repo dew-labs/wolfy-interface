@@ -12,7 +12,9 @@ import React, {useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
 import {toast} from 'sonner'
 
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
@@ -39,6 +41,8 @@ export default function DepositModal({
   marketTokenAddress,
   orderType,
 }: DepositModalProps) {
+  const [chainId] = useChainId()
+
   const [longTokenAmount, setLongTokenAmount] = useState('')
   const [shortTokenAmount, setShortTokenAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -193,7 +197,11 @@ export default function DepositModal({
         success: data => (
           <>
             Deposit successful.
-            <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank' rel='noreferrer'>
+            <a
+              href={getScanUrl(chainId, ScanType.Transaction, data.tx)}
+              target='_blank'
+              rel='noreferrer'
+            >
               View transaction
             </a>
           </>

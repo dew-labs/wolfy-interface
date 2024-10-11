@@ -27,6 +27,7 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useGasPrice from '@/lib/trade/hooks/useGasPrice'
 import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
 import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
@@ -370,7 +371,11 @@ const Controller = createResetableComponent(function ({reset}) {
           return (
             <>
               Order placed.
-              <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+              <a
+                href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                target='_blank'
+                rel='noreferrer'
+              >
                 View tx
               </a>
             </>

@@ -27,9 +27,11 @@ import wolfyLogoLightSvg from '@/assets/icons/wolfy-text-light.svg'
 import ChainSelect from '@/lib/starknet/components/ChainSelect'
 import ConnectModal from '@/lib/starknet/components/ConnectModal'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import useDripFaucet from '@/lib/trade/hooks/useFaucetDrip'
@@ -76,6 +78,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
     await disconnect()
   }, [disconnect])
 
+  const [chainId] = useChainId()
   const [isDripping, handleOnDrip] = useDripFaucet()
 
   return (
@@ -172,9 +175,14 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   </DropdownTrigger>
                   <DropdownMenu aria-label='Profile Actions' variant='flat'>
                     <DropdownItem key='profile'>
-                      <p className='font-semibold'>
+                      <a
+                        href={getScanUrl(chainId, ScanType.Contract, accountAddress)}
+                        target='_blank'
+                        rel='noreferrer'
+                        className='font-semibold'
+                      >
                         {!!accountAddress && middleEllipsis(accountAddress)}
-                      </p>
+                      </a>
                     </DropdownItem>
                     <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
                     <DropdownItem key='disconnect' color='danger' onPress={handleDisconnect}>

@@ -10,6 +10,7 @@ import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
@@ -126,7 +127,7 @@ export default function ClosePositionModal() {
   const accountAddress = useAccountAddress()
   const latestAccountAddress = useLatest(accountAddress)
   const queryClient = useQueryClient()
-  const chainId = useChainId()
+  const [chainId] = useChainId()
   const latestChainId = useLatest(chainId)
 
   const [isClosing, setIsClosing] = useState(false)
@@ -186,7 +187,11 @@ export default function ClosePositionModal() {
             return (
               <>
                 Order placed.
-                <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+                <a
+                  href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                  target='_blank'
+                  rel='noreferrer'
+                >
                   View tx
                 </a>
               </>

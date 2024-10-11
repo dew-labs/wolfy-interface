@@ -12,7 +12,9 @@ import React, {useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
 import {toast} from 'sonner'
 
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
@@ -36,6 +38,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const queryClient = useQueryClient()
+  const [chainId] = useChainId()
   const [wallet] = useWalletAccount()
   const tokenPrices = useTokenPrices(data => data)
   const marketsData = useMarketsData()
@@ -139,7 +142,11 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
         success: data => (
           <>
             Withdrawal successful.
-            <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank' rel='noreferrer'>
+            <a
+              href={getScanUrl(chainId, ScanType.Transaction, data.tx)}
+              target='_blank'
+              rel='noreferrer'
+            >
               View transaction
             </a>
           </>
