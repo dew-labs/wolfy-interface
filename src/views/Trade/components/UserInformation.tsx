@@ -3,6 +3,7 @@ import {memo, useCallback, useState} from 'react'
 
 import OrdersTab from './OrdersTab'
 import PositionsTab from './PositionsTab'
+import TradesTab from './TradesTab'
 
 enum UserTabs {
   Positions = 'Positions',
@@ -14,7 +15,7 @@ enum UserTabs {
 const AVAILABLE_TABS = [
   UserTabs.Positions,
   UserTabs.Orders,
-  // UserTabs.Trades,
+  UserTabs.Trades,
   // UserTabs.Claims
 ]
 
@@ -25,9 +26,9 @@ const TABS_LABEL: Record<UserTabs, string> = {
   [UserTabs.Claims]: 'Claims',
 }
 
-function UserTrades() {
-  return <div>Comming soon...</div>
-}
+// function UserTrades() {
+//   return <div>Comming soon...</div>
+// }
 
 function UserClaims() {
   return <div>Comming soon...</div>
@@ -56,7 +57,7 @@ export default memo(function UserInformation() {
       </Tabs>
       {tab === UserTabs.Positions && <PositionsTab />}
       {tab === UserTabs.Orders && <OrdersTab />}
-      {tab === UserTabs.Trades && <UserTrades />}
+      {tab === UserTabs.Trades && <TradesTab />}
       {tab === UserTabs.Claims && <UserClaims />}
     </>
   )
