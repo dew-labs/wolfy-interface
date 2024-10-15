@@ -15,7 +15,7 @@ export type TokenPricesData = Map<string, Price>
 export default async function fetchTokenPrices(chainId: StarknetChainId) {
   const tokensMetadata = getTokensMetadata(chainId)
 
-  const connection = new PriceServiceConnection('https://hermes-beta.pyth.network')
+  const connection = new PriceServiceConnection('https://hermes.pyth.network')
   const data: TokenPricesData = new Map()
 
   const tokens = Array.from(tokensMetadata.values())

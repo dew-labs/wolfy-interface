@@ -17,7 +17,7 @@ export default memo(function TokenPricesUpdater() {
   useEffect(() => {
     const tokensMetadata = getTokensMetadata(chainId)
     const queryKey = getTokenPricesQueryKey(chainId)
-    const connection = new PriceServiceConnection('https://hermes-beta.pyth.network')
+    const connection = new PriceServiceConnection('https://hermes.pyth.network')
 
     Array.from(tokensMetadata.values()).forEach(token => {
       if (token.pythFeedId) {
