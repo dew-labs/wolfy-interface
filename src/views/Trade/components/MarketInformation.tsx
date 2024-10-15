@@ -248,6 +248,9 @@ export default memo(function MarketInformation() {
             <Table
               aria-label='Example static collection table'
               className='my-2'
+              classNames={{
+                th: '!rounded-none',
+              }}
               removeWrapper
               selectionMode='single'
               selectedKeys={tokenAddress ? [tokenAddress] : []}

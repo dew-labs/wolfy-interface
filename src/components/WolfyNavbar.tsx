@@ -87,7 +87,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
       <Navbar
         {...props}
         classNames={{
-          base: cn('border-default-100 py-2', {
+          base: cn('border-default-100 py-2', 'bg-transparent', {
             'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
           }),
           wrapper: 'gap-2 sm:gap-4 w-full justify-center px-2 sm:px-4',
@@ -97,6 +97,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
         maxWidth='full'
+        isBlurred={false}
       >
         <NavbarMenuToggle className='mb-1 text-default-400 md:hidden' />
         {/* Left Content */}

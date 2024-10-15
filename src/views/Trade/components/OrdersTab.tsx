@@ -71,7 +71,13 @@ export default memo(function OrdersTab() {
   )
 
   return (
-    <Table className='mt-2' aria-label='Positions'>
+    <Table
+      className='mt-2'
+      aria-label='Orders'
+      classNames={{
+        th: '!rounded-none',
+      }}
+    >
       <TableHeader>
         <TableColumn>Type</TableColumn>
         <TableColumn>Market</TableColumn>

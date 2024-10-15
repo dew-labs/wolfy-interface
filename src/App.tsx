@@ -1,3 +1,5 @@
+// eslint-disable-next-line import-x/no-unresolved -- This is a workaround for unplugin-fonts
+import 'unfonts.css'
 import './App.scss'
 import 'lazysizes'
 import 'lazysizes/plugins/parent-fit/ls.parent-fit'
@@ -25,6 +27,8 @@ import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
 import AuthUpdater from './auth/AuthUpdater'
 import GoogleOneTapLogin from './auth/components/GoogleOneTapLogin'
+import UpdateMousePosition from './components/UpdateMousePosition'
+import WolfyBackground from './components/WolfyBackground'
 import {DEBUG} from './constants/config'
 import Head from './lib/head/Head'
 import ThemeSubscriber from './lib/theme/ThemeSubscriber'
@@ -79,6 +83,7 @@ function App() {
         <Head />
         <QueryClientProvider client={queryClient}>
           <QueryErrorBoundary>
+            <UpdateMousePosition />
             <Toaster richColors />
             <ThemeUpdater />
             <ThemeSubscriber />
@@ -87,6 +92,7 @@ function App() {
             <GoogleOneTapLogin router={router} />
             <AuthUpdater router={router} />
             <TokenPricesUpdater />
+            <WolfyBackground />
             <RouterProvider router={router} />
           </QueryErrorBoundary>
           <ReactQueryDevtools initialIsOpen={false} />

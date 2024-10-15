@@ -32,7 +32,13 @@ export default memo(function PositionTab() {
   const closePosition = useClosePosition()
 
   return (
-    <Table className='mt-2' aria-label='Positions'>
+    <Table
+      className='mt-2'
+      aria-label='Positions'
+      classNames={{
+        th: '!rounded-none',
+      }}
+    >
       <TableHeader>
         <TableColumn>Position</TableColumn>
         <TableColumn>Pool</TableColumn>

@@ -14,6 +14,7 @@ import react from '@vitejs/plugin-react-swc'
 // import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {obfuscator} from 'rollup-obfuscator'
+import Unfonts from 'unplugin-fonts/vite'
 import TurboConsole from 'unplugin-turbo-console/vite'
 import {defineConfig, loadEnv} from 'vite'
 // import pluginChecker from 'vite-plugin-checker'
@@ -196,6 +197,54 @@ export default defineConfig(({mode}) => {
     inspectorServer(),
     compression(), // Useful when serve dist as static files (https://nginx.org/en/docs/http/ngx_http_gzip_static_module.html), but not when serve dist with a backend (since the backend should handle compression)
     optimizeCssModules(),
+    Unfonts({
+      // Fontsource API
+      fontsource: {
+        /**
+         * Fonts families lists
+         */
+        families: [
+          // families can be either strings (load default font set)
+          // Require the `@fontsource/abeezee` package to be installed.
+          'Geist Sans',
+          'Geist Mono',
+          // {
+          //   /**
+          //    * Name of the font family.
+          //    * Require the `@fontsource/roboto` package to be installed.
+          //    */
+          //   name: 'Roboto',
+          //   /**
+          //    * Load only a subset of the font family.
+          //    */
+          //   weights: [400, 700],
+          //   /**
+          //    * Restrict the font styles to load.
+          //    */
+          //   styles: ['italic', 'normal'],
+          //   /**
+          //    * Use another font subset.
+          //    */
+          //   subset: 'latin-ext',
+          // },
+          // {
+          //   /**
+          //    * Name of the font family.
+          //    * Require the `@fontsource-variable/cabin` package to be installed.
+          //    */
+          //   name: 'Cabin',
+          //   /**
+          //    * When using variable fonts, you can choose which axes to load.
+          //    */
+          //   variable: {
+          //     wght: true,
+          //     slnt: true,
+          //     ital: true,
+          //   },
+          // },
+        ],
+      },
+    }),
     FontaineTransform.vite(fontaineOptions),
     // NOTE: enable this if you need support for legacy browsers
     // Legacy plugin need extra setup for CSP (Content Security Policy)

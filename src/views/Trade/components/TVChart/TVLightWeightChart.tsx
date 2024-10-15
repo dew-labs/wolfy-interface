@@ -40,6 +40,7 @@ export default memo(function TVLightWeightChart(props: {
       layout: {
         background: {type: ColorType.Solid, color: CHART_STYLE.BACKGROUND_COLOR},
         textColor: props.textColor,
+        fontFamily: 'Geist Mono',
       },
       grid: {
         vertLines: {

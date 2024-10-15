@@ -479,6 +479,10 @@ const Controller = createResetableComponent(function ({reset}) {
             minValue={1}
             defaultValue={1}
             className='mt-4'
+            classNames={{
+              thumb: '!rounded-none before:!rounded-none after:!rounded-none',
+              track: '!rounded-none',
+            }}
             renderValue={({_, ...props}) => (
               <output {...props}>
                 {'x '}
