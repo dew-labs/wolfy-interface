@@ -1,7 +1,9 @@
 import {memo} from 'react'
 
+import {Theme} from '@/lib/theme/theme'
+import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
+
 const BACKGROUND_STYLE = {
-  backgroundImage: 'radial-gradient(white .5px, transparent 0.5px)',
   backgroundSize: '1rem 1rem',
   position: 'fixed' as const,
   zIndex: 0,
@@ -14,5 +16,19 @@ const BACKGROUND_STYLE = {
 }
 
 export default memo(function WolfyBackground() {
-  return <div style={BACKGROUND_STYLE} />
+  const [theme] = useCurrentTheme()
+
+  const backgroundImage =
+    theme === Theme.Dark
+      ? 'radial-gradient(white .5px, transparent 0.5px)'
+      : 'radial-gradient(black .5px, transparent 0.5px)'
+
+  return (
+    <div
+      style={{
+        ...BACKGROUND_STYLE,
+        backgroundImage,
+      }}
+    />
+  )
 })
