@@ -314,6 +314,7 @@ export default function PoolsTable() {
           <Input
             isClearable
             className='w-full sm:max-w-[44%]'
+            name='market-search'
             placeholder='Search by market name...'
             value={filterValue}
             onClear={() => {

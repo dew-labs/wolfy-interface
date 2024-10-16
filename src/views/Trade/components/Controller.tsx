@@ -287,8 +287,8 @@ const Controller = createResetableComponent(function ({reset}) {
     let shortTokenPrice = tokenPricesData?.shortTokenPrice?.min ?? 0n
 
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
-      if (tokenAddress === longTokenAddress) longTokenPrice = tokenPrice ?? 0n
-      if (tokenAddress === shortTokenAddress) shortTokenPrice = tokenPrice ?? 0n
+      if (tokenAddress === longTokenAddress && tokenPrice) longTokenPrice = tokenPrice
+      if (tokenAddress === shortTokenAddress && tokenPrice) shortTokenPrice = tokenPrice
     }
 
     return convertTokenAmountToUsd(
@@ -516,7 +516,7 @@ const Controller = createResetableComponent(function ({reset}) {
                 >
                   <input
                     className={clsx(
-                      'w-14 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+                      'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
                       leverage > 0n && !isValidLeverage
                         ? 'border-danger-500'
                         : 'border-transparent',
