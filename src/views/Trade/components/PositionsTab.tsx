@@ -41,7 +41,6 @@ export default memo(function PositionTab() {
     >
       <TableHeader>
         <TableColumn>Position</TableColumn>
-        <TableColumn>Pool</TableColumn>
         <TableColumn>Net value</TableColumn>
         <TableColumn>Size</TableColumn>
         <TableColumn>Collateral</TableColumn>
@@ -70,21 +69,19 @@ export default memo(function PositionTab() {
                 <div
                   className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                 />
-                <div className='flex items-center gap-2'>
+                <div className='flex min-w-max items-center gap-2'>
                   <img
                     src={position.marketData.indexToken.imageUrl}
                     alt={position.marketData.indexToken.symbol}
                     className='h-6 w-6 rounded'
                   />
-                  <div>
-                    <div>{position.isLong ? t('Long') : t('Short')}</div>
-                    <div>{position.marketData.indexToken.symbol}</div>
+                  <div className='flex flex-col'>
+                    <div>
+                      {position.isLong ? t('Long') : t('Short')}{' '}
+                      {position.marketData.indexToken.symbol}
+                    </div>
+                    <div className='subtext whitespace-nowrap text-xs opacity-50'>[{poolName}]</div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className='flex items-center'>
-                  <span className='subtext leading-1 whitespace-nowrap'>{poolName}</span>
                 </div>
               </TableCell>
               <TableCell>
@@ -107,22 +104,27 @@ export default memo(function PositionTab() {
                 <div className='opacity-50'>{formatUsd(position.remainingCollateralUsd)}</div>
               </TableCell>
               <TableCell>
-                {' '}
-                {position.isOpening
-                  ? `Opening...`
-                  : formatUsd(position.entryPrice, {
-                      displayDecimals: priceDecimals,
-                    })}
+                <span>
+                  {position.isOpening
+                    ? `Opening...`
+                    : formatUsd(position.entryPrice, {
+                        displayDecimals: priceDecimals,
+                      })}
+                </span>
               </TableCell>
               <TableCell>
-                {formatUsd(position.markPrice, {
-                  displayDecimals: priceDecimals,
-                })}
+                <span>
+                  {formatUsd(position.markPrice, {
+                    displayDecimals: priceDecimals,
+                  })}
+                </span>
               </TableCell>
               <TableCell>
-                {formatUsd(position.liquidationPrice, {
-                  displayDecimals: priceDecimals,
-                })}
+                <span>
+                  {formatUsd(position.liquidationPrice, {
+                    displayDecimals: priceDecimals,
+                  })}
+                </span>
               </TableCell>
               <TableCell>
                 <Button

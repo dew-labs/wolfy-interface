@@ -30,7 +30,7 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 import max from '@/utils/numbers/bigint/max'
 import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
-import formatLocaleNumber from '@/utils/numbers/formatLocaleNumber'
+
 interface TokenOption {
   longLiquidity: bigint
   shortLiquidity: bigint
@@ -101,8 +101,12 @@ export default memo(function MarketInformation() {
       {
         markets: TokenOption[]
         imageUrl: string
-        maxLongLiquidity: bigint
-        maxShortLiquidity: bigint
+        maxLongLiquidity: number
+        maxLongLiquidityString: string
+        maxShortLiquidity: number
+        maxShortLiquidityString: string
+        price: number
+        priceString: string
       }
     >()
 
@@ -110,16 +114,28 @@ export default memo(function MarketInformation() {
       const longLiquids = markets.map(data => data.longLiquidity)
       const shortLiquids = markets.map(data => data.shortLiquidity)
 
+      const selectedLongLiquid = max(...longLiquids)
+      const selectedShortLiquid = max(...shortLiquids)
+
+      const price = tokenPricesData?.get(token)?.max ?? 0n
+      const priceDisplayDecimals = calculatePriceDecimals(price)
+
       indexes.set(token, {
         markets,
         imageUrl: getTokenMetadata(chainId, token).imageUrl ?? '',
-        maxLongLiquidity: max(...longLiquids) / expandDecimals(1, USD_DECIMALS),
-        maxShortLiquidity: max(...shortLiquids) / expandDecimals(1, USD_DECIMALS),
+        maxLongLiquidity: Number(shrinkDecimals(selectedLongLiquid, USD_DECIMALS)),
+        maxLongLiquidityString:
+          '$' + shrinkDecimals(selectedLongLiquid, USD_DECIMALS, 0, true, true),
+        maxShortLiquidity: Number(shrinkDecimals(selectedShortLiquid, USD_DECIMALS)),
+        maxShortLiquidityString:
+          '$' + shrinkDecimals(selectedShortLiquid, USD_DECIMALS, 0, true, true),
+        price: Number(shrinkDecimals(price, USD_DECIMALS)),
+        priceString: '$' + shrinkDecimals(price, USD_DECIMALS, priceDisplayDecimals, true, true),
       })
     })
 
     return indexes
-  }, [marketsWithLiquidityGrouppedByIndexToken, chainId])
+  }, [marketsWithLiquidityGrouppedByIndexToken, chainId, tokenPricesData])
 
   const indexTokensWithLiquidityInformationList = useMemo(
     () => Array.from(indexTokensWithLiquidityInformation.values()),
@@ -218,6 +234,16 @@ export default memo(function MarketInformation() {
     ? shrinkDecimals(priceMark, USD_DECIMALS, priceDecimals, true, true)
     : '--'
 
+  const maxLongLiquidityText =
+    indexTokensWithLiquidityInformationList.find(
+      item => item.markets[0]?.indexTokenAddress === tokenAddress,
+    )?.maxLongLiquidityString ?? '--'
+
+  const maxShortLiquidityText =
+    indexTokensWithLiquidityInformationList.find(
+      item => item.markets[0]?.indexTokenAddress === tokenAddress,
+    )?.maxShortLiquidityString ?? '--'
+
   return (
     <Card>
       <CardBody className='flex flex-row items-center gap-6'>
@@ -232,7 +258,7 @@ export default memo(function MarketInformation() {
         >
           <PopoverTrigger>
             <Button
-              className='text-2xl font-medium'
+              className='min-w-fit text-nowrap text-2xl font-medium'
               size='lg'
               variant='flat'
               startContent={
@@ -252,6 +278,7 @@ export default memo(function MarketInformation() {
               className='my-2'
               classNames={{
                 th: '!rounded-none',
+                td: 'first:before:rounded-none last:before:rounded-none',
               }}
               removeWrapper
               selectionMode='single'
@@ -262,6 +289,7 @@ export default memo(function MarketInformation() {
             >
               <TableHeader>
                 <TableColumn allowsSorting>Pair</TableColumn>
+                <TableColumn allowsSorting>Price</TableColumn>
                 <TableColumn allowsSorting>Long Liq.</TableColumn>
                 <TableColumn allowsSorting>Short Liq.</TableColumn>
               </TableHeader>
@@ -275,8 +303,15 @@ export default memo(function MarketInformation() {
                           <span>{`${item.symbol} / USD`}</span>
                         </div>
                       </TableCell>
-                      <TableCell>${formatLocaleNumber(item.maxLongLiquidity)}</TableCell>
-                      <TableCell>${formatLocaleNumber(item.maxShortLiquidity)}</TableCell>
+                      <TableCell>
+                        <span>{item.priceString}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span>{item.maxLongLiquidityString}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span>{item.maxShortLiquidityString}</span>
+                      </TableCell>
                     </TableRow>
                   )
                 })}
@@ -286,21 +321,38 @@ export default memo(function MarketInformation() {
         </Popover>
         <div className='flex flex-1 flex-row gap-4'>
           <div className='flex flex-col items-start justify-center'>
-            <div className='text-2xl leading-6'>${priceIndexText}</div>
-            <div className='text-xs opacity-70'>${priceMarkText}</div>
-          </div>
-          {/* <div className='flex flex-col items-start justify-center'>
-            <div className='text-xs opacity-70'>24h Change</div>
-            <div className='text-lg'>-1.26%</div>
+            <div className='text-nowrap text-2xl leading-6'>${priceIndexText}</div>
+            <div className='text-nowrap text-xs opacity-70'>${priceMarkText}</div>
           </div>
           <div className='flex flex-col items-start justify-center'>
-            <div className='text-xs opacity-70'>24h High</div>
-            <div className='text-lg'>3,215.58</div>
+            <div className='text-nowrap text-xs opacity-70'>Long liq.</div>
+            <div className='text-lg'>{maxLongLiquidityText}</div>
           </div>
           <div className='flex flex-col items-start justify-center'>
-            <div className='text-xs opacity-70'>24h Low</div>
-            <div className='text-lg'>3,077.70</div>
-          </div> */}
+            <div className='text-nowrap text-xs opacity-70'>Short liq.</div>
+            <div className='text-lg'>{maxShortLiquidityText}</div>
+          </div>
+          <div className='flex flex-col items-start justify-center'>
+            <div className='text-nowrap text-xs opacity-70'>24h Change</div>
+            <div className='text-lg'>---</div>
+          </div>
+          <div className='flex flex-col items-start justify-center'>
+            <div className='text-nowrap text-xs opacity-70'>24h High/Low</div>
+            <div className='text-nowrap text-lg'>
+              <span className='text-success'>---</span> / <span className='text-danger'>---</span>
+            </div>
+          </div>
+          <div className='flex flex-col items-start justify-center'>
+            <div className='text-nowrap text-xs opacity-70'>24h Volume</div>
+            <div className='text-nowrap text-lg'>---</div>
+          </div>
+          <div className='flex flex-col items-start justify-center'>
+            <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
+            <div className='mt-1 flex overflow-hidden text-xs'>
+              <div className='bg-success px-2 py-1 text-white'>50%</div>
+              <div className='bg-danger px-2 py-1 text-white'>50%</div>
+            </div>
+          </div>
         </div>
       </CardBody>
     </Card>

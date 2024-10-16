@@ -97,17 +97,19 @@ export default memo(function OrdersTab() {
           const initialCollateralToken = order.initialCollateralToken
           const targetCollateralToken = order.targetCollateralToken
 
+          const initialCollateralTokenPrice = order.initialCollateralTokenPrice
+          const targetCollateralTokenPrice = order.targetCollateralTokenPrice
+
+          const collateralUsd = convertTokenAmountToUsd(
+            order.initialCollateralDeltaAmount,
+            initialCollateralToken.decimals,
+            initialCollateralTokenPrice?.min ?? 0n,
+          )
+
+          const collateralUdsShrinked = formatUsd(collateralUsd)
+
           const collateralText = (function () {
-            const initialCollateralTokenPrice = order.initialCollateralTokenPrice
-            const targetCollateralTokenPrice = order.targetCollateralTokenPrice
-
             if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
-
-            const collateralUsd = convertTokenAmountToUsd(
-              order.initialCollateralDeltaAmount,
-              initialCollateralToken.decimals,
-              initialCollateralTokenPrice.min,
-            )
 
             const targetCollateralAmount = convertUsdToTokenAmount(
               collateralUsd,
@@ -137,9 +139,14 @@ export default memo(function OrdersTab() {
           return (
             <TableRow key={order.key}>
               <TableCell>
-                {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
-                {` `}
-                {order.isLong ? 'Long' : 'Short'}
+                <div
+                  className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                />
+                <div>
+                  {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
+                  {` `}
+                  {order.isLong ? 'Long' : 'Short'}
+                </div>
               </TableCell>
               <TableCell>
                 <div className='flex items-center gap-2'>
@@ -149,15 +156,24 @@ export default memo(function OrdersTab() {
                     className='h-6 w-6 rounded'
                   />
                   <div>
-                    <div>{indexName}</div>
-                    <div className='subtext lh-1'>{poolName && `[${poolName}]`}</div>
+                    <div className='text-nowrap'>{indexName}</div>
+                    <div className='subtext lh-1 text-nowrap text-xs opacity-50'>
+                      {poolName && `[${poolName}]`}
+                    </div>
                   </div>
                 </div>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
-              <TableCell>{collateralText}</TableCell>
-              <TableCell>{triggerPriceText}</TableCell>
-              <TableCell>{markPriceText}</TableCell>
+              <TableCell>
+                <div className='text-nowrap'>{collateralUdsShrinked}</div>
+                <div className='text-xs opacity-50'>{collateralText}</div>
+              </TableCell>
+              <TableCell>
+                <span>{triggerPriceText}</span>
+              </TableCell>
+              <TableCell>
+                <span>{markPriceText}</span>
+              </TableCell>
               <TableCell>
                 <Button
                   size='sm'
