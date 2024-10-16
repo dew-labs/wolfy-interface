@@ -349,7 +349,7 @@ export default memo(function MarketInformation() {
           </PopoverTrigger>
           <PopoverContent>
             <Table
-              aria-label='Example static collection table'
+              aria-label='Markets'
               className='my-2'
               classNames={{
                 th: '!rounded-none',

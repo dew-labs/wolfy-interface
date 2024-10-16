@@ -14,6 +14,7 @@ import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import formatDeltaUsd from '@/lib/trade/numbers/formatDeltaUsd'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
+import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 // import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
@@ -25,6 +26,7 @@ import {useClosePosition} from './ClosePositionModal'
 export default memo(function PositionTab() {
   const positionsInfo = usePositionsInfoData()
   const tokenPricesData = useTokenPrices(data => data)
+  const setTokenAddress = useSetTokenAddress()
 
   const positions = positionsInfo ? Array.from(positionsInfo.values()) : []
   const [savedShowPnlAfterFees] = useState(true)
@@ -69,7 +71,12 @@ export default memo(function PositionTab() {
                 <div
                   className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                 />
-                <div className='flex min-w-max items-center gap-2'>
+                <button
+                  className='flex min-w-max items-center gap-2'
+                  onClick={() => {
+                    setTokenAddress(position.marketData.indexTokenAddress)
+                  }}
+                >
                   <img
                     src={position.marketData.indexToken.imageUrl}
                     alt={position.marketData.indexToken.symbol}
@@ -82,7 +89,7 @@ export default memo(function PositionTab() {
                     </div>
                     <div className='subtext whitespace-nowrap text-xs opacity-50'>[{poolName}]</div>
                   </div>
-                </div>
+                </button>
               </TableCell>
               <TableCell>
                 <div>{formatUsd(position.netValue)}</div>

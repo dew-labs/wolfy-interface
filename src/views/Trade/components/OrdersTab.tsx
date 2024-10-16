@@ -21,6 +21,7 @@ import useOrders from '@/lib/trade/hooks/useOrders'
 import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
+import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import {isDecreaseOrderType} from '@/lib/trade/utils/order/type/isDecreaseOrderType'
@@ -37,6 +38,7 @@ export default memo(function OrdersTab() {
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
+  const setTokenAddress = useSetTokenAddress()
 
   const orders = useOrders()
 
@@ -155,12 +157,16 @@ export default memo(function OrdersTab() {
                     alt={indexName}
                     className='h-6 w-6 rounded'
                   />
-                  <div>
+                  <button
+                    onClick={() => {
+                      setTokenAddress(order.marketData.indexTokenAddress)
+                    }}
+                  >
                     <div className='text-nowrap'>{indexName}</div>
                     <div className='subtext lh-1 text-nowrap text-xs opacity-50'>
                       {poolName && `[${poolName}]`}
                     </div>
-                  </div>
+                  </button>
                 </div>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
