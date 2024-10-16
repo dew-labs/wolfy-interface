@@ -18,7 +18,6 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useOrders from '@/lib/trade/hooks/useOrders'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
 import formatUsd from '@/lib/trade/numbers/formatUsd'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
@@ -38,7 +37,6 @@ export default memo(function OrdersTab() {
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
   const queryClient = useQueryClient()
-  const tokenPricesData = useTokenPrices(data => data)
 
   const orders = useOrders()
 
@@ -89,9 +87,7 @@ export default memo(function OrdersTab() {
       </TableHeader>
       <TableBody emptyContent={'No order.'} items={orders}>
         {order => {
-          if (!tokenPricesData) return <></>
-
-          const indexTokenPrice = tokenPricesData.get(order.indexToken.address)
+          const indexTokenPrice = order.indexTokenPrice
 
           if (!indexTokenPrice) return <></>
 
@@ -102,8 +98,8 @@ export default memo(function OrdersTab() {
           const targetCollateralToken = order.targetCollateralToken
 
           const collateralText = (function () {
-            const initialCollateralTokenPrice = tokenPricesData.get(initialCollateralToken.address)
-            const targetCollateralTokenPrice = tokenPricesData.get(targetCollateralToken.address)
+            const initialCollateralTokenPrice = order.initialCollateralTokenPrice
+            const targetCollateralTokenPrice = order.targetCollateralTokenPrice
 
             if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
 

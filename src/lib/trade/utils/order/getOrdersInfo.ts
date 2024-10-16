@@ -3,7 +3,7 @@ import type {StarknetChainId} from 'satoru-sdk'
 import {getTokensMetadata, type Token} from '@/constants/tokens'
 import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Order, OrdersData} from '@/lib/trade/services/fetchOrders'
-import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
+import type {Price, TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import getTokensRatioByAmounts, {
@@ -31,8 +31,11 @@ export type PositionOrderInfo = Order & {
   marketData: MarketData
   swapPathStats?: SwapPathStats | undefined
   indexToken: Token
+  indexTokenPrice?: Price | undefined
   initialCollateralToken: Token
+  initialCollateralTokenPrice?: Price | undefined
   targetCollateralToken: Token
+  targetCollateralTokenPrice?: Price | undefined
   acceptablePrice: bigint
   triggerPrice: bigint
   triggerThresholdType: TriggerThresholdType
@@ -48,6 +51,10 @@ export default function getOrdersInfo(
 
   ordersData.forEach((order, key) => {
     try {
+      const market = marketsData.get(order.marketAddress)
+      const indexToken = market?.indexToken
+      const indexTokenPrice = tokenPricesData.get(indexToken?.address ?? '')
+
       const initialCollateralToken = tokensMetadata.get(order.initialCollateralTokenAddress)
       const initialCollateralTokenPrice = tokenPricesData.get(order.initialCollateralTokenAddress)
 
@@ -139,7 +146,7 @@ export default function getOrdersInfo(
         if (!outTokenAddress) return
 
         const targetCollateralToken = tokensMetadata.get(outTokenAddress)
-
+        const targetCollateralTokenPrice = tokenPricesData.get(outTokenAddress)
         if (!marketInfo || !indexToken || !targetCollateralToken) {
           return
         }
@@ -171,8 +178,11 @@ export default function getOrdersInfo(
           swapPathStats,
           marketData: marketInfo,
           indexToken,
+          indexTokenPrice,
           initialCollateralToken,
+          initialCollateralTokenPrice,
           targetCollateralToken,
+          targetCollateralTokenPrice,
           acceptablePrice,
           triggerPrice,
           triggerThresholdType,
