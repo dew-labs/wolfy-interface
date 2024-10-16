@@ -12,7 +12,6 @@ import getTokensRatioByAmounts, {
 import parseContractPrice from '@/lib/trade/utils/token/parseContractPrice'
 import {logError} from '@/utils/logger'
 
-import getPositionOrderTitle from './getPositionOrderTitle'
 import getTriggerThresholdType, {type TriggerThresholdType} from './getTriggerThresholdType'
 import getSwapOrderTitle from './swap/getSwapOrderTitle'
 import getSwapPathOutputAddresses from './swap/getSwapPathOutputAddresses'
@@ -29,7 +28,6 @@ export type SwapOrderInfo = Order & {
 }
 
 export type PositionOrderInfo = Order & {
-  title: string
   marketData: MarketData
   swapPathStats?: SwapPathStats | undefined
   indexToken: Token
@@ -146,13 +144,6 @@ export default function getOrdersInfo(
           return
         }
 
-        const title = getPositionOrderTitle({
-          orderType: order.orderType,
-          isLong: order.isLong,
-          indexToken,
-          sizeDeltaUsd: order.sizeDeltaUsd,
-        })
-
         const acceptablePrice = parseContractPrice(
           order.contractAcceptablePrice,
           indexToken.decimals,
@@ -176,7 +167,7 @@ export default function getOrdersInfo(
 
         const orderInfo: PositionOrderInfo = {
           ...order,
-          title,
+          // title,
           swapPathStats,
           marketData: marketInfo,
           indexToken,
