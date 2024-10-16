@@ -8,8 +8,10 @@ import {
   ModalHeader,
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
+import clsx from 'clsx'
 import React, {useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
+import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -54,25 +56,44 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     [marketTokensData, marketTokenAddress],
   )
 
-  const userBalance = useMemo(() => {
-    if (!marketTokenBalances || !marketTokenData) return '0'
-    const balance = marketTokenBalances.get(marketTokenAddress) ?? 0n
-    return shrinkDecimals(balance, marketTokenData.decimals, 6)
-  }, [marketTokenBalances, marketTokenData, marketTokenAddress])
-
   const price =
     marketData && marketTokenData
       ? calculateMarketPrice(marketData, marketTokenData, tokenPrices) ||
         expandDecimals(1, USD_DECIMALS)
       : expandDecimals(1, USD_DECIMALS)
 
+  const userBalance = Number(
+    shrinkDecimals(
+      marketTokenBalances?.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+  )
+  const userBalanceDisplayDecimals = calculatePriceDecimals(price, marketTokenData?.decimals ?? 18)
+  const userBalanceString = shrinkDecimals(
+    marketTokenBalances?.get(marketTokenAddress) ?? 0n,
+    marketTokenData?.decimals ?? 18,
+    userBalanceDisplayDecimals,
+    false,
+    true,
+  )
+
   const priceDecimals = calculatePriceDecimals(price)
 
   const priceNumber = shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
 
+  const {longTokenPrice, shortTokenPrice} = useMemo(() => {
+    if (!tokenPrices || !marketData) return {longTokenPrice: 0n, shortTokenPrice: 0n}
+    return {
+      longTokenPrice: tokenPrices.get(marketData.longTokenAddress)?.max ?? 0n,
+      shortTokenPrice: tokenPrices.get(marketData.shortTokenAddress)?.max ?? 0n,
+    }
+  }, [tokenPrices, marketData])
+  const latestLongTokenPrice = useLatest(longTokenPrice)
+  const latestShortTokenPrice = useLatest(shortTokenPrice)
+
   const {longTokenAmount, shortTokenAmount} = useMemo(() => {
     if (!marketData || !marketTokenData || !wmAmount) {
-      return {longTokenAmount: '', shortTokenAmount: ''}
+      return {longTokenAmount: '0', shortTokenAmount: '0'}
     }
 
     const wmAmountBigInt = BigInt(Math.floor(parseFloat(wmAmount) * 10 ** marketTokenData.decimals))
@@ -85,25 +106,49 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     const longTokenAmount = (wmAmountBigInt * marketData.longPoolAmount) / totalSupply
     const shortTokenAmount = (wmAmountBigInt * marketData.shortPoolAmount) / totalSupply
 
+    const longTokenDisplayDecimals = calculatePriceDecimals(
+      latestLongTokenPrice.current,
+      marketData.longToken.decimals,
+    )
+    const shortTokenDisplayDecimals = calculatePriceDecimals(
+      latestShortTokenPrice.current,
+      marketData.shortToken.decimals,
+    )
+
     return {
-      longTokenAmount: shrinkDecimals(longTokenAmount, marketData.longToken.decimals, 6),
-      shortTokenAmount: shrinkDecimals(shortTokenAmount, marketData.shortToken.decimals, 6),
+      longTokenAmount: shrinkDecimals(
+        longTokenAmount,
+        marketData.longToken.decimals,
+        longTokenDisplayDecimals,
+        false,
+        true,
+      ),
+      shortTokenAmount: shrinkDecimals(
+        shortTokenAmount,
+        marketData.shortToken.decimals,
+        shortTokenDisplayDecimals,
+        false,
+        true,
+      ),
     }
   }, [marketData, marketTokenData, wmAmount])
 
   const handleWmAmountChange = (value: string) => {
-    const numValue = parseFloat(value)
-    const maxValue = parseFloat(userBalance)
-    if (!isNaN(numValue) && numValue <= maxValue) {
-      setWmAmount(value)
-    } else if (numValue > maxValue) {
-      setWmAmount(userBalance)
-    }
+    setWmAmount(() => {
+      const newValue = value.replace(/[^0-9.]/g, '')
+      const numValue = parseFloat(newValue)
+      if (isNaN(numValue)) return ''
+      return numValue > userBalance ? userBalanceString : newValue
+    })
+  }
+
+  const handleWmAmountSetToMax = () => {
+    setWmAmount(userBalanceString.replace(/,/g, ''))
   }
 
   const isInputValid = useMemo(() => {
     const amount = parseFloat(wmAmount)
-    return !isNaN(amount) && amount > 0 && amount <= parseFloat(userBalance)
+    return !isNaN(amount) && amount > 0 && amount <= userBalance
   }, [wmAmount, userBalance])
 
   const handleSubmit = (_e: PressEvent) => {
@@ -175,19 +220,42 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
         <ModalBody>
           <p>Current Market Price: ${priceNumber}</p>
           <Input
-            label={`WM Amount (Max: ${userBalance})`}
+            label={`WM Amount`}
             placeholder='Enter WM token amount'
             value={wmAmount}
             onChange={e => {
               handleWmAmountChange(e.target.value)
             }}
+            endContent={
+              <button
+                className={clsx(
+                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  parseFloat(wmAmount.replace(/,/g, '')) > userBalance && 'text-danger-500',
+                )}
+                onClick={handleWmAmountSetToMax}
+                type='button'
+              >
+                Max: {userBalanceString}
+              </button>
+            }
           />
-          <p>
-            You will receive: ~ {longTokenAmount} {marketData.longToken.symbol} and{' '}
-            {shortTokenAmount} {marketData.shortToken.symbol}
-          </p>
-          <p>Fees and price impact: ${feesAndPriceImpact}</p>
-          <p>Network Fee: ${networkFee}</p>
+          <div className='flex flex-col gap-2'>
+            <div className='flex justify-between'>
+              <span className='text-sm'>You will receive:</span>
+              <span className='text-right'>
+                ~ {longTokenAmount} {marketData.longToken.symbol}
+                <br />~ {shortTokenAmount} {marketData.shortToken.symbol}
+              </span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Fees and price impact:</span>
+              <span>${feesAndPriceImpact}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Network Fee:</span>
+              <span>${networkFee}</span>
+            </div>
+          </div>
         </ModalBody>
         <ModalFooter>
           <Button color='danger' variant='light' onPress={onClose}>

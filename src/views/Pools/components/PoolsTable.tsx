@@ -30,7 +30,7 @@ const columns = [
   {name: 'MARKET', uid: 'market', sortable: true},
   {name: 'PRICE', uid: 'price', sortable: true},
   {name: 'TOTAL SUPPLY', uid: 'totalSupply', sortable: true},
-  {name: 'VALUE', uid: 'value', sortable: true},
+  // {name: 'VALUE', uid: 'value', sortable: true},
   {name: 'WALLET BALANCE', uid: 'balance', sortable: true},
   {name: 'APY', uid: 'apy', sortable: true},
   {name: 'ACTIONS', uid: 'actions'},
@@ -39,10 +39,16 @@ const columns = [
 export interface ExtendedMarketData {
   marketTokenAddress: string
   market: string
-  price: string
-  totalSupply: string
-  value: string
-  balance: string
+  price: number
+  priceString: string
+  totalSupply: number
+  totalSupplyString: string
+  value: number
+  valueString: string
+  balance: number
+  balanceString: string
+  balanceValue: number
+  balanceValueString: string
   apy: string
   actions?: React.ReactNode
 }
@@ -103,21 +109,69 @@ export default function PoolsTable() {
           calculateMarketPrice(market, marketTokenData, tokenPrices) ||
           expandDecimals(1, USD_DECIMALS)
 
-        const value = (marketTokenData.totalSupply * price) / expandDecimals(1, USD_DECIMALS)
-        const valueNumber = '$' + shrinkDecimals(value, marketTokenData.decimals, 2)
-        const priceDecimals = calculatePriceDecimals(price)
-        const priceNumber = '$' + shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
-        const balanceNumber = shrinkDecimals(balance, marketTokenData.decimals, 2) + ' WM'
-        const totalSupplyNumber =
-          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals, 2) + ' WM'
+        const displayDecimals = calculatePriceDecimals(price)
+
+        const priceString = shrinkDecimals(price, USD_DECIMALS, 3, false, true)
+        const priceNumber = Number(shrinkDecimals(price, USD_DECIMALS))
+
+        const valueString = shrinkDecimals(
+          marketTokenData.totalSupply * price,
+          marketTokenData.decimals + USD_DECIMALS,
+          0,
+          false,
+          true,
+        )
+        const valueNumber = Number(
+          shrinkDecimals(
+            marketTokenData.totalSupply * price,
+            marketTokenData.decimals + USD_DECIMALS,
+          ),
+        )
+
+        const balanceString = shrinkDecimals(
+          balance,
+          marketTokenData.decimals,
+          displayDecimals,
+          false,
+          true,
+        )
+        const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
+
+        const balanceValueString = shrinkDecimals(
+          balance * price,
+          marketTokenData.decimals + USD_DECIMALS,
+          0,
+          false,
+          true,
+        )
+        const balanceValueNumber = Number(
+          shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+        )
+
+        const totalSupplyString = shrinkDecimals(
+          marketTokenData.totalSupply,
+          marketTokenData.decimals,
+          displayDecimals,
+          false,
+          true,
+        )
+        const totalSupplyNumber = Number(
+          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+        )
 
         return {
           marketTokenAddress: market.marketTokenAddress,
           market: market.name,
           price: priceNumber,
-          value: valueNumber,
+          priceString,
           totalSupply: totalSupplyNumber,
+          totalSupplyString,
+          value: valueNumber,
+          valueString,
           balance: balanceNumber,
+          balanceString,
+          balanceValue: balanceValueNumber,
+          balanceValueString,
           apy: '--',
         }
       })
@@ -166,6 +220,29 @@ export default function PoolsTable() {
   const renderCell = useCallback(
     (market: ExtendedMarketData, columnKey: React.Key) => {
       const key = String(columnKey) as keyof ExtendedMarketData
+
+      if (['price'].includes(key)) {
+        return <span className='text-nowrap'>${market.priceString}</span>
+      }
+
+      if (['totalSupply'].includes(key)) {
+        return (
+          <>
+            <div className='text-nowrap'>{market.totalSupplyString} WM</div>
+            <div className='text-nowrap text-xs opacity-50'>${market.valueString}</div>
+          </>
+        )
+      }
+
+      if (['balance'].includes(key)) {
+        return (
+          <>
+            <div className='text-nowrap'>{market.balanceString} WM</div>
+            <div className='text-nowrap text-xs opacity-50'>${market.balanceValueString}</div>
+          </>
+        )
+      }
+
       if (key === 'actions') {
         return (
           <div className='flex gap-2'>

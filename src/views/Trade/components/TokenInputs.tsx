@@ -4,6 +4,7 @@ import {memo, type MemoizedCallbackOrDispatch, useCallback, useState} from 'reac
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
+import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
@@ -21,7 +22,7 @@ const INPUT_2_LABEL: Record<TradeType, string> = {
 interface Props {
   tradeType: TradeType
   tradeMode: Exclude<TradeMode, TradeMode.Trigger>
-  tokenAddress: string | undefined
+  marketAddress: string | undefined
   tokenAmount: bigint
   setTokenAmount: MemoizedCallbackOrDispatch<(amount: bigint) => void>
   tokenAmountUsd: bigint
@@ -40,7 +41,7 @@ const ACCEPTABLE_DIFF = 2n
 export default memo(function TokenInputs({
   tradeType,
   tradeMode,
-  tokenAddress,
+  marketAddress,
   availablePayTokenAddresses,
   payTokenAmount,
   setPayTokenAmount,
@@ -56,13 +57,14 @@ export default memo(function TokenInputs({
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
   const tokenBalances = useTokenBalances()
+  const marketsData = useMarketsData()
 
   // -------------------------------------------------------------------------------------------------------------------
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
   const payTokenBalance = tokenBalances?.get(payTokenAddress ?? '') ?? 0n
-  const payTokenBalanceShrinked = shrinkDecimals(payTokenBalance, payTokenDecimals, 2, true)
+  const payTokenBalanceShrinked = shrinkDecimals(payTokenBalance, payTokenDecimals, 2, true, true)
 
   const [payTokenAmountInput, setPayTokenAmountInput] = useState(() =>
     shrinkDecimals(payTokenAmount, payTokenDecimals),
@@ -70,7 +72,7 @@ export default memo(function TokenInputs({
   const [payTokenAmountInputIsFocused, setPayTokenAmountInputIsFocused] = useState(false)
 
   const payTokenAmountUsdShrinked = payTokenAmountUsd
-    ? shrinkDecimals(payTokenAmountUsd, USD_DECIMALS, 2, true)
+    ? shrinkDecimals(payTokenAmountUsd, USD_DECIMALS, 2, true, true)
     : '0'
 
   const handlePayTokenAmountInputChange = useCallback(
@@ -89,6 +91,10 @@ export default memo(function TokenInputs({
     [setPayTokenAmount, payTokenDecimals],
   )
 
+  const handlePayTokenAmountSetToMax = useCallback(() => {
+    setPayTokenAmount(payTokenBalance)
+  }, [payTokenBalance, setPayTokenAmount])
+
   ;(function syncPayTokenAmountInputWithPayTokenAmount() {
     if (payTokenAmountInputIsFocused) return
     if (!payTokenDecimals) return
@@ -102,8 +108,10 @@ export default memo(function TokenInputs({
   })()
 
   // -------------------------------------------------------------------------------------------------------------------
+  const marketData = marketAddress ? marketsData?.get(marketAddress) : undefined
 
-  const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
+  const tokenData = marketData?.longToken
+  const shortTokenData = marketData?.shortToken
 
   const tokenDecimals = tokenData?.decimals ?? 0
   const [tokenAmountInput, setTokenAmountInput] = useState(() =>
@@ -111,7 +119,7 @@ export default memo(function TokenInputs({
   )
   const [tokenAmountInputIsFocussed, setTokenAmountInputIsFocused] = useState(false)
   const tokenAmountUsdShrinked = tokenAmountUsd
-    ? shrinkDecimals(tokenAmountUsd, USD_DECIMALS, 2, true)
+    ? shrinkDecimals(tokenAmountUsd, USD_DECIMALS, 2, true, true)
     : '0'
 
   const handleTokenAmountInputChange = useCallback(
@@ -180,7 +188,9 @@ export default memo(function TokenInputs({
           // }
           endContent={
             <div className='pointer-events-none flex h-full items-center justify-center'>
-              <span className='text-lg text-default-400'>=&nbsp;1&nbsp;{tokenData?.symbol}</span>
+              <span className='text-lg text-default-400'>
+                {shortTokenData?.symbol}&nbsp;=&nbsp;1&nbsp;{tokenData?.symbol}
+              </span>
             </div>
           }
         />
@@ -201,14 +211,15 @@ export default memo(function TokenInputs({
         }}
         endContent={
           <>
-            <div
+            <button
               className={clsx(
-                'absolute right-3 top-2 whitespace-nowrap text-xs',
+                'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
                 payTokenData && !isValidPayTokenAmount && 'text-danger-500',
               )}
+              onClick={handlePayTokenAmountSetToMax}
             >
               Balance: ~{payTokenBalanceShrinked}
-            </div>
+            </button>
             <Select
               aria-label='Select pay asset'
               className='max-w-xs'

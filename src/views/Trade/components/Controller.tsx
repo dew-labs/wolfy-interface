@@ -20,7 +20,7 @@ import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
 
-import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
+import {DEFAULT_SLIPPAGE, LEVERAGE_DECIMALS, SLIPPAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -245,7 +245,7 @@ const Controller = createResetableComponent(function ({reset}) {
     })
 
   const liquidationPriceText = liquidationPrice
-    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, priceDecimals, true)
+    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, priceDecimals, true, true)
     : '-'
 
   const executionPrice =
@@ -257,7 +257,7 @@ const Controller = createResetableComponent(function ({reset}) {
     })
 
   const executionPriceText = executionPrice
-    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, priceDecimals, true)
+    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, priceDecimals, true, true)
     : '-'
 
   const isConnected = useIsWalletConnected()
@@ -292,10 +292,10 @@ const Controller = createResetableComponent(function ({reset}) {
   })()
 
   const availableLiquidityUsdText = (() => {
-    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 0, true, true)
+    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 2, true, true)
   })()
 
-  const isValidSize = tokenAmount > 0n && tokenAmount <= availableLiquidity
+  const isValidSize = tokenAmount <= availableLiquidity
   const isValidPayTokenAmount =
     !!tokenBalancesData &&
     !!payTokenAddress &&
@@ -303,6 +303,18 @@ const Controller = createResetableComponent(function ({reset}) {
   const isValidTokenAmount = tokenAmount > 0n
   const isValidLeverage = leverage > 0n && leverage <= maxLeverage
   const isValidOrder = isValidLeverage && isValidTokenAmount && isValidPayTokenAmount && isValidSize
+
+  const invalidMessage = (() => {
+    if (!isValidTokenAmount) return 'Order size must be greater than 0'
+    if (!isValidPayTokenAmount) return 'Insufficient collateral balance'
+    if (!isValidSize) return 'Insufficient liquidity'
+    if (!isValidLeverage)
+      return (
+        'Leverage must be between 1 and ' +
+        shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS, 0, true, true)
+      )
+    return ''
+  })()
 
   const [isPlacing, setIsPlacing] = useState(false)
 
@@ -454,7 +466,7 @@ const Controller = createResetableComponent(function ({reset}) {
           </div>
           {tradeMode !== TradeMode.Trigger && (
             <TokenInputs
-              tokenAddress={tokenAddress}
+              marketAddress={marketAddress}
               tradeType={tradeType}
               tradeMode={tradeMode}
               availablePayTokenAddresses={availableCollateralTokenAddresses}
@@ -600,16 +612,23 @@ const Controller = createResetableComponent(function ({reset}) {
             </div>
           </div>
           <div className='mt-4 w-full'>
-            <Button
-              color='primary'
-              className='w-full'
-              size='lg'
-              onPress={handleSubmitBtnPress}
-              isDisabled={isConnected && !isValidOrder}
-              isLoading={isPlacing}
+            <Tooltip
+              showArrow={true}
+              color='danger'
+              content={invalidMessage}
+              isDisabled={isValidOrder}
             >
-              {!isConnected ? 'Connect Wallet' : !isPlacing ? 'Place Order' : 'Placing Order...'}
-            </Button>
+              <Button
+                color='primary'
+                className='w-full'
+                size='lg'
+                onPress={handleSubmitBtnPress}
+                isDisabled={isConnected && !isValidOrder}
+                isLoading={isPlacing}
+              >
+                {!isConnected ? 'Connect Wallet' : !isPlacing ? 'Place Order' : 'Placing Order...'}
+              </Button>
+            </Tooltip>
           </div>
         </CardBody>
       </Card>

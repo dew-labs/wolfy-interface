@@ -8,6 +8,7 @@ import {
   ModalHeader,
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
+import clsx from 'clsx'
 import React, {useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
 import {toast} from 'sonner'
@@ -131,18 +132,56 @@ export default function DepositModal({
     shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
   )
 
+  const longTokenDisplayDecimals = calculatePriceDecimals(
+    longTokenBalance,
+    marketData?.longToken.decimals ?? 18,
+  )
+
+  const maxLongTokenString = shrinkDecimals(
+    longTokenBalance,
+    marketData?.longToken.decimals ?? 18,
+    longTokenDisplayDecimals,
+    false,
+    true,
+  )
+
   const handleLongTokenAmountChange = (value: string) => {
-    setLongTokenAmount(value)
+    setLongTokenAmount(() => {
+      const newValue = value.replace(/[^0-9.]/g, '')
+      return newValue === '' ? '' : newValue
+    })
   }
 
   const maxShortToken = Number(
     shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
   )
 
-  console.log('maxShortToken', maxShortToken, 'shortAmount', parseFloat(shortTokenAmount))
+  const shortTokenDisplayDecimals = calculatePriceDecimals(
+    shortTokenBalance,
+    marketData?.shortToken.decimals ?? 18,
+  )
+
+  const maxShortTokenString = shrinkDecimals(
+    shortTokenBalance,
+    marketData?.shortToken.decimals ?? 18,
+    shortTokenDisplayDecimals,
+    false,
+    true,
+  )
 
   const handleShortTokenAmountChange = (value: string) => {
-    setShortTokenAmount(value)
+    setShortTokenAmount(() => {
+      const newValue = value.replace(/[^0-9.]/g, '')
+      return newValue === '' ? '' : newValue
+    })
+  }
+
+  const handleLongTokenSetToMax = () => {
+    setLongTokenAmount(maxLongTokenString.replace(/,/g, ''))
+  }
+
+  const handleShortTokenSetToMax = () => {
+    setShortTokenAmount(maxShortTokenString.replace(/,/g, ''))
   }
 
   const isInputValid = useMemo(() => {
@@ -232,31 +271,60 @@ export default function DepositModal({
         <ModalBody>
           <p>Current Market Price: ${priceNumber}</p>
           <Input
-            label={`${marketData.longToken.symbol} Amount (Max: ${Number(shrinkDecimals(longTokenBalance, marketData.longToken.decimals)).toFixed(4)})`}
+            label={`${marketData.longToken.symbol} Amount`}
             placeholder='Enter long token amount'
             value={longTokenAmount}
-            type='number'
-            min={0}
-            max={maxLongToken}
             onChange={e => {
               handleLongTokenAmountChange(e.target.value)
             }}
+            endContent={
+              <button
+                className={clsx(
+                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  parseFloat(longTokenAmount.replace(/,/g, '')) > maxLongToken && 'text-danger-500',
+                )}
+                onClick={handleLongTokenSetToMax}
+                type='button'
+              >
+                Max: {maxLongTokenString}
+              </button>
+            }
           />
           <Input
-            label={`${marketData.shortToken.symbol} Amount (Max: ${Number(shrinkDecimals(shortTokenBalance, marketData.shortToken.decimals)).toFixed(4)})`}
+            label={`${marketData.shortToken.symbol} Amount`}
             placeholder='Enter short token amount'
             value={shortTokenAmount}
-            type='number'
-            min={0}
-            max={maxShortToken}
             onChange={e => {
               handleShortTokenAmountChange(e.target.value)
             }}
+            endContent={
+              <button
+                className={clsx(
+                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  parseFloat(shortTokenAmount.replace(/,/g, '')) > maxShortToken &&
+                    'text-danger-500',
+                )}
+                onClick={handleShortTokenSetToMax}
+                type='button'
+              >
+                Max: {maxShortTokenString}
+              </button>
+            }
           />
-          <p>Received: ~ {marketTokenAmount} WM</p>
-          {/* Add new information */}
-          <p>Fees and price impact: ${feesAndPriceImpact}</p>
-          <p>Network Fee: ${networkFee}</p>
+          <div className='flex flex-col gap-2'>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Received:</span>
+              <span>~ {marketTokenAmount} WM</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Fees and price impact:</span>
+              <span>${feesAndPriceImpact}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Network Fee:</span>
+              <span>${networkFee}</span>
+            </div>
+          </div>
         </ModalBody>
         <ModalFooter>
           <Button color='danger' variant='light' onPress={onClose}>
