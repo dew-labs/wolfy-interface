@@ -28,6 +28,7 @@ export default async function fetchTokenPrices(chainId: StarknetChainId) {
   const feedIds = tokens.map(token => token.pythFeedId!)
 
   const priceFeeds = await connection.getLatestPriceFeeds(feedIds)
+  connection.closeWebSocket()
 
   if (!priceFeeds) return data
 

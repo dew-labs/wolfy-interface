@@ -82,6 +82,7 @@ function use1DMarketInformation(symbol: string | undefined) {
 
     return () => {
       chartDataWS.removeEventListener('message', eventHandler)
+      chartDataWS.close()
     }
   }, [symbol])
 

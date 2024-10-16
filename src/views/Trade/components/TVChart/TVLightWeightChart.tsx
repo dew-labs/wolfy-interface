@@ -145,6 +145,7 @@ export default memo(function TVLightWeightChart(props: {
 
       return () => {
         chartDataWS.removeEventListener('message', eventHandler)
+        chartDataWS.close()
       }
     },
     [props.interval, props.asset],

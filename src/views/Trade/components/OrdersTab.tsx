@@ -152,7 +152,7 @@ export default memo(function OrdersTab() {
                 </div>
               </TableCell>
               <TableCell>
-                <div className='flex items-center gap-2'>
+                <div className='flex min-w-max items-center gap-2'>
                   <img
                     src={order.marketData.indexToken.imageUrl}
                     alt={indexName}
@@ -163,7 +163,7 @@ export default memo(function OrdersTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='block min-w-max rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onClick={() => {
                         setTokenAddress(order.marketData.indexTokenAddress)
                       }}
