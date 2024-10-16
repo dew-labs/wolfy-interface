@@ -1,6 +1,7 @@
 import {
   ColorType,
   createChart,
+  type CreatePriceLineOptions,
   type IChartApi,
   type ISeriesApi,
   LineStyle,
@@ -25,6 +26,7 @@ export default memo(function TVLightWeightChart(props: {
   textColor: string
   gridColor: string
   interval: ChartInterval
+  lines: CreatePriceLineOptions[]
 }) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi>()
@@ -94,6 +96,22 @@ export default memo(function TVLightWeightChart(props: {
       chart.remove()
     }
   }, [props.interval, props.asset])
+
+  useEffect(
+    function addPriceLines() {
+      const series = chartMainCandlestickSeries.current
+      if (!series) return
+
+      const createdLines = props.lines.map(line => series.createPriceLine(line))
+
+      return () => {
+        createdLines.forEach(line => {
+          series.removePriceLine(line)
+        })
+      }
+    },
+    [props.lines],
+  )
 
   useEffect(
     function applyNewChartStyle() {
