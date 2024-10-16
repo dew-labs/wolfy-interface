@@ -8,6 +8,7 @@ import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   if (tokenAmountUsd <= 0 || payTokenAmountUsd <= 0) return 0n
@@ -98,7 +99,14 @@ export default function usePayToken(
       const newTokenAmountUsd = (latestPayTokenAmountUsd.current * leverage) / LEVERAGE_PRECISION
       setTokenAmountUsd(newTokenAmountUsd)
 
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS, 2, true)
+      const newLeverageInput = formatNumber(
+        shrinkDecimals(leverage, LEVERAGE_DECIMALS),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: 2,
+        },
+      )
       setLeverageInput(newLeverageInput)
     },
     [setTokenAmountUsd],
@@ -107,7 +115,14 @@ export default function usePayToken(
   useEffect(
     function syncLeverageToLeverageInput() {
       if (leverageInputIsFocused) return
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS, 2, true)
+      const newLeverageInput = formatNumber(
+        shrinkDecimals(leverage, LEVERAGE_DECIMALS),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: 2,
+        },
+      )
 
       if (newLeverageInput === '0') {
         setLeverageInput('1')

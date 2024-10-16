@@ -26,6 +26,7 @@ import sendWithdrawal from '@/lib/trade/services/market/sendWithdrawal'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import {calculateMarketPrice} from './PoolsTable'
 
@@ -69,17 +70,29 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     ),
   )
   const userBalanceDisplayDecimals = calculatePriceDecimals(price, marketTokenData?.decimals ?? 18)
-  const userBalanceString = shrinkDecimals(
-    marketTokenBalances?.get(marketTokenAddress) ?? 0n,
-    marketTokenData?.decimals ?? 18,
-    userBalanceDisplayDecimals,
-    false,
-    true,
+  const userBalanceNumber = Number(
+    shrinkDecimals(
+      marketTokenBalances?.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+  )
+  const userBalanceString = formatNumber(
+    shrinkDecimals(
+      marketTokenBalances?.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+    Format.PLAIN,
+    {
+      fractionDigits: userBalanceDisplayDecimals,
+    },
   )
 
   const priceDecimals = calculatePriceDecimals(price)
 
-  const priceNumber = shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
+  const priceNumber = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+    exactFractionDigits: true,
+    fractionDigits: priceDecimals,
+  })
 
   const {longTokenPrice, shortTokenPrice} = useMemo(() => {
     if (!tokenPrices || !marketData) return {longTokenPrice: 0n, shortTokenPrice: 0n}
@@ -116,19 +129,21 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     )
 
     return {
-      longTokenAmount: shrinkDecimals(
-        longTokenAmount,
-        marketData.longToken.decimals,
-        longTokenDisplayDecimals,
-        false,
-        true,
+      longTokenAmount: formatNumber(
+        shrinkDecimals(longTokenAmount, marketData.longToken.decimals),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: longTokenDisplayDecimals,
+        },
       ),
-      shortTokenAmount: shrinkDecimals(
-        shortTokenAmount,
-        marketData.shortToken.decimals,
-        shortTokenDisplayDecimals,
-        false,
-        true,
+      shortTokenAmount: formatNumber(
+        shrinkDecimals(shortTokenAmount, marketData.shortToken.decimals),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: shortTokenDisplayDecimals,
+        },
       ),
     }
   }, [marketData, marketTokenData, wmAmount])
@@ -138,12 +153,12 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
       const newValue = value.replace(/[^0-9.]/g, '')
       const numValue = parseFloat(newValue)
       if (isNaN(numValue)) return ''
-      return numValue > userBalance ? userBalanceString : newValue
+      return numValue > userBalance ? userBalanceNumber.toString() : newValue
     })
   }
 
   const handleWmAmountSetToMax = () => {
-    setWmAmount(userBalanceString.replace(/,/g, ''))
+    setWmAmount(userBalanceNumber.toString())
   }
 
   const isInputValid = useMemo(() => {
@@ -218,7 +233,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
       <ModalContent>
         <ModalHeader className='flex flex-col gap-1'>Sell {marketData.name}</ModalHeader>
         <ModalBody>
-          <p>Current Market Price: ${priceNumber}</p>
+          <p>Current Market Price: {priceNumber}</p>
           <Input
             label={`WM Amount`}
             placeholder='Enter WM token amount'

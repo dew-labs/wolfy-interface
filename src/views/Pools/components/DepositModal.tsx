@@ -26,6 +26,7 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import {calculateMarketPrice} from './PoolsTable'
 
@@ -80,10 +81,17 @@ export default function DepositModal({
 
   const priceDecimals = calculatePriceDecimals(price)
 
-  const priceNumber = shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
+  const priceNumber = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+    exactFractionDigits: true,
+    fractionDigits: priceDecimals,
+  })
 
   const marketTokenAmount = useMemo(() => {
-    if (!marketData || !marketTokenData) return ''
+    if (!marketData || !marketTokenData)
+      return {
+        number: 0,
+        text: '0',
+      }
 
     const longAmount = parseFloat(longTokenAmount) || 0
     const shortAmount = parseFloat(shortTokenAmount) || 0
@@ -109,7 +117,13 @@ export default function DepositModal({
     const amountDecimals = calculatePriceDecimals(
       BigInt(Math.floor(calculatedAmount / 10 ** USD_DECIMALS)),
     )
-    return shrinkDecimals(calculatedAmount, 0, amountDecimals, true, true)
+    return {
+      number: calculatedAmount,
+      text: formatNumber(calculatedAmount, Format.READABLE, {
+        exactFractionDigits: true,
+        fractionDigits: amountDecimals,
+      }),
+    }
   }, [
     marketData,
     marketTokenData,
@@ -137,18 +151,21 @@ export default function DepositModal({
     marketData?.longToken.decimals ?? 18,
   )
 
-  const maxLongTokenString = shrinkDecimals(
-    longTokenBalance,
-    marketData?.longToken.decimals ?? 18,
-    longTokenDisplayDecimals,
-    false,
-    true,
+  const maxLongTokenString = formatNumber(
+    shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
+    Format.READABLE,
+    {
+      exactFractionDigits: true,
+      fractionDigits: longTokenDisplayDecimals,
+    },
   )
 
   const handleLongTokenAmountChange = (value: string) => {
     setLongTokenAmount(() => {
       const newValue = value.replace(/[^0-9.]/g, '')
-      return newValue === '' ? '' : newValue
+      const numValue = parseFloat(newValue)
+      if (isNaN(numValue)) return ''
+      return numValue > maxLongToken ? maxLongToken.toString() : newValue
     })
   }
 
@@ -161,27 +178,30 @@ export default function DepositModal({
     marketData?.shortToken.decimals ?? 18,
   )
 
-  const maxShortTokenString = shrinkDecimals(
-    shortTokenBalance,
-    marketData?.shortToken.decimals ?? 18,
-    shortTokenDisplayDecimals,
-    false,
-    true,
+  const maxShortTokenString = formatNumber(
+    shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
+    Format.READABLE,
+    {
+      exactFractionDigits: true,
+      fractionDigits: shortTokenDisplayDecimals,
+    },
   )
 
   const handleShortTokenAmountChange = (value: string) => {
     setShortTokenAmount(() => {
       const newValue = value.replace(/[^0-9.]/g, '')
-      return newValue === '' ? '' : newValue
+      const numValue = parseFloat(newValue)
+      if (isNaN(numValue)) return ''
+      return numValue > maxShortToken ? maxShortToken.toString() : newValue
     })
   }
 
   const handleLongTokenSetToMax = () => {
-    setLongTokenAmount(maxLongTokenString.replace(/,/g, ''))
+    setLongTokenAmount(maxLongToken.toString())
   }
 
   const handleShortTokenSetToMax = () => {
-    setShortTokenAmount(maxShortTokenString.replace(/,/g, ''))
+    setShortTokenAmount(maxShortToken.toString())
   }
 
   const isInputValid = useMemo(() => {
@@ -218,7 +238,7 @@ export default function DepositModal({
             initialShortToken: marketData.shortTokenAddress,
             initialShortTokenAmount: shortAmount,
             minMarketToken: expandDecimals(
-              parseFloat(marketTokenAmount) * 0.99,
+              marketTokenAmount.number * 0.99,
               marketTokenData.decimals,
             ), // 1% slippage
           }
@@ -269,7 +289,7 @@ export default function DepositModal({
           {orderType === 'buy' ? 'Buy' : 'Sell'} {marketData.name}
         </ModalHeader>
         <ModalBody>
-          <p>Current Market Price: ${priceNumber}</p>
+          <p>Current Market Price: {priceNumber}</p>
           <Input
             label={`${marketData.longToken.symbol} Amount`}
             placeholder='Enter long token amount'
@@ -314,7 +334,7 @@ export default function DepositModal({
           <div className='flex flex-col gap-2'>
             <div className='flex justify-between'>
               <span className='text-sm'>Received:</span>
-              <span>~ {marketTokenAmount} WM</span>
+              <span>~ {marketTokenAmount.text} WM</span>
             </div>
             <div className='flex justify-between'>
               <span className='text-sm'>Fees and price impact:</span>

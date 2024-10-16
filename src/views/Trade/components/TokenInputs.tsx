@@ -12,6 +12,7 @@ import {TradeType} from '@/lib/trade/states/useTradeType'
 import {cleanNumberString} from '@/utils/numberInputs'
 import abs from '@/utils/numbers/bigint/abs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 const INPUT_2_LABEL: Record<TradeType, string> = {
   [TradeType.Long]: 'To long',
@@ -64,7 +65,14 @@ export default memo(function TokenInputs({
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
   const payTokenBalance = tokenBalances?.get(payTokenAddress ?? '') ?? 0n
-  const payTokenBalanceShrinked = shrinkDecimals(payTokenBalance, payTokenDecimals, 2, true, true)
+  const payTokenBalanceShrinked = formatNumber(
+    shrinkDecimals(payTokenBalance, payTokenDecimals),
+    Format.READABLE,
+    {
+      exactFractionDigits: true,
+      fractionDigits: 2,
+    },
+  )
 
   const [payTokenAmountInput, setPayTokenAmountInput] = useState(() =>
     shrinkDecimals(payTokenAmount, payTokenDecimals),
@@ -72,8 +80,8 @@ export default memo(function TokenInputs({
   const [payTokenAmountInputIsFocused, setPayTokenAmountInputIsFocused] = useState(false)
 
   const payTokenAmountUsdShrinked = payTokenAmountUsd
-    ? shrinkDecimals(payTokenAmountUsd, USD_DECIMALS, 2, true, true)
-    : '0'
+    ? formatNumber(shrinkDecimals(payTokenAmountUsd, USD_DECIMALS), Format.USD)
+    : '$0'
 
   const handlePayTokenAmountInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +127,7 @@ export default memo(function TokenInputs({
   )
   const [tokenAmountInputIsFocussed, setTokenAmountInputIsFocused] = useState(false)
   const tokenAmountUsdShrinked = tokenAmountUsd
-    ? shrinkDecimals(tokenAmountUsd, USD_DECIMALS, 2, true, true)
+    ? formatNumber(shrinkDecimals(tokenAmountUsd, USD_DECIMALS), Format.USD)
     : '0'
 
   const handleTokenAmountInputChange = useCallback(
@@ -199,7 +207,7 @@ export default memo(function TokenInputs({
         className='mt-4'
         size='lg'
         type='text'
-        label={`Pay: $${payTokenAmountUsdShrinked}`}
+        label={`Pay: ${payTokenAmountUsdShrinked}`}
         value={payTokenAmountInput}
         onChange={handlePayTokenAmountInputChange}
         onFocusChange={setPayTokenAmountInputIsFocused}
@@ -249,7 +257,7 @@ export default memo(function TokenInputs({
         className='mt-4'
         size='lg'
         type='text'
-        label={`${INPUT_2_LABEL[tradeType]}: $${tokenAmountUsdShrinked}`}
+        label={`${INPUT_2_LABEL[tradeType]}: ${tokenAmountUsdShrinked}`}
         placeholder='0.0'
         classNames={{
           input: 'appearance-none',

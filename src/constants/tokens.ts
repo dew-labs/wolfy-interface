@@ -16,6 +16,12 @@ export interface Token {
   pythFeedId?: string
 }
 
+export const MOCK_SYMBOL_MAP: Record<string, string> = {
+  wfETH: 'eth',
+  wfBTC: 'btc',
+  wfSTRK: 'strk',
+}
+
 const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
   [StarknetChainId.SN_MAIN, new Map()],
   [

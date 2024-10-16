@@ -44,6 +44,7 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import createResetableComponent from '@/utils/reset-component/createResettableComponent'
 
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
@@ -245,7 +246,10 @@ const Controller = createResetableComponent(function ({reset}) {
     })
 
   const liquidationPriceText = liquidationPrice
-    ? '$' + shrinkDecimals(liquidationPrice, USD_DECIMALS, priceDecimals, true, true)
+    ? formatNumber(shrinkDecimals(liquidationPrice, USD_DECIMALS), Format.USD, {
+        exactFractionDigits: true,
+        fractionDigits: priceDecimals,
+      })
     : '-'
 
   const executionPrice =
@@ -257,7 +261,10 @@ const Controller = createResetableComponent(function ({reset}) {
     })
 
   const executionPriceText = executionPrice
-    ? '$' + shrinkDecimals(executionPrice, USD_DECIMALS, priceDecimals, true, true)
+    ? formatNumber(shrinkDecimals(executionPrice, USD_DECIMALS), Format.USD, {
+        exactFractionDigits: true,
+        fractionDigits: priceDecimals,
+      })
     : '-'
 
   const isConnected = useIsWalletConnected()
@@ -291,9 +298,10 @@ const Controller = createResetableComponent(function ({reset}) {
     )
   })()
 
-  const availableLiquidityUsdText = (() => {
-    return '$' + shrinkDecimals(availableLiquidityUsd, USD_DECIMALS, 2, true, true)
-  })()
+  const availableLiquidityUsdText = formatNumber(
+    shrinkDecimals(availableLiquidityUsd, USD_DECIMALS),
+    Format.USD,
+  )
 
   const isValidSize = tokenAmount <= availableLiquidity
   const isValidPayTokenAmount =
@@ -311,7 +319,10 @@ const Controller = createResetableComponent(function ({reset}) {
     if (!isValidLeverage)
       return (
         'Leverage must be between 1 and ' +
-        shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS, 0, true, true)
+        formatNumber(shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS), Format.PLAIN, {
+          exactFractionDigits: true,
+          fractionDigits: 0,
+        })
       )
     return ''
   })()

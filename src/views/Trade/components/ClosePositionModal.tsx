@@ -19,6 +19,7 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 const closePositionKeyAtom = atom<bigint>()
 const isCLosePositionModalOpenAtom = atom(get => !!get(closePositionKeyAtom))
@@ -57,19 +58,22 @@ export default function ClosePositionModal() {
     expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) /
     (collateralTokenPrice?.min ?? 1n)
 
-  const maximumCollateralTokenToDecreaseText = shrinkDecimals(
-    maximumCollateralTokenToDecrease,
-    collateralTokenDecimals,
-    calculatePriceDecimals(maximumCollateralTokenToDecrease),
-    true,
-    true,
+  const maximumCollateralTokenToDecreaseText = formatNumber(
+    shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
+    Format.READABLE,
+    {
+      exactFractionDigits: true,
+      fractionDigits: calculatePriceDecimals(maximumCollateralTokenToDecrease),
+    },
   )
-  const maximumSizeUsdToDecreaseText = shrinkDecimals(
-    maximumSizeUsdToDecrease,
-    USD_DECIMALS,
-    2,
-    true,
-    true,
+
+  const maximumSizeUsdToDecreaseText = formatNumber(
+    shrinkDecimals(maximumSizeUsdToDecrease, USD_DECIMALS),
+    Format.USD,
+    {
+      exactFractionDigits: true,
+      fractionDigits: 2,
+    },
   )
 
   //----------------------------------------------------------------------------
@@ -245,7 +249,7 @@ export default function ClosePositionModal() {
             className='mt-0'
             size='lg'
             type='text'
-            label={`Size (Max: $${maximumSizeUsdToDecreaseText})`}
+            label={`Size (Max: ${maximumSizeUsdToDecreaseText})`}
             placeholder='0.0'
             classNames={{
               input: 'appearance-none',

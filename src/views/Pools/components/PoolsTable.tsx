@@ -24,6 +24,7 @@ import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
@@ -117,16 +118,23 @@ export default function PoolsTable() {
 
         const displayDecimals = calculatePriceDecimals(price)
 
-        const priceString = shrinkDecimals(price, USD_DECIMALS, 3, false, true)
+        const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+          exactFractionDigits: true,
+          fractionDigits: 3,
+        })
         const priceNumber = Number(shrinkDecimals(price, USD_DECIMALS))
 
-        const valueString = shrinkDecimals(
-          marketTokenData.totalSupply * price,
-          marketTokenData.decimals + USD_DECIMALS,
-          0,
-          false,
-          true,
+        const valueString = formatNumber(
+          shrinkDecimals(
+            marketTokenData.totalSupply * price,
+            marketTokenData.decimals + USD_DECIMALS,
+          ),
+          Format.USD,
+          {
+            fractionDigits: 0,
+          },
         )
+
         const valueNumber = Number(
           shrinkDecimals(
             marketTokenData.totalSupply * price,
@@ -134,33 +142,36 @@ export default function PoolsTable() {
           ),
         )
 
-        const balanceString = shrinkDecimals(
-          balance,
-          marketTokenData.decimals,
-          displayDecimals,
-          false,
-          true,
+        const balanceString = formatNumber(
+          shrinkDecimals(balance, marketTokenData.decimals),
+          Format.READABLE,
+          {
+            fractionDigits: displayDecimals,
+          },
         )
+
         const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
 
-        const balanceValueString = shrinkDecimals(
-          balance * price,
-          marketTokenData.decimals + USD_DECIMALS,
-          0,
-          false,
-          true,
+        const balanceValueString = formatNumber(
+          shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+          Format.READABLE,
+          {
+            fractionDigits: 2,
+          },
         )
+
         const balanceValueNumber = Number(
           shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
         )
 
-        const totalSupplyString = shrinkDecimals(
-          marketTokenData.totalSupply,
-          marketTokenData.decimals,
-          displayDecimals,
-          false,
-          true,
+        const totalSupplyString = formatNumber(
+          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+          Format.READABLE,
+          {
+            fractionDigits: displayDecimals,
+          },
         )
+
         const totalSupplyNumber = Number(
           shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
         )
@@ -238,14 +249,14 @@ export default function PoolsTable() {
       }
 
       if (['price'].includes(key)) {
-        return <span className='text-nowrap'>${market.priceString}</span>
+        return <span className='text-nowrap'>{market.priceString}</span>
       }
 
       if (['totalSupply'].includes(key)) {
         return (
           <>
             <div className='text-nowrap'>{market.totalSupplyString} WM</div>
-            <div className='text-nowrap text-xs opacity-50'>${market.valueString}</div>
+            <div className='text-nowrap text-xs opacity-50'>{market.valueString}</div>
           </>
         )
       }

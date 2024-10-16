@@ -1,7 +1,5 @@
 import type {BigNumberish} from 'starknet'
 
-import formatLocaleNumber from './formatLocaleNumber'
-
 export default function expandDecimals(value: BigNumberish, decimals: number | bigint): bigint {
   if (!value) return 0n
 
@@ -21,15 +19,7 @@ export default function expandDecimals(value: BigNumberish, decimals: number | b
   return BigInt(integerPart + decimalPart)
 }
 
-export function shrinkDecimals(
-  value: BigNumberish,
-  decimals: number | bigint,
-  fractionPlaces?: number | bigint,
-  exactFractionPlaces = false,
-  format = false,
-  formatLocale?: Intl.LocalesArgument,
-  formatOptions?: Intl.NumberFormatOptions,
-): string {
+export function shrinkDecimals(value: BigNumberish, decimals: number | bigint): string {
   decimals = Number(decimals)
   let display = (() => {
     if (typeof value === 'number') return value.toFixed(0)
@@ -42,15 +32,10 @@ export function shrinkDecimals(
 
   display = display.padStart(decimals, '0')
 
-  let integer = display.slice(0, display.length - decimals)
+  const integer = display.slice(0, display.length - decimals)
+
   let fraction = display.slice(display.length - decimals)
   fraction = fraction.replace(/0+$/, '')
-  if (fractionPlaces || fractionPlaces === 0) fraction = fraction.slice(0, Number(fractionPlaces))
-  if (fractionPlaces && exactFractionPlaces) fraction = fraction.padEnd(Number(fractionPlaces), '0')
-  if (format) integer = formatLocaleNumber(BigInt(integer), formatLocale, formatOptions)
-  const fractionDelimiter = formatLocaleNumber(Number(`0.1`), formatLocale, formatOptions).replace(
-    /\d/g,
-    '',
-  )
-  return `${negative ? '-' : ''}${integer || '0'}${fraction ? fractionDelimiter + fraction : ''}`
+
+  return `${negative ? '-' : ''}${integer || '0'}${fraction ? '.' + fraction : ''}`
 }

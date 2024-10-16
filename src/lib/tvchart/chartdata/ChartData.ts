@@ -28,6 +28,8 @@ export interface ChartData {
   high: number
   open: number
   close: number
+  volume?: number
+  volumeQuote?: number
 }
 
 export function isChartInterval(value: unknown): value is ChartInterval {

@@ -4,7 +4,7 @@ import {memo, useCallback, useMemo, useState} from 'react'
 import type {Key} from 'react-aria-components'
 import useLatest from 'react-use/lib/useLatest'
 
-import {getTokensMetadata} from '@/constants/tokens'
+import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useOrders from '@/lib/trade/hooks/useOrders'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -14,14 +14,9 @@ import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecima
 import {ChartInterval, isChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import useChartConfig from '@/lib/tvchart/configs/useChartConfigs.ts'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import TVLightWeightChart from '@/views/Trade/components/TVChart/TVLightWeightChart.tsx'
 import TVLightWeightTimeFrame from '@/views/Trade/components/TVChart/TVLightWeightTimeFrame.tsx'
-
-const MOCK_SYMBOL_MAP: Record<string, string> = {
-  wfETH: 'eth',
-  wfBTC: 'btc',
-  wfSTRK: 'strk',
-}
 
 export default memo(function Chart() {
   const [chainId] = useChainId()
@@ -43,17 +38,20 @@ export default memo(function Chart() {
     () =>
       ordersOfCurrentToken.map(order => {
         const price = Number(shrinkDecimals(order.triggerPrice, USD_DECIMALS))
-        const size = shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS, 2, false, true)
+        const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
+          fractionDigits: 2,
+        })
         const displayDecimals = calculatePriceDecimals(
           latestTokenPrices.current?.get(order.initialCollateralToken.address)?.max ?? 0n,
           order.initialCollateralToken.decimals,
         )
-        const collateral = shrinkDecimals(
-          order.initialCollateralDeltaAmount,
-          order.initialCollateralToken.decimals,
-          displayDecimals,
-          false,
-          true,
+        const collateral = formatNumber(
+          shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
+          Format.PLAIN,
+          {
+            exactFractionDigits: true,
+            fractionDigits: displayDecimals,
+          },
         )
         const collateralSymbol = order.initialCollateralToken.symbol
 
@@ -63,7 +61,7 @@ export default memo(function Chart() {
           lineWidth: 2 as const,
           lineStyle: LineStyle.Dashed,
           axisLabelVisible: true,
-          title: `${order.isLong ? 'LONG' : 'SHORT'} $${size} with ${collateral} ${collateralSymbol}`,
+          title: `${order.isLong ? 'LONG' : 'SHORT'} ${size} with ${collateral} ${collateralSymbol}`,
         }
       }),
     [ordersOfCurrentToken],

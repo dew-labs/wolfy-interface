@@ -17,7 +17,7 @@ import type {Selection} from '@react-types/shared'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
-import {getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
+import {getTokenMetadata, getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -27,15 +27,73 @@ import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
+import {getChartWssUrl} from '@/lib/tvchart/constants'
+import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData'
 import max from '@/utils/numbers/bigint/max'
 import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 interface TokenOption {
   longLiquidity: bigint
   shortLiquidity: bigint
   marketTokenAddress: string
   indexTokenAddress: string
+}
+
+function use1DMarketInformation(symbol: string | undefined) {
+  const [open, setOpen] = useState(0)
+  const [close, setClose] = useState(0)
+  const change = close - open
+  const changePercent = change / open || 0
+  const [high, setHigh] = useState(0)
+  const [low, setLow] = useState(0)
+  const [volume, setVolume] = useState(0)
+
+  useEffect(() => {
+    if (!symbol) return
+
+    const asset = MOCK_SYMBOL_MAP[symbol]
+
+    if (!asset) return
+
+    const wssUrl = getChartWssUrl(asset, ChartInterval['1d'])
+    const chartDataWS = new WebSocket(wssUrl)
+
+    const eventHandler = (event: MessageEvent<unknown>) => {
+      if (typeof event.data !== 'string') {
+        return
+      }
+
+      const rawData = JSON.parse(event.data)
+      const data = parseChartData(rawData, ChartInterval['1d'])
+
+      if (data) {
+        setOpen(data.open)
+        setClose(data.close)
+        setHigh(data.high)
+        setLow(data.low)
+        setVolume(data.volume ?? 0)
+      }
+    }
+
+    chartDataWS.addEventListener('message', eventHandler)
+
+    return () => {
+      chartDataWS.removeEventListener('message', eventHandler)
+    }
+  }, [symbol])
+
+  return {
+    open,
+    close,
+    change,
+    changePercent,
+    high,
+    low,
+    volume,
+  }
 }
 
 export default memo(function MarketInformation() {
@@ -124,13 +182,22 @@ export default memo(function MarketInformation() {
         markets,
         imageUrl: getTokenMetadata(chainId, token).imageUrl ?? '',
         maxLongLiquidity: Number(shrinkDecimals(selectedLongLiquid, USD_DECIMALS)),
-        maxLongLiquidityString:
-          '$' + shrinkDecimals(selectedLongLiquid, USD_DECIMALS, 0, true, true),
+        maxLongLiquidityString: formatNumber(
+          shrinkDecimals(selectedLongLiquid, USD_DECIMALS),
+          Format.USD,
+          {exactFractionDigits: true, fractionDigits: 0},
+        ),
         maxShortLiquidity: Number(shrinkDecimals(selectedShortLiquid, USD_DECIMALS)),
-        maxShortLiquidityString:
-          '$' + shrinkDecimals(selectedShortLiquid, USD_DECIMALS, 0, true, true),
+        maxShortLiquidityString: formatNumber(
+          shrinkDecimals(selectedShortLiquid, USD_DECIMALS),
+          Format.USD,
+          {exactFractionDigits: true, fractionDigits: 0},
+        ),
         price: Number(shrinkDecimals(price, USD_DECIMALS)),
-        priceString: '$' + shrinkDecimals(price, USD_DECIMALS, priceDisplayDecimals, true, true),
+        priceString: formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+          exactFractionDigits: true,
+          fractionDigits: priceDisplayDecimals,
+        }),
       })
     })
 
@@ -222,16 +289,24 @@ export default memo(function MarketInformation() {
     [setTokenAddress],
   )
 
+  const {change, changePercent, high, low, volume} = use1DMarketInformation(tokenMetadata?.symbol)
+
   const priceIndex = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.max : 0n
   const priceMark = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.min : 0n
 
   const priceDecimals = calculatePriceDecimals(priceIndex)
 
   const priceIndexText = priceIndex
-    ? shrinkDecimals(priceIndex, USD_DECIMALS, priceDecimals, true, true)
+    ? formatNumber(shrinkDecimals(priceIndex, USD_DECIMALS), Format.USD, {
+        exactFractionDigits: true,
+        fractionDigits: priceDecimals,
+      })
     : '--'
   const priceMarkText = priceMark
-    ? shrinkDecimals(priceMark, USD_DECIMALS, priceDecimals, true, true)
+    ? formatNumber(shrinkDecimals(priceMark, USD_DECIMALS), Format.USD, {
+        exactFractionDigits: true,
+        fractionDigits: priceDecimals,
+      })
     : '--'
 
   const maxLongLiquidityText =
@@ -321,8 +396,8 @@ export default memo(function MarketInformation() {
         </Popover>
         <div className='flex flex-1 flex-row gap-4'>
           <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-2xl leading-6'>${priceIndexText}</div>
-            <div className='text-nowrap text-xs opacity-70'>${priceMarkText}</div>
+            <div className='text-nowrap text-2xl leading-6'>{priceIndexText}</div>
+            <div className='text-nowrap text-xs opacity-70'>{priceMarkText}</div>
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-nowrap text-xs opacity-70'>Long liq.</div>
@@ -334,17 +409,24 @@ export default memo(function MarketInformation() {
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-nowrap text-xs opacity-70'>24h Change</div>
-            <div className='text-lg'>---</div>
+            <div className='text-lg'>
+              <span className={change > 0 ? 'text-success' : 'text-danger'}>
+                {formatNumber(changePercent, Format.PERCENT_SIGNED)}
+              </span>
+            </div>
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-nowrap text-xs opacity-70'>24h High/Low</div>
             <div className='text-nowrap text-lg'>
-              <span className='text-success'>---</span> / <span className='text-danger'>---</span>
+              <span className='text-success'>${high}</span>/
+              <span className='text-danger'>${low}</span>
             </div>
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-nowrap text-xs opacity-70'>24h Volume</div>
-            <div className='text-nowrap text-lg'>---</div>
+            <div className='text-nowrap text-lg'>
+              {formatNumber(volume, Format.USD_ABBREVIATED)}
+            </div>
           </div>
           <div className='flex flex-col items-start justify-center'>
             <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
