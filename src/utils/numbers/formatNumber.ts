@@ -4,6 +4,7 @@ export enum Format {
   PLAIN,
   READABLE,
   USD,
+  USD_SIGNED,
   USD_ABBREVIATED,
   PERCENT,
   PERCENT_SIGNED,
@@ -35,6 +36,14 @@ export default function formatNumber(
         currency: 'USD',
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
+      })
+    case Format.USD_SIGNED:
+      return formatLocaleNumber(Number(number), 'en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: options?.fractionDigits ?? 2,
+        minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
+        signDisplay: 'exceptZero',
       })
     case Format.USD_ABBREVIATED:
       return formatLocaleNumber(Number(number), 'en-US', {

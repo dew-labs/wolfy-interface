@@ -7,6 +7,7 @@ import useLatest from 'react-use/lib/useLatest'
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useOrders from '@/lib/trade/hooks/useOrders'
+import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
@@ -34,38 +35,90 @@ export default memo(function Chart() {
     [orders, tokenAddress],
   )
 
-  const lines: CreatePriceLineOptions[] = useMemo(
+  const positions = usePositionsInfoData()
+  const positionOfCurrentToken = useMemo(
     () =>
-      ordersOfCurrentToken.map(order => {
-        const price = Number(shrinkDecimals(order.triggerPrice, USD_DECIMALS))
-        const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
-          fractionDigits: 2,
-        })
-        const displayDecimals = calculatePriceDecimals(
-          latestTokenPrices.current?.get(order.initialCollateralToken.address)?.max ?? 0n,
-          order.initialCollateralToken.decimals,
-        )
-        const collateral = formatNumber(
-          shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
-          Format.PLAIN,
-          {
-            exactFractionDigits: true,
-            fractionDigits: displayDecimals,
-          },
-        )
-        const collateralSymbol = order.initialCollateralToken.symbol
-
-        return {
-          price,
-          color: order.isLong ? '#22c55e' : '#ef4444',
-          lineWidth: 2 as const,
-          lineStyle: LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: `${order.isLong ? 'LONG' : 'SHORT'} ${size} with ${collateral} ${collateralSymbol}`,
-        }
-      }),
-    [ordersOfCurrentToken],
+      Array.from(positions?.values() ?? []).filter(
+        position => position.marketData.indexTokenAddress === tokenAddress,
+      ),
+    [positions, tokenAddress],
   )
+
+  const lines = useMemo(() => {
+    const lines: CreatePriceLineOptions[] = []
+
+    ordersOfCurrentToken.forEach(order => {
+      const price = Number(shrinkDecimals(order.triggerPrice, USD_DECIMALS))
+      const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
+        fractionDigits: 2,
+      })
+      const displayDecimals = calculatePriceDecimals(
+        latestTokenPrices.current?.get(order.initialCollateralToken.address)?.max ?? 0n,
+        order.initialCollateralToken.decimals,
+      )
+      const collateral = formatNumber(
+        shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: displayDecimals,
+        },
+      )
+      const collateralSymbol = order.initialCollateralToken.symbol
+
+      lines.push({
+        price,
+        color: order.isLong ? '#22c55e' : '#ef4444',
+        lineWidth: 1 as const,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: `OPEN ${order.isLong ? 'LONG' : 'SHORT'} ${size} with ${collateral} ${collateralSymbol}`,
+      })
+    })
+
+    positionOfCurrentToken.forEach(position => {
+      if (!position.entryPrice) return
+      const price = Number(shrinkDecimals(position.entryPrice, USD_DECIMALS))
+      const size = formatNumber(shrinkDecimals(position.sizeInUsd, USD_DECIMALS), Format.USD, {
+        fractionDigits: 2,
+      })
+      // const displayDecimals = calculatePriceDecimals(
+      //   latestTokenPrices.current?.get(position.marketData.indexTokenAddress)?.max ?? 0n,
+      //   position.marketData.indexToken.decimals,
+      // )
+      // const collateral = formatNumber(
+      //   shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
+      //   Format.PLAIN,
+      //   {
+      //     exactFractionDigits: true,
+      //     fractionDigits: displayDecimals,
+      //   },
+      // )
+      // const collateralSymbol = position.collateralToken.symbol
+      const pnl = formatNumber(
+        shrinkDecimals(position.pnlAfterFees, USD_DECIMALS),
+        Format.USD_SIGNED,
+        {
+          fractionDigits: 2,
+        },
+      )
+
+      const isProfit = position.pnlAfterFees >= 0n
+
+      lines.push({
+        price,
+        color: position.isLong ? '#22c55e' : '#ef4444',
+        lineWidth: 2 as const,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        axisLabelColor: isProfit ? '#22c55e' : '#ef4444',
+        // axisLabelTextColor: isProfit ? '#fff' : '#000',
+        title: `${position.isLong ? 'LONGING' : 'SHORTING'} ${size}: ${pnl}`,
+      })
+    })
+
+    return lines
+  }, [ordersOfCurrentToken, positionOfCurrentToken])
 
   const handleChartIntervalSelection = useCallback((key: Key) => {
     if (isChartInterval(key)) {
