@@ -17,7 +17,7 @@ import type {Selection} from '@react-types/shared'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
-import {getTokensMetadata} from '@/constants/tokens'
+import {getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -100,6 +100,7 @@ export default memo(function MarketInformation() {
       string,
       {
         markets: TokenOption[]
+        imageUrl: string
         maxLongLiquidity: bigint
         maxShortLiquidity: bigint
       }
@@ -111,13 +112,14 @@ export default memo(function MarketInformation() {
 
       indexes.set(token, {
         markets,
+        imageUrl: getTokenMetadata(chainId, token).imageUrl ?? '',
         maxLongLiquidity: max(...longLiquids) / expandDecimals(1, USD_DECIMALS),
         maxShortLiquidity: max(...shortLiquids) / expandDecimals(1, USD_DECIMALS),
       })
     })
 
     return indexes
-  }, [marketsWithLiquidityGrouppedByIndexToken])
+  }, [marketsWithLiquidityGrouppedByIndexToken, chainId])
 
   const indexTokensWithLiquidityInformationList = useMemo(
     () => Array.from(indexTokensWithLiquidityInformation.values()),
@@ -267,7 +269,12 @@ export default memo(function MarketInformation() {
                 {sortedAndFilteredIndexTokens.map(item => {
                   return (
                     <TableRow key={item.address} className='cursor-pointer'>
-                      <TableCell>{`${item.symbol} / USD`}</TableCell>
+                      <TableCell>
+                        <div className='flex items-center gap-2'>
+                          <img src={item.imageUrl} alt={item.symbol} className='h-6 w-6 rounded' />
+                          <span>{`${item.symbol} / USD`}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>${formatLocaleNumber(item.maxLongLiquidity)}</TableCell>
                       <TableCell>${formatLocaleNumber(item.maxShortLiquidity)}</TableCell>
                     </TableRow>

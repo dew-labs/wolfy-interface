@@ -146,8 +146,17 @@ export default memo(function OrdersTab() {
                 {order.isLong ? 'Long' : 'Short'}
               </TableCell>
               <TableCell>
-                <div>{indexName}</div>
-                <div className='subtext lh-1'>{poolName && `[${poolName}]`}</div>
+                <div className='flex items-center gap-2'>
+                  <img
+                    src={order.marketData.indexToken.imageUrl}
+                    alt={indexName}
+                    className='h-6 w-6 rounded'
+                  />
+                  <div>
+                    <div>{indexName}</div>
+                    <div className='subtext lh-1'>{poolName && `[${poolName}]`}</div>
+                  </div>
+                </div>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
               <TableCell>{collateralText}</TableCell>

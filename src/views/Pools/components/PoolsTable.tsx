@@ -11,6 +11,8 @@ import {
 import type {SortDescriptor} from '@react-types/shared'
 import React, {useCallback, useMemo, useState} from 'react'
 
+import {getTokenMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
@@ -37,6 +39,7 @@ const columns = [
 ]
 
 export interface ExtendedMarketData {
+  imageUrl: string
   marketTokenAddress: string
   market: string
   price: number
@@ -89,6 +92,7 @@ export default function PoolsTable() {
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy')
+  const [chainId] = useChainId()
 
   const marketsData = useMarketsData()
   const tokenPrices = useTokenPrices(data => data)
@@ -102,6 +106,8 @@ export default function PoolsTable() {
         const marketTokenData = marketTokensData.get(market.marketTokenAddress)
 
         if (!marketTokenData) return null
+
+        const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
 
         const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
 
@@ -160,6 +166,7 @@ export default function PoolsTable() {
         )
 
         return {
+          imageUrl: indexTokenData.imageUrl,
           marketTokenAddress: market.marketTokenAddress,
           market: market.name,
           price: priceNumber,
@@ -176,7 +183,7 @@ export default function PoolsTable() {
         }
       })
       .filter((market): market is ExtendedMarketData => market !== null)
-  }, [marketsData, marketTokensData, tokenPrices, marketTokensBalances])
+  }, [marketsData, marketTokensData, tokenPrices, marketTokensBalances, chainId])
 
   const filteredMarkets = useMemo(() => {
     return extendedMarkets.filter(market =>
@@ -220,6 +227,15 @@ export default function PoolsTable() {
   const renderCell = useCallback(
     (market: ExtendedMarketData, columnKey: React.Key) => {
       const key = String(columnKey) as keyof ExtendedMarketData
+
+      if (['market'].includes(key)) {
+        return (
+          <div className='flex items-center gap-2'>
+            <img src={market.imageUrl} alt={market.market} className='h-6 w-6' />
+            <span className='text-nowrap'>{market.market}</span>
+          </div>
+        )
+      }
 
       if (['price'].includes(key)) {
         return <span className='text-nowrap'>${market.priceString}</span>

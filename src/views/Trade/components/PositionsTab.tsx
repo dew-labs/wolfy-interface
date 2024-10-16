@@ -70,11 +70,17 @@ export default memo(function PositionTab() {
                 <div
                   className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                 />
-                <div>{position.isLong ? t('Long') : t('Short')}</div>
-                <div>{position.marketData.indexToken.symbol}</div>
-                {/* <div className='flex items-center'>
-                  <span>{indexName}</span>
-                </div> */}
+                <div className='flex items-center gap-2'>
+                  <img
+                    src={position.marketData.indexToken.imageUrl}
+                    alt={position.marketData.indexToken.symbol}
+                    className='h-6 w-6 rounded'
+                  />
+                  <div>
+                    <div>{position.isLong ? t('Long') : t('Short')}</div>
+                    <div>{position.marketData.indexToken.symbol}</div>
+                  </div>
+                </div>
               </TableCell>
               <TableCell>
                 <div className='flex items-center'>
@@ -98,7 +104,7 @@ export default memo(function PositionTab() {
                   {shrinkDecimals(position.collateralAmount, position.collateralToken.decimals)}{' '}
                   {position.collateralToken.symbol}
                 </div>
-                <div>{formatUsd(position.remainingCollateralUsd)}</div>
+                <div className='opacity-50'>{formatUsd(position.remainingCollateralUsd)}</div>
               </TableCell>
               <TableCell>
                 {' '}
