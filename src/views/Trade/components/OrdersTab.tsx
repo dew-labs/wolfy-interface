@@ -6,6 +6,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  Tooltip,
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
@@ -157,16 +158,22 @@ export default memo(function OrdersTab() {
                     alt={indexName}
                     className='h-6 w-6 rounded'
                   />
-                  <button
-                    onClick={() => {
-                      setTokenAddress(order.marketData.indexTokenAddress)
-                    }}
-                  >
-                    <div className='text-nowrap'>{indexName}</div>
-                    <div className='subtext lh-1 text-nowrap text-xs opacity-50'>
-                      {poolName && `[${poolName}]`}
-                    </div>
-                  </button>
+                  <Tooltip content='Press to switch market'>
+                    <Button
+                      disableRipple
+                      disableAnimation
+                      variant='light'
+                      className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      onClick={() => {
+                        setTokenAddress(order.marketData.indexTokenAddress)
+                      }}
+                    >
+                      <div className='text-nowrap'>{indexName}</div>
+                      <div className='subtext lh-1 text-nowrap text-xs opacity-50'>
+                        {poolName && `[${poolName}]`}
+                      </div>
+                    </Button>
+                  </Tooltip>
                 </div>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
