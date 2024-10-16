@@ -119,9 +119,11 @@ export default memo(function ConnectModal() {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
   const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
+  const latestShouldReconnect = useLatest(shouldReconnect)
 
   const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
   const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
+  const latestLastConnectedWallet = useLatest(lastConnectedWallet)
   const [unavailableWallets, setUnavailableWallets] = useState<WalletProvider[]>([])
 
   const [isConnecting, setIsConnecting] = useState(false)
@@ -217,13 +219,13 @@ export default memo(function ConnectModal() {
     },
     [setShouldReconnect, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
   )
-  useEffect(() => {
-    console.log('lastConnectedWallet:', lastConnectedWallet)
-    if (!lastConnectedWallet) return
-    if (!shouldReconnect) return
 
-    void connect(lastConnectedWallet)
-  }, [lastConnectedWallet, connect, shouldReconnect])
+  useEffect(() => {
+    if (!latestLastConnectedWallet.current) return
+    if (!latestShouldReconnect.current) return
+
+    void connect(latestLastConnectedWallet.current)
+  }, [connect])
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
