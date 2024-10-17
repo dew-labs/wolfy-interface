@@ -23,6 +23,7 @@ import {UAParser} from 'ua-parser-js'
 
 import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
+import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
@@ -119,12 +120,12 @@ export default memo(function ConnectModal() {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
   const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
-  const latestShouldReconnect = useLatest(shouldReconnect)
 
   const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
   const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
-  const latestLastConnectedWallet = useLatest(lastConnectedWallet)
   const [unavailableWallets, setUnavailableWallets] = useState<WalletProvider[]>([])
+  const isWalletConnected = useIsWalletConnected()
+  const latestIsWalletConnected = useLatest(isWalletConnected)
 
   const [isConnecting, setIsConnecting] = useState(false)
   const latestIsConnecting = useLatest(isConnecting)
@@ -221,11 +222,12 @@ export default memo(function ConnectModal() {
   )
 
   useEffect(() => {
-    if (!latestLastConnectedWallet.current) return
-    if (!latestShouldReconnect.current) return
+    if (!lastConnectedWallet) return
+    if (!shouldReconnect) return
+    if (latestIsWalletConnected.current) return
 
-    void connect(latestLastConnectedWallet.current)
-  }, [connect])
+    void connect(lastConnectedWallet)
+  }, [connect, shouldReconnect, lastConnectedWallet])
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
