@@ -22,6 +22,7 @@ function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Mar
     refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    throwOnError: false,
   })
 }
 
