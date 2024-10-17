@@ -12,6 +12,7 @@ import {
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {getTokenMetadata} from '@/constants/tokens'
+import {logError} from '@/utils/logger'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import type {Market} from './fetchMarkets'
@@ -176,17 +177,22 @@ export default async function fetchPositions(
     }
   })
 
-  const positionsInfo = await readerContract.get_account_position_info_list(
-    {
-      contract_address: dataStoreAddress,
-    },
-    {
-      contract_address: referralStorageAddress,
-    },
-    positionHashes,
-    marketPrices,
-    UI_FEE_RECEIVER_ADDRESS,
-  )
+  const positionsInfo = await readerContract
+    .get_account_position_info_list(
+      {
+        contract_address: dataStoreAddress,
+      },
+      {
+        contract_address: referralStorageAddress,
+      },
+      positionHashes,
+      marketPrices,
+      UI_FEE_RECEIVER_ADDRESS,
+    )
+    .catch(error => {
+      logError(error, {positionHashes: positionHashes.map(toStarknetHexString), marketPrices})
+      return []
+    })
 
   const positionsData = new Map<bigint, Position>()
 
@@ -219,6 +225,8 @@ export default async function fetchPositions(
     //   collateralTokenAddress,
     //   is_long,
     // )
+
+    // console.log('stringPosition', stringPosition)
 
     positionsData.set(key, {
       key: key,

@@ -15,8 +15,11 @@ const logError = function (
   const error = isUserFriendlyError(err) ? err.cause : err
 
   console.error(error)
+  if (extra) console.info('Extra:', extra)
+  if (hint)
+    console.info('Hint:', hint)
 
-  // Log metadata of the error
+    // Log metadata of the error
   ;(function logMetadata() {
     // @ts-expect-error error can be anything
     if ('metadata' in error) {
