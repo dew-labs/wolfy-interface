@@ -53,24 +53,12 @@ import useToken from './hooks/useToken'
 import TokenInputs from './TokenInputs'
 
 const AVAILABLE_TRADE_MODES: Record<TradeType, TradeMode[]> = {
-  [TradeType.Long]: [
-    TradeMode.Market,
-    TradeMode.Limit,
-    // TradeMode.Trigger
-  ],
-  [TradeType.Short]: [
-    TradeMode.Market,
-    TradeMode.Limit,
-    // TradeMode.Trigger
-  ],
+  [TradeType.Long]: [TradeMode.Market, TradeMode.Limit, TradeMode.Trigger],
+  [TradeType.Short]: [TradeMode.Market, TradeMode.Limit, TradeMode.Trigger],
   [TradeType.Swap]: [TradeMode.Market, TradeMode.Limit],
 }
 
-const SUPPORTED_TRADE_TYPES: TradeType[] = [
-  TradeType.Long,
-  TradeType.Short,
-  // TradeType.Swap,
-]
+const SUPPORTED_TRADE_TYPES: TradeType[] = [TradeType.Long, TradeType.Short, TradeType.Swap]
 
 const Controller = createResetableComponent(function ({reset}) {
   const [chainId] = useChainId()
