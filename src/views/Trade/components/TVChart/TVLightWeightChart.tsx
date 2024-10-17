@@ -10,6 +10,7 @@ import {memo, useEffect, useMemo, useRef} from 'react'
 import {useLatest} from 'react-use'
 
 import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
+import {isIntervalSmallerThan1D} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {
   CANDLE_STICK_SERIES,
   CANDLE_STICKS_TO_RIGHT_BORDER,
@@ -59,9 +60,11 @@ export default memo(function TVLightWeightChart(props: {
       },
       timeScale: {
         borderVisible: false,
+        timeVisible: isIntervalSmallerThan1D(props.interval),
+        secondsVisible: false,
       },
     }),
-    [props.gridColor, props.textColor],
+    [props.gridColor, props.textColor, props.interval],
   )
   const latestChartStyle = useLatest(chartStyle)
 

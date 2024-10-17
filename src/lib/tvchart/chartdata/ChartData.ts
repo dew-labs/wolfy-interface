@@ -39,3 +39,13 @@ export function isChartInterval(value: unknown): value is ChartInterval {
 
   return Object.values(ChartInterval).includes(value)
 }
+
+export function isIntervalSmallerThan1D(interval: ChartInterval) {
+  const intervalLargerThan1D: ChartInterval[] = [
+    ChartInterval['1d'],
+    ChartInterval['1w'],
+    ChartInterval['1M'],
+  ]
+
+  return !intervalLargerThan1D.includes(interval)
+}
