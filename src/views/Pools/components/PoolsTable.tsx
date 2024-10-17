@@ -168,7 +168,8 @@ export default function PoolsTable() {
           shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
           Format.READABLE,
           {
-            fractionDigits: displayDecimals,
+            fractionDigits: 0,
+            exactFractionDigits: true,
           },
         )
 
