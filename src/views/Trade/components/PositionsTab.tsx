@@ -21,6 +21,7 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import {useClosePosition} from './ClosePositionModal'
 
@@ -112,8 +113,12 @@ export default memo(function PositionTab() {
                 </div>
               </TableCell>
               <TableCell>
-                <div>
-                  {shrinkDecimals(position.collateralAmount, position.collateralToken.decimals)}{' '}
+                <div className='whitespace-nowrap'>
+                  {formatNumber(
+                    shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
+                    Format.READABLE,
+                    {fractionDigits: priceDecimals},
+                  )}{' '}
                   {position.collateralToken.symbol}
                 </div>
                 <div className='opacity-50'>{formatUsd(position.remainingCollateralUsd)}</div>

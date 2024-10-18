@@ -355,6 +355,7 @@ export default memo(function MarketInformation() {
               classNames={{
                 th: '!rounded-none',
                 td: 'first:before:rounded-none last:before:rounded-none',
+                tbody: 'overflow-scroll',
               }}
               removeWrapper
               selectionMode='single'
@@ -374,9 +375,9 @@ export default memo(function MarketInformation() {
                   return (
                     <TableRow key={item.address} className='cursor-pointer'>
                       <TableCell>
-                        <div className='flex items-center gap-2'>
+                        <div className='flex min-w-max items-center gap-2 text-nowrap'>
                           <img src={item.imageUrl} alt={item.symbol} className='h-6 w-6 rounded' />
-                          <span>{`${item.symbol} / USD`}</span>
+                          <span>{`${item.symbol}/USD`}</span>
                         </div>
                       </TableCell>
                       <TableCell>

@@ -188,6 +188,9 @@ export default function getPositionsInfo(
       uiFeeUsd,
     })
 
+    // Liquidated positions, don't need to show them
+    if (netValue <= 0n) return
+
     const pnlAfterFees = pnl - totalPendingFeesUsd - closingFeeUsd - uiFeeUsd
     const pnlAfterFeesPercentage =
       collateralUsd != 0n ? getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd) : 0n

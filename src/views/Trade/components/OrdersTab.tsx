@@ -152,34 +152,34 @@ export default memo(function OrdersTab() {
                 </div>
               </TableCell>
               <TableCell>
-                <div className='flex min-w-max items-center gap-2'>
-                  <img
-                    src={order.marketData.indexToken.imageUrl}
-                    alt={indexName}
-                    className='h-6 w-6 rounded'
-                  />
-                  <Tooltip content='Press to switch market'>
-                    <Button
-                      disableRipple
-                      disableAnimation
-                      variant='light'
-                      className='block min-w-max rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                      onClick={() => {
-                        setTokenAddress(order.marketData.indexTokenAddress)
-                      }}
-                    >
-                      <div className='text-nowrap'>{indexName}</div>
-                      <div className='subtext lh-1 text-nowrap text-xs opacity-50'>
-                        {poolName && `[${poolName}]`}
+                <Tooltip content='Press to switch market'>
+                  <Button
+                    disableRipple
+                    disableAnimation
+                    variant='light'
+                    className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                    onClick={() => {
+                      setTokenAddress(order.marketData.indexTokenAddress)
+                    }}
+                  >
+                    <img
+                      src={order.marketData.indexToken.imageUrl}
+                      alt={indexName}
+                      className='h-6 w-6 rounded'
+                    />
+                    <div className='flex flex-col'>
+                      <div>{indexName}</div>
+                      <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                        [{poolName}]
                       </div>
-                    </Button>
-                  </Tooltip>
-                </div>
+                    </div>
+                  </Button>
+                </Tooltip>
               </TableCell>
               <TableCell>{sizeText}</TableCell>
               <TableCell>
                 <div className='text-nowrap'>{collateralUdsShrinked}</div>
-                <div className='text-xs opacity-50'>{collateralText}</div>
+                <div className='text-nowrap text-xs opacity-50'>{collateralText}</div>
               </TableCell>
               <TableCell>
                 <span>{triggerPriceText}</span>
