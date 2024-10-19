@@ -1,8 +1,9 @@
 import axios from 'axios'
 import jsonBig from 'json-bigint'
 
-import isAuthenticated from '@/auth/isAuthenticated'
-import isAuthenticatedPubSubChannel from '@/auth/isAuthenticatedPubSubChannel'
+// TODO(auth): re-enable auth
+// import isAuthenticated from '@/auth/isAuthenticated'
+// import isAuthenticatedPubSubChannel from '@/auth/isAuthenticatedPubSubChannel'
 
 const call = axios.create({
   adapter: 'fetch',
@@ -20,7 +21,7 @@ const call = axios.create({
 })
 
 call.interceptors.response.use(function (response) {
-  isAuthenticatedPubSubChannel.pub(isAuthenticated())
+  // isAuthenticatedPubSubChannel.pub(isAuthenticated())
   return response
 })
 

@@ -24,8 +24,6 @@ import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscrib
 import {logError} from '@/utils/logger'
 import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
-import AuthUpdater from './auth/AuthUpdater'
-import GoogleOneTapLogin from './auth/components/GoogleOneTapLogin'
 import UpdateMousePosition from './components/UpdateMousePosition'
 import WolfyBackground from './components/WolfyBackground'
 import WolfyToaster from './components/WolfyToaster'
@@ -89,8 +87,6 @@ function App() {
             <ThemeSubscriber />
             <ChainSwitchRequester />
             <ChainSwitchSubscriber />
-            <GoogleOneTapLogin router={router} />
-            <AuthUpdater router={router} />
             <TokenPricesUpdater />
             <WolfyBackground />
             <RouterProvider router={router} />
