@@ -75,3 +75,8 @@ $nextUiForeground: hsl(
   pointer-events: auto;
   cursor: not-allowed;
 }
+
+.truncate-none {
+  overflow: visible;
+  text-overflow: unset;
+}
