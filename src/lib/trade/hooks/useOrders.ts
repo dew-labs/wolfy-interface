@@ -34,5 +34,7 @@ export default function useOrders() {
   if (!marketsData || !orders || !tokenPricesData) return []
 
   const ordersInfo = getOrdersInfo(chainId, marketsData, orders, tokenPricesData)
-  return Array.from(ordersInfo.values()).filter(order => isPositionOrder(order))
+  return Array.from(ordersInfo.values())
+    .filter(order => isPositionOrder(order))
+    .reverse()
 }

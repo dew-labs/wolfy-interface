@@ -20,6 +20,7 @@ import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
 import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import max from '@/utils/numbers/bigint/max'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -30,7 +31,13 @@ export default memo(function PositionTab() {
   const tokenPricesData = useTokenPrices(data => data)
   const setTokenAddress = useSetTokenAddress()
 
-  const positions = positionsInfo ? Array.from(positionsInfo.values()) : []
+  const positions = positionsInfo
+    ? Array.from(positionsInfo.values()).sort((a, b) => {
+        const timeA = max(a.increasedAtBlock, a.decreasedAtBlock)
+        const timeB = max(b.increasedAtBlock, b.decreasedAtBlock)
+        return Number(timeB - timeA)
+      })
+    : []
   const [savedShowPnlAfterFees] = useState(true)
 
   const closePosition = useClosePosition()

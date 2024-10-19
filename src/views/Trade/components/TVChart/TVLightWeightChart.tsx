@@ -1,4 +1,5 @@
 import {
+  type ChartOptions,
   ColorType,
   createChart,
   type CreatePriceLineOptions,
@@ -8,6 +9,7 @@ import {
 } from 'lightweight-charts'
 import {memo, useEffect, useMemo, useRef} from 'react'
 import {useLatest} from 'react-use'
+import type {PartialDeep} from 'type-fest'
 
 import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {isIntervalSmallerThan1D} from '@/lib/tvchart/chartdata/ChartData.ts'
@@ -38,7 +40,7 @@ export default memo(function TVLightWeightChart(props: {
   // CHART_STYLE.AREA_TOP_COLOR
   // CHART_STYLE.AREA_BOTTOM_COLOR
 
-  const chartStyle = useMemo(
+  const chartStyle = useMemo<PartialDeep<ChartOptions>>(
     () => ({
       layout: {
         background: {type: ColorType.Solid, color: CHART_STYLE.BACKGROUND_COLOR},
