@@ -107,7 +107,7 @@ export default defineConfig(({mode}) => {
           title: process.env.VITE_APP_TITLE,
           description: process.env.VITE_APP_DESCRIPTION,
           ogImage: '/og.jpg',
-          gtagTagId: 'AW-16526181924',
+          gtagTagId: process.env.GA_TAG_ID,
         },
         tags: [
           /**
