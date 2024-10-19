@@ -33,7 +33,7 @@ import Head from './lib/head/Head'
 import ThemeSubscriber from './lib/theme/ThemeSubscriber'
 import ThemeUpdater from './lib/theme/ThemeUpdater'
 import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
-import {createQueryClient, createQueryPersister} from './queries/queries'
+import {createQueryClient, createQueryPersistOptions} from './queries/queries'
 import {createRouter} from './router'
 import ErrorComponent from './views/Error/ErrorComponent'
 
@@ -54,7 +54,7 @@ function QueryErrorBoundary({children}: PropsWithChildren) {
 function App() {
   // Ensures each request has its own cache in SSR
   const [queryClient] = useState(() => createQueryClient())
-  const [queryPersister] = useState(() => createQueryPersister())
+  const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const [router] = useState(() => createRouter({queryClient}))
 
@@ -82,10 +82,7 @@ function App() {
           <JotaiDevTools />
         </Suspense>
         <Head />
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{persister: queryPersister}}
-        >
+        <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
           <QueryErrorBoundary>
             <UpdateMousePosition />
             <WolfyToaster />

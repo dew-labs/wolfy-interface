@@ -1,8 +1,19 @@
 import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister'
-import {matchQuery, MutationCache, QueryClient, type QueryKey} from '@tanstack/react-query'
-import type {PersistedClient} from '@tanstack/react-query-persist-client'
+import {
+  matchQuery,
+  MutationCache,
+  type OmitKeyof,
+  QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query'
+import type {PersistedClient, PersistQueryClientOptions} from '@tanstack/react-query-persist-client'
+import {
+  compress as compressJson,
+  type Compressed,
+  decompress as decompressJson,
+} from 'compress-json'
 import {parse, stringify} from 'devalue'
-import {compress, decompress} from 'lz-string'
+import {compress as compressString, decompress as decompressString} from 'lz-string'
 
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
@@ -63,10 +74,30 @@ export function createQueryClient() {
   return queryClient
 }
 
-export function createQueryPersister() {
-  return createSyncStoragePersister({
+export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions, 'queryClient'> {
+  const persister = createSyncStoragePersister({
     storage: window.localStorage,
-    serialize: data => compress(stringify(data)),
-    deserialize: data => parse(decompress(data)) as PersistedClient,
+    serialize: data =>
+      compressString(JSON.stringify(compressJson(JSON.parse(stringify(data)) as object))),
+    deserialize: data =>
+      parse(
+        JSON.stringify(decompressJson(JSON.parse(decompressString(data)) as Compressed)),
+      ) as PersistedClient,
   })
+
+  return {
+    persister,
+    dehydrateOptions: {
+      shouldDehydrateQuery: ({queryKey}) => {
+        const firstKey = queryKey[0]
+        if (typeof firstKey !== 'string') return true
+        return !firstKey.startsWith('!')
+      },
+      shouldDehydrateMutation: ({meta}) => {
+        if (!meta) return true
+        if (typeof meta.persist !== 'boolean') return true
+        return !!meta.persist
+      },
+    },
+  }
 }

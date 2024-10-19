@@ -3,7 +3,7 @@ import type {ChartInterval} from './chartdata/ChartData'
 export function getChartHistoryUrl(symbol: string, interval: ChartInterval) {
   return (
     'https://testnet.binancefuture.com/fapi/v1/markPriceKlines?' +
-    new URLSearchParams({symbol, interval}).toString()
+    new URLSearchParams({symbol, interval, limit: '1500'}).toString()
   )
 }
 

@@ -1,3 +1,4 @@
+import {useQuery} from '@tanstack/react-query'
 import {
   type ChartOptions,
   ColorType,
@@ -21,8 +22,20 @@ import {
 } from '@/lib/tvchart/constants.ts'
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 const CHART_HEIGHT = 300
+
+function useChartHistoryData(asset: string, interval: ChartInterval) {
+  const {data} = useQuery({
+    queryKey: ['!chartHistoryData', asset, interval],
+    queryFn: async () => fetchChartHistoryData(`${asset}usdt`, interval),
+    ...NO_REFETCH_OPTIONS,
+    refetchOnMount: true,
+  })
+
+  return data
+}
 
 export default memo(function TVLightWeightChart(props: {
   asset: string
@@ -39,6 +52,8 @@ export default memo(function TVLightWeightChart(props: {
   // CHART_STYLE.LINE_COLOR
   // CHART_STYLE.AREA_TOP_COLOR
   // CHART_STYLE.AREA_BOTTOM_COLOR
+
+  const historicalData = useChartHistoryData(props.asset, props.interval)
 
   const chartStyle = useMemo<PartialDeep<ChartOptions>>(
     () => ({
@@ -70,11 +85,12 @@ export default memo(function TVLightWeightChart(props: {
   )
   const latestChartStyle = useLatest(chartStyle)
 
-  useEffect(() => {
-    if (!chartContainerRef.current) return
+  useEffect(function initChart() {
+    const container = chartContainerRef.current
+    if (!container) return
 
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
+    const chart = createChart(container, {
+      width: container.clientWidth,
       height: CHART_HEIGHT,
       ...latestChartStyle.current,
     })
@@ -89,21 +105,25 @@ export default memo(function TVLightWeightChart(props: {
       wickDownColor: CANDLE_STICK_SERIES.WICK_DOWN_COLOR,
     })
 
-    void (async function updateChartWithHistoricalData() {
-      const initialData = await fetchChartHistoryData(`${props.asset}usdt`, props.interval)
-      if (!chartMainCandlestickSeries.current) return
-      chartMainCandlestickSeries.current.setData(initialData)
-      if (chartRef.current)
-        chartRef.current.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
-    })()
-
     return () => {
+      chartRef.current = undefined
+      chartMainCandlestickSeries.current = undefined
       chart.remove()
     }
-  }, [props.interval, props.asset])
+  }, [])
 
   useEffect(
-    function addPriceLines() {
+    function updateChartData() {
+      if (!historicalData) return
+
+      chartMainCandlestickSeries.current?.setData(historicalData)
+      chartRef.current?.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
+    },
+    [historicalData],
+  )
+
+  useEffect(
+    function updatePriceLines() {
       const series = chartMainCandlestickSeries.current
       if (!series) return
 
@@ -120,9 +140,7 @@ export default memo(function TVLightWeightChart(props: {
 
   useEffect(
     function applyNewChartStyle() {
-      if (!chartRef.current) return
-
-      chartRef.current.applyOptions(chartStyle)
+      chartRef.current?.applyOptions(chartStyle)
     },
     [chartStyle],
   )
