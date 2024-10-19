@@ -260,14 +260,22 @@ export default defineConfig(({mode}) => {
       throw new Error('SENTRY_AUTH_TOKEN is required')
     }
 
+    if (!process.env.SENTRY_ORG) {
+      throw new Error('SENTRY_ORG is required')
+    }
+
+    if (!process.env.SENTRY_PROJECT) {
+      throw new Error('SENTRY_PROJECT is required')
+    }
+
     plugins.push(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- some how typescript unable to infer the type correctly
       sentryVitePlugin({
         // release: '',
         applicationKey: process.env.VITE_APP_NAME,
         authToken: process.env.SENTRY_AUTH_TOKEN,
-        org: '<REPLACE_THIS>',
-        project: '<REPLACE_THIS>',
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
         reactComponentAnnotation: {
           enabled: true,
         },
