@@ -18,7 +18,6 @@ import {RouterProvider} from '@tanstack/react-router'
 import {lazy, type PropsWithChildren, Suspense, useEffect, useState} from 'react'
 // import {Inspector} from 'react-dev-inspector'
 import {ErrorBoundary} from 'react-error-boundary'
-import {Toaster} from 'sonner'
 
 import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
 import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'
@@ -29,6 +28,7 @@ import AuthUpdater from './auth/AuthUpdater'
 import GoogleOneTapLogin from './auth/components/GoogleOneTapLogin'
 import UpdateMousePosition from './components/UpdateMousePosition'
 import WolfyBackground from './components/WolfyBackground'
+import WolfyToaster from './components/WolfyToaster'
 import {DEBUG} from './constants/config'
 import Head from './lib/head/Head'
 import ThemeSubscriber from './lib/theme/ThemeSubscriber'
@@ -84,7 +84,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <QueryErrorBoundary>
             <UpdateMousePosition />
-            <Toaster richColors />
+            <WolfyToaster />
             <ThemeUpdater />
             <ThemeSubscriber />
             <ChainSwitchRequester />
