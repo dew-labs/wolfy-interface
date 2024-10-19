@@ -1,6 +1,8 @@
 import {
-  Autocomplete,
-  AutocompleteItem,
+  Select,
+  SelectItem,
+  SelectSection,
+  type SharedSelection,
   Table,
   TableBody,
   TableCell,
@@ -8,100 +10,137 @@ import {
   TableHeader,
   TableRow,
 } from '@nextui-org/react'
-import {memo, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 
-interface TradeData {
-  action: string
-  market: string
-  size: number
-  price: number
-  rpnl: number
+import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
+import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
+
+const actionOptions = {
+  'Market increases': [
+    {label: 'Request Market Increase', value: TradeHistoryAction.RequestMarketIncrease},
+    {label: 'Market Increase', value: TradeHistoryAction.MarketIncrease},
+    {label: 'Failed Market Increase', value: TradeHistoryAction.FailedMarketIncrease},
+    {label: 'Cancel Market Increase', value: TradeHistoryAction.CancelMarketIncrease},
+  ],
+  'Market decreases': [
+    {label: 'Request Market Decrease', value: TradeHistoryAction.RequestMarketDecrease},
+    {label: 'Market Decrease', value: TradeHistoryAction.MarketDecrease},
+    {label: 'Failed Market Decrease', value: TradeHistoryAction.FailedMarketDecrease},
+    {label: 'Cancel Market Decrease', value: TradeHistoryAction.CancelMarketDecrease},
+  ],
+  'Limit orders': [
+    {label: 'Create Limit Order', value: TradeHistoryAction.CreateLimitOrder},
+    {label: 'Update Limit Order', value: TradeHistoryAction.UpdateLimitOrder},
+    {label: 'Execute Limit Order', value: TradeHistoryAction.ExecuteLimitOrder},
+    {label: 'Failed Limit Order', value: TradeHistoryAction.FailedLimitOrder},
+    {label: 'Cancel Limit Order', value: TradeHistoryAction.CancelLimitOrder},
+  ],
+  'Take-profit orders': [
+    {label: 'Create Take-Profit Order', value: TradeHistoryAction.CreateTakeProfitOrder},
+    {label: 'Update Take-Profit Order', value: TradeHistoryAction.UpdateTakeProfitOrder},
+    {label: 'Execute Take-Profit Order', value: TradeHistoryAction.ExecuteTakeProfitOrder},
+    {label: 'Failed Take-Profit Order', value: TradeHistoryAction.FailedTakeProfitOrder},
+    {label: 'Cancel Take-Profit Order', value: TradeHistoryAction.CancelTakeProfitOrder},
+  ],
+  'Stop-loss orders': [
+    {label: 'Create Stop-Loss Order', value: TradeHistoryAction.CreateStopLossOrder},
+    {label: 'Update Stop-Loss Order', value: TradeHistoryAction.UpdateStopLossOrder},
+    {label: 'Execute Stop-Loss Order', value: TradeHistoryAction.ExecuteStopLossOrder},
+    {label: 'Failed Stop-Loss Order', value: TradeHistoryAction.FailedStopLossOrder},
+    {label: 'Cancel Stop-Loss Order', value: TradeHistoryAction.CancelStopLossOrder},
+  ],
+  'Market swaps': [
+    {label: 'Request Market Swap', value: TradeHistoryAction.RequestMarketSwap},
+    {label: 'Execute Market Swap', value: TradeHistoryAction.ExecuteMarketSwap},
+    {label: 'Failed Market Swap', value: TradeHistoryAction.FailedMarketSwap},
+    {label: 'Cancel Market Swap', value: TradeHistoryAction.CancelMarketSwap},
+  ],
+  'Limit swaps': [
+    {label: 'Create Limit Swap', value: TradeHistoryAction.CreateLimitSwap},
+    {label: 'Update Limit Swap', value: TradeHistoryAction.UpdateLimitSwap},
+    {label: 'Execute Limit Swap', value: TradeHistoryAction.ExecuteLimitSwap},
+    {label: 'Failed Limit Swap', value: TradeHistoryAction.FailedLimitSwap},
+    {label: 'Cancel Limit Swap', value: TradeHistoryAction.CancelLimitSwap},
+  ],
+  'Deposits': [
+    {label: 'Request Deposit', value: TradeHistoryAction.RequestDeposit},
+    {label: 'Deposit', value: TradeHistoryAction.Deposit},
+    {label: 'Failed Deposit', value: TradeHistoryAction.FailedDeposit},
+    {label: 'Cancel Deposit', value: TradeHistoryAction.CancelDeposit},
+  ],
+  'Withdraws': [
+    {label: 'Request Withdraw', value: TradeHistoryAction.RequestWithdraw},
+    {label: 'Withdraw', value: TradeHistoryAction.Withdraw},
+    {label: 'Failed Withdraw', value: TradeHistoryAction.FailedWithdraw},
+    {label: 'Cancel Withdraw', value: TradeHistoryAction.CancelWithdraw},
+  ],
+  'Liquidations': [{label: 'Liquidation', value: TradeHistoryAction.Liquidation}],
 }
 
-const actionOptions = [
-  'Market Increase',
-  'Market Decrease',
-  'Deposit',
-  'Withdraw',
-  'Failed Market Increase',
-  'Failed Market Decrease',
-  'Failed Deposit',
-  'Failed Withdraw',
-  'Request Market Increase',
-  'Request Market Decrease',
-  'Request Deposit',
-  'Request Withdraw',
-  'Execute Limit Order',
-  'Execute Take-Profit Order',
-  'Execute Stop-Loss Order',
-  'Create Limit Order',
-  'Create Take-Profit Order',
-  'Create Stop-Loss Order',
-  'Update Limit Order',
-  'Update Take-Profit Order',
-  'Update Stop-Loss Order',
-  'Cancel Limit Order',
-  'Cancel Take-Profit Order',
-  'Cancel Stop-Loss Order',
-  'Failed Limit Order',
-  'Failed Take-Profit Order',
-  'Failed Stop-Loss Order',
-  'Execute Market Swap',
-  'Execute Limit Swap',
-  'Create Limit Swap',
-  'Update Limit Swap',
-  'Cancel Limit Swap',
-  'Failed Market Swap',
-  'Failed Limit Swap',
-  'Request Market Swap',
-  'Liquidated',
-]
-
-const marketOptions = ['Longs', 'Shorts', 'Swaps', 'wfSTRK / USD', 'wfETH / USD', 'wfBTC / USD']
-
-const trades: TradeData[] = [
-  {action: 'Market Increase', market: 'Longs', size: 1, price: 50000, rpnl: 100},
-  {action: 'Market Increase', market: 'wfSTRK / USD', size: 2, price: 3000, rpnl: 50},
-  {action: 'Create Limit Order', market: 'wfETH / USD', size: 3, price: 1.2, rpnl: 30},
-  {action: 'Sell', market: 'Longs', size: 4, price: 0.25, rpnl: -10},
-]
+const headingClasses =
+  'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small'
 
 export default memo(function TradesTab() {
-  const [selectedAction, setSelectedAction] = useState('')
-  const [selectedMarket, setSelectedMarket] = useState('')
+  const marketsData = useMarketsData()
 
-  const filteredData = trades.filter(data => {
-    const actionMatches = selectedAction ? data.action === selectedAction : true
-    const marketMatches = selectedMarket ? data.market === selectedMarket : true
-    return actionMatches && marketMatches
-  })
+  const markets = useMemo(() => {
+    return Array.from(marketsData?.values() ?? []).map(market => ({
+      label: market.name,
+      value: market.marketTokenAddress,
+    }))
+  }, [marketsData])
+
+  const marketOptions = useMemo(() => {
+    return {
+      Direction: [
+        {label: 'Long', value: '--long--'},
+        {label: 'Short', value: '--short--'},
+        {label: 'Swap', value: '--swap--'},
+      ],
+      Markets: markets,
+    } as const
+  }, [markets])
+
+  const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
+
+  const tradeHistory = useTradeHistory(selectedActions, selectedMarkets)
+
+  const onActionChange = useCallback((action: SharedSelection) => {
+    // TODO: validate action value with isSupportedAction instead of type assertion
+    setSelectedActions(Array.from(action) as TradeHistoryAction[])
+  }, [])
+
+  const onMarketChange = useCallback((market: SharedSelection) => {
+    setSelectedMarkets(Array.from(market) as string[])
+  }, [])
 
   return (
     <>
-      <Table aria-label='Trade History Table'>
+      <Table
+        className='mt-2'
+        aria-label='Trade History Table'
+        classNames={{
+          th: '!rounded-none',
+        }}
+      >
         <TableHeader>
           <TableColumn>
-            <Autocomplete
+            <Select
               classNames={{
-                base: 'max-w-xs',
-                listboxWrapper: 'max-h-[320px]',
-                selectorButton: 'text-default-500',
+                base: 'w-max -mx-[0.6875rem] min-w-[100px]',
+                mainWrapper: 'w-full',
+                value: 'pr-6 truncate-none text-xs',
+                label: 'text-xs',
               }}
-              placeholder='Search Action'
-              onSelectionChange={action => {
-                setSelectedAction(action as string)
-              }}
-              inputProps={{
-                classNames: {
-                  input: 'ml-1',
-                  inputWrapper: 'h-[48px]',
-                },
-              }}
+              label='Action'
+              selectionMode='multiple'
+              // selectedKeys={selectedActions}
+              onSelectionChange={onActionChange}
               listboxProps={{
-                hideSelectedIcon: true,
                 itemClasses: {
                   base: [
-                    'rounded-medium',
                     'text-default-500',
                     'transition-opacity',
                     'data-[hover=true]:text-foreground',
@@ -117,39 +156,46 @@ export default memo(function TradesTab() {
                 offset: 10,
                 classNames: {
                   base: 'rounded-large',
-                  content: 'p-1 border-small border-default-100 bg-background',
+                  content: 'p-1 bg-background min-w-max',
                 },
               }}
+              scrollShadowProps={{
+                isEnabled: false,
+              }}
+              items={Array.from(Object.entries(actionOptions))}
             >
-              {actionOptions.map(action => (
-                <AutocompleteItem key={action} value={action}>
-                  {action}
-                </AutocompleteItem>
-              ))}
-            </Autocomplete>
+              {([category, actions]) => (
+                <SelectSection
+                  key={category}
+                  title={category}
+                  classNames={{
+                    heading: headingClasses,
+                    base: 'last:mb-0',
+                  }}
+                >
+                  {actions.map(action => (
+                    <SelectItem key={action.value} value={action.value} className='text-nowrap'>
+                      {action.label}
+                    </SelectItem>
+                  ))}
+                </SelectSection>
+              )}
+            </Select>
           </TableColumn>
           <TableColumn>
-            <Autocomplete
+            <Select
               classNames={{
-                base: 'max-w-xs',
-                listboxWrapper: 'max-h-[320px]',
-                selectorButton: 'text-default-500',
+                base: 'w-max -mx-[0.6875rem] min-w-[100px]',
+                mainWrapper: 'w-full',
+                value: 'pr-6 truncate-none',
+                label: 'text-xs',
               }}
-              placeholder='Search Market'
-              onSelectionChange={market => {
-                setSelectedMarket(market as string)
-              }}
-              inputProps={{
-                classNames: {
-                  input: 'ml-1',
-                  inputWrapper: 'h-[48px]',
-                },
-              }}
+              label='Market'
+              selectionMode='multiple'
+              onSelectionChange={onMarketChange}
               listboxProps={{
-                hideSelectedIcon: true,
                 itemClasses: {
                   base: [
-                    'rounded-medium',
                     'text-default-500',
                     'transition-opacity',
                     'data-[hover=true]:text-foreground',
@@ -165,31 +211,46 @@ export default memo(function TradesTab() {
                 offset: 10,
                 classNames: {
                   base: 'rounded-large',
-                  content: 'p-1 border-small border-default-100 bg-background',
+                  content: 'p-1 bg-background min-w-max',
                 },
               }}
+              scrollShadowProps={{
+                isEnabled: false,
+              }}
+              items={Array.from(Object.entries(marketOptions))}
             >
-              {marketOptions.map(market => (
-                <AutocompleteItem key={market} value={market}>
-                  {market}
-                </AutocompleteItem>
-              ))}
-            </Autocomplete>
+              {([category, markets]) => (
+                <SelectSection
+                  key={category}
+                  title={category}
+                  classNames={{
+                    heading: headingClasses,
+                    base: 'last:mb-0',
+                  }}
+                >
+                  {markets.map(action => (
+                    <SelectItem key={action.value} value={action.value} className='text-nowrap'>
+                      {action.label}
+                    </SelectItem>
+                  ))}
+                </SelectSection>
+              )}
+            </Select>
           </TableColumn>
-          <TableColumn>SIZE</TableColumn>
-          <TableColumn>PRICE</TableColumn>
-          <TableColumn>RPNL ($)</TableColumn>
+          <TableColumn>Size</TableColumn>
+          <TableColumn>Price</TableColumn>
+          <TableColumn>RPnL ($)</TableColumn>
         </TableHeader>
-        <TableBody>
-          {filteredData.map(trade => (
-            <TableRow key={trade.action + trade.market}>
-              <TableCell>{trade.action}</TableCell>
-              <TableCell>{trade.market}</TableCell>
-              <TableCell>{trade.size}</TableCell>
-              <TableCell>{trade.price}</TableCell>
-              <TableCell>{trade.rpnl}</TableCell>
+        <TableBody items={tradeHistory ?? []} emptyContent={<div>No trade.</div>}>
+          {item => (
+            <TableRow key={item.id}>
+              <TableCell>{item.action}</TableCell>
+              <TableCell>{item.market}</TableCell>
+              <TableCell>{item.size}</TableCell>
+              <TableCell>{item.price}</TableCell>
+              <TableCell>{item.rpnl}</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </>

@@ -116,3 +116,8 @@ $nextUiForeground: hsl(
     clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
   }
 }
+
+.truncate-none {
+  overflow: visible;
+  text-overflow: unset;
+}
