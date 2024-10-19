@@ -12,8 +12,9 @@ import {Partytown} from '@builder.io/partytown/react'
 import {NextUIProvider} from '@nextui-org/react'
 import {announce} from '@react-aria/live-announcer'
 import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/react'
-import {QueryClientProvider, useQueryErrorResetBoundary} from '@tanstack/react-query'
+import {useQueryErrorResetBoundary} from '@tanstack/react-query'
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
+import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
 import {lazy, type PropsWithChildren, Suspense, useEffect, useState} from 'react'
 // import {Inspector} from 'react-dev-inspector'
@@ -32,7 +33,7 @@ import Head from './lib/head/Head'
 import ThemeSubscriber from './lib/theme/ThemeSubscriber'
 import ThemeUpdater from './lib/theme/ThemeUpdater'
 import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
-import {createQueryClient} from './queries/queries'
+import {createQueryClient, createQueryPersister} from './queries/queries'
 import {createRouter} from './router'
 import ErrorComponent from './views/Error/ErrorComponent'
 
@@ -53,6 +54,7 @@ function QueryErrorBoundary({children}: PropsWithChildren) {
 function App() {
   // Ensures each request has its own cache in SSR
   const [queryClient] = useState(() => createQueryClient())
+  const [queryPersister] = useState(() => createQueryPersister())
 
   const [router] = useState(() => createRouter({queryClient}))
 
@@ -80,7 +82,10 @@ function App() {
           <JotaiDevTools />
         </Suspense>
         <Head />
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{persister: queryPersister}}
+        >
           <QueryErrorBoundary>
             <UpdateMousePosition />
             <WolfyToaster />
@@ -92,7 +97,7 @@ function App() {
             <RouterProvider router={router} />
           </QueryErrorBoundary>
           <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </ErrorBoundary>
     </NextUIProvider>
   )

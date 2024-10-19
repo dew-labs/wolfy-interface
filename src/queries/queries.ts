@@ -1,4 +1,8 @@
+import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister'
 import {matchQuery, MutationCache, QueryClient, type QueryKey} from '@tanstack/react-query'
+import type {PersistedClient} from '@tanstack/react-query-persist-client'
+import {parse, stringify} from 'devalue'
+import {compress, decompress} from 'lz-string'
 
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
@@ -55,5 +59,14 @@ export function createQueryClient() {
       },
     }),
   })
+
   return queryClient
+}
+
+export function createQueryPersister() {
+  return createSyncStoragePersister({
+    storage: window.localStorage,
+    serialize: data => compress(stringify(data)),
+    deserialize: data => parse(decompress(data)) as PersistedClient,
+  })
 }
