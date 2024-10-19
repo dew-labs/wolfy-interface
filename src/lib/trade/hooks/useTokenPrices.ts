@@ -18,7 +18,6 @@ function createGetTokenPricesQueryOptions<T>(
     queryFn: async () => {
       return await fetchTokenPrices(chainId)
     },
-    structuralSharing: false,
     select: selector,
     ...NO_REFETCH_OPTIONS,
   })

@@ -4,6 +4,7 @@ import {StarknetChainId} from 'satoru-sdk'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import {fetchMarketTokensData} from '@/lib/trade/services/fetchMarketTokensData'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 function createGetMarketTokensDataQueryOptions(
   chainId: StarknetChainId,
@@ -14,9 +15,8 @@ function createGetMarketTokensDataQueryOptions(
     queryFn: async () => {
       return await fetchMarketTokensData(chainId, marketTokenAddresses)
     },
-    refetchInterval: 5000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
+    ...NO_REFETCH_OPTIONS,
+    refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })

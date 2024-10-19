@@ -5,6 +5,7 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {Market} from '@/lib/trade/services/fetchMarkets'
 import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarkets from './useMarkets'
 
@@ -17,12 +18,10 @@ function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Mar
           return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
+    ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
-    throwOnError: false,
   })
 }
 

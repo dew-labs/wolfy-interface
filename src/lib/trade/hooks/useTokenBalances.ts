@@ -4,6 +4,7 @@ import type {StarknetChainId} from 'satoru-sdk'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTokenBalances from '@/lib/trade/services/fetchTokenBalances'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 function createGetTokenBalancesQueryOptions(chainId: StarknetChainId, accountAddress: string) {
   return queryOptions({
@@ -11,11 +12,11 @@ function createGetTokenBalancesQueryOptions(chainId: StarknetChainId, accountAdd
     queryFn: async () => {
       return await fetchTokenBalances(chainId, accountAddress)
     },
-    refetchInterval: 5000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
+    ...NO_REFETCH_OPTIONS,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    refetchInterval: 5000,
+    throwOnError: false,
   })
 }
 

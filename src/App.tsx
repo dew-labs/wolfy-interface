@@ -74,6 +74,7 @@ function App() {
           return <ErrorComponent />
         }}
       >
+        <WolfyBackground />
         {/* <Inspector /> */}
         <Suspense>
           <JotaiDevTools />
@@ -88,7 +89,6 @@ function App() {
             <ChainSwitchRequester />
             <ChainSwitchSubscriber />
             <TokenPricesUpdater />
-            <WolfyBackground />
             <RouterProvider router={router} />
           </QueryErrorBoundary>
           <ReactQueryDevtools initialIsOpen={false} />

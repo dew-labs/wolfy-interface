@@ -3,6 +3,7 @@ import type {WalletAccount} from 'starknet'
 
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import fetchGasPrice from '@/lib/trade/services/fetchGasPrice'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 function createGetGasPriceQueryOptions(wallet: WalletAccount | undefined) {
   return queryOptions({
@@ -13,10 +14,8 @@ function createGetGasPriceQueryOptions(wallet: WalletAccount | undefined) {
           return await fetchGasPrice(wallet)
         }
       : skipToken,
-    structuralSharing: false,
+    ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000, // 1 minute
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })

@@ -11,7 +11,6 @@ function createGetUiFeeFactor(chainId: StarknetChainId) {
     queryFn: async () => {
       return await fetchUiFeeFactor(chainId)
     },
-    structuralSharing: false,
     ...NO_REFETCH_OPTIONS,
   })
 }
