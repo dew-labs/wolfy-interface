@@ -17,6 +17,7 @@ import getSwapOrderTitle from './swap/getSwapOrderTitle'
 import getSwapPathOutputAddresses from './swap/getSwapPathOutputAddresses'
 import getSwapPathStats, {type SwapPathStats} from './swap/getSwapPathStats'
 import {isIncreaseOrderType} from './type/isIncreaseOrderType'
+import {isMarketOrderType} from './type/isMarketOrderType'
 import isSwapOrderType from './type/isSwapOrderType'
 
 export type SwapOrderInfo = Order & {
@@ -51,6 +52,12 @@ export default function getOrdersInfo(
 
   ordersData.forEach((order, key) => {
     try {
+      // Market orders should be executed right away, don't need to display them
+      if (isMarketOrderType(order.orderType)) {
+        ordersData.delete(key)
+        return
+      }
+
       const market = marketsData.get(order.marketAddress)
       const indexToken = market?.indexToken
       const indexTokenPrice = tokenPricesData.get(indexToken?.address ?? '')
@@ -132,64 +139,59 @@ export default function getOrdersInfo(
         }
 
         ordersData.set(key, orderInfo)
-      } else {
-        const marketInfo = marketsData.get(order.marketAddress)
-        const indexToken = marketInfo?.indexToken
-
-        const {outTokenAddress} = getSwapPathOutputAddresses({
-          marketsData,
-          swapPath: order.swapPath,
-          initialCollateralAddress: order.initialCollateralTokenAddress,
-          isIncrease: isIncreaseOrderType(order.orderType),
-        })
-
-        if (!outTokenAddress) return
-
-        const targetCollateralToken = tokensMetadata.get(outTokenAddress)
-        const targetCollateralTokenPrice = tokenPricesData.get(outTokenAddress)
-        if (!marketInfo || !indexToken || !targetCollateralToken) {
-          return
-        }
-
-        const acceptablePrice = parseContractPrice(
-          order.contractAcceptablePrice,
-          indexToken.decimals,
-        )
-        const triggerPrice = parseContractPrice(order.contractTriggerPrice, indexToken.decimals)
-
-        const swapPathStats = getSwapPathStats({
-          marketsData,
-          tokenPricesData,
-          swapPath: order.swapPath,
-          initialCollateralAddress: order.initialCollateralTokenAddress,
-          usdIn: convertTokenAmountToUsd(
-            order.initialCollateralDeltaAmount,
-            initialCollateralToken.decimals,
-            initialCollateralTokenPrice.min,
-          ),
-          shouldApplyPriceImpact: true,
-        })
-
-        const triggerThresholdType = getTriggerThresholdType(order.orderType, order.isLong)
-
-        const orderInfo: PositionOrderInfo = {
-          ...order,
-          // title,
-          swapPathStats,
-          marketData: marketInfo,
-          indexToken,
-          indexTokenPrice,
-          initialCollateralToken,
-          initialCollateralTokenPrice,
-          targetCollateralToken,
-          targetCollateralTokenPrice,
-          acceptablePrice,
-          triggerPrice,
-          triggerThresholdType,
-        }
-
-        ordersData.set(key, orderInfo)
+        return
       }
+
+      const {outTokenAddress} = getSwapPathOutputAddresses({
+        marketsData,
+        swapPath: order.swapPath,
+        initialCollateralAddress: order.initialCollateralTokenAddress,
+        isIncrease: isIncreaseOrderType(order.orderType),
+      })
+
+      if (!outTokenAddress) return
+
+      const targetCollateralToken = tokensMetadata.get(outTokenAddress)
+      const targetCollateralTokenPrice = tokenPricesData.get(outTokenAddress)
+      if (!market || !indexToken || !targetCollateralToken) {
+        return
+      }
+
+      const acceptablePrice = parseContractPrice(order.contractAcceptablePrice, indexToken.decimals)
+      const triggerPrice = parseContractPrice(order.contractTriggerPrice, indexToken.decimals)
+
+      const swapPathStats = getSwapPathStats({
+        marketsData,
+        tokenPricesData,
+        swapPath: order.swapPath,
+        initialCollateralAddress: order.initialCollateralTokenAddress,
+        usdIn: convertTokenAmountToUsd(
+          order.initialCollateralDeltaAmount,
+          initialCollateralToken.decimals,
+          initialCollateralTokenPrice.min,
+        ),
+        shouldApplyPriceImpact: true,
+      })
+
+      const triggerThresholdType = getTriggerThresholdType(order.orderType, order.isLong)
+
+      const orderInfo: PositionOrderInfo = {
+        ...order,
+        // title,
+        swapPathStats,
+        marketData: market,
+        indexToken,
+        indexTokenPrice,
+        initialCollateralToken,
+        initialCollateralTokenPrice,
+        targetCollateralToken,
+        targetCollateralTokenPrice,
+        acceptablePrice,
+        triggerPrice,
+        triggerThresholdType,
+      }
+
+      ordersData.set(key, orderInfo)
     } catch (e) {
       logError(e)
       ordersData.delete(key)
