@@ -26,7 +26,7 @@ import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
 import {getChartWssUrl} from '@/lib/tvchart/constants'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData'
@@ -177,7 +177,7 @@ export default memo(function MarketInformation() {
       const selectedShortLiquid = max(...shortLiquids)
 
       const price = tokenPricesData?.get(token)?.max ?? 0n
-      const priceDisplayDecimals = calculatePriceDecimals(price)
+      const priceFractionDigits = calculatePriceFractionDigits(price)
 
       indexes.set(token, {
         markets,
@@ -197,7 +197,7 @@ export default memo(function MarketInformation() {
         price: Number(shrinkDecimals(price, USD_DECIMALS)),
         priceString: formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
           exactFractionDigits: true,
-          fractionDigits: priceDisplayDecimals,
+          fractionDigits: priceFractionDigits,
         }),
       })
     })
@@ -295,18 +295,18 @@ export default memo(function MarketInformation() {
   const priceIndex = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.max : 0n
   const priceMark = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.min : 0n
 
-  const priceDecimals = calculatePriceDecimals(priceIndex)
+  const priceFractionDigits = calculatePriceFractionDigits(priceIndex)
 
   const priceIndexText = priceIndex
     ? formatNumber(shrinkDecimals(priceIndex, USD_DECIMALS), Format.USD, {
         exactFractionDigits: true,
-        fractionDigits: priceDecimals,
+        fractionDigits: priceFractionDigits,
       })
     : '--'
   const priceMarkText = priceMark
     ? formatNumber(shrinkDecimals(priceMark, USD_DECIMALS), Format.USD, {
         exactFractionDigits: true,
-        fractionDigits: priceDecimals,
+        fractionDigits: priceFractionDigits,
       })
     : '--'
 

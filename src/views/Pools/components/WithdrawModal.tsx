@@ -23,7 +23,8 @@ import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendWithdrawal from '@/lib/trade/services/market/sendWithdrawal'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
@@ -69,7 +70,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
       marketTokenData?.decimals ?? 18,
     ),
   )
-  const userBalanceDisplayDecimals = calculatePriceDecimals(price, marketTokenData?.decimals ?? 18)
+  const userBalanceFractionDigits = calculateTokenFractionDigits(price)
   const userBalanceNumber = Number(
     shrinkDecimals(
       marketTokenBalances?.get(marketTokenAddress) ?? 0n,
@@ -83,15 +84,15 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     ),
     Format.PLAIN,
     {
-      fractionDigits: userBalanceDisplayDecimals,
+      fractionDigits: userBalanceFractionDigits,
     },
   )
 
-  const priceDecimals = calculatePriceDecimals(price)
+  const priceFractionDigits = calculatePriceFractionDigits(price)
 
   const priceNumber = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
     exactFractionDigits: true,
-    fractionDigits: priceDecimals,
+    fractionDigits: priceFractionDigits,
   })
 
   const {longTokenPrice, shortTokenPrice} = useMemo(() => {
@@ -119,14 +120,8 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     const longTokenAmount = (wmAmountBigInt * marketData.longPoolAmount) / totalSupply
     const shortTokenAmount = (wmAmountBigInt * marketData.shortPoolAmount) / totalSupply
 
-    const longTokenDisplayDecimals = calculatePriceDecimals(
-      latestLongTokenPrice.current,
-      marketData.longToken.decimals,
-    )
-    const shortTokenDisplayDecimals = calculatePriceDecimals(
-      latestShortTokenPrice.current,
-      marketData.shortToken.decimals,
-    )
+    const longTokenFractionDigits = calculateTokenFractionDigits(latestLongTokenPrice.current)
+    const shortTokenFractionDigits = calculateTokenFractionDigits(latestShortTokenPrice.current)
 
     return {
       longTokenAmount: formatNumber(
@@ -134,7 +129,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
         Format.PLAIN,
         {
           exactFractionDigits: true,
-          fractionDigits: longTokenDisplayDecimals,
+          fractionDigits: longTokenFractionDigits,
         },
       ),
       shortTokenAmount: formatNumber(
@@ -142,7 +137,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
         Format.PLAIN,
         {
           exactFractionDigits: true,
-          fractionDigits: shortTokenDisplayDecimals,
+          fractionDigits: shortTokenFractionDigits,
         },
       ),
     }

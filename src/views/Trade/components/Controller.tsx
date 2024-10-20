@@ -40,7 +40,7 @@ import useTradeType, {TRADE_TYPE_LABEL, TradeType} from '@/lib/trade/states/useT
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -222,10 +222,9 @@ const Controller = createResetableComponent(function ({reset}) {
 
   const positionConstants = usePositionsConstants()
 
-  const priceDecimals =
-    tokenAddress && tokenPricesData
-      ? calculatePriceDecimals(tokenPricesData.tokenPrice?.min)
-      : undefined
+  const priceFractionDigits = calculatePriceFractionDigits(
+    tokenAddress && tokenPricesData ? tokenPricesData.tokenPrice?.min : 0,
+  )
 
   const liquidationPrice =
     payTokenData &&
@@ -248,7 +247,7 @@ const Controller = createResetableComponent(function ({reset}) {
   const liquidationPriceText = liquidationPrice
     ? formatNumber(shrinkDecimals(liquidationPrice, USD_DECIMALS), Format.USD, {
         exactFractionDigits: true,
-        fractionDigits: priceDecimals,
+        fractionDigits: priceFractionDigits,
       })
     : '-'
 
@@ -263,7 +262,7 @@ const Controller = createResetableComponent(function ({reset}) {
   const executionPriceText = executionPrice
     ? formatNumber(shrinkDecimals(executionPrice, USD_DECIMALS), Format.USD, {
         exactFractionDigits: true,
-        fractionDigits: priceDecimals,
+        fractionDigits: priceFractionDigits,
       })
     : '-'
 

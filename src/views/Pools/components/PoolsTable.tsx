@@ -21,7 +21,7 @@ import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
@@ -116,7 +116,7 @@ export default function PoolsTable() {
           calculateMarketPrice(market, marketTokenData, tokenPrices) ||
           expandDecimals(1, USD_DECIMALS)
 
-        const displayDecimals = calculatePriceDecimals(price)
+        const tokenFractionDigits = calculateTokenFractionDigits(price)
 
         const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
           exactFractionDigits: true,
@@ -146,7 +146,7 @@ export default function PoolsTable() {
           shrinkDecimals(balance, marketTokenData.decimals),
           Format.READABLE,
           {
-            fractionDigits: displayDecimals,
+            fractionDigits: tokenFractionDigits,
           },
         )
 
@@ -157,6 +157,7 @@ export default function PoolsTable() {
           Format.READABLE,
           {
             fractionDigits: 2,
+            exactFractionDigits: true,
           },
         )
 

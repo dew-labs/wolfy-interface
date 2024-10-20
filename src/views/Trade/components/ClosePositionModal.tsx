@@ -15,7 +15,7 @@ import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -63,7 +63,7 @@ export default function ClosePositionModal() {
     Format.READABLE,
     {
       exactFractionDigits: true,
-      fractionDigits: calculatePriceDecimals(maximumCollateralTokenToDecrease),
+      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice?.max),
     },
   )
 

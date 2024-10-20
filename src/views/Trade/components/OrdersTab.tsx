@@ -19,8 +19,7 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useOrders from '@/lib/trade/hooks/useOrders'
-import formatTokenAmount from '@/lib/trade/numbers/formatTokenAmount'
-import formatUsd from '@/lib/trade/numbers/formatUsd'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
@@ -28,8 +27,11 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import {isDecreaseOrderType} from '@/lib/trade/utils/order/type/isDecreaseOrderType'
 import {isIncreaseOrderType} from '@/lib/trade/utils/order/type/isIncreaseOrderType'
 import {getMarkPrice} from '@/lib/trade/utils/position/getPositionsInfo'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
@@ -109,7 +111,13 @@ export default memo(function OrdersTab() {
             initialCollateralTokenPrice?.min ?? 0n,
           )
 
-          const collateralUdsShrinked = formatUsd(collateralUsd)
+          const collateralUdsShrinked = formatNumber(
+            shrinkDecimals(collateralUsd, USD_DECIMALS),
+            Format.USD,
+            {
+              exactFractionDigits: true,
+            },
+          )
 
           const collateralText = (function () {
             if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
@@ -120,16 +128,24 @@ export default memo(function OrdersTab() {
               targetCollateralTokenPrice.min,
             )
 
-            const tokenAmountText = formatTokenAmount(
-              targetCollateralAmount,
-              targetCollateralToken.decimals,
-              targetCollateralToken.symbol,
+            const tokenAmountFractionDigits = calculateTokenFractionDigits(
+              targetCollateralTokenPrice.min,
             )
 
-            return `${tokenAmountText}`
+            const tokenAmountText = formatNumber(
+              shrinkDecimals(targetCollateralAmount, targetCollateralToken.decimals),
+              Format.PLAIN,
+              {exactFractionDigits: true, fractionDigits: tokenAmountFractionDigits},
+            )
+
+            return `${tokenAmountText} ${targetCollateralToken.symbol}`
           })()
 
-          const triggerPriceText = `${order.triggerThresholdType} ${formatUsd(order.triggerPrice)}`
+          const triggerPriceText = `${order.triggerThresholdType} ${formatNumber(
+            shrinkDecimals(order.triggerPrice, USD_DECIMALS),
+            Format.USD,
+            {exactFractionDigits: true},
+          )}`
 
           const markPrice = getMarkPrice({
             price: indexTokenPrice,
@@ -137,8 +153,13 @@ export default memo(function OrdersTab() {
             isLong: order.isLong,
           })
 
-          const markPriceText = formatUsd(markPrice)
-          const sizeText = formatUsd(order.sizeDeltaUsd)
+          const markPriceText = formatNumber(shrinkDecimals(markPrice, USD_DECIMALS), Format.USD)
+          const sizeText = formatNumber(
+            shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
+            Format.USD,
+            {exactFractionDigits: true},
+          )
+
           return (
             <TableRow key={order.key}>
               <TableCell>

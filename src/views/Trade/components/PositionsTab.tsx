@@ -13,13 +13,12 @@ import {memo, useState} from 'react'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import formatDeltaUsd from '@/lib/trade/numbers/formatDeltaUsd'
-import formatUsd from '@/lib/trade/numbers/formatUsd'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 // import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import max from '@/utils/numbers/bigint/max'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
@@ -68,12 +67,22 @@ export default memo(function PositionTab() {
 
           // const indexName = getMarketIndexName(position.marketData)
           const poolName = getMarketPoolName(position.marketData)
-          const priceDecimals = calculatePriceDecimals(tokenPrice?.min)
+          const priceFractionDigits = calculatePriceFractionDigits(tokenPrice?.min)
 
-          const displayedPnl = savedShowPnlAfterFees ? position.pnlAfterFees : position.pnl
-          const displayedPnlPercentage = savedShowPnlAfterFees
+          const pnl = savedShowPnlAfterFees ? position.pnlAfterFees : position.pnl
+          const pnlPercentage = savedShowPnlAfterFees
             ? position.pnlAfterFeesPercentage
             : position.pnlPercentage
+
+          const pnlText = formatNumber(shrinkDecimals(pnl, USD_DECIMALS), Format.USD_SIGNED, {
+            exactFractionDigits: true,
+          })
+
+          const pnlPercentageText = formatNumber(
+            shrinkDecimals(pnlPercentage, 4),
+            Format.PERCENT_SIGNED,
+          )
+
           return (
             <TableRow key={position.key} className='relative'>
               <TableCell>
@@ -108,13 +117,22 @@ export default memo(function PositionTab() {
                 </Tooltip>
               </TableCell>
               <TableCell>
-                <div>{formatUsd(position.netValue)}</div>
+                <div>
+                  {formatNumber(shrinkDecimals(position.netValue, USD_DECIMALS), Format.USD, {
+                    exactFractionDigits: true,
+                  })}
+                </div>
                 <div className={position.pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
-                  {formatDeltaUsd(displayedPnl, displayedPnlPercentage)}
+                  <div>{pnlText}</div>
+                  <div className='text-xs'>{pnlPercentageText}</div>
                 </div>
               </TableCell>
               <TableCell>
-                <div>{formatUsd(position.sizeInUsd)}</div>
+                <div>
+                  {formatNumber(shrinkDecimals(position.sizeInUsd, USD_DECIMALS), Format.USD, {
+                    exactFractionDigits: true,
+                  })}
+                </div>
                 <div className='opacity-50'>
                   {formatLeverage(position.leverage) ?? 'Liquidated'}
                 </div>
@@ -124,33 +142,43 @@ export default memo(function PositionTab() {
                   {formatNumber(
                     shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
                     Format.READABLE,
-                    {fractionDigits: priceDecimals},
+                    {fractionDigits: priceFractionDigits},
                   )}{' '}
                   {position.collateralToken.symbol}
                 </div>
-                <div className='opacity-50'>{formatUsd(position.remainingCollateralUsd)}</div>
+                <div className='opacity-50'>
+                  {formatNumber(
+                    shrinkDecimals(position.remainingCollateralUsd, USD_DECIMALS),
+                    Format.USD,
+                    {exactFractionDigits: true},
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <span>
                   {position.isOpening
                     ? `Opening...`
-                    : formatUsd(position.entryPrice, {
-                        displayDecimals: priceDecimals,
+                    : formatNumber(shrinkDecimals(position.entryPrice, USD_DECIMALS), Format.USD, {
+                        exactFractionDigits: true,
                       })}
                 </span>
               </TableCell>
               <TableCell>
                 <span>
-                  {formatUsd(position.markPrice, {
-                    displayDecimals: priceDecimals,
+                  {formatNumber(shrinkDecimals(position.markPrice, USD_DECIMALS), Format.USD, {
+                    exactFractionDigits: true,
                   })}
                 </span>
               </TableCell>
               <TableCell>
                 <span>
-                  {formatUsd(position.liquidationPrice, {
-                    displayDecimals: priceDecimals,
-                  })}
+                  {formatNumber(
+                    shrinkDecimals(position.liquidationPrice, USD_DECIMALS),
+                    Format.USD,
+                    {
+                      exactFractionDigits: true,
+                    },
+                  )}
                 </span>
               </TableCell>
               <TableCell>

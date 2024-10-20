@@ -22,7 +22,8 @@ import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendDeposit from '@/lib/trade/services/market/sendDeposit'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -79,11 +80,11 @@ export default function DepositModal({
         expandDecimals(1, USD_DECIMALS)
       : expandDecimals(1, USD_DECIMALS)
 
-  const priceDecimals = calculatePriceDecimals(price)
+  const priceFractionDigits = calculatePriceFractionDigits(price)
 
   const priceNumber = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
     exactFractionDigits: true,
-    fractionDigits: priceDecimals,
+    fractionDigits: priceFractionDigits,
   })
 
   const marketTokenAmount = useMemo(() => {
@@ -114,9 +115,10 @@ export default function DepositModal({
     // based on your protocol's specifics
     const calculatedAmount = Number(totalValueUsd) / Number(price)
 
-    const amountDecimals = calculatePriceDecimals(
+    const amountDecimals = calculateTokenFractionDigits(
       BigInt(Math.floor(calculatedAmount / 10 ** USD_DECIMALS)),
     )
+
     return {
       number: calculatedAmount,
       text: formatNumber(calculatedAmount, Format.READABLE, {
@@ -146,10 +148,7 @@ export default function DepositModal({
     shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
   )
 
-  const longTokenDisplayDecimals = calculatePriceDecimals(
-    longTokenBalance,
-    marketData?.longToken.decimals ?? 18,
-  )
+  const longTokenDisplayDecimals = calculateTokenFractionDigits(longTokenPrice)
 
   const maxLongTokenString = formatNumber(
     shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
@@ -173,10 +172,7 @@ export default function DepositModal({
     shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
   )
 
-  const shortTokenDisplayDecimals = calculatePriceDecimals(
-    shortTokenBalance,
-    marketData?.shortToken.decimals ?? 18,
-  )
+  const shortTokenDisplayDecimals = calculateTokenFractionDigits(shortTokenPrice)
 
   const maxShortTokenString = formatNumber(
     shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),

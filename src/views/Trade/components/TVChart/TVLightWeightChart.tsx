@@ -12,6 +12,7 @@ import {memo, useEffect, useMemo, useRef} from 'react'
 import {useLatest} from 'react-use'
 import type {PartialDeep} from 'type-fest'
 
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {isIntervalSmallerThan1D} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {
@@ -115,9 +116,14 @@ export default memo(function TVLightWeightChart(props: {
   useEffect(
     function updateChartData() {
       if (!historicalData) return
+      if (!chartMainCandlestickSeries.current) return
 
-      chartMainCandlestickSeries.current?.setData(historicalData)
+      chartMainCandlestickSeries.current.setData(historicalData)
+
       chartRef.current?.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
+      chartMainCandlestickSeries.current.priceScale().applyOptions({
+        autoScale: true,
+      })
     },
     [historicalData],
   )
@@ -145,6 +151,15 @@ export default memo(function TVLightWeightChart(props: {
     [chartStyle],
   )
 
+  useEffect(function updatePriceFormatter() {
+    if (!chartRef.current) return
+    chartRef.current.applyOptions({
+      localization: {
+        priceFormatter: (price: number) => price.toFixed(calculatePriceFractionDigits(price, 0)),
+      },
+    })
+  }, [])
+
   useEffect(
     function updateRealTimeData() {
       const wssUrl = getChartWssUrl(props.asset, props.interval)
@@ -152,6 +167,7 @@ export default memo(function TVLightWeightChart(props: {
 
       const eventHandler = (event: MessageEvent<unknown>) => {
         if (!chartMainCandlestickSeries.current) return
+
         if (typeof event.data !== 'string') {
           return
         }

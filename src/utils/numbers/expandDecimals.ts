@@ -1,6 +1,9 @@
 import type {BigNumberish} from 'starknet'
 
-export default function expandDecimals(value: BigNumberish, decimals: number | bigint): bigint {
+export default function expandDecimals(
+  value: BigNumberish | undefined,
+  decimals: number | bigint,
+): bigint {
   if (!value) return 0n
 
   if (typeof value === 'number') return BigInt(value.toFixed(Number(decimals)).replace('.', ''))
@@ -19,7 +22,9 @@ export default function expandDecimals(value: BigNumberish, decimals: number | b
   return BigInt(integerPart + decimalPart)
 }
 
-export function shrinkDecimals(value: BigNumberish, decimals: number | bigint): string {
+export function shrinkDecimals(value: BigNumberish | undefined, decimals: number | bigint): string {
+  if (!value) return '0'
+
   decimals = Number(decimals)
   let display = (() => {
     if (typeof value === 'number') return value.toFixed(0)

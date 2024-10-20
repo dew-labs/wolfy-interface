@@ -11,7 +11,7 @@ import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import {ChartInterval, isChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import useChartConfig from '@/lib/tvchart/configs/useChartConfigs.ts'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -52,16 +52,16 @@ export default memo(function Chart() {
       const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
         fractionDigits: 2,
       })
-      const displayDecimals = calculatePriceDecimals(
+      const collateralFractionDigits = calculateTokenFractionDigits(
         latestTokenPrices.current?.get(order.initialCollateralToken.address)?.max ?? 0n,
-        order.initialCollateralToken.decimals,
       )
+
       const collateral = formatNumber(
         shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
         Format.PLAIN,
         {
           exactFractionDigits: true,
-          fractionDigits: displayDecimals,
+          fractionDigits: collateralFractionDigits,
         },
       )
       const collateralSymbol = order.initialCollateralToken.symbol
@@ -82,19 +82,21 @@ export default memo(function Chart() {
       const size = formatNumber(shrinkDecimals(position.sizeInUsd, USD_DECIMALS), Format.USD, {
         fractionDigits: 2,
       })
-      // const displayDecimals = calculatePriceDecimals(
-      //   latestTokenPrices.current?.get(position.marketData.indexTokenAddress)?.max ?? 0n,
-      //   position.marketData.indexToken.decimals,
-      // )
-      // const collateral = formatNumber(
-      //   shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
-      //   Format.PLAIN,
-      //   {
-      //     exactFractionDigits: true,
-      //     fractionDigits: displayDecimals,
-      //   },
-      // )
-      // const collateralSymbol = position.collateralToken.symbol
+      const collateralFractionDigits = calculateTokenFractionDigits(
+        latestTokenPrices.current?.get(position.collateralTokenAddress)?.max ?? 0n,
+      )
+
+      const collateral = formatNumber(
+        shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: collateralFractionDigits,
+        },
+      )
+
+      const collateralSymbol = position.collateralToken.symbol
+
       const pnl = formatNumber(
         shrinkDecimals(position.pnlAfterFees, USD_DECIMALS),
         Format.USD_SIGNED,
@@ -112,8 +114,7 @@ export default memo(function Chart() {
         lineStyle: LineStyle.Dashed,
         axisLabelVisible: true,
         axisLabelColor: isProfit ? '#22c55e' : '#ef4444',
-        // axisLabelTextColor: isProfit ? '#fff' : '#000',
-        title: `${position.isLong ? 'LONGING' : 'SHORTING'} ${size}: ${pnl}`,
+        title: `${position.isLong ? 'LONGING' : 'SHORTING'} ${size} with ${collateral} ${collateralSymbol}: ${pnl}`,
       })
     })
 
