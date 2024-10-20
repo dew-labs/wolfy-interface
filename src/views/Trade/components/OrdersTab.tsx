@@ -153,7 +153,9 @@ export default memo(function OrdersTab() {
             isLong: order.isLong,
           })
 
-          const markPriceText = formatNumber(shrinkDecimals(markPrice, USD_DECIMALS), Format.USD)
+          const markPriceText = formatNumber(shrinkDecimals(markPrice, USD_DECIMALS), Format.USD, {
+            exactFractionDigits: true,
+          })
           const sizeText = formatNumber(
             shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
             Format.USD,

@@ -441,6 +441,7 @@ const Controller = createResetableComponent(function ({reset}) {
             classNames={{
               tabList: 'gap-2 w-full relative',
             }}
+            color={tradeType === TradeType.Long ? 'success' : 'danger'}
           >
             {SUPPORTED_TRADE_TYPES.map(type => (
               <Tab key={type} title={TRADE_TYPE_LABEL[type]} />
