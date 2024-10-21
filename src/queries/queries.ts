@@ -7,11 +7,6 @@ import {
   type QueryKey,
 } from '@tanstack/react-query'
 import type {PersistedClient, PersistQueryClientOptions} from '@tanstack/react-query-persist-client'
-import {
-  compress as compressJson,
-  type Compressed,
-  decompress as decompressJson,
-} from 'compress-json'
 import {parse, stringify} from 'devalue'
 import {compress as compressString, decompress as decompressString} from 'lz-string'
 
@@ -77,12 +72,8 @@ export function createQueryClient() {
 export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions, 'queryClient'> {
   const persister = createSyncStoragePersister({
     storage: window.localStorage,
-    serialize: data =>
-      compressString(JSON.stringify(compressJson(JSON.parse(stringify(data)) as object))),
-    deserialize: data =>
-      parse(
-        JSON.stringify(decompressJson(JSON.parse(decompressString(data)) as Compressed)),
-      ) as PersistedClient,
+    serialize: data => compressString(stringify(data)),
+    deserialize: data => parse(decompressString(data)) as PersistedClient,
   })
 
   return {
