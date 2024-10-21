@@ -18,6 +18,7 @@ import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
 import {getTokenMetadata, getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
+import HeadTags from '@/lib/head/HeadTags'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -321,127 +322,136 @@ export default memo(function MarketInformation() {
     )?.maxShortLiquidityString ?? '--'
 
   return (
-    <Card>
-      <CardBody className='flex flex-row items-center gap-4'>
-        <Popover
-          placement='bottom-start'
-          offset={6}
-          backdrop='opaque'
-          isOpen={marketSelectorIsOpen}
-          onOpenChange={open => {
-            setMarketSelectorIsOpen(open)
-          }}
-          classNames={{
-            content: 'max-w-[90vw] overflow-auto',
-          }}
-        >
-          <PopoverTrigger>
-            <Button
-              className='min-w-fit text-nowrap p-4 text-2xl font-medium'
-              size='lg'
-              variant='flat'
-              startContent={
-                tokenMetadata ? (
-                  <img className='rounded' src={tokenMetadata.imageUrl} width='24' alt='' />
-                ) : (
-                  '--'
-                )
-              }
-            >
-              {tokenMetadata ? tokenMetadata.symbol : '--'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Table
-              aria-label='Markets'
-              className='my-2'
-              classNames={{
-                th: '!rounded-none',
-                td: 'first:before:rounded-none last:before:rounded-none',
-                tbody: 'overflow-scroll',
-              }}
-              removeWrapper
-              selectionMode='single'
-              selectedKeys={tokenAddress ? [tokenAddress] : []}
-              onSelectionChange={handleSelectMarket}
-              sortDescriptor={marketSortDescriptor}
-              onSortChange={handleSortChange}
-            >
-              <TableHeader>
-                <TableColumn allowsSorting>Pair</TableColumn>
-                <TableColumn allowsSorting>Price</TableColumn>
-                <TableColumn allowsSorting>Long Liq.</TableColumn>
-                <TableColumn allowsSorting>Short Liq.</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {sortedAndFilteredIndexTokens.map(item => {
-                  return (
-                    <TableRow key={item.address} className='cursor-pointer'>
-                      <TableCell>
-                        <div className='flex min-w-max items-center gap-2 text-nowrap'>
-                          <img src={item.imageUrl} alt={item.symbol} className='h-6 w-6 rounded' />
-                          <span>{`${item.symbol}/USD`}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span>{item.priceString}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span>{item.maxLongLiquidityString}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span>{item.maxShortLiquidityString}</span>
-                      </TableCell>
-                    </TableRow>
+    <>
+      {tokenMetadata?.symbol && priceIndexText && (
+        <HeadTags title={`${priceIndexText} | ${tokenMetadata.symbol}/USD`} />
+      )}
+      <Card>
+        <CardBody className='flex flex-row items-center gap-4'>
+          <Popover
+            placement='bottom-start'
+            offset={6}
+            backdrop='opaque'
+            isOpen={marketSelectorIsOpen}
+            onOpenChange={open => {
+              setMarketSelectorIsOpen(open)
+            }}
+            classNames={{
+              content: 'max-w-[90vw] overflow-auto',
+            }}
+          >
+            <PopoverTrigger>
+              <Button
+                className='min-w-fit text-nowrap p-4 text-2xl font-medium'
+                size='lg'
+                variant='flat'
+                startContent={
+                  tokenMetadata ? (
+                    <img className='rounded' src={tokenMetadata.imageUrl} width='24' alt='' />
+                  ) : (
+                    '--'
                   )
-                })}
-              </TableBody>
-            </Table>
-          </PopoverContent>
-        </Popover>
-        <div className='flex flex-1 flex-row gap-4'>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-2xl leading-6'>{priceIndexText}</div>
-            <div className='text-nowrap text-xs opacity-70'>{priceMarkText}</div>
-          </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>Long Liq.</div>
-            <div className='text-sm'>{maxLongLiquidityText}</div>
-          </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>Short Liq.</div>
-            <div className='text-sm'>{maxShortLiquidityText}</div>
-          </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>24h Chg.</div>
-            <div className='text-sm'>
-              <span className={change > 0 ? 'text-success' : 'text-danger'}>
-                {formatNumber(changePercent, Format.PERCENT_SIGNED)}
-              </span>
+                }
+              >
+                {tokenMetadata ? tokenMetadata.symbol : '--'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Table
+                aria-label='Markets'
+                className='my-2'
+                classNames={{
+                  th: '!rounded-none',
+                  td: 'first:before:rounded-none last:before:rounded-none',
+                  tbody: 'overflow-scroll',
+                }}
+                removeWrapper
+                selectionMode='single'
+                selectedKeys={tokenAddress ? [tokenAddress] : []}
+                onSelectionChange={handleSelectMarket}
+                sortDescriptor={marketSortDescriptor}
+                onSortChange={handleSortChange}
+              >
+                <TableHeader>
+                  <TableColumn allowsSorting>Pair</TableColumn>
+                  <TableColumn allowsSorting>Price</TableColumn>
+                  <TableColumn allowsSorting>Long Liq.</TableColumn>
+                  <TableColumn allowsSorting>Short Liq.</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {sortedAndFilteredIndexTokens.map(item => {
+                    return (
+                      <TableRow key={item.address} className='cursor-pointer'>
+                        <TableCell>
+                          <div className='flex min-w-max items-center gap-2 text-nowrap'>
+                            <img
+                              src={item.imageUrl}
+                              alt={item.symbol}
+                              className='h-6 w-6 rounded'
+                            />
+                            <span>{`${item.symbol}/USD`}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span>{item.priceString}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span>{item.maxLongLiquidityString}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span>{item.maxShortLiquidityString}</span>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </PopoverContent>
+          </Popover>
+          <div className='flex flex-1 flex-row gap-4'>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-2xl leading-6'>{priceIndexText}</div>
+              <div className='text-nowrap text-xs opacity-70'>{priceMarkText}</div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>Long Liq.</div>
+              <div className='text-sm'>{maxLongLiquidityText}</div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>Short Liq.</div>
+              <div className='text-sm'>{maxShortLiquidityText}</div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>24h Chg.</div>
+              <div className='text-sm'>
+                <span className={change > 0 ? 'text-success' : 'text-danger'}>
+                  {formatNumber(changePercent, Format.PERCENT_SIGNED)}
+                </span>
+              </div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>24h High/Low</div>
+              <div className='text-nowrap text-sm'>
+                <span className='text-success'>${high}</span>/
+                <span className='text-danger'>${low}</span>
+              </div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>24h Vol.</div>
+              <div className='text-nowrap text-sm'>
+                {formatNumber(volume, Format.USD_ABBREVIATED)}
+              </div>
+            </div>
+            <div className='flex flex-col items-start justify-center'>
+              <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
+              <div className='mt-0.5 flex overflow-hidden text-xs'>
+                <div className='bg-success px-1 py-0.5 text-white'>51.45%</div>
+                <div className='bg-danger px-1 py-0.5 text-white'>48.55%</div>
+              </div>
             </div>
           </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>24h High/Low</div>
-            <div className='text-nowrap text-sm'>
-              <span className='text-success'>${high}</span>/
-              <span className='text-danger'>${low}</span>
-            </div>
-          </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>24h Vol.</div>
-            <div className='text-nowrap text-sm'>
-              {formatNumber(volume, Format.USD_ABBREVIATED)}
-            </div>
-          </div>
-          <div className='flex flex-col items-start justify-center'>
-            <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
-            <div className='mt-0.5 flex overflow-hidden text-xs'>
-              <div className='bg-success px-1 py-0.5 text-white'>51.45%</div>
-              <div className='bg-danger px-1 py-0.5 text-white'>48.55%</div>
-            </div>
-          </div>
-        </div>
-      </CardBody>
-    </Card>
+        </CardBody>
+      </Card>
+    </>
   )
 })
