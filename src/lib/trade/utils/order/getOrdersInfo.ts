@@ -50,13 +50,12 @@ export default function getOrdersInfo(
 ) {
   const tokensMetadata = getTokensMetadata(chainId)
 
+  const newOrdersData = new Map<string, SwapOrderInfo | PositionOrderInfo>()
+
   ordersData.forEach((order, key) => {
     try {
       // Market orders should be executed right away, don't need to display them
-      if (isMarketOrderType(order.orderType)) {
-        ordersData.delete(key)
-        return
-      }
+      if (isMarketOrderType(order.orderType)) return
 
       const market = marketsData.get(order.marketAddress)
       const indexToken = market?.indexToken
@@ -138,7 +137,7 @@ export default function getOrdersInfo(
           targetCollateralToken,
         }
 
-        ordersData.set(key, orderInfo)
+        newOrdersData.set(key, orderInfo)
         return
       }
 
@@ -191,12 +190,11 @@ export default function getOrdersInfo(
         triggerThresholdType,
       }
 
-      ordersData.set(key, orderInfo)
+      newOrdersData.set(key, orderInfo)
     } catch (e) {
       logError(e)
-      ordersData.delete(key)
     }
   })
 
-  return ordersData
+  return newOrdersData
 }
