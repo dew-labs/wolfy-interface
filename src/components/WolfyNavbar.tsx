@@ -44,24 +44,29 @@ const menuItems = [
   {
     label: 'Trade',
     to: TradeRoute.fullPath,
+    target: '_self',
   },
   {
     label: 'Pools',
     to: PoolsRoute.fullPath,
+    target: '_self',
   },
   {
     label: 'Referrals',
     to: '',
+    target: '_self',
   },
   {
     label: 'Leaderboard',
     to: '',
+    target: '_self',
   },
   {
     label: 'Docs',
-    to: '',
+    to: 'https://docs.wolfy.trade/',
+    target: '_blank',
   },
-]
+] as const
 
 export default memo(function WolfyNavbar(props: NavbarProps) {
   const {t} = useTranslation()
@@ -112,7 +117,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
           {menuItems.map(item => {
             return (
               <NavbarItem key={item.label}>
-                <Link className='mt-2 text-sm text-default-500' to={item.to}>
+                <Link className='mt-2 text-sm text-default-500' to={item.to} target={item.target}>
                   {t(item.label)}
                 </Link>
               </NavbarItem>

@@ -19,4 +19,4 @@ export const LEVERAGE_PRECISION = expandDecimals(1, LEVERAGE_DECIMALS)
 export const SLIPPAGE_DECIMALS = 6
 export const SLIPPAGE_PRECISION = expandDecimals(1, SLIPPAGE_DECIMALS)
 // TODO: implement slippage
-export const DEFAULT_SLIPPAGE = expandDecimals(0.3 / 100, SLIPPAGE_DECIMALS) // 0.05%
+export const DEFAULT_SLIPPAGE = expandDecimals(1 / 100, SLIPPAGE_DECIMALS) // 1%
