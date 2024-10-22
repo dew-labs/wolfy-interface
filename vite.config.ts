@@ -1,4 +1,5 @@
 // import MillionLint from '@million/lint'
+import {execSync} from 'node:child_process'
 import dns from 'node:dns'
 import path from 'node:path'
 
@@ -31,6 +32,10 @@ import svgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 // import packageJson from './package.json'
+
+const commitHash = JSON.stringify(
+  execSync('git rev-parse --short HEAD').toString().replaceAll('\n', ''),
+)
 
 dns.setDefaultResultOrder('verbatim')
 
@@ -288,6 +293,9 @@ export default defineConfig(({mode}) => {
   }
 
   return {
+    define: {
+      __COMMIT_HASH__: commitHash,
+    },
     build: {
       sourcemap: true,
       // manifest: true,

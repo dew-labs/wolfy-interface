@@ -90,5 +90,6 @@ export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions
         return !!meta.persist
       },
     },
+    buster: __COMMIT_HASH__,
   }
 }
