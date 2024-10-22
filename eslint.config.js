@@ -348,7 +348,7 @@ const reactConfigs = [
       'react-compiler': pluginReactCompiler,
     },
     rules: {
-      'react-compiler/react-compiler': 'warn',
+      'react-compiler/react-compiler': 'error',
     },
   }),
   ...applyToReact('react', {

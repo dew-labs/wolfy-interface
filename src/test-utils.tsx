@@ -30,6 +30,7 @@ export const renderHookServer = <Hook extends () => unknown>(
   }
 
   const Component = ({useHook}: {useHook: Hook}) => {
+    // eslint-disable-next-line react-compiler/react-compiler -- its intentional
     setValue(useHook() as ReturnType<Hook>)
     return null
   }
