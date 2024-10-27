@@ -5,9 +5,13 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchMarkets from '@/lib/trade/services/fetchMarkets'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
+export function getMarketsQueryKey(chainId: StarknetChainId) {
+  return ['markets', chainId] as const
+}
+
 function createGetMarketsQueryOptions(chainId: StarknetChainId) {
   return queryOptions({
-    queryKey: ['markets', chainId],
+    queryKey: getMarketsQueryKey(chainId),
     queryFn: async () => {
       return await fetchMarkets(chainId)
     },

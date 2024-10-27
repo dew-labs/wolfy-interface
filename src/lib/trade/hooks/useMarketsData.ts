@@ -1,4 +1,6 @@
+import type {QueryClient} from '@tanstack/react-query'
 import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
+import {usePreviousDistinct} from 'react-use'
 import type {StarknetChainId} from 'satoru-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -9,15 +11,28 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarkets from './useMarkets'
 
-function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Market[] | undefined) {
+export function getMarketsDataQueryKey(chainId: StarknetChainId, markets: Market[] | undefined) {
+  return ['marketsData', chainId, markets] as const
+}
+
+function createGetMarketsDataQueryOptions(
+  chainId: StarknetChainId,
+  markets: Market[] | undefined,
+  previousMarkets: Market[] | undefined,
+  queryClient: QueryClient,
+) {
   return queryOptions({
-    queryKey: ['marketsData', chainId, markets] as const,
+    queryKey: getMarketsDataQueryKey(chainId, markets),
     queryFn: markets
       ? async () => {
           const tokenPricesData = await fetchTokenPrices(chainId)
           return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
+    placeholderData: () => {
+      if (!previousMarkets) return undefined
+      return queryClient.getQueryData<MarketsData>(getMarketsDataQueryKey(chainId, previousMarkets))
+    },
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,
     refetchOnWindowFocus: true,
@@ -28,21 +43,12 @@ function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Mar
 export default function useMarketsData() {
   const [chainId] = useChainId()
   const markets = useMarkets()
-
+  const previousMarkets = usePreviousDistinct(markets)
   const queryClient = useQueryClient()
 
-  const {data: marketsData} = useQuery({
-    ...createGetMarketsDataQueryOptions(chainId, markets),
-    initialData: () => {
-      const initialData = queryClient.getQueryData<MarketsData>([
-        'marketsData',
-        chainId,
-        markets,
-        null,
-      ])
-      return initialData ?? undefined
-    },
-  })
+  const {data: marketsData} = useQuery(
+    createGetMarketsDataQueryOptions(chainId, markets, previousMarkets, queryClient),
+  )
 
   return marketsData
 }

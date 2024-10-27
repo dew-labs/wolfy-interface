@@ -11,9 +11,13 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 import useMarketsData from './useMarketsData'
 import useTokenPrices from './useTokenPrices'
 
+export function getOrdersQueryKey(chainId: StarknetChainId, accountAddress: string | undefined) {
+  return ['orders', chainId, accountAddress] as const
+}
+
 function createGetOrdersQueryOptions(chainId: StarknetChainId, accountAddress: string | undefined) {
   return queryOptions({
-    queryKey: ['orders', chainId, accountAddress] as const,
+    queryKey: getOrdersQueryKey(chainId, accountAddress),
     queryFn: async () => {
       return await fetchOrders(chainId, accountAddress)
     },
@@ -29,6 +33,7 @@ export default function useOrders() {
   const accountAddress = useAccountAddress()
   const marketsData = useMarketsData()
   const tokenPricesData = useTokenPrices(data => data)
+
   const {data: orders} = useQuery(createGetOrdersQueryOptions(chainId, accountAddress))
 
   if (!marketsData || !orders || !tokenPricesData) return []

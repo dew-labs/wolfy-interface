@@ -9,6 +9,7 @@ import {
   SatoruContract,
   toStarknetHexString,
 } from 'satoru-sdk'
+import invariant from 'tiny-invariant'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {getTokenMetadata} from '@/constants/tokens'
@@ -68,21 +69,25 @@ export function getMarketPrice(
   tokenPricesData: TokenPricesData,
   market: Market,
 ): MarketPrice | undefined {
-  const indexTokenPrice = tokenPricesData.get(market.indexTokenAddress)
-  const longTokenPrice = tokenPricesData.get(market.longTokenAddress)
-  const shortTokenPrice = tokenPricesData.get(market.shortTokenAddress)
+  try {
+    const indexTokenPrice = tokenPricesData.get(market.indexTokenAddress)
+    const longTokenPrice = tokenPricesData.get(market.longTokenAddress)
+    const shortTokenPrice = tokenPricesData.get(market.shortTokenAddress)
 
-  const indexToken = getTokenMetadata(chainId, market.indexTokenAddress)
-  const longToken = getTokenMetadata(chainId, market.longTokenAddress)
-  const shortToken = getTokenMetadata(chainId, market.shortTokenAddress)
+    const indexToken = getTokenMetadata(chainId, market.indexTokenAddress)
+    const longToken = getTokenMetadata(chainId, market.longTokenAddress)
+    const shortToken = getTokenMetadata(chainId, market.shortTokenAddress)
 
-  if (!indexTokenPrice || !longTokenPrice || !shortTokenPrice) {
+    invariant(indexTokenPrice && longTokenPrice && shortTokenPrice, 'Invalid prices')
+
+    return {
+      index_token_price: convertToContractTokenPrices(indexTokenPrice, indexToken.decimals),
+      long_token_price: convertToContractTokenPrices(longTokenPrice, longToken.decimals),
+      short_token_price: convertToContractTokenPrices(shortTokenPrice, shortToken.decimals),
+    }
+  } catch (error) {
+    logError(error)
     return undefined
-  }
-  return {
-    index_token_price: convertToContractTokenPrices(indexTokenPrice, indexToken.decimals),
-    long_token_price: convertToContractTokenPrices(longTokenPrice, longToken.decimals),
-    short_token_price: convertToContractTokenPrices(shortTokenPrice, shortToken.decimals),
   }
 }
 

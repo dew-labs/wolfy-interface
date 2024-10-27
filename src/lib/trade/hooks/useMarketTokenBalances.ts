@@ -8,13 +8,21 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarketsData from './useMarketsData'
 
+export function getMarketTokenBalancesQueryKey(
+  chainId: StarknetChainId,
+  marketTokenAddresses: string[],
+  accountAddress: string,
+) {
+  return ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const
+}
+
 function createGetMarketTokenBalancesQueryOptions(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
   accountAddress: string,
 ) {
   return queryOptions({
-    queryKey: ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const,
+    queryKey: getMarketTokenBalancesQueryKey(chainId, marketTokenAddresses, accountAddress),
     queryFn: async () => {
       return await fetchMarketTokenBalances(chainId, marketTokenAddresses, accountAddress)
     },
@@ -30,6 +38,7 @@ export default function useMarketTokenBalances() {
   const accountAddress = useAccountAddress()
   const marketsData = useMarketsData()
   const marketTokenAddresses = marketsData ? Array.from(marketsData.keys()) : []
+
   const {data} = useQuery(
     createGetMarketTokenBalancesQueryOptions(chainId, marketTokenAddresses, accountAddress),
   )

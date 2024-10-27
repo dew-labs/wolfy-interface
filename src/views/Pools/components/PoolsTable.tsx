@@ -23,6 +23,7 @@ import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import {logError} from '@/utils/logger'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -104,97 +105,102 @@ export default function PoolsTable() {
     if (!marketsData || !marketTokensData) return []
     return Array.from(marketsData.values())
       .map(market => {
-        const marketTokenData = marketTokensData.get(market.marketTokenAddress)
+        try {
+          const marketTokenData = marketTokensData.get(market.marketTokenAddress)
 
-        if (!marketTokenData) return null
+          if (!marketTokenData) return null
 
-        const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
+          const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
 
-        const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
+          const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
 
-        // const price = market.priceMax
+          // const price = market.priceMax
 
-        const price =
-          calculateMarketPrice(market, marketTokenData, tokenPrices) ||
-          expandDecimals(1, USD_DECIMALS)
+          const price =
+            calculateMarketPrice(market, marketTokenData, tokenPrices) ||
+            expandDecimals(1, USD_DECIMALS)
 
-        const tokenFractionDigits = calculateTokenFractionDigits(price)
+          const tokenFractionDigits = calculateTokenFractionDigits(price)
 
-        const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
-          exactFractionDigits: true,
-          fractionDigits: 3,
-        })
-        const priceNumber = Number(shrinkDecimals(price, USD_DECIMALS))
-
-        const valueString = formatNumber(
-          shrinkDecimals(
-            marketTokenData.totalSupply * price,
-            marketTokenData.decimals + USD_DECIMALS,
-          ),
-          Format.USD,
-          {
-            fractionDigits: 0,
-          },
-        )
-
-        const valueNumber = Number(
-          shrinkDecimals(
-            marketTokenData.totalSupply * price,
-            marketTokenData.decimals + USD_DECIMALS,
-          ),
-        )
-
-        const balanceString = formatNumber(
-          shrinkDecimals(balance, marketTokenData.decimals),
-          Format.READABLE,
-          {
-            fractionDigits: tokenFractionDigits,
-          },
-        )
-
-        const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
-
-        const balanceValueString = formatNumber(
-          shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
-          Format.READABLE,
-          {
-            fractionDigits: 2,
+          const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
             exactFractionDigits: true,
-          },
-        )
+            fractionDigits: 3,
+          })
+          const priceNumber = Number(shrinkDecimals(price, USD_DECIMALS))
 
-        const balanceValueNumber = Number(
-          shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
-        )
+          const valueString = formatNumber(
+            shrinkDecimals(
+              marketTokenData.totalSupply * price,
+              marketTokenData.decimals + USD_DECIMALS,
+            ),
+            Format.USD,
+            {
+              fractionDigits: 0,
+            },
+          )
 
-        const totalSupplyString = formatNumber(
-          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
-          Format.READABLE,
-          {
-            fractionDigits: 0,
-            exactFractionDigits: true,
-          },
-        )
+          const valueNumber = Number(
+            shrinkDecimals(
+              marketTokenData.totalSupply * price,
+              marketTokenData.decimals + USD_DECIMALS,
+            ),
+          )
 
-        const totalSupplyNumber = Number(
-          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
-        )
+          const balanceString = formatNumber(
+            shrinkDecimals(balance, marketTokenData.decimals),
+            Format.READABLE,
+            {
+              fractionDigits: tokenFractionDigits,
+            },
+          )
 
-        return {
-          imageUrl: indexTokenData.imageUrl,
-          marketTokenAddress: market.marketTokenAddress,
-          market: market.name,
-          price: priceNumber,
-          priceString,
-          totalSupply: totalSupplyNumber,
-          totalSupplyString,
-          value: valueNumber,
-          valueString,
-          balance: balanceNumber,
-          balanceString,
-          balanceValue: balanceValueNumber,
-          balanceValueString,
-          apy: '--',
+          const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
+
+          const balanceValueString = formatNumber(
+            shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+            Format.READABLE,
+            {
+              fractionDigits: 2,
+              exactFractionDigits: true,
+            },
+          )
+
+          const balanceValueNumber = Number(
+            shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+          )
+
+          const totalSupplyString = formatNumber(
+            shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+            Format.READABLE,
+            {
+              fractionDigits: 0,
+              exactFractionDigits: true,
+            },
+          )
+
+          const totalSupplyNumber = Number(
+            shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+          )
+
+          return {
+            imageUrl: indexTokenData.imageUrl,
+            marketTokenAddress: market.marketTokenAddress,
+            market: market.name,
+            price: priceNumber,
+            priceString,
+            totalSupply: totalSupplyNumber,
+            totalSupplyString,
+            value: valueNumber,
+            valueString,
+            balance: balanceNumber,
+            balanceString,
+            balanceValue: balanceValueNumber,
+            balanceValueString,
+            apy: '--',
+          }
+        } catch (error) {
+          logError(error)
+          return null
         }
       })
       .filter((market): market is ExtendedMarketData => market !== null)

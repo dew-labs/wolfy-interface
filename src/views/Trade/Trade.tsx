@@ -1,6 +1,7 @@
 import SkipLink from '@/components/SkipLink'
 import WolfyNavbar from '@/components/WolfyNavbar'
 import HeadTags from '@/lib/head/HeadTags'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 
@@ -11,7 +12,9 @@ import MarketInformation from './components/MarketInformation'
 import UserInformation from './components/UserInformation'
 
 export default function Trade() {
+  const [chainId] = useChainId()
   const [tokenAddress] = useTokenAddress()
+  const key = `${chainId}-${tokenAddress}`
 
   return (
     <>
@@ -30,7 +33,7 @@ export default function Trade() {
               <Chart />
               <UserInformation />
             </div>
-            <Controller key={tokenAddress} />
+            <Controller key={key} />
           </div>
         </main>
       </div>
