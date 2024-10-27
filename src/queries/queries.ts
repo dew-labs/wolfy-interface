@@ -6,10 +6,15 @@ import {
   QueryClient,
   type QueryKey,
 } from '@tanstack/react-query'
-import type {PersistedClient, PersistQueryClientOptions} from '@tanstack/react-query-persist-client'
+import {
+  type PersistedClient,
+  type PersistQueryClientOptions,
+  removeOldestQuery,
+} from '@tanstack/react-query-persist-client'
 import {parse, stringify} from 'devalue'
 import {compress as compressString, decompress as decompressString} from 'lz-string'
 
+import {APP_NAME} from '@/constants/config'
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
 declare module '@tanstack/react-query' {
@@ -74,6 +79,8 @@ export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions
     storage: window.localStorage,
     serialize: data => compressString(stringify(data)),
     deserialize: data => parse(decompressString(data)) as PersistedClient,
+    retry: removeOldestQuery,
+    key: APP_NAME + '-query-data',
   })
 
   return {
