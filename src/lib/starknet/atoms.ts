@@ -8,7 +8,7 @@ export const walletAccountAtom = atom<WalletAccount>()
 
 export const walletChainIdAtom = atom<string>()
 
-export const chainIdAtom = atom(DEFAULT_CHAIN_ID)
+export const chainIdAtom = atomWithStorage('chainId', DEFAULT_CHAIN_ID)
 
 export const accountAddressAtom = atom('')
 

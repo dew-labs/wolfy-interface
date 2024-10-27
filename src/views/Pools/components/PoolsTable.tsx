@@ -78,8 +78,8 @@ export function calculateMarketPrice(
     shortTokenPrice,
   )
 
-  // TODO: how to get pending pnl?
-  const pendingPnl = 0n
+  // TODO: check why netPnlMax is not right
+  const pendingPnl = market.netPnlMax
 
   const totalValue = longTokenValue + shortTokenValue - pendingPnl
   const totalSupply = marketTokenData.totalSupply
@@ -111,6 +111,8 @@ export default function PoolsTable() {
         const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
 
         const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
+
+        // const price = market.priceMax
 
         const price =
           calculateMarketPrice(market, marketTokenData, tokenPrices) ||

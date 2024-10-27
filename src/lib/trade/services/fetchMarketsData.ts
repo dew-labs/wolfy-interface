@@ -111,6 +111,9 @@ export interface MarketData extends Market {
   netPnlMin: bigint
   netPnlMax: bigint
 
+  priceMin: bigint
+  priceMax: bigint
+
   longInterestUsd: bigint
   shortInterestUsd: bigint
   longInterestInTokens: bigint
@@ -709,8 +712,8 @@ export default async function fetchMarketsData(
 
           const {next_funding: nextFunding, virtual_inventory: virtualInventory} = marketInfo
 
-          const {1: poolValueInfoMin} = marketTokenPriceMin
-          const {1: poolValueInfoMax} = marketTokenPriceMax
+          const {0: priceMin, 1: poolValueInfoMin} = marketTokenPriceMin
+          const {0: priceMax, 1: poolValueInfoMax} = marketTokenPriceMax
 
           return {
             ...market,
@@ -744,6 +747,8 @@ export default async function fetchMarketsData(
             borrowingExponentFactorShort: cairoIntToBigInt(borrowingExponentFactorShort),
             fundingFactor: cairoIntToBigInt(fundingFactor),
             fundingExponentFactor: cairoIntToBigInt(fundingExponentFactor),
+            priceMin: cairoIntToBigInt(priceMin),
+            priceMax: cairoIntToBigInt(priceMax),
             pnlLongMax: cairoIntToBigInt(poolValueInfoMax.long_pnl),
             pnlLongMin: cairoIntToBigInt(poolValueInfoMin.long_pnl),
             pnlShortMax: cairoIntToBigInt(poolValueInfoMax.short_pnl),
