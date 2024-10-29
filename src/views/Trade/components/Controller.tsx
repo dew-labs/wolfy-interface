@@ -302,7 +302,8 @@ const Controller = createResetableComponent(function ({reset}) {
     Format.USD,
   )
 
-  const isValidSize = tokenAmount <= availableLiquidity
+  const isValidSize = tokenAmountUsd <= availableLiquidityUsd
+
   const isValidPayTokenAmount =
     !!tokenBalancesData &&
     !!payTokenAddress &&
