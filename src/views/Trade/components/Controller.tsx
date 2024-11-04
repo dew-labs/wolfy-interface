@@ -14,7 +14,14 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import {useCallback, useRef, useState} from 'react'
+import {
+  type ChangeEventHandler,
+  type DOMAttributes,
+  type KeyboardEventHandler,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
@@ -73,6 +80,15 @@ const SUPPORTED_TRADE_TYPES: TradeType[] = [
   TradeType.Short,
   // TradeType.Swap,
 ]
+
+const TABS_CLASS_NAMES = {
+  tabList: 'gap-2 w-full relative',
+}
+
+const SLIDER_CLASS_NAMES = {
+  thumb: '!rounded-none before:!rounded-none after:!rounded-none',
+  track: '!rounded-none',
+}
 
 const Controller = createResetableComponent(function ({reset}) {
   const [chainId] = useChainId()
@@ -167,6 +183,7 @@ const Controller = createResetableComponent(function ({reset}) {
     payTokenAmountUsd,
     maxLeverageNumber,
     leverageInput,
+    latestLeverageInput,
     setLeverageInput,
     handleLeverageChange,
     leverage,
@@ -430,6 +447,69 @@ const Controller = createResetableComponent(function ({reset}) {
     latestTokenDecimals,
   ])
 
+  const onLeverageInputChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    e => {
+      const v = e.target.value
+      setLeverageInput(v)
+    },
+    [setLeverageInput],
+  )
+
+  const onLeverageInputKeyDown = useCallback<KeyboardEventHandler<HTMLInputElement>>(
+    e => {
+      if (e.key === 'Enter') {
+        handleLeverageChange(latestLeverageInput.current)
+      }
+    },
+    [handleLeverageChange, latestLeverageInput],
+  )
+
+  const onLeverageInputFocus = useCallback(() => {
+    setLeverageInputFocused(true)
+  }, [setLeverageInputFocused])
+
+  const onLeverageInputBlur = useCallback(() => {
+    setLeverageInputFocused(false)
+  }, [setLeverageInputFocused])
+
+  const sliderRenderValue = useCallback(
+    (props: DOMAttributes<HTMLOutputElement>) => (
+      <output {...props}>
+        {'x '}
+        <Tooltip
+          className='rounded-md text-tiny text-default-500'
+          content='Press Enter to confirm'
+          placement='left'
+        >
+          <input
+            className={clsx(
+              'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+              leverage > 0n && !isValidLeverage ? 'border-danger-500' : 'border-transparent',
+            )}
+            type='text'
+            aria-label='Leverage value'
+            value={leverageInput}
+            onChange={onLeverageInputChange}
+            max={maxLeverageNumber}
+            onKeyDown={onLeverageInputKeyDown}
+            onFocus={onLeverageInputFocus}
+            onBlur={onLeverageInputBlur}
+          />
+        </Tooltip>
+      </output>
+    ),
+    [
+      isValidLeverage,
+      leverage,
+      leverageInput,
+      maxLeverageNumber,
+      onLeverageInputBlur,
+      onLeverageInputChange,
+      onLeverageInputFocus,
+      onLeverageInputKeyDown,
+    ],
+  )
+
   return (
     <div className='flex w-full min-w-80 flex-col md:max-w-sm'>
       <Card>
@@ -439,13 +519,11 @@ const Controller = createResetableComponent(function ({reset}) {
             selectedKey={tradeType}
             onSelectionChange={handleChangeTradeType}
             aria-label='Trade type'
-            classNames={{
-              tabList: 'gap-2 w-full relative',
-            }}
+            classNames={TABS_CLASS_NAMES}
             color={tradeType === TradeType.Long ? 'success' : 'danger'}
           >
             {SUPPORTED_TRADE_TYPES.map(type => (
-              <Tab key={type} title={TRADE_TYPE_LABEL[type]} />
+              <Tab key={type} title={TRADE_TYPE_LABEL[type]} className='font-serif' />
             ))}
           </Tabs>
           <Tabs
@@ -456,7 +534,7 @@ const Controller = createResetableComponent(function ({reset}) {
             aria-label='Trade mode'
           >
             {AVAILABLE_TRADE_MODES[tradeType].map(type => (
-              <Tab key={type} title={TRADE_MODE_LABEL[type]} />
+              <Tab key={type} title={TRADE_MODE_LABEL[type]} className='font-serif' />
             ))}
           </Tabs>
           <div className='mt-2 flex w-full justify-between'>
@@ -503,48 +581,8 @@ const Controller = createResetableComponent(function ({reset}) {
             minValue={1}
             defaultValue={1}
             className='mt-4'
-            classNames={{
-              thumb: '!rounded-none before:!rounded-none after:!rounded-none',
-              track: '!rounded-none',
-            }}
-            renderValue={({_, ...props}) => (
-              <output {...props}>
-                {'x '}
-                <Tooltip
-                  className='rounded-md text-tiny text-default-500'
-                  content='Press Enter to confirm'
-                  placement='left'
-                >
-                  <input
-                    className={clsx(
-                      'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
-                      leverage > 0n && !isValidLeverage
-                        ? 'border-danger-500'
-                        : 'border-transparent',
-                    )}
-                    type='text'
-                    aria-label='Leverage value'
-                    value={leverageInput}
-                    onChange={e => {
-                      const v = e.target.value
-                      setLeverageInput(v)
-                    }}
-                    max={maxLeverageNumber}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        handleLeverageChange(leverageInput)
-                      }
-                    }}
-                    onFocus={() => {
-                      setLeverageInputFocused(true)
-                    }}
-                    onBlur={() => {
-                      setLeverageInputFocused(false)
-                    }}
-                  />
-                </Tooltip>
-              </output>
-            )}
+            classNames={SLIDER_CLASS_NAMES}
+            renderValue={sliderRenderValue}
             value={leverageNumber}
             onChange={handleLeverageChange}
             // TODO: generate marks based on maximum leverage
@@ -632,7 +670,7 @@ const Controller = createResetableComponent(function ({reset}) {
             >
               <Button
                 color='primary'
-                className='w-full'
+                className='w-full font-serif'
                 size='lg'
                 onPress={handleSubmitBtnPress}
                 isDisabled={isConnected && !isValidOrder}

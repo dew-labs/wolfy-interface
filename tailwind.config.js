@@ -12,6 +12,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Geist Mono'],
+        serif: ['Pixelify Sans'], // Use for highlight
         mono: ['Geist Mono'],
       },
     },

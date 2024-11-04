@@ -25,6 +25,10 @@ import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import {useClosePosition} from './ClosePositionModal'
 
+const TABLE_CLASS_NAMES = {
+  th: '!rounded-none font-serif',
+}
+
 export default memo(function PositionTab() {
   const positionsInfo = usePositionsInfoData()
   const tokenPricesData = useTokenPrices(data => data)
@@ -42,13 +46,7 @@ export default memo(function PositionTab() {
   const closePosition = useClosePosition()
 
   return (
-    <Table
-      className='mt-2'
-      aria-label='Positions'
-      classNames={{
-        th: '!rounded-none',
-      }}
-    >
+    <Table className='mt-2' aria-label='Positions' classNames={TABLE_CLASS_NAMES}>
       <TableHeader>
         <TableColumn>Position</TableColumn>
         <TableColumn>Net value</TableColumn>
@@ -95,6 +93,7 @@ export default memo(function PositionTab() {
                     disableAnimation
                     variant='light'
                     className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                    // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                     onClick={() => {
                       setTokenAddress(position.marketData.indexTokenAddress)
                     }}
@@ -184,6 +183,7 @@ export default memo(function PositionTab() {
               <TableCell>
                 <Button
                   size='sm'
+                  // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                   onClick={() => {
                     closePosition(position.key)
                   }}

@@ -9,8 +9,9 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import React, {useMemo, useState} from 'react'
+import React, {type ChangeEventHandler, useCallback, useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
+import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -147,6 +148,7 @@ export default function DepositModal({
   const maxLongToken = Number(
     shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
   )
+  const latestMaxLongToken = useLatest(maxLongToken)
 
   const longTokenDisplayDecimals = calculateTokenFractionDigits(longTokenPrice)
 
@@ -159,18 +161,21 @@ export default function DepositModal({
     },
   )
 
-  const handleLongTokenAmountChange = (value: string) => {
+  const handleLongTokenAmountChange = useCallback((value: string) => {
     setLongTokenAmount(() => {
       const newValue = value.replace(/[^0-9.]/g, '')
       const numValue = parseFloat(newValue)
       if (isNaN(numValue)) return ''
-      return numValue > maxLongToken ? maxLongToken.toString() : newValue
+      return numValue > latestMaxLongToken.current
+        ? latestMaxLongToken.current.toString()
+        : newValue
     })
-  }
+  }, [])
 
   const maxShortToken = Number(
     shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
   )
+  const latestMaxShortToken = useLatest(maxShortToken)
 
   const shortTokenDisplayDecimals = calculateTokenFractionDigits(shortTokenPrice)
 
@@ -183,22 +188,24 @@ export default function DepositModal({
     },
   )
 
-  const handleShortTokenAmountChange = (value: string) => {
+  const handleShortTokenAmountChange = useCallback((value: string) => {
     setShortTokenAmount(() => {
       const newValue = value.replace(/[^0-9.]/g, '')
       const numValue = parseFloat(newValue)
       if (isNaN(numValue)) return ''
-      return numValue > maxShortToken ? maxShortToken.toString() : newValue
+      return numValue > latestMaxShortToken.current
+        ? latestMaxShortToken.current.toString()
+        : newValue
     })
-  }
+  }, [])
 
-  const handleLongTokenSetToMax = () => {
-    setLongTokenAmount(maxLongToken.toString())
-  }
+  const handleLongTokenSetToMax = useCallback(() => {
+    setLongTokenAmount(latestMaxLongToken.current.toString())
+  }, [])
 
-  const handleShortTokenSetToMax = () => {
-    setShortTokenAmount(maxShortToken.toString())
-  }
+  const handleShortTokenSetToMax = useCallback(() => {
+    setShortTokenAmount(latestMaxShortToken.current.toString())
+  }, [])
 
   const isInputValid = useMemo(() => {
     const longAmount = parseFloat(longTokenAmount) || 0
@@ -210,69 +217,101 @@ export default function DepositModal({
     )
   }, [longTokenAmount, shortTokenAmount, maxLongToken, maxShortToken])
 
-  const handleSubmit = (_e: PressEvent) => {
-    if (!marketData || !wallet || !marketTokenData || !isInputValid) return
+  const latestMarketTokenAddress = useLatest(marketTokenAddress)
+  const latestChainId = useLatest(chainId)
+  const latestWallet = useLatest(wallet)
+  const latestMarketData = useLatest(marketData)
+  const latestMarketTokenData = useLatest(marketTokenData)
+  const latestMarketTokenAmount = useLatest(marketTokenAmount)
+  const latestLongTokenAmount = useLatest(longTokenAmount)
+  const latestShortTokenAmount = useLatest(shortTokenAmount)
+  const latestIsInputValid = useLatest(isInputValid)
 
-    setIsSubmitting(true)
-    toast.promise(
-      async () => {
-        try {
-          const longAmount = expandDecimals(
-            parseFloat(longTokenAmount) || 0,
-            marketData.longToken.decimals,
-          )
-          const shortAmount = expandDecimals(
-            parseFloat(shortTokenAmount) || 0,
-            marketData.shortToken.decimals,
-          )
+  const handleSubmit = useCallback(
+    (_e: PressEvent) => {
+      const marketData = latestMarketData.current
+      const wallet = latestWallet.current
+      const marketTokenData = latestMarketTokenData.current
+      const isInputValid = latestIsInputValid.current
 
-          const depositParams = {
-            receiver: wallet.address,
-            market: marketTokenAddress,
-            initialLongToken: marketData.longTokenAddress,
-            initialLongTokenAmount: longAmount,
-            initialShortToken: marketData.shortTokenAddress,
-            initialShortTokenAmount: shortAmount,
-            minMarketToken: expandDecimals(
-              marketTokenAmount.number * 0.99,
-              marketTokenData.decimals,
-            ), // 1% slippage
+      if (!marketData || !wallet || !marketTokenData || !isInputValid) return
+
+      setIsSubmitting(true)
+      toast.promise(
+        async () => {
+          try {
+            const longAmount = expandDecimals(
+              parseFloat(latestLongTokenAmount.current) || 0,
+              marketData.longToken.decimals,
+            )
+            const shortAmount = expandDecimals(
+              parseFloat(latestShortTokenAmount.current) || 0,
+              marketData.shortToken.decimals,
+            )
+
+            const depositParams = {
+              receiver: wallet.address,
+              market: latestMarketTokenAddress.current,
+              initialLongToken: marketData.longTokenAddress,
+              initialLongTokenAmount: longAmount,
+              initialShortToken: marketData.shortTokenAddress,
+              initialShortTokenAmount: shortAmount,
+              minMarketToken: expandDecimals(
+                latestMarketTokenAmount.current.number * 0.99,
+                marketTokenData.decimals,
+              ), // 1% slippage
+            }
+
+            const result = await sendDeposit(wallet, depositParams)
+            await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
+            onClose()
+            return result
+          } finally {
+            setIsSubmitting(false)
           }
-
-          const result = await sendDeposit(wallet, depositParams)
-          await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
-          onClose()
-          return result
-        } finally {
-          setIsSubmitting(false)
-        }
-      },
-      {
-        loading: 'Submitting deposit...',
-        success: data => (
-          <>
-            Deposit successful.
-            <a
-              href={getScanUrl(chainId, ScanType.Transaction, data.tx)}
-              target='_blank'
-              rel='noreferrer'
-            >
-              View transaction
-            </a>
-          </>
-        ),
-        error: error => (
-          <>
-            <div>{errorMessageOrUndefined(error) ?? 'Deposit failed.'}</div>
-          </>
-        ),
-      },
-    )
-  }
+        },
+        {
+          loading: 'Submitting deposit...',
+          success: data => (
+            <>
+              Deposit successful.
+              <a
+                href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                target='_blank'
+                rel='noreferrer'
+              >
+                View transaction
+              </a>
+            </>
+          ),
+          error: error => (
+            <>
+              <div>{errorMessageOrUndefined(error) ?? 'Deposit failed.'}</div>
+            </>
+          ),
+        },
+      )
+    },
+    [onClose, queryClient],
+  )
 
   // Add new state for fees and price impact
   const [feesAndPriceImpact, _setFeesAndPriceImpact] = useState('0')
   const [networkFee, _setNetworkFee] = useState('0')
+
+  const onLongTokenAmountChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    e => {
+      handleLongTokenAmountChange(e.target.value)
+    },
+    [handleLongTokenAmountChange],
+  )
+
+  const onShortTokenAmountChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    e => {
+      handleShortTokenAmountChange(e.target.value)
+    },
+    [handleShortTokenAmountChange],
+  )
 
   if (!marketData || !marketTokenData) {
     return null
@@ -290,9 +329,7 @@ export default function DepositModal({
             label={`${marketData.longToken.symbol} Amount`}
             placeholder='Enter long token amount'
             value={longTokenAmount}
-            onChange={e => {
-              handleLongTokenAmountChange(e.target.value)
-            }}
+            onChange={onLongTokenAmountChange}
             endContent={
               <button
                 className={clsx(
@@ -310,9 +347,7 @@ export default function DepositModal({
             label={`${marketData.shortToken.symbol} Amount`}
             placeholder='Enter short token amount'
             value={shortTokenAmount}
-            onChange={e => {
-              handleShortTokenAmountChange(e.target.value)
-            }}
+            onChange={onShortTokenAmountChange}
             endContent={
               <button
                 className={clsx(

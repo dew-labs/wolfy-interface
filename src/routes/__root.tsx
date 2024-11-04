@@ -5,7 +5,7 @@ import {
   ScrollRestoration,
   useRouter,
 } from '@tanstack/react-router'
-import {lazy, Suspense} from 'react'
+import {lazy, Suspense, useCallback} from 'react'
 import {RouterProvider} from 'react-aria-components'
 
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
@@ -23,11 +23,14 @@ const TanStackRouterDevtools = import.meta.env.PROD
 
 function RootRoute() {
   const router = useRouter()
+
+  const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
+
   return (
     <>
       <ScrollRestoration />
       <RouteAnnouncer />
-      <RouterProvider navigate={async (to: string) => router.navigate({to})}>
+      <RouterProvider navigate={navigate}>
         <Outlet />
         <Suspense>
           <TanStackRouterDevtools initialIsOpen={false} />

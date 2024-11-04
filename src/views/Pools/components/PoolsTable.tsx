@@ -58,6 +58,11 @@ export interface ExtendedMarketData {
   actions?: React.ReactNode
 }
 
+const TABLE_CLASS_NAMES = {
+  base: ['max-w-7xl', 'm-auto'],
+  th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
+}
+
 export function calculateMarketPrice(
   market: MarketData,
   marketTokenData: MarketTokenData,
@@ -286,6 +291,7 @@ export default function PoolsTable() {
             <Button
               size='sm'
               color='success'
+              // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
               onPress={() => {
                 handleOpenModal(market.marketTokenAddress, 'buy')
               }}
@@ -295,6 +301,7 @@ export default function PoolsTable() {
             <Button
               size='sm'
               color='danger'
+              // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
               onPress={() => {
                 handleOpenModal(market.marketTokenAddress, 'sell')
               }}
@@ -317,6 +324,10 @@ export default function PoolsTable() {
     setSortDescriptor(descriptor)
   }, [])
 
+  const onClear = useCallback(() => {
+    setFilterValue('')
+  }, [])
+
   const topContent = useMemo(() => {
     return (
       <div className='flex flex-col gap-4'>
@@ -327,9 +338,7 @@ export default function PoolsTable() {
             name='market-search'
             placeholder='Search by market name...'
             value={filterValue}
-            onClear={() => {
-              setFilterValue('')
-            }}
+            onClear={onClear}
             onValueChange={onSearchChange}
           />
         </div>
@@ -340,16 +349,13 @@ export default function PoolsTable() {
         </div>
       </div>
     )
-  }, [filterValue, onSearchChange, filteredMarkets.length])
+  }, [filterValue, onSearchChange, filteredMarkets.length, onClear])
 
   return (
     <>
       <Table
         aria-label='Markets table'
-        classNames={{
-          base: ['max-w-7xl', 'm-auto'],
-          th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
-        }}
+        classNames={TABLE_CLASS_NAMES}
         sortDescriptor={sortDescriptor}
         onSortChange={onSortChange}
         topContent={topContent}

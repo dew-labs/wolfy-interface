@@ -18,6 +18,7 @@ function registerHttpProviders() {
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK',
       'https://starknet-mainnet.reddio.com/rpc/v0_7/rk-78e6eebf-b107-440c-89dd-889014500fdc',
       'https://starknet-mainnet.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
+      'https://starknet-mainnet.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-mainnet.infura.io/v3/82802c15c3d242d2846e464a66238198',
       'https://api-starknet-mainnet.dwellir.com/dd28e566-3260-4d8d-8180-6ef1a161e41c',
       'https://mainnet-rpc.spaceshard.io/',
@@ -59,13 +60,14 @@ function registerHttpProviders() {
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-RKRlVd3tmxZAHYO2QbBNp6E6y7vCXXE',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/JnR9OZ0EoYZTyhz91Kko2UkLLZ1jH7Eu',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/G9wJH34O_F038b_k329lcjOd_o38JA3j',
-      'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK',
+      // 'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK', // SEPOLIA turned off
       'https://starknet-sepolia.reddio.com/rpc/v0_7/rk-78e6eebf-b107-440c-89dd-889014500fdc',
       'https://starknet-sepolia.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/82802c15c3d242d2846e464a66238198',
       'https://api-starknet-sepolia.dwellir.com/dd28e566-3260-4d8d-8180-6ef1a161e41c',
       'https://testnet-rpc.spaceshard.io/',
       'https://starknet-sepolia.blastapi.io/6e65b40f-7148-4714-856f-9754a74d9d5d/rpc/v0_7',
+      'https://starknet-sepolia.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/Snq-IYMCQSA2MqkyN85BljqG6-8SpM0z',
       'https://rpc.nethermind.io/sepolia-juno/?apikey=YUVMGlmfoAEUCrf9vRERnyb7YeCNFE5sA8Awf0htjD2RyKS7',
       // -------------------------------------------------------------------------
@@ -85,6 +87,7 @@ function registerHttpProviders() {
       'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
       // 'https://rpc.starknet-testnet.lava.build:443',
     ],
+    [StarknetChainId.SN_KATANA]: ['https://127.0.0.1:8080'],
   }
 
   Object.entries(HTTP_RPC_PROVIDERS).forEach(([chainId, urls]) => {
@@ -116,6 +119,7 @@ function registerWssProviders() {
       // -------------------------------------------------------------------------
       // 'wss://starknet-sepolia.drpc.org',
     ],
+    [StarknetChainId.SN_KATANA]: [],
   }
 
   Object.entries(WSS_RPC_PROVIDERS).forEach(([chainId, urls]) => {
@@ -153,6 +157,27 @@ function registerContractAddresses() {
     [StarknetChainId.SN_MAIN]: {
       [SatoruContract.Multicall]:
         '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
+    },
+    // Note: this will always change
+    [StarknetChainId.SN_KATANA]: {
+      [SatoruContract.Multicall]:
+        '0x203e20476da9d6147d506d46b568bf217bae5bb8f65b31755da3da4358cb68c',
+      [SatoruContract.Reader]: '0x17a7f571b793477ba195be08661f9f72a2691792cd08e9679c3efa629497ca2',
+      [SatoruContract.EventEmitter]:
+        '0x207a233bc2cf39a127a152344c0fe6a1b5b6a808db767bc9b75b519252ab0d0',
+      [SatoruContract.Router]: '0x7c43781bb9da29ae279ff399d0a048c3df4a4d60f558a5a59906a369692990e',
+      [SatoruContract.ReferralStorage]:
+        '0x112949c63bc01ddc8f53f7cc626f794387b2b4898a82843eb9c2527d5b414ca',
+      [SatoruContract.DataStore]:
+        '0x34d8b2b6fa67e3d519fa1466d47a86468481da639d6f5de1bd64e7e40852f67',
+      [SatoruContract.OrderVault]:
+        '0x71d39a703e94aa13b5a851182abbe4e56d617140af067f6234315ba42b74e23',
+      [SatoruContract.DepositVault]:
+        '0x5a7d3688afa8c10d68523a93f7a8e2ab5535cb2c52c1be2867409cbcac3199e',
+      [SatoruContract.WithdrawalVault]:
+        '0x44062427ac689a16a27bfcf8e73d70227f2897b3b23a3b4613f045005d93221',
+      [SatoruContract.ExchangeRouter]:
+        '0x3606041a6a483ae3464036403ab211fdf280a0c43536e15df196c9178664aa4',
     },
   }
 

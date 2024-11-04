@@ -1,6 +1,6 @@
-import {Input, Select, SelectItem} from '@nextui-org/react'
+import {Input, Select, SelectItem, type SharedSelection} from '@nextui-org/react'
 import clsx from 'clsx'
-import {memo, type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
+import {memo, type MemoizedCallbackOrDispatch, useCallback, useMemo, useState} from 'react'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -39,6 +39,23 @@ interface Props {
 
 const ACCEPTABLE_DIFF = 2n
 
+const PRICE_INPUT_CLASS_NAMES = {
+  input: 'appearance-none',
+}
+
+const TOKEN_AMOUNT_INPUT_CLASS_NAMES = {
+  inputWrapper: 'h-20 relative',
+  label: 'relative top-4 overflow-visible',
+  input: 'appearance-none text-3xl',
+}
+
+const SELECT_CLASS_NAMES = {
+  base: 'w-min',
+  label: 'visually-hidden',
+  innerWrapper: 'group-data-[has-label=true]:pt-0 w-full',
+  trigger: 'h-10 min-h-10 min-w-24 w-24 max-w-24',
+  value: 'text-center',
+}
 export default memo(function TokenInputs({
   tradeType,
   tradeMode,
@@ -175,6 +192,18 @@ export default memo(function TokenInputs({
   const isValidPayTokenAmount =
     !!payTokenAddress && payTokenAmount <= (tokenBalances?.get(payTokenAddress) ?? 0n)
 
+  const onSelectionChange = useCallback(
+    (selection: SharedSelection) => {
+      if (!selection.currentKey) return
+      setPayTokenAddress(selection.currentKey)
+    },
+    [setPayTokenAddress],
+  )
+
+  const payTokenSelectedKeys = useMemo(() => {
+    return payTokenAddress ? [payTokenAddress] : []
+  }, [payTokenAddress])
+
   return (
     <>
       {tradeMode === TradeMode.Limit && (
@@ -184,9 +213,7 @@ export default memo(function TokenInputs({
           type='text'
           label={`At price:`}
           placeholder='0.0'
-          classNames={{
-            input: 'appearance-none',
-          }}
+          classNames={PRICE_INPUT_CLASS_NAMES}
           value={tokenPriceInput}
           onChange={handleTokenPriceInputChange}
           // startContent={
@@ -212,11 +239,7 @@ export default memo(function TokenInputs({
         onChange={handlePayTokenAmountInputChange}
         onFocusChange={setPayTokenAmountInputIsFocused}
         placeholder='0.0'
-        classNames={{
-          inputWrapper: 'h-20 relative',
-          label: 'relative top-4 overflow-visible',
-          input: 'appearance-none text-3xl',
-        }}
+        classNames={TOKEN_AMOUNT_INPUT_CLASS_NAMES}
         endContent={
           <>
             <button
@@ -232,19 +255,10 @@ export default memo(function TokenInputs({
               aria-label='Select pay asset'
               className='max-w-xs'
               variant='bordered'
-              selectedKeys={payTokenAddress ? [payTokenAddress] : []}
-              onSelectionChange={selection => {
-                if (!selection.currentKey) return
-                setPayTokenAddress(selection.currentKey)
-              }}
+              selectedKeys={payTokenSelectedKeys}
+              onSelectionChange={onSelectionChange}
               selectorIcon={<></>}
-              classNames={{
-                base: 'w-min',
-                label: 'visually-hidden',
-                innerWrapper: 'group-data-[has-label=true]:pt-0 w-full',
-                trigger: 'h-10 min-h-10 min-w-24 w-24 max-w-24',
-                value: 'text-center',
-              }}
+              classNames={SELECT_CLASS_NAMES}
             >
               {availablePayTokenAddresses.map(address => (
                 <SelectItem key={address}>{tokensMetadata.get(address)?.symbol}</SelectItem>
@@ -259,9 +273,7 @@ export default memo(function TokenInputs({
         type='text'
         label={`${INPUT_2_LABEL[tradeType]}: ${tokenAmountUsdShrinked}`}
         placeholder='0.0'
-        classNames={{
-          input: 'appearance-none',
-        }}
+        classNames={PRICE_INPUT_CLASS_NAMES}
         value={tokenAmountInput}
         onChange={handleTokenAmountInputChange}
         onFocusChange={setTokenAmountInputIsFocused}

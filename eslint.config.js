@@ -30,6 +30,7 @@ import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
 // eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReactCompiler from 'eslint-plugin-react-compiler'
+import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
@@ -349,6 +350,17 @@ const reactConfigs = [
     },
     rules: {
       'react-compiler/react-compiler': 'error',
+    },
+  }),
+  ...applyToReact('react/perf', pluginReactPerf.configs.flat.recommended),
+  ...applyToReact('react/perf-custom', {
+    rules: {
+      'react-perf/jsx-no-new-object-as-prop': [
+        'error',
+        {
+          nativeAllowList: ['style'],
+        },
+      ],
     },
   }),
   ...applyToReact('react', {

@@ -1,7 +1,7 @@
 import {Button, Input, Modal, ModalBody, ModalContent, ModalHeader} from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
@@ -217,6 +217,30 @@ export default function ClosePositionModal() {
     [queryClient],
   )
 
+  const inputTokenClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
+    }),
+    [isValidCollateralTokenAmountToDecrease],
+  )
+
+  const inputSizeClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidSizeUsdToDecrease && '!text-danger-500',
+    }),
+    [isValidSizeUsdToDecrease],
+  )
+
+  const handleCloseFull = useCallback(() => {
+    handleClose(true)
+  }, [handleClose])
+
+  const handleClosePartial = useCallback(() => {
+    handleClose(false)
+  }, [handleClose])
+
   if (!positionKey) return
 
   return (
@@ -233,10 +257,7 @@ export default function ClosePositionModal() {
             type='text'
             label={`Collateral (Max: ${maximumCollateralTokenToDecreaseText})`}
             placeholder='0.0'
-            classNames={{
-              input: 'appearance-none',
-              label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
-            }}
+            classNames={inputTokenClassNames}
             value={collaterTokenAmountToDecreaseInput}
             onChange={handleTokenAmountInputChange}
             endContent={
@@ -251,10 +272,7 @@ export default function ClosePositionModal() {
             type='text'
             label={`Size (Max: ${maximumSizeUsdToDecreaseText})`}
             placeholder='0.0'
-            classNames={{
-              input: 'appearance-none',
-              label: !isValidSizeUsdToDecrease && '!text-danger-500',
-            }}
+            classNames={inputSizeClassNames}
             value={sizeUsdToDecreaseInput}
             onChange={handleSizeUsdInputChange}
             startContent={
@@ -273,9 +291,7 @@ export default function ClosePositionModal() {
               color='warning'
               className='w-full'
               size='lg'
-              onPress={() => {
-                handleClose(true)
-              }}
+              onPress={handleCloseFull}
               isLoading={isClosing}
             >
               Fully close
@@ -284,9 +300,7 @@ export default function ClosePositionModal() {
               color='primary'
               className='w-full'
               size='lg'
-              onPress={() => {
-                handleClose()
-              }}
+              onPress={handleClosePartial}
               isDisabled={!isValid}
               isLoading={isClosing}
             >

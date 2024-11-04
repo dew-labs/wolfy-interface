@@ -18,7 +18,7 @@ import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
 import {lazy, type PropsWithChildren, Suspense, useEffect, useState} from 'react'
 // import {Inspector} from 'react-dev-inspector'
-import {ErrorBoundary} from 'react-error-boundary'
+import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 
 import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
 import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'
@@ -51,6 +51,36 @@ function QueryErrorBoundary({children}: PropsWithChildren) {
   )
 }
 
+const PARTYTOWN_FORWARD = ['dataLayer.push']
+
+function ErrorBoundaryFallbackRender({error}: FallbackProps) {
+  logError(error)
+
+  const errorMessage = (() => {
+    if (typeof error !== 'object') return undefined
+    if (error === null) return undefined
+    if (!('message' in error)) return undefined
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
+    if (typeof error.message !== 'string') return undefined
+
+    return error.message as string
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  })()
+
+  const errorCode = (() => {
+    if (typeof error !== 'object') return undefined
+    if (error === null) return undefined
+    if (!('code' in error)) return undefined
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
+    if (typeof error.code !== 'string') return undefined
+
+    return error.code as string
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  })()
+
+  return <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} />
+}
+
 function App() {
   // Ensures each request has its own cache in SSR
   const [queryClient] = useState(() => createQueryClient())
@@ -68,14 +98,9 @@ function App() {
   return (
     <NextUIProvider>
       <ErrorBoundary fallback={null}>
-        <Partytown debug={DEBUG} forward={['dataLayer.push']} />
+        <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
       </ErrorBoundary>
-      <ErrorBoundary
-        fallbackRender={({error}) => {
-          logError(error)
-          return <ErrorComponent />
-        }}
-      >
+      <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
         <WolfyBackground />
         {/* <Inspector /> */}
         <Suspense>

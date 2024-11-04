@@ -249,6 +249,23 @@ export default defineConfig(({mode}) => {
           // },
         ],
       },
+      google: {
+        preconnect: true,
+        display: 'block',
+        injectTo: 'head',
+        families: [
+          {
+            name: 'Pixelify Sans',
+            styles: 'wght@400..700',
+            defer: true,
+          },
+          {
+            name: 'Silkscreen',
+            styles: 'wght@400;700',
+            defer: true,
+          },
+        ],
+      },
     }),
     FontaineTransform.vite(fontaineOptions),
     // NOTE: enable this if you need support for legacy browsers

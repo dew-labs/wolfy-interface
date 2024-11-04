@@ -14,6 +14,10 @@ export const SUPPORTED_CHAINS: {
     chainId: StarknetChainId.SN_SEPOLIA,
     name: 'Sepolia',
   },
+  {
+    chainId: StarknetChainId.SN_KATANA,
+    name: 'Katana',
+  },
 ] as const
 
 export const SUPPORTED_CHAIN_IDS = SUPPORTED_CHAINS.map(chain => chain.chainId)

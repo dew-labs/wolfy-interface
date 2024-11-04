@@ -19,7 +19,7 @@ import {
 } from '@nextui-org/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
-import {memo, useCallback, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 
 import wolfyLogoDarkSvg from '@/assets/icons/wolfy-text-dark.svg'
@@ -68,6 +68,16 @@ const menuItems = [
   },
 ] as const
 
+const NAVBAR_MENU_MOTION_PROPS = {
+  initial: {opacity: 0, y: -20},
+  animate: {opacity: 1, y: 0},
+  exit: {opacity: 0, y: -20},
+  transition: {
+    ease: 'easeInOut',
+    duration: 0.2,
+  },
+}
+
 export default memo(function WolfyNavbar(props: NavbarProps) {
   const {t} = useTranslation()
   const [theme] = useCurrentTheme()
@@ -86,18 +96,22 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
   const [chainId] = useChainId()
   const [isDripping, handleOnDrip] = useDripFaucet()
 
+  const navbarClassNames = useMemo(() => {
+    return {
+      base: cn('border-default-100 py-2', 'bg-transparent', {
+        'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
+      }),
+      wrapper: 'gap-2 sm:gap-4 w-full justify-center px-2 sm:px-4',
+      item: 'hidden md:flex',
+    }
+  }, [isMenuOpen])
+
   return (
     <>
       <ConnectModal />
       <Navbar
         {...props}
-        classNames={{
-          base: cn('border-default-100 py-2', 'bg-transparent', {
-            'bg-default-200/50 dark:bg-default-100/50': isMenuOpen,
-          }),
-          wrapper: 'gap-2 sm:gap-4 w-full justify-center px-2 sm:px-4',
-          item: 'hidden md:flex',
-        }}
+        classNames={navbarClassNames}
         height='60px'
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
@@ -200,18 +214,9 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             )}
           </NavbarItem>
         </NavbarContent>
-
         <NavbarMenu
           className='top-[calc(var(--navbar-height)_-_1px)] mt-4 max-h-fit bg-default-200/50 pb-2 pt-4 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
-          motionProps={{
-            initial: {opacity: 0, y: -20},
-            animate: {opacity: 1, y: 0},
-            exit: {opacity: 0, y: -20},
-            transition: {
-              ease: 'easeInOut',
-              duration: 0.2,
-            },
-          }}
+          motionProps={NAVBAR_MENU_MOTION_PROPS}
         >
           {menuItems.map((item, index) => (
             <NavbarMenuItem key={`${item.label}-${index}`}>

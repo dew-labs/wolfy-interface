@@ -150,6 +150,7 @@ export default function usePayToken(
     leverageNumber,
     latestLeverage,
     leverageInput,
+    latestLeverageInput,
     setLeverageInput,
     handleLeverageChange,
     setLeverageInputFocused,

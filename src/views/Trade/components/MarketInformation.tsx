@@ -98,6 +98,16 @@ function use1DMarketInformation(symbol: string | undefined) {
   }
 }
 
+const TABLE_CLASS_NAMES = {
+  th: '!rounded-none font-serif',
+  td: 'first:before:rounded-none last:before:rounded-none',
+  tbody: 'overflow-scroll',
+}
+
+const POPOVER_CLASS_NAMES = {
+  content: 'max-w-[90vw] overflow-auto',
+}
+
 export default memo(function MarketInformation() {
   const [chainId] = useChainId()
   const [tokenAddress, setTokenAddress] = useTokenAddress()
@@ -321,6 +331,17 @@ export default memo(function MarketInformation() {
       item => item.markets[0]?.indexTokenAddress === tokenAddress,
     )?.maxShortLiquidityString ?? '--'
 
+  const handleOnMarketTableOpenChange = useCallback(
+    (open: boolean) => {
+      setMarketSelectorIsOpen(open)
+    },
+    [setMarketSelectorIsOpen],
+  )
+
+  const selectedMarketKeys = useMemo(() => {
+    return tokenAddress ? [tokenAddress] : []
+  }, [tokenAddress])
+
   return (
     <>
       {tokenMetadata?.symbol && priceIndexText && (
@@ -333,12 +354,8 @@ export default memo(function MarketInformation() {
             offset={6}
             backdrop='opaque'
             isOpen={marketSelectorIsOpen}
-            onOpenChange={open => {
-              setMarketSelectorIsOpen(open)
-            }}
-            classNames={{
-              content: 'max-w-[90vw] overflow-auto',
-            }}
+            onOpenChange={handleOnMarketTableOpenChange}
+            classNames={POPOVER_CLASS_NAMES}
           >
             <PopoverTrigger>
               <Button
@@ -360,14 +377,10 @@ export default memo(function MarketInformation() {
               <Table
                 aria-label='Markets'
                 className='my-2'
-                classNames={{
-                  th: '!rounded-none',
-                  td: 'first:before:rounded-none last:before:rounded-none',
-                  tbody: 'overflow-scroll',
-                }}
+                classNames={TABLE_CLASS_NAMES}
                 removeWrapper
                 selectionMode='single'
-                selectedKeys={tokenAddress ? [tokenAddress] : []}
+                selectedKeys={selectedMarketKeys}
                 onSelectionChange={handleSelectMarket}
                 sortDescriptor={marketSortDescriptor}
                 onSortChange={handleSortChange}

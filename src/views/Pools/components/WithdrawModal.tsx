@@ -9,7 +9,7 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import React, {useMemo, useState} from 'react'
+import React, {type ChangeEventHandler, useCallback, useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
@@ -38,12 +38,17 @@ interface WithdrawModalProps {
 }
 
 export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: WithdrawModalProps) {
+  const latestMarketTokenAddress = useLatest(marketTokenAddress)
+
   const [wmAmount, setWmAmount] = useState('')
+  const latestWmAmount = useLatest(wmAmount)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const queryClient = useQueryClient()
   const [chainId] = useChainId()
+  const latestChainId = useLatest(chainId)
   const [wallet] = useWalletAccount()
+  const latestWallet = useLatest(wallet)
   const tokenPrices = useTokenPrices(data => data)
   const marketsData = useMarketsData()
   const marketTokensData = useMarketTokensData()
@@ -53,11 +58,12 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     () => marketsData?.get(marketTokenAddress),
     [marketsData, marketTokenAddress],
   )
+  const latestMarketData = useLatest(marketData)
   const marketTokenData = useMemo(
     () => marketTokensData?.get(marketTokenAddress),
     [marketTokensData, marketTokenAddress],
   )
-
+  const latestMarketTokenData = useLatest(marketTokenData)
   const price =
     marketData && marketTokenData
       ? calculateMarketPrice(marketData, marketTokenData, tokenPrices) ||
@@ -70,6 +76,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
       marketTokenData?.decimals ?? 18,
     ),
   )
+  const latestUserBalance = useLatest(userBalance)
   const userBalanceFractionDigits = calculateTokenFractionDigits(price)
   const userBalanceNumber = Number(
     shrinkDecimals(
@@ -77,6 +84,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
       marketTokenData?.decimals ?? 18,
     ),
   )
+  const latestUserBalanceNumber = useLatest(userBalanceNumber)
   const userBalanceString = formatNumber(
     shrinkDecimals(
       marketTokenBalances?.get(marketTokenAddress) ?? 0n,
@@ -143,81 +151,103 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
     }
   }, [marketData, marketTokenData, wmAmount])
 
-  const handleWmAmountChange = (value: string) => {
+  const latestLongTokenAmount = useLatest(longTokenAmount)
+  const latestShortTokenAmount = useLatest(shortTokenAmount)
+
+  const handleWmAmountChange = useCallback((value: string) => {
     setWmAmount(() => {
       const newValue = value.replace(/[^0-9.]/g, '')
       const numValue = parseFloat(newValue)
       if (isNaN(numValue)) return ''
-      return numValue > userBalance ? userBalanceNumber.toString() : newValue
+      return numValue > latestUserBalance.current ? latestUserBalance.current.toString() : newValue
     })
-  }
+  }, [])
 
-  const handleWmAmountSetToMax = () => {
-    setWmAmount(userBalanceNumber.toString())
-  }
+  const handleWmAmountSetToMax = useCallback(() => {
+    setWmAmount(latestUserBalanceNumber.current.toString())
+  }, [])
 
   const isInputValid = useMemo(() => {
     const amount = parseFloat(wmAmount)
     return !isNaN(amount) && amount > 0 && amount <= userBalance
   }, [wmAmount, userBalance])
+  const latestIsInputValid = useLatest(isInputValid)
 
-  const handleSubmit = (_e: PressEvent) => {
-    if (!marketData || !wallet || !marketTokenData || !isInputValid) return
+  const handleSubmit = useCallback(
+    (_e: PressEvent) => {
+      const wallet = latestWallet.current
+      const marketData = latestMarketData.current
+      const marketTokenData = latestMarketTokenData.current
+      const isInputValid = latestIsInputValid.current
 
-    setIsSubmitting(true)
-    toast.promise(
-      async () => {
-        try {
-          const wmAmountBigInt = expandDecimals(parseFloat(wmAmount), marketTokenData.decimals)
+      if (!marketData || !wallet || !marketTokenData || !isInputValid) return
 
-          const withdrawalParams = {
-            receiver: wallet.address,
-            market: marketTokenAddress,
-            marketTokenAmount: wmAmountBigInt,
-            minLongToken: expandDecimals(
-              parseFloat(longTokenAmount) * 0.99,
-              marketData.longToken.decimals,
-            ), // 1% slippage
-            minShortToken: expandDecimals(
-              parseFloat(shortTokenAmount) * 0.99,
-              marketData.shortToken.decimals,
-            ), // 1% slippage
+      setIsSubmitting(true)
+      toast.promise(
+        async () => {
+          try {
+            const wmAmountBigInt = expandDecimals(
+              parseFloat(latestWmAmount.current),
+              marketTokenData.decimals,
+            )
+
+            const withdrawalParams = {
+              receiver: wallet.address,
+              market: latestMarketTokenAddress.current,
+              marketTokenAmount: wmAmountBigInt,
+              minLongToken: expandDecimals(
+                parseFloat(latestLongTokenAmount.current) * 0.99,
+                marketData.longToken.decimals,
+              ), // 1% slippage
+              minShortToken: expandDecimals(
+                parseFloat(latestShortTokenAmount.current) * 0.99,
+                marketData.shortToken.decimals,
+              ), // 1% slippage
+            }
+
+            const result = await sendWithdrawal(wallet, withdrawalParams)
+            await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
+            onClose()
+            return result
+          } finally {
+            setIsSubmitting(false)
           }
-
-          const result = await sendWithdrawal(wallet, withdrawalParams)
-          await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
-          onClose()
-          return result
-        } finally {
-          setIsSubmitting(false)
-        }
-      },
-      {
-        loading: 'Submitting withdrawal...',
-        success: data => (
-          <>
-            Withdrawal successful.
-            <a
-              href={getScanUrl(chainId, ScanType.Transaction, data.tx)}
-              target='_blank'
-              rel='noreferrer'
-            >
-              View transaction
-            </a>
-          </>
-        ),
-        error: error => (
-          <>
-            <div>{errorMessageOrUndefined(error) ?? 'Withdrawal failed.'}</div>
-          </>
-        ),
-      },
-    )
-  }
+        },
+        {
+          loading: 'Submitting withdrawal...',
+          success: data => (
+            <>
+              Withdrawal successful.
+              <a
+                href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                target='_blank'
+                rel='noreferrer'
+              >
+                View transaction
+              </a>
+            </>
+          ),
+          error: error => (
+            <>
+              <div>{errorMessageOrUndefined(error) ?? 'Withdrawal failed.'}</div>
+            </>
+          ),
+        },
+      )
+    },
+    [onClose, queryClient],
+  )
 
   // Add new state for fees and price impact
   const [feesAndPriceImpact, _setFeesAndPriceImpact] = useState('0')
   const [networkFee, _setNetworkFee] = useState('0')
+
+  const onWmAmountChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
+    e => {
+      handleWmAmountChange(e.target.value)
+    },
+    [handleWmAmountChange],
+  )
 
   if (!marketData || !marketTokenData) {
     return null
@@ -233,9 +263,7 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
             label={`WM Amount`}
             placeholder='Enter WM token amount'
             value={wmAmount}
-            onChange={e => {
-              handleWmAmountChange(e.target.value)
-            }}
+            onChange={onWmAmountChange}
             endContent={
               <button
                 className={clsx(

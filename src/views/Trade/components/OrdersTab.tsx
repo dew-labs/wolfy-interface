@@ -33,6 +33,10 @@ import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAm
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
+const TABLE_CLASS_NAMES = {
+  th: '!rounded-none font-serif',
+}
+
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
@@ -74,13 +78,7 @@ export default memo(function OrdersTab() {
   )
 
   return (
-    <Table
-      className='mt-2'
-      aria-label='Orders'
-      classNames={{
-        th: '!rounded-none',
-      }}
-    >
+    <Table className='mt-2' aria-label='Orders' classNames={TABLE_CLASS_NAMES}>
       <TableHeader>
         <TableColumn>Type</TableColumn>
         <TableColumn>Market</TableColumn>
@@ -181,6 +179,7 @@ export default memo(function OrdersTab() {
                     disableAnimation
                     variant='light'
                     className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                    // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                     onClick={() => {
                       setTokenAddress(order.marketData.indexTokenAddress)
                     }}
@@ -213,6 +212,7 @@ export default memo(function OrdersTab() {
               <TableCell>
                 <Button
                   size='sm'
+                  // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                   onClick={() => {
                     handleCancelOrder(order.key)
                   }}
