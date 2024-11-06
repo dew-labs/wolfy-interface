@@ -17,7 +17,15 @@ export default memo(function ThemeSwitchButton() {
       return Theme.Dark
     })()
 
-    setTheme(nextTheme)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not supported in all browsers
+    if (!document.startViewTransition) {
+      setTheme(nextTheme)
+      return
+    }
+
+    document.startViewTransition(() => {
+      setTheme(nextTheme)
+    })
   }, [setTheme])
 
   const icon = (() => {
