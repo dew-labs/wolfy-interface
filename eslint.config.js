@@ -35,8 +35,8 @@ import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
-// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: enable later
-// import pluginTestingLibrary from 'eslint-plugin-testing-library' // TODO: check why this plugin is causing issues
+// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: investigate why this cause errors
+import pluginTestingLibrary from 'eslint-plugin-testing-library'
 // eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginVitest from 'eslint-plugin-vitest'
 import globals from 'globals'
@@ -108,19 +108,19 @@ const applyToVitest = createApplyTo(
   ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
   ['**/cypress/**/*'],
 )
-// const applyToVitestNotReact = createApplyTo(
-//   ['**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)', '**/!(use)*.{test,spec}.?(c|m)[jt]s!(x)'],
-//   ['**/cypress/**/*'],
-// )
-// const applyToVitestReact = createApplyTo(
-//   [
-//     '**/__tests__/**/*.?(c|m)[jt]sx',
-//     '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
-//     '**/*.{test,spec}.?(c|m)[jt]sx',
-//     '**/use*.{test,spec}.?(c|m)[jt]s?(x)',
-//   ],
-//   ['**/cypress/**/*'],
-// )
+const applyToVitestNotReact = createApplyTo(
+  ['**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)', '**/!(use)*.{test,spec}.?(c|m)[jt]s!(x)'],
+  ['**/cypress/**/*'],
+)
+const applyToVitestReact = createApplyTo(
+  [
+    '**/__tests__/**/*.?(c|m)[jt]sx',
+    '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
+    '**/*.{test,spec}.?(c|m)[jt]sx',
+    '**/use*.{test,spec}.?(c|m)[jt]s?(x)',
+  ],
+  ['**/cypress/**/*'],
+)
 
 //------------------------------------------------------------------------------
 
@@ -147,8 +147,8 @@ const coreConfigs = [
   // ...applyToAll('core/sonarjs/custom-rules', {
   //   rules: {
   //     'sonarjs/no-duplicate-string': 'warn',
-  //   }
-  // })
+  //   },
+  // }),
   ...applyToAll('core/no-relative-import-paths', {
     plugins: {
       'no-relative-import-paths': pluginNoRelativeImportPaths,
@@ -174,7 +174,7 @@ const coreConfigs = [
     plugins: {
       'css-modules': pluginCssModules,
     },
-    // rules: pluginCssModules.configs.recommended.rules, // TODO: enable later
+    rules: pluginCssModules.configs.recommended.rules,
   }),
   ...applyToAll('core/no-barrel-files', {
     plugins: {
@@ -203,7 +203,7 @@ const coreConfigs = [
       'exception-handling': pluginExceptionHandling,
     },
     rules: {
-      // 'exception-handling/no-unhandled': 'error',
+      // 'exception-handling/no-unhandled': 'error', // TODO: investigate why this is causing issues
     },
   }),
   // 'plugin:jsdoc/recommended-typescript', // TODO: To be added later
@@ -306,7 +306,7 @@ const reactConfigs = [
     },
   }),
   ...applyToReact('react/query', pluginQuery.configs['flat/recommended']),
-  ...applyToReact('react/dom', pluginReact.configs.dom), // TODO: Exclude react in server?
+  ...applyToReact('react/dom', pluginReact.configs.dom), // TODO: Exclude react in SSR, RSC??
   ...applyToJavascriptReact('react/x-javascript', {
     ...pluginReact.configs['recommended'],
   }),
@@ -423,8 +423,8 @@ const reactTypescriptConfigs = [
 // ]
 
 const testConfigs = [
-  // ...applyToVitestNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
-  // ...applyToVitestReact('testing/react', pluginTestingLibrary.configs['flat/react']),
+  ...applyToVitestNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
+  ...applyToVitestReact('testing/react', pluginTestingLibrary.configs['flat/react']),
   ...applyToVitest('testing/vitest', {
     plugins: {
       vitest: pluginVitest,
