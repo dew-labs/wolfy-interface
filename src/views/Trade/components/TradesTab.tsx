@@ -4,6 +4,7 @@ import {
   SelectItem,
   SelectSection,
   type SharedSelection,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -174,14 +175,15 @@ export default memo(function TradesTab() {
   const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
   const [selectedDirection, setSelectedDirection] = useState<boolean[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  console.log('Current Page:', currentPage)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  // const [isLoading, setIsLoading] = useState<boolean>(false)
 
+  console.log('Current Page:', currentPage)
   console.log('Selected actions:', selectedActions)
   console.log('Selected markets:', selectedMarkets)
   console.log('Selected direction:', selectedDirection)
 
-  const tradeHistory = useTradeHistory(
+  const {isLoading, data} = useTradeHistory(
     selectedActions,
     selectedMarkets,
     selectedDirection,
@@ -189,13 +191,13 @@ export default memo(function TradesTab() {
     10,
     0,
   )
-  const totalPages = Array.isArray(tradeHistory) ? 0 : tradeHistory.totalPages
 
-  console.log('Trade history:', tradeHistory)
+  const page = Array.isArray(data) ? 0 : data.page
+  const totalPages = Array.isArray(data) ? 0 : data.totalPages
 
-  const tradeHistoryItems = Array.isArray(tradeHistory)
-    ? []
-    : (tradeHistory.data as TradeHistoryItem[])
+  console.log('Trade history:', data)
+
+  const tradeHistoryItems = Array.isArray(data) ? [] : (data.data as TradeHistoryItem[])
 
   console.log('Trade history items:', tradeHistoryItems)
 
@@ -370,13 +372,32 @@ export default memo(function TradesTab() {
           <TableColumn>{t('Fee')}</TableColumn>
           <TableColumn>{t('Time')}</TableColumn>
         </TableHeader>
-        <TableBody items={tradeHistoryItems} emptyContent={<div>{t('No trade.')}</div>}>
-          {item => (
+        <TableBody
+          items={tradeHistoryItems}
+          emptyContent={'No trade.'}
+          isLoading={isLoading}
+          loadingContent={<Spinner />}
+        >
+          {tradeHistoryItems.map(item => (
             <TableRow key={item.id}>
               <TableCell>
                 <div
                   className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${
-                    item.isLong ? 'bg-green-500' : 'bg-red-500'
+                    item.action === TradeHistoryAction.MarketIncrease ||
+                    item.action === TradeHistoryAction.RequestMarketIncrease ||
+                    item.action === TradeHistoryAction.FailedMarketIncrease ||
+                    item.action === TradeHistoryAction.CancelMarketIncrease ||
+                    item.action === TradeHistoryAction.PositionIncrease
+                      ? 'bg-green-500'
+                      : item.action === TradeHistoryAction.MarketDecrease ||
+                          item.action === TradeHistoryAction.RequestMarketDecrease ||
+                          item.action === TradeHistoryAction.FailedMarketDecrease ||
+                          item.action === TradeHistoryAction.CancelMarketDecrease ||
+                          item.action === TradeHistoryAction.PositionDecrease
+                        ? 'bg-red-500'
+                        : item.isLong
+                          ? 'bg-green-500'
+                          : 'bg-red-500'
                   }`}
                 />
                 {getActionLabel(item.action)}
@@ -388,15 +409,15 @@ export default memo(function TradesTab() {
               <TableCell>{formatUsd(item.fee)}</TableCell>
               <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
       <div className='mt-4 flex justify-center'>
         <Pagination
           showControls
           total={totalPages}
-          initialPage={1}
-          page={currentPage}
+          initialPage={page}
+          page={page}
           onChange={setCurrentPage}
         />
       </div>

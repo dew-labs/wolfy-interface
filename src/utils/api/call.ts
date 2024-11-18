@@ -6,7 +6,7 @@ import jsonBig from 'json-bigint'
 // import isAuthenticatedPubSubChannel from '@/auth/isAuthenticatedPubSubChannel'
 
 const call = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_BASE_URL as string,
+  baseURL: import.meta.env.VITE_API_URL,
   adapter: 'fetch',
   transformResponse: data => {
     if (typeof data === 'string') {

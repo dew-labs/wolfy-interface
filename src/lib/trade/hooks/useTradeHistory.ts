@@ -31,7 +31,7 @@ export default function useTradeHistory(
     totalPages,
   })
 
-  const {data} = useQuery({
+  const {isLoading, data} = useQuery({
     queryKey: [
       'trade-histories',
       chainId,
@@ -67,6 +67,7 @@ export default function useTradeHistory(
   })
 
   console.log('Trade history data:', data)
+  console.log('isLoading:', isLoading)
 
-  return data ?? []
+  return {isLoading, data: data ?? []}
 }
