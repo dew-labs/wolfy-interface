@@ -310,9 +310,6 @@ const reactConfigs = [
   ...applyToJavascriptReact('react/x-javascript', {
     ...pluginReact.configs['recommended'],
   }),
-  ...applyToTypescriptReact('react/x-typescript', {
-    ...pluginReact.configs['recommended-type-checked'],
-  }),
   ...applyToReact('react/x-hooks', {
     // ...pluginReact.configs['hooks-extra'], // TODO: enable this when available in v2.0.0 instead of manually set rules
     rules: {
@@ -399,6 +396,12 @@ const reactConfigs = [
       '@eslint-react/prefer-shorthand-fragment': 'warn',
     },
   }),
+]
+
+const reactTypescriptConfigs = [
+  ...applyToTypescriptReact('react/x-typescript', {
+    ...pluginReact.configs['recommended-type-checked'],
+  }),
   ...applyToTypescriptReact('react/typescript', {
     rules: {
       // https://github.com/orgs/react-hook-form/discussions/8020
@@ -470,6 +473,7 @@ const config = tsEslint.config(
   ...scriptConfigs,
   ...typescriptConfigs,
   ...reactConfigs,
+  ...reactTypescriptConfigs,
   ...testConfigs,
   ...applyToAll('core', {
     languageOptions: {

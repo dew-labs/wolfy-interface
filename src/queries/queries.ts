@@ -19,7 +19,9 @@ import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
 declare module '@tanstack/react-query' {
   interface Register {
+    // queryMeta: {}
     mutationMeta: {
+      persist?: boolean
       invalidates?: QueryKey[] | 'all'
       awaitInvalidates?: QueryKey[] | 'all'
     }

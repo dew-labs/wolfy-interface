@@ -29,6 +29,7 @@ export function createRouter({queryClient}: {queryClient: QueryClient}) {
     defaultPreloadStaleTime: 0, // leverage cache control of react-query instead: we don't want loader calls to ever be stale as this will ensure that the loader is always called when the route is preloaded or visited
     defaultNotFoundComponent: NotFound,
     defaultErrorComponent: RouterErrorComponent,
+    defaultStructuralSharing: true,
     // defaultPendingComponent
   })
 }

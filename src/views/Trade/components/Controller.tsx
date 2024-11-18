@@ -662,12 +662,7 @@ const Controller = createResetableComponent(function ({reset}) {
             </div>
           </div>
           <div className='mt-4 w-full'>
-            <Tooltip
-              showArrow={true}
-              color='danger'
-              content={invalidMessage}
-              isDisabled={isValidOrder}
-            >
+            <Tooltip showArrow color='danger' content={invalidMessage} isDisabled={isValidOrder}>
               <Button
                 color='primary'
                 className='w-full font-serif'
