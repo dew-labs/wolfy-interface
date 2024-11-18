@@ -192,8 +192,11 @@ export default memo(function TradesTab() {
     0,
   )
 
-  const page = Array.isArray(data) ? 0 : data.page
+  // const page = Array.isArray(data) ? 0 : data.page
   const totalPages = Array.isArray(data) ? 0 : data.totalPages
+
+  console.log('Current page:', currentPage)
+  console.log('Total pages:', totalPages)
 
   console.log('Trade history:', data)
 
@@ -416,8 +419,8 @@ export default memo(function TradesTab() {
         <Pagination
           showControls
           total={totalPages}
-          initialPage={page}
-          page={page}
+          initialPage={currentPage}
+          page={currentPage}
           onChange={setCurrentPage}
         />
       </div>

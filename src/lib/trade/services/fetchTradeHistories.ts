@@ -113,7 +113,6 @@ export default async function fetchTradeHistories(
   isLong: boolean[],
   page: number,
   limit: number,
-  totalPages: number,
 ): Promise<TradeData> {
   console.log('Fetching trade histories with:', {
     chainId,
@@ -123,7 +122,6 @@ export default async function fetchTradeHistories(
     isLong,
     page,
     limit,
-    totalPages,
   })
 
   if (!accountAddress) {
@@ -152,7 +150,6 @@ export default async function fetchTradeHistories(
     const response = await call.get<TradeData>(
       `/api/v1/accounts/${accountAddress}/trade-history${query ? `?${query}` : ''}`,
     )
-    // console.log('API response:', response.data)
     return response.data
   } catch (error) {
     console.error('Error fetching trade histories:', error)

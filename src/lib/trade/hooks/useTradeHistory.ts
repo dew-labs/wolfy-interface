@@ -32,35 +32,9 @@ export default function useTradeHistory(
   })
 
   const {isLoading, data} = useQuery({
-    queryKey: [
-      'trade-histories',
-      chainId,
-      accountAddress,
-      actions,
-      markets,
-      isLong,
-      page,
-      limit,
-      totalPages,
-    ],
+    queryKey: ['trade-histories', chainId, accountAddress, actions, markets, isLong, page, limit],
     queryFn: async () =>
-      fetchTradeHistories(
-        chainId,
-        accountAddress,
-        actions,
-        markets,
-        isLong,
-        page,
-        limit,
-        totalPages,
-      ),
-    placeholderData: {
-      page: 0,
-      limit: 0,
-      count: 0,
-      totalPages: 0,
-      data: [],
-    },
+      fetchTradeHistories(chainId, accountAddress, actions, markets, isLong, page, limit),
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 10000,
     throwOnError: false,
