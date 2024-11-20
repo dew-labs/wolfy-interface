@@ -25,18 +25,6 @@ import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
-interface TradeHistoryItem {
-  id: string
-  action: TradeHistoryAction
-  market: string
-  size: string
-  price: string
-  rpnl: string
-  fee: string
-  createdAt: number
-  isLong: boolean
-}
-
 const actionOptions = {
   'Market increases': [
     {label: 'Request Market Increase', value: TradeHistoryAction.RequestMarketIncrease}, //0
@@ -103,6 +91,56 @@ const actionOptions = {
   ],
 }
 
+const TABLE_CLASS_NAMES = {
+  th: '!rounded-none',
+}
+
+const HEADING_CLASSES =
+  'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small'
+
+const SELECT_SECTION_CLASS_NAMES = {
+  heading: HEADING_CLASSES,
+  base: 'last:mb-0',
+}
+
+const SELECT_CLASS_NAMES = {
+  base: 'w-max -mx-[0.6875rem] min-w-[100px]',
+  mainWrapper: 'w-full',
+  value: 'pr-6 truncate-none text-xs',
+  label: 'text-xs',
+}
+
+const LIST_BOX_ITEM_CLASSES = {
+  base: [
+    'text-default-500',
+    'transition-opacity',
+    'data-[hover=true]:text-foreground',
+    'dark:data-[hover=true]:bg-default-50',
+    'data-[pressed=true]:opacity-70',
+    'data-[hover=true]:bg-default-200',
+    'data-[selectable=true]:focus:bg-default-100',
+    'data-[focus-visible=true]:ring-default-500',
+  ],
+}
+
+const POPOVER_CLASSNAMES = {
+  base: 'rounded-large',
+  content: 'p-1 bg-background min-w-max',
+}
+
+const LIST_BOX_PROPS = {
+  itemClasses: LIST_BOX_ITEM_CLASSES,
+}
+
+const POPOVER_PROPS = {
+  offset: 10,
+  classNames: POPOVER_CLASSNAMES,
+}
+
+const SCROLL_SHADOW_PROPS = {
+  isEnabled: false,
+}
+
 export default memo(function TradesTab() {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
@@ -127,6 +165,16 @@ export default memo(function TradesTab() {
     } as const
   }, [markets])
 
+  // GET MARKET
+  const getMarketLabel = useCallback(
+    (address: string): string => {
+      const market = marketsData?.get(address)
+      return market ? market.name : 'Unknown Market'
+    },
+    [marketsData],
+  )
+
+  // GET ACTION
   function getActionLabel(value: TradeHistoryAction): string {
     for (const actions of Object.values(actionOptions)) {
       for (const action of actions) {
@@ -138,13 +186,15 @@ export default memo(function TradesTab() {
     return 'Unknown Action'
   }
 
-  function getMarketLabel(address: string): string {
-    const market = marketsData?.get(address)
-    return market ? market.name : 'Unknown Market'
-  }
+  // GET MARKET
+  // function getMarketLabel(address: string): string {
+  //   const market = marketsData?.get(address)
+  //   return market ? market.name : 'Unknown Market'
+  // }
 
-  const formatUsd = useCallback((amount: string): string => {
-    if (!amount) return '-'
+  // FORMAT USD
+  const formatUsd = useCallback((amount: string | null): string => {
+    if (amount === null) return '-'
     const amountBigNumberish = cairoIntToBigInt(amount)
     return formatNumber(shrinkDecimals(amountBigNumberish, USD_DECIMALS), Format.USD, {
       exactFractionDigits: true,
@@ -152,6 +202,7 @@ export default memo(function TradesTab() {
     })
   }, [])
 
+  // FORMAT MARKET USD
   const formatMarketUsd = useCallback(
     (amount: string, marketAddress: string): string => {
       const market = marketsData?.get(marketAddress)
@@ -168,6 +219,7 @@ export default memo(function TradesTab() {
     [marketsData, tokensMetadata],
   )
 
+  // FORMAT DATE TIME
   const formatLocaleDateTime = useCallback((timestamp: number): string => {
     return new Date(timestamp).toLocaleString()
   }, [])
@@ -176,55 +228,34 @@ export default memo(function TradesTab() {
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
   const [selectedDirection, setSelectedDirection] = useState<boolean[]>([])
   const [currentPage, setCurrentPage] = useState<number>(1)
-  // const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  console.log('Current Page:', currentPage)
-  console.log('Selected actions:', selectedActions)
-  console.log('Selected markets:', selectedMarkets)
-  console.log('Selected direction:', selectedDirection)
-
+  // GET TRADE HISTORY
   const {isLoading, data} = useTradeHistory(
     selectedActions,
     selectedMarkets,
     selectedDirection,
     currentPage,
     10,
-    0,
   )
 
-  // const page = Array.isArray(data) ? 0 : data.page
-  const totalPages = Array.isArray(data) ? 0 : data.totalPages
+  console.log('data', data)
 
-  console.log('Current page:', currentPage)
-  console.log('Total pages:', totalPages)
+  console.log('Selected actions:', selectedActions)
+  console.log('Selected markets:', selectedMarkets)
+  console.log('Selected direction:', selectedDirection)
 
-  console.log('Trade history:', data)
+  const totalPages = data?.totalPages ?? 0
+  const tradeHistoryItems = data?.data ?? []
 
-  const tradeHistoryItems = Array.isArray(data) ? [] : (data.data as TradeHistoryItem[])
-
-  console.log('Trade history items:', tradeHistoryItems)
-
+  // HANDLE ACTION CHANGE
   const onActionChange = useCallback((action: SharedSelection) => {
-    // TODO: validate action value with isSupportedAction instead of type assertion
     setSelectedActions(Array.from(action) as TradeHistoryAction[])
-    // console.log('Selected actions:', Array.from(action))
   }, [])
 
-  // const onMarketChange = useCallback((market: SharedSelection) => {
-  //   setSelectedMarkets(Array.from(market) as string[])
-  //   // console.log('Selected markets:', Array.from(market))
-  // }, [])
-
-  // const onDirectionChange = useCallback((isLong: SharedSelection) => {
-  //   const booleanArray = Array.from(isLong).map(item => Boolean(item))
-  //   setSelectedDirection(booleanArray)
-  //   console.log('Selected direction:', booleanArray)
-  // }, [])
-
-  const handleSelectionChange = useCallback((selection: SharedSelection) => {
+  // HANDLE MARKET AND DIRECTION CHANGE
+  const handleMarketAndDirectionChange = useCallback((selection: SharedSelection) => {
     const selectedMarkets: string[] = []
     const selectedDirections: boolean[] = []
-
     Array.from(selection).forEach(item => {
       const itemValue = item as string
       if (itemValue === 'true' || itemValue === 'false') {
@@ -233,107 +264,31 @@ export default memo(function TradesTab() {
         selectedMarkets.push(itemValue)
       }
     })
-
     setSelectedMarkets(selectedMarkets)
     setSelectedDirection(selectedDirections)
-
-    console.log('Selected markets:', selectedMarkets)
-    console.log('Selected direction:', selectedDirections)
   }, [])
-
-  const tableClassNames = useMemo(
-    () => ({
-      th: '!rounded-none',
-    }),
-    [],
-  )
-
-  const headingClasses = useMemo(
-    () => 'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small',
-    [],
-  )
-
-  const selectSectionClassNames = useMemo(
-    () => ({
-      heading: headingClasses,
-      base: 'last:mb-0',
-    }),
-    [headingClasses],
-  )
-
-  const selectClassNames = useMemo(
-    () => ({
-      base: 'w-max -mx-[0.6875rem] min-w-[100px]',
-      mainWrapper: 'w-full',
-      value: 'pr-6 truncate-none text-xs',
-      label: 'text-xs',
-    }),
-    [],
-  )
-
-  const listboxItemClasses = useMemo(
-    () => ({
-      base: [
-        'text-default-500',
-        'transition-opacity',
-        'data-[hover=true]:text-foreground',
-        'dark:data-[hover=true]:bg-default-50',
-        'data-[pressed=true]:opacity-70',
-        'data-[hover=true]:bg-default-200',
-        'data-[selectable=true]:focus:bg-default-100',
-        'data-[focus-visible=true]:ring-default-500',
-      ],
-    }),
-    [],
-  )
-
-  const popoverClassNames = useMemo(
-    () => ({
-      base: 'rounded-large',
-      content: 'p-1 bg-background min-w-max',
-    }),
-    [],
-  )
-
-  const listboxProps = useMemo(
-    () => ({
-      itemClasses: listboxItemClasses,
-    }),
-    [listboxItemClasses],
-  )
-
-  const popoverProps = useMemo(
-    () => ({
-      offset: 10,
-      classNames: popoverClassNames,
-    }),
-    [popoverClassNames],
-  )
-
-  const scrollShadowProps = useMemo(
-    () => ({
-      isEnabled: false,
-    }),
-    [],
-  )
 
   return (
     <>
-      <Table className='mt-2' aria-label='Trade History Table' classNames={tableClassNames}>
+      <Table className='mt-2' aria-label='Trade History Table' classNames={TABLE_CLASS_NAMES}>
         <TableHeader>
           <TableColumn>
             <Select
-              classNames={selectClassNames}
+              classNames={SELECT_CLASS_NAMES}
               label={t('Action')}
               selectionMode='multiple'
               onSelectionChange={onActionChange}
-              listboxProps={listboxProps}
-              popoverProps={popoverProps}
-              scrollShadowProps={scrollShadowProps}
+              listboxProps={LIST_BOX_PROPS}
+              popoverProps={POPOVER_PROPS}
+              scrollShadowProps={SCROLL_SHADOW_PROPS}
               items={Array.from(Object.entries(actionOptions))}
             >
               {([category, actions]) => (
-                <SelectSection key={category} title={category} classNames={selectSectionClassNames}>
+                <SelectSection
+                  key={category}
+                  title={category}
+                  classNames={SELECT_SECTION_CLASS_NAMES}
+                >
                   {actions.map(action => (
                     <SelectItem key={action.value} value={action.value} className='text-nowrap'>
                       {action.label}
@@ -345,17 +300,21 @@ export default memo(function TradesTab() {
           </TableColumn>
           <TableColumn>
             <Select
-              classNames={selectClassNames}
+              classNames={SELECT_CLASS_NAMES}
               label={t('Market')}
               selectionMode='multiple'
-              onSelectionChange={handleSelectionChange}
-              listboxProps={listboxProps}
-              popoverProps={popoverProps}
-              scrollShadowProps={scrollShadowProps}
+              onSelectionChange={handleMarketAndDirectionChange}
+              listboxProps={LIST_BOX_PROPS}
+              popoverProps={POPOVER_PROPS}
+              scrollShadowProps={SCROLL_SHADOW_PROPS}
               items={Array.from(Object.entries(marketOptions))}
             >
               {([category, markets]) => (
-                <SelectSection key={category} title={category} classNames={selectSectionClassNames}>
+                <SelectSection
+                  key={category}
+                  title={category}
+                  classNames={SELECT_SECTION_CLASS_NAMES}
+                >
                   {markets.map(action => (
                     <SelectItem
                       key={String(action.value)}
@@ -378,10 +337,10 @@ export default memo(function TradesTab() {
         <TableBody
           items={tradeHistoryItems}
           emptyContent={'No trade.'}
-          isLoading={isLoading}
-          loadingContent={<Spinner />}
+          isLoading={isLoading || !!data?.isPrevious}
+          loadingContent={<Spinner className='mt-4' />}
         >
-          {tradeHistoryItems.map(item => (
+          {item => (
             <TableRow key={item.id}>
               <TableCell>
                 <div
@@ -412,18 +371,19 @@ export default memo(function TradesTab() {
               <TableCell>{formatUsd(item.fee)}</TableCell>
               <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
-      <div className='mt-4 flex justify-center'>
-        <Pagination
-          showControls
-          total={totalPages}
-          initialPage={currentPage}
-          page={currentPage}
-          onChange={setCurrentPage}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className='mt-4 flex justify-center'>
+          <Pagination
+            showControls
+            total={totalPages}
+            page={currentPage}
+            onChange={setCurrentPage}
+          />
+        </div>
+      )}
     </>
   )
 })

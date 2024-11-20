@@ -91,17 +91,20 @@ const tradeDataSchema = Type.Object({
       isLong: Type.Boolean(),
       action: Type.Enum(TradeHistoryAction),
       market: Type.String(),
-      fee: Type.Optional(Type.String()),
-      rpnl: Type.Optional(Type.String()),
-      createdAt: Type.Optional(Type.Number()),
+      fee: Type.Union([Type.String(), Type.Null()]),
+      rpnl: Type.Union([Type.String(), Type.Null()]),
+      createdAt: Type.Number(),
     }),
   ),
+  // Custom field, not in API response
+  isPrevious: Type.Optional(Type.Boolean()),
 })
 
 export type TradeData = Static<typeof tradeDataSchema>
 const tradeDataTypeCheck = TypeCompiler.Compile(tradeDataSchema)
 
 export function isTradeData(data: unknown): data is TradeData {
+  console.log('Errors', Array.from(tradeDataTypeCheck.Errors(data)))
   return tradeDataTypeCheck.Check(data)
 }
 
@@ -114,18 +117,7 @@ export default async function fetchTradeHistories(
   page: number,
   limit: number,
 ): Promise<TradeData> {
-  console.log('Fetching trade histories with:', {
-    chainId,
-    accountAddress,
-    actions,
-    markets,
-    isLong,
-    page,
-    limit,
-  })
-
   if (!accountAddress) {
-    console.log('No account address provided, returning empty array.')
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
@@ -147,9 +139,14 @@ export default async function fetchTradeHistories(
 
     const query = params.toString()
 
-    const response = await call.get<TradeData>(
+    const response = await call.get(
       `/api/v1/accounts/${accountAddress}/trade-history${query ? `?${query}` : ''}`,
     )
+
+    if (!isTradeData(response.data)) {
+      throw new Error('Invalid trade data received from API')
+    }
+
     return response.data
   } catch (error) {
     console.error('Error fetching trade histories:', error)
