@@ -5,16 +5,12 @@ import {fixupConfigRules} from '@eslint/compat'
 import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReact from '@eslint-react/eslint-plugin'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginQuery from '@tanstack/eslint-plugin-query'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginI18next from 'eslint-plugin-i18next'
 import pluginImportX from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
@@ -24,11 +20,9 @@ import pluginNoBarrelFiles from 'eslint-plugin-no-barrel-files'
 import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReactCompiler from 'eslint-plugin-react-compiler'
 import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
@@ -37,7 +31,6 @@ import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 // import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: investigate why this cause errors
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginVitest from 'eslint-plugin-vitest'
 import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
