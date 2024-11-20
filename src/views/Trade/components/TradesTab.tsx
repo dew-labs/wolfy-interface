@@ -1,4 +1,5 @@
 import {
+  Button,
   Pagination,
   Select,
   SelectItem,
@@ -11,6 +12,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  Tooltip,
 } from '@nextui-org/react'
 import {t} from 'i18next'
 import {memo, useCallback, useMemo, useState} from 'react'
@@ -22,6 +24,9 @@ import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
+import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
+import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
+import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -92,7 +97,7 @@ const actionOptions = {
 }
 
 const TABLE_CLASS_NAMES = {
-  th: '!rounded-none',
+  th: '!rounded-none font-serif',
 }
 
 const HEADING_CLASSES =
@@ -145,6 +150,7 @@ export default memo(function TradesTab() {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
   const marketsData = useMarketsData()
+  const setTokenAddress = useSetTokenAddress()
 
   const markets = useMemo(() => {
     return Array.from(marketsData?.values() ?? []).map(market => ({
@@ -164,15 +170,6 @@ export default memo(function TradesTab() {
       Markets: markets,
     } as const
   }, [markets])
-
-  // GET MARKET
-  const getMarketLabel = useCallback(
-    (address: string): string => {
-      const market = marketsData?.get(address)
-      return market ? market.name : 'Unknown Market'
-    },
-    [marketsData],
-  )
 
   // GET ACTION
   function getActionLabel(value: TradeHistoryAction): string {
@@ -340,38 +337,71 @@ export default memo(function TradesTab() {
           isLoading={isLoading || !!data?.isPrevious}
           loadingContent={<Spinner className='mt-4' />}
         >
-          {item => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <div
-                  className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${
-                    item.action === TradeHistoryAction.MarketIncrease ||
-                    item.action === TradeHistoryAction.RequestMarketIncrease ||
-                    item.action === TradeHistoryAction.FailedMarketIncrease ||
-                    item.action === TradeHistoryAction.CancelMarketIncrease ||
-                    item.action === TradeHistoryAction.PositionIncrease
-                      ? 'bg-green-500'
-                      : item.action === TradeHistoryAction.MarketDecrease ||
-                          item.action === TradeHistoryAction.RequestMarketDecrease ||
-                          item.action === TradeHistoryAction.FailedMarketDecrease ||
-                          item.action === TradeHistoryAction.CancelMarketDecrease ||
-                          item.action === TradeHistoryAction.PositionDecrease
-                        ? 'bg-red-500'
-                        : item.isLong
-                          ? 'bg-green-500'
-                          : 'bg-red-500'
-                  }`}
-                />
-                {getActionLabel(item.action)}
-              </TableCell>
-              <TableCell>{getMarketLabel(item.market)}</TableCell>
-              <TableCell>{formatUsd(item.size)}</TableCell>
-              <TableCell>{formatMarketUsd(item.price, item.market)}</TableCell>
-              <TableCell>{formatUsd(item.rpnl)}</TableCell>
-              <TableCell>{formatUsd(item.fee)}</TableCell>
-              <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
-            </TableRow>
-          )}
+          {item => {
+            const market = marketsData?.get(item.market)
+            if (!market) return <></>
+
+            const indexName = getMarketIndexName(market)
+            const poolName = getMarketPoolName(market)
+
+            return (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div
+                    className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${
+                      item.action === TradeHistoryAction.MarketIncrease ||
+                      item.action === TradeHistoryAction.RequestMarketIncrease ||
+                      item.action === TradeHistoryAction.FailedMarketIncrease ||
+                      item.action === TradeHistoryAction.CancelMarketIncrease ||
+                      item.action === TradeHistoryAction.PositionIncrease
+                        ? 'bg-green-500'
+                        : item.action === TradeHistoryAction.MarketDecrease ||
+                            item.action === TradeHistoryAction.RequestMarketDecrease ||
+                            item.action === TradeHistoryAction.FailedMarketDecrease ||
+                            item.action === TradeHistoryAction.CancelMarketDecrease ||
+                            item.action === TradeHistoryAction.PositionDecrease
+                          ? 'bg-red-500'
+                          : item.isLong
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                    }`}
+                  />
+                  {getActionLabel(item.action)}
+                </TableCell>
+                <TableCell>
+                  <Tooltip content='Press to switch market'>
+                    <Button
+                      disableRipple
+                      disableAnimation
+                      variant='light'
+                      className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
+                      onClick={() => {
+                        setTokenAddress(market.indexTokenAddress)
+                      }}
+                    >
+                      <img
+                        src={market.indexToken.imageUrl}
+                        alt={indexName}
+                        className='h-6 w-6 rounded'
+                      />
+                      <div className='flex flex-col'>
+                        <div>{indexName}</div>
+                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                          [{poolName}]
+                        </div>
+                      </div>
+                    </Button>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{formatUsd(item.size)}</TableCell>
+                <TableCell>{formatMarketUsd(item.price, item.market)}</TableCell>
+                <TableCell>{formatUsd(item.rpnl)}</TableCell>
+                <TableCell>{formatUsd(item.fee)}</TableCell>
+                <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
+              </TableRow>
+            )
+          }}
         </TableBody>
       </Table>
       {totalPages > 1 && (
