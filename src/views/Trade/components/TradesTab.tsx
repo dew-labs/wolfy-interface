@@ -26,7 +26,6 @@ import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
-import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
@@ -342,7 +341,6 @@ export default memo(function TradesTab() {
             const market = marketsData?.get(item.market)
             if (!market) return <></>
 
-            const indexName = getMarketIndexName(market)
             const poolName = getMarketPoolName(market)
 
             return (
@@ -383,11 +381,13 @@ export default memo(function TradesTab() {
                     >
                       <img
                         src={market.indexToken.imageUrl}
-                        alt={indexName}
+                        alt={market.indexToken.symbol}
                         className='h-6 w-6 rounded'
                       />
                       <div className='flex flex-col'>
-                        <div>{indexName}</div>
+                        <div>
+                          {item.isLong ? 'Long' : 'Short'} {market.indexToken.symbol}
+                        </div>
                         <div className='subtext whitespace-nowrap text-xs opacity-50'>
                           [{poolName}]
                         </div>

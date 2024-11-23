@@ -17,7 +17,19 @@ import {
   WITHDRAWAL_GAS_LIMIT,
 } from 'wolfy-sdk/dataStore'
 
-export default async function fetchGasLimits(chainId: StarknetChainId) {
+export interface GasLimitsConfig {
+  depositSingleToken: bigint
+  depositMultiToken: bigint
+  withdrawalMultiToken: bigint
+  singleSwap: bigint
+  swapOrder: bigint
+  increaseOrder: bigint
+  decreaseOrder: bigint
+  estimatedFeeBaseGasLimit: bigint
+  estimatedFeeMultiplierFactor: bigint
+}
+
+export default async function fetchGasLimits(chainId: StarknetChainId): Promise<GasLimitsConfig> {
   const [
     depositSingleToken,
     depositMultiToken,

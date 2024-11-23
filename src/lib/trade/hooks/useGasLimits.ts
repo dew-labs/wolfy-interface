@@ -28,6 +28,7 @@ function createGetGasLimitsQueryOptions(
       )
     },
     ...NO_REFETCH_OPTIONS,
+    refetchInterval: 100000,
   })
 }
 

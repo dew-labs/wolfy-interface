@@ -19,6 +19,7 @@ import {
   type DOMAttributes,
   type KeyboardEventHandler,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -28,22 +29,26 @@ import {toast} from 'sonner'
 import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, LEVERAGE_DECIMALS, SLIPPAGE_PRECISION} from '@/constants/config'
-import {getTokensMetadata} from '@/constants/tokens'
+import {FEE_TOKEN_ADDRESS, getTokensMetadata} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
+import useGasLimits from '@/lib/trade/hooks/useGasLimits'
 import useGasPrice from '@/lib/trade/hooks/useGasPrice'
 import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
 import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
 import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
 import useTradeMode, {TRADE_MODE_LABEL, TradeMode} from '@/lib/trade/states/useTradeMode'
 import useTradeType, {TRADE_TYPE_LABEL, TradeType} from '@/lib/trade/states/useTradeType'
+import estimateExecuteOrderGasLimit from '@/lib/trade/utils/fee/estimateExecuteOrderGasLimit'
+import {getExecutionFee} from '@/lib/trade/utils/fee/getExecutionFee'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
@@ -99,7 +104,10 @@ const Controller = createResetableComponent(function ({reset}) {
   const accountAddress = useAccountAddress()
   const latestAccountAddress = useLatest(accountAddress)
   const tokensMetadata = getTokensMetadata(chainId)
-  const {data: _gasPrice} = useGasPrice()
+  const {data: gasPrice} = useGasPrice()
+  const {data: gasLimits} = useGasLimits()
+  const {data: _uiFeeFactor} = useUiFeeFactor()
+  const {data: referralInfo} = useReferralInfo()
   const {data: tokenBalancesData} = useTokenBalances()
   const latestChainId = useRef(chainId)
 
@@ -139,6 +147,7 @@ const Controller = createResetableComponent(function ({reset}) {
       tokenPrice: data.get(tokenAddress ?? ''),
       longTokenPrice: data.get(marketData?.longTokenAddress ?? ''),
       shortTokenPrice: data.get(marketData?.shortTokenAddress ?? ''),
+      feeTokenPrice: data.get(FEE_TOKEN_ADDRESS.get(chainId) ?? ''),
     }
   })
 
@@ -234,8 +243,6 @@ const Controller = createResetableComponent(function ({reset}) {
     },
     [setCollateralAddress, latestAvailableCollateralTokenAddresses],
   )
-
-  const {data: referralInfo} = useReferralInfo()
 
   const {data: positionConstants} = usePositionsConstants()
 
@@ -343,6 +350,35 @@ const Controller = createResetableComponent(function ({reset}) {
       )
     return ''
   })()
+
+  const executionFee = useMemo(() => {
+    const feeTokenPrice = tokenPricesData?.feeTokenPrice
+    if (!feeTokenPrice || !gasLimits || !gasPrice) return undefined
+
+    let estimatedGas: bigint | undefined
+
+    // if (isIncrease) {
+    // eslint-disable-next-line prefer-const -- for support multiple type later
+    estimatedGas = estimateExecuteOrderGasLimit('increase', gasLimits, {
+      // TODO: update swapPath
+      swapPath: [],
+    })
+    // }
+
+    // if (isTrigger) {
+    //   estimatedGas = estimateExecuteOrderGasLimit('decrease', gasLimits, {})
+    // }
+
+    // if (isSwap) {
+    //   estimatedGas = estimateExecuteOrderGasLimit('swap',gasLimits, {
+    //     swapPath: swapAmounts?.swapPathStats?.swapPath,
+    //   })
+    // }
+
+    if (!estimatedGas) return undefined
+
+    return getExecutionFee(gasLimits, feeTokenPrice, estimatedGas, gasPrice)
+  }, [tokenPricesData, gasLimits, gasPrice])
 
   const [isPlacing, setIsPlacing] = useState(false)
 
@@ -658,7 +694,12 @@ const Controller = createResetableComponent(function ({reset}) {
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Network Fee</div>
-              <div className='flex items-center'>$0</div>
+              <div className='flex items-center'>
+                {formatNumber(shrinkDecimals(executionFee?.feeUsd, USD_DECIMALS), Format.USD, {
+                  exactFractionDigits: true,
+                  fractionDigits: 2,
+                })}
+              </div>
             </div>
           </div>
           <div className='mt-4 w-full'>
@@ -677,39 +718,6 @@ const Controller = createResetableComponent(function ({reset}) {
           </div>
         </CardBody>
       </Card>
-      {/* <Card className='mt-4'>
-        <CardBody>
-          {`${TRADE_TYPE_LABEL[tradeType]} ...`}
-          <Divider className='mt-3 opacity-50' />
-          <div className='text-sm'>
-            <div className='mt-2 flex w-full justify-between'>
-              <div className='flex items-center'>Market</div>
-              <div className='flex items-center'>ETH/USD[WETH]</div>
-            </div>
-            <div className='mt-2 flex w-full justify-between'>
-              <div className='flex items-center'>Ask Price (Entry)</div>
-              <div className='flex items-center'>$3,179.33</div>
-            </div>
-            <div className='mt-2 flex w-full justify-between'>
-              <div className='flex items-center'>Net Rate</div>
-              <div className='flex items-center'>-0.0047% / 1h</div>
-            </div>
-            <div className='mt-2 flex w-full justify-between'>
-              <div className='flex items-center'>Available Liquidity</div>
-              <div className='flex items-center'>$1,983,118.56</div>
-            </div>
-            <div className='mt-2 flex w-full justify-between'>
-              <div className='flex items-center'>Open Interest Balance</div>
-              <div className='flex items-center'>
-                <div className='flex'>
-                  <div className='rounded-l bg-emerald-700 px-2 py-1 text-white'>50%</div>
-                  <div className='rounded-r bg-rose-700 px-2 py-1 text-white'>43%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardBody>
-      </Card> */}
     </div>
   )
 })
