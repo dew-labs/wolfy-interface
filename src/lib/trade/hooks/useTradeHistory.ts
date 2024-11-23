@@ -17,7 +17,7 @@ export default function useTradeHistory(
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
 
-  const {isLoading, data} = useQuery({
+  return useQuery({
     queryKey: ['trade-histories', chainId, accountAddress, actions, markets, isLong, page, limit],
     queryFn: async () =>
       fetchTradeHistories(chainId, accountAddress, actions, markets, isLong, page, limit),
@@ -34,6 +34,4 @@ export default function useTradeHistory(
     refetchInterval: 10000,
     throwOnError: false,
   })
-
-  return {isLoading, data}
 }

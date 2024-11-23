@@ -36,11 +36,10 @@ function createGetMarketTokenBalancesQueryOptions(
 export default function useMarketTokenBalances() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
   const marketTokenAddresses = marketsData ? Array.from(marketsData.keys()) : []
 
-  const {data} = useQuery(
+  return useQuery(
     createGetMarketTokenBalancesQueryOptions(chainId, marketTokenAddresses, accountAddress),
   )
-  return data
 }

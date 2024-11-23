@@ -30,6 +30,5 @@ export default function useReferralInfo() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
 
-  const {data} = useQuery(createGetReferralInfoQueryOptions(chainId, accountAddress))
-  return data
+  return useQuery(createGetReferralInfoQueryOptions(chainId, accountAddress))
 }

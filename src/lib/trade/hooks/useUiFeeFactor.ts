@@ -35,6 +35,5 @@ export default function useUiFeeFactor() {
   const [chainId] = useChainId()
   const previousChainId = usePreviousDistinct(chainId)
   const queryClient = useQueryClient()
-  const {data} = useQuery(createGetUiFeeFactorQueryOptions(chainId, previousChainId, queryClient))
-  return data
+  return useQuery(createGetUiFeeFactorQueryOptions(chainId, previousChainId, queryClient))
 }

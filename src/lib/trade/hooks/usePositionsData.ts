@@ -6,7 +6,7 @@ import type {StarknetChainId} from 'wolfy-sdk'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
-import fetchPositions from '@/lib/trade/services/fetchPositions'
+import fetchPositions, {type PositionsData} from '@/lib/trade/services/fetchPositions'
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
@@ -20,11 +20,12 @@ export function getPositionsQueryKey(
   return ['positions', chainId, accountAddress, marketsData] as const
 }
 
-function createGetPositionsQueryOptions(
+function createGetPositionsQueryOptions<T>(
   chainId: StarknetChainId,
   marketsData: MarketsData | undefined,
   previousMarketsData: MarketsData | undefined,
   accountAddress: string | undefined,
+  selector: (data: PositionsData) => T,
   queryClient: QueryClient,
 ) {
   return queryOptions({
@@ -42,27 +43,28 @@ function createGetPositionsQueryOptions(
       )
     },
     ...NO_REFETCH_OPTIONS,
+    select: selector,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function usePositionsData() {
+export default function usePositionsData<T>(selector: (data: PositionsData) => T) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
   const previousMarketsData = usePreviousDistinct(marketsData)
   const queryClient = useQueryClient()
 
-  const {data} = useQuery(
+  return useQuery(
     createGetPositionsQueryOptions(
       chainId,
       marketsData,
       previousMarketsData,
       accountAddress,
+      selector,
       queryClient,
     ),
   )
-  return data
 }

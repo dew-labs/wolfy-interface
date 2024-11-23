@@ -1,5 +1,3 @@
-import {useMemo} from 'react'
-
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getPositionsInfo from '@/lib/trade/utils/position/getPositionsInfo'
 
@@ -12,21 +10,14 @@ import useUiFeeFactor from './useUiFeeFactor'
 
 export default function usePositionsInfoData() {
   const [chainId] = useChainId()
-  const marketsData = useMarketsData()
-  const positionConstants = usePositionConstants()
-  const uiFeeFactor = useUiFeeFactor()
-  const referralInfo = useReferralInfo()
-  const tokenPricesData = useTokenPrices(data => data)
-  const positionsData = usePositionsData()
+  const {data: marketsData} = useMarketsData()
+  const {data: positionConstants} = usePositionConstants()
+  const {data: uiFeeFactor} = useUiFeeFactor()
+  const {data: referralInfo} = useReferralInfo()
+  const {data: tokenPricesData} = useTokenPrices(data => data)
 
-  return useMemo(() => {
-    if (
-      !marketsData ||
-      !tokenPricesData ||
-      !positionsData ||
-      !positionConstants ||
-      uiFeeFactor === undefined
-    ) {
+  return usePositionsData(positionsData => {
+    if (!marketsData || !tokenPricesData || !positionConstants || uiFeeFactor === undefined) {
       return undefined
     }
 
@@ -40,13 +31,5 @@ export default function usePositionsInfoData() {
       true,
       referralInfo,
     )
-  }, [
-    chainId,
-    marketsData,
-    tokenPricesData,
-    positionsData,
-    positionConstants,
-    uiFeeFactor,
-    referralInfo,
-  ])
+  })
 }

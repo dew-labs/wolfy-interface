@@ -53,10 +53,10 @@ export default function DepositModal({
 
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
-  const tokenPrices = useTokenPrices(data => data)
-  const marketsData = useMarketsData()
-  const marketTokensData = useMarketTokensData()
-  const tokenBalances = useTokenBalances()
+  const {data: tokenPrices} = useTokenPrices(data => data)
+  const {data: marketsData} = useMarketsData()
+  const {data: marketTokensData} = useMarketTokensData()
+  const {data: tokenBalances} = useTokenBalances()
 
   const marketData = useMemo(
     () => marketsData?.get(marketTokenAddress),

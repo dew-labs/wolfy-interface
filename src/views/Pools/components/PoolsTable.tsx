@@ -1,6 +1,8 @@
+import {Icon} from '@iconify/react/dist/iconify.js'
 import {
   Button,
   Input,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -59,7 +61,6 @@ export interface ExtendedMarketData {
 }
 
 const TABLE_CLASS_NAMES = {
-  base: ['max-w-7xl', 'm-auto'],
   th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
 }
 
@@ -101,10 +102,65 @@ export default function PoolsTable() {
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy')
   const [chainId] = useChainId()
 
-  const marketsData = useMarketsData()
-  const tokenPrices = useTokenPrices(data => data)
-  const marketTokensData = useMarketTokensData()
-  const marketTokensBalances = useMarketTokenBalances()
+  const {
+    data: marketsData,
+    isLoading: isMarketsDataLoading,
+    isFetching: isMarketsDataFetching,
+    refetch: refetchMarketsData,
+  } = useMarketsData()
+  const {
+    data: tokenPrices,
+    isLoading: isTokenPricesLoading,
+    isFetching: isTokenPricesFetching,
+    refetch: refetchTokenPrices,
+  } = useTokenPrices(data => data)
+  const {
+    data: marketTokensData,
+    isLoading: isMarketTokensDataLoading,
+    isFetching: isMarketTokensDataFetching,
+    refetch: refetchMarketTokensData,
+  } = useMarketTokensData()
+  const {
+    data: marketTokensBalances,
+    isLoading: isMarketTokensBalancesLoading,
+    isFetching: isMarketTokensBalancesFetching,
+    refetch: refetchMarketTokensBalances,
+  } = useMarketTokenBalances()
+
+  const refetchPools = useCallback(() => {
+    void refetchMarketsData()
+    void refetchMarketTokensData()
+    void refetchMarketTokensBalances()
+    void refetchTokenPrices()
+  }, [refetchMarketsData, refetchMarketTokensData, refetchMarketTokensBalances, refetchTokenPrices])
+
+  const poolsIsLoading = useMemo(() => {
+    return (
+      isMarketsDataLoading ||
+      isMarketTokensDataLoading ||
+      isMarketTokensBalancesLoading ||
+      isTokenPricesLoading
+    )
+  }, [
+    isMarketsDataLoading,
+    isMarketTokensDataLoading,
+    isMarketTokensBalancesLoading,
+    isTokenPricesLoading,
+  ])
+
+  const poolsIsFetching = useMemo(() => {
+    return (
+      isMarketsDataFetching ||
+      isMarketTokensDataFetching ||
+      isMarketTokensBalancesFetching ||
+      isTokenPricesFetching
+    )
+  }, [
+    isMarketsDataFetching,
+    isMarketTokensDataFetching,
+    isMarketTokensBalancesFetching,
+    isTokenPricesFetching,
+  ])
 
   const extendedMarkets = useMemo(() => {
     if (!marketsData || !marketTokensData) return []
@@ -211,14 +267,12 @@ export default function PoolsTable() {
       .filter((market): market is ExtendedMarketData => market !== null)
   }, [marketsData, marketTokensData, tokenPrices, marketTokensBalances, chainId])
 
-  const filteredMarkets = useMemo(() => {
-    return extendedMarkets.filter(market =>
-      market.market.toLowerCase().includes(filterValue.toLowerCase()),
-    )
-  }, [extendedMarkets, filterValue])
-
   const sortedMarkets = useMemo(() => {
-    return [...filteredMarkets].sort((a, b) => {
+    const filderedMarkets = extendedMarkets
+      .filter(market => market.market.toLowerCase().includes(filterValue.toLowerCase()))
+      .slice()
+
+    return filderedMarkets.sort((a, b) => {
       const {column, direction} = sortDescriptor
       if (!column) return 0
 
@@ -237,7 +291,7 @@ export default function PoolsTable() {
 
       return 0
     })
-  }, [filteredMarkets, sortDescriptor])
+  }, [sortDescriptor, filterValue, extendedMarkets])
 
   const handleOpenModal = useCallback((marketTokenAddress: string, action: 'buy' | 'sell') => {
     setSelectedMarketAddress(marketTokenAddress)
@@ -343,16 +397,24 @@ export default function PoolsTable() {
           />
         </div>
         <div className='flex items-center justify-between'>
-          <span className='text-small text-default-400'>
-            Total {filteredMarkets.length} markets
-          </span>
+          <span className='text-small text-default-400'>Total {sortedMarkets.length} markets</span>
         </div>
       </div>
     )
-  }, [filterValue, onSearchChange, filteredMarkets.length, onClear])
+  }, [filterValue, onSearchChange, sortedMarkets.length, onClear])
 
   return (
-    <>
+    <div className='relative'>
+      <Button
+        className='absolute -right-2 top-20 z-10'
+        size='md'
+        variant='solid'
+        isIconOnly
+        isLoading={poolsIsFetching}
+        onPress={refetchPools}
+      >
+        <Icon icon='mdi:refresh' />
+      </Button>
       <Table
         aria-label='Markets table'
         classNames={TABLE_CLASS_NAMES}
@@ -368,7 +430,12 @@ export default function PoolsTable() {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={'No markets found'} items={sortedMarkets}>
+        <TableBody
+          emptyContent={'No markets.'}
+          items={sortedMarkets}
+          isLoading={poolsIsLoading}
+          loadingContent={<Spinner className='mt-4' />}
+        >
           {item => (
             <TableRow key={item.marketTokenAddress}>
               {columnKey => <TableCell>{renderCell(item, columnKey)}</TableCell>}
@@ -391,6 +458,6 @@ export default function PoolsTable() {
           marketTokenAddress={selectedMarketAddress}
         />
       )}
-    </>
+    </div>
   )
 }

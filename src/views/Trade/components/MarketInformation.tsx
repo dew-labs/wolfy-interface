@@ -112,10 +112,10 @@ export default memo(function MarketInformation() {
   const [chainId] = useChainId()
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
-  const tokenPricesData = useTokenPrices(data => data)
+  const {data: tokenPricesData} = useTokenPrices(data => data)
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
 
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
 
   const dataIsLoaded = !!marketsData && !!tokenPricesData
 

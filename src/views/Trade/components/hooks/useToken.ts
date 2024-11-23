@@ -13,7 +13,7 @@ export default function useToken(tradeMode: TradeMode) {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
   const [tokenAddress] = useTokenAddress()
-  const tokenMinPriceData = useTokenPrices(data => data.get(tokenAddress ?? '')?.min)
+  const {data: tokenMinPriceData} = useTokenPrices(data => data.get(tokenAddress ?? '')?.min)
 
   const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
   const tokenDecimals = tokenData?.decimals ?? 0

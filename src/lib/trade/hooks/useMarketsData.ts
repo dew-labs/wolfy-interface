@@ -42,13 +42,9 @@ function createGetMarketsDataQueryOptions(
 
 export default function useMarketsData() {
   const [chainId] = useChainId()
-  const markets = useMarkets()
+  const {data: markets} = useMarkets()
   const previousMarkets = usePreviousDistinct(markets)
   const queryClient = useQueryClient()
 
-  const {data: marketsData} = useQuery(
-    createGetMarketsDataQueryOptions(chainId, markets, previousMarkets, queryClient),
-  )
-
-  return marketsData
+  return useQuery(createGetMarketsDataQueryOptions(chainId, markets, previousMarkets, queryClient))
 }

@@ -5,7 +5,7 @@ import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 
 export default function useMarket() {
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
   const [marketAddress, setMarketAddress] = useState<string>()
   const latestMarketAddress = useLatest(marketAddress)
 

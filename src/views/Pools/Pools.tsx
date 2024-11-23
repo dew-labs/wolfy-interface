@@ -32,7 +32,9 @@ export default function Pools() {
               New Pool
             </Button>
           </div>
-          <PoolsTable />
+          <div className='m-auto max-w-7xl'>
+            <PoolsTable />
+          </div>
         </main>
       </div>
     </>

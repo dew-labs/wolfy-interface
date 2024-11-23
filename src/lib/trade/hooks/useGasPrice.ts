@@ -45,8 +45,7 @@ export default function useGasPrice() {
   const [chainId] = useChainId()
   const previousChainId = usePreviousDistinct(chainId)
   const queryClient = useQueryClient()
-  const {data} = useQuery(
+  return useQuery(
     createGetGasPriceQueryOptions(walletAccount, chainId, previousChainId, queryClient),
   )
-  return data
 }

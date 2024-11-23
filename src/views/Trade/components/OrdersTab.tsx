@@ -1,5 +1,7 @@
+import {Icon} from '@iconify/react/dist/iconify.js'
 import {
   Button,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -47,7 +49,11 @@ export default memo(function OrdersTab() {
   const queryClient = useQueryClient()
   const setTokenAddress = useSetTokenAddress()
 
-  const orders = useOrders()
+  const {data, isLoading, isFetching, refetch} = useOrders()
+  const orders = data ?? []
+  const refetchOrders = useCallback(() => {
+    void refetch()
+  }, [refetch])
 
   const handleCancelOrder = useCallback(
     (orderKey: string) => {
@@ -78,152 +84,173 @@ export default memo(function OrdersTab() {
   )
 
   return (
-    <Table className='mt-2' aria-label='Orders' classNames={TABLE_CLASS_NAMES}>
-      <TableHeader>
-        <TableColumn>Type</TableColumn>
-        <TableColumn>Market</TableColumn>
-        <TableColumn>Size</TableColumn>
-        <TableColumn>Collateral</TableColumn>
-        <TableColumn>Trigger Price</TableColumn>
-        <TableColumn>Mark Price</TableColumn>
-        <TableColumn> </TableColumn>
-      </TableHeader>
-      <TableBody emptyContent={'No order.'} items={orders}>
-        {order => {
-          const indexTokenPrice = order.indexTokenPrice
+    <div className='relative'>
+      <Button
+        className='absolute right-2 top-2 z-10'
+        size='md'
+        variant='solid'
+        isIconOnly
+        isLoading={isFetching}
+        onPress={refetchOrders}
+      >
+        <Icon icon='mdi:refresh' />
+      </Button>
+      <Table className='mt-2' aria-label='Orders' classNames={TABLE_CLASS_NAMES}>
+        <TableHeader>
+          <TableColumn>Type</TableColumn>
+          <TableColumn>Market</TableColumn>
+          <TableColumn>Size</TableColumn>
+          <TableColumn>Collateral</TableColumn>
+          <TableColumn>Trigger Price</TableColumn>
+          <TableColumn>Mark Price</TableColumn>
+          <TableColumn> </TableColumn>
+        </TableHeader>
+        <TableBody
+          emptyContent={'No order.'}
+          items={orders}
+          isLoading={isLoading}
+          loadingContent={<Spinner className='mt-4' />}
+        >
+          {order => {
+            const indexTokenPrice = order.indexTokenPrice
 
-          if (!indexTokenPrice) return <></>
+            if (!indexTokenPrice) return <></>
 
-          const indexName = getMarketIndexName(order.marketData)
-          const poolName = getMarketPoolName(order.marketData)
+            const indexName = getMarketIndexName(order.marketData)
+            const poolName = getMarketPoolName(order.marketData)
 
-          const initialCollateralToken = order.initialCollateralToken
-          const targetCollateralToken = order.targetCollateralToken
+            const initialCollateralToken = order.initialCollateralToken
+            const targetCollateralToken = order.targetCollateralToken
 
-          const initialCollateralTokenPrice = order.initialCollateralTokenPrice
-          const targetCollateralTokenPrice = order.targetCollateralTokenPrice
+            const initialCollateralTokenPrice = order.initialCollateralTokenPrice
+            const targetCollateralTokenPrice = order.targetCollateralTokenPrice
 
-          const collateralUsd = convertTokenAmountToUsd(
-            order.initialCollateralDeltaAmount,
-            initialCollateralToken.decimals,
-            initialCollateralTokenPrice?.min ?? 0n,
-          )
-
-          const collateralUdsShrinked = formatNumber(
-            shrinkDecimals(collateralUsd, USD_DECIMALS),
-            Format.USD,
-            {
-              exactFractionDigits: true,
-            },
-          )
-
-          const collateralText = (function () {
-            if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
-
-            const targetCollateralAmount = convertUsdToTokenAmount(
-              collateralUsd,
-              targetCollateralToken.decimals,
-              targetCollateralTokenPrice.min,
+            const collateralUsd = convertTokenAmountToUsd(
+              order.initialCollateralDeltaAmount,
+              initialCollateralToken.decimals,
+              initialCollateralTokenPrice?.min ?? 0n,
             )
 
-            const tokenAmountFractionDigits = calculateTokenFractionDigits(
-              targetCollateralTokenPrice.min,
+            const collateralUdsShrinked = formatNumber(
+              shrinkDecimals(collateralUsd, USD_DECIMALS),
+              Format.USD,
+              {
+                exactFractionDigits: true,
+              },
             )
 
-            const tokenAmountText = formatNumber(
-              shrinkDecimals(targetCollateralAmount, targetCollateralToken.decimals),
-              Format.PLAIN,
-              {exactFractionDigits: true, fractionDigits: tokenAmountFractionDigits},
+            const collateralText = (function () {
+              if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
+
+              const targetCollateralAmount = convertUsdToTokenAmount(
+                collateralUsd,
+                targetCollateralToken.decimals,
+                targetCollateralTokenPrice.min,
+              )
+
+              const tokenAmountFractionDigits = calculateTokenFractionDigits(
+                targetCollateralTokenPrice.min,
+              )
+
+              const tokenAmountText = formatNumber(
+                shrinkDecimals(targetCollateralAmount, targetCollateralToken.decimals),
+                Format.PLAIN,
+                {exactFractionDigits: true, fractionDigits: tokenAmountFractionDigits},
+              )
+
+              return `${tokenAmountText} ${targetCollateralToken.symbol}`
+            })()
+
+            const triggerPriceText = `${order.triggerThresholdType} ${formatNumber(
+              shrinkDecimals(order.triggerPrice, USD_DECIMALS),
+              Format.USD,
+              {exactFractionDigits: true},
+            )}`
+
+            const markPrice = getMarkPrice({
+              price: indexTokenPrice,
+              isIncrease: isIncreaseOrderType(order.orderType),
+              isLong: order.isLong,
+            })
+
+            const markPriceText = formatNumber(
+              shrinkDecimals(markPrice, USD_DECIMALS),
+              Format.USD,
+              {
+                exactFractionDigits: true,
+              },
+            )
+            const sizeText = formatNumber(
+              shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
+              Format.USD,
+              {exactFractionDigits: true},
             )
 
-            return `${tokenAmountText} ${targetCollateralToken.symbol}`
-          })()
-
-          const triggerPriceText = `${order.triggerThresholdType} ${formatNumber(
-            shrinkDecimals(order.triggerPrice, USD_DECIMALS),
-            Format.USD,
-            {exactFractionDigits: true},
-          )}`
-
-          const markPrice = getMarkPrice({
-            price: indexTokenPrice,
-            isIncrease: isIncreaseOrderType(order.orderType),
-            isLong: order.isLong,
-          })
-
-          const markPriceText = formatNumber(shrinkDecimals(markPrice, USD_DECIMALS), Format.USD, {
-            exactFractionDigits: true,
-          })
-          const sizeText = formatNumber(
-            shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
-            Format.USD,
-            {exactFractionDigits: true},
-          )
-
-          return (
-            <TableRow key={order.key}>
-              <TableCell>
-                <div
-                  className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
-                />
-                <div>
-                  {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
-                  {` `}
-                  {order.isLong ? 'Long' : 'Short'}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Tooltip content='Press to switch market'>
+            return (
+              <TableRow key={order.key}>
+                <TableCell>
+                  <div
+                    className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                  />
+                  <div>
+                    {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
+                    {` `}
+                    {order.isLong ? 'Long' : 'Short'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Tooltip content='Press to switch market'>
+                    <Button
+                      disableRipple
+                      disableAnimation
+                      variant='light'
+                      className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
+                      onClick={() => {
+                        setTokenAddress(order.marketData.indexTokenAddress)
+                      }}
+                    >
+                      <img
+                        src={order.marketData.indexToken.imageUrl}
+                        alt={indexName}
+                        className='h-6 w-6 rounded'
+                      />
+                      <div className='flex flex-col'>
+                        <div>{indexName}</div>
+                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                          [{poolName}]
+                        </div>
+                      </div>
+                    </Button>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{sizeText}</TableCell>
+                <TableCell>
+                  <div className='text-nowrap'>{collateralUdsShrinked}</div>
+                  <div className='text-nowrap text-xs opacity-50'>{collateralText}</div>
+                </TableCell>
+                <TableCell>
+                  <span>{triggerPriceText}</span>
+                </TableCell>
+                <TableCell>
+                  <span>{markPriceText}</span>
+                </TableCell>
+                <TableCell>
                   <Button
-                    disableRipple
-                    disableAnimation
-                    variant='light'
-                    className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                    size='sm'
                     // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                     onClick={() => {
-                      setTokenAddress(order.marketData.indexTokenAddress)
+                      handleCancelOrder(order.key)
                     }}
                   >
-                    <img
-                      src={order.marketData.indexToken.imageUrl}
-                      alt={indexName}
-                      className='h-6 w-6 rounded'
-                    />
-                    <div className='flex flex-col'>
-                      <div>{indexName}</div>
-                      <div className='subtext whitespace-nowrap text-xs opacity-50'>
-                        [{poolName}]
-                      </div>
-                    </div>
+                    Cancel
                   </Button>
-                </Tooltip>
-              </TableCell>
-              <TableCell>{sizeText}</TableCell>
-              <TableCell>
-                <div className='text-nowrap'>{collateralUdsShrinked}</div>
-                <div className='text-nowrap text-xs opacity-50'>{collateralText}</div>
-              </TableCell>
-              <TableCell>
-                <span>{triggerPriceText}</span>
-              </TableCell>
-              <TableCell>
-                <span>{markPriceText}</span>
-              </TableCell>
-              <TableCell>
-                <Button
-                  size='sm'
-                  // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
-                  onClick={() => {
-                    handleCancelOrder(order.key)
-                  }}
-                >
-                  Cancel
-                </Button>
-              </TableCell>
-            </TableRow>
-          )
-        }}
-      </TableBody>
-    </Table>
+                </TableCell>
+              </TableRow>
+            )
+          }}
+        </TableBody>
+      </Table>
+    </div>
   )
 })

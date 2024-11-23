@@ -26,16 +26,16 @@ export default memo(function Chart() {
   const [tokenAddress] = useTokenAddress()
   const tokenMetadata = getTokensMetadata(chainId)
   const asset = MOCK_SYMBOL_MAP[tokenMetadata.get(tokenAddress ?? '')?.symbol ?? '']
-  const tokenPrices = useTokenPrices(data => data)
+  const {data: tokenPrices} = useTokenPrices(data => data)
   const latestTokenPrices = useLatest(tokenPrices)
 
-  const orders = useOrders()
+  const {data: orders} = useOrders()
   const ordersOfCurrentToken = useMemo(
-    () => orders.filter(order => order.indexToken.address === tokenAddress),
+    () => orders?.filter(order => order.indexToken.address === tokenAddress) ?? [],
     [orders, tokenAddress],
   )
 
-  const positions = usePositionsInfoData()
+  const {data: positions} = usePositionsInfoData()
   const positionOfCurrentToken = useMemo(
     () =>
       Array.from(positions?.values() ?? []).filter(

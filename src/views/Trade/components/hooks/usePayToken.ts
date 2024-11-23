@@ -28,7 +28,7 @@ export default function usePayToken(
   const tokensMetadata = getTokensMetadata(chainId)
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
-  const payTokenMinPriceData = useTokenPrices(data => data.get(payTokenAddress ?? '')?.min)
+  const {data: payTokenMinPriceData} = useTokenPrices(data => data.get(payTokenAddress ?? '')?.min)
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0

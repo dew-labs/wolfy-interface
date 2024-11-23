@@ -99,8 +99,8 @@ const Controller = createResetableComponent(function ({reset}) {
   const accountAddress = useAccountAddress()
   const latestAccountAddress = useLatest(accountAddress)
   const tokensMetadata = getTokensMetadata(chainId)
-  const _gasPrice = useGasPrice()
-  const tokenBalancesData = useTokenBalances()
+  const {data: _gasPrice} = useGasPrice()
+  const {data: tokenBalancesData} = useTokenBalances()
   const latestChainId = useRef(chainId)
 
   const [tradeType, setTradeType] = useTradeType()
@@ -134,7 +134,7 @@ const Controller = createResetableComponent(function ({reset}) {
     marketData,
   } = useMarket()
 
-  const tokenPricesData = useTokenPrices(data => {
+  const {data: tokenPricesData} = useTokenPrices(data => {
     return {
       tokenPrice: data.get(tokenAddress ?? ''),
       longTokenPrice: data.get(marketData?.longTokenAddress ?? ''),
@@ -235,9 +235,9 @@ const Controller = createResetableComponent(function ({reset}) {
     [setCollateralAddress, latestAvailableCollateralTokenAddresses],
   )
 
-  const referralInfo = useReferralInfo()
+  const {data: referralInfo} = useReferralInfo()
 
-  const positionConstants = usePositionsConstants()
+  const {data: positionConstants} = usePositionsConstants()
 
   const priceFractionDigits = calculatePriceFractionDigits(
     tokenAddress && tokenPricesData ? tokenPricesData.tokenPrice?.min : 0,

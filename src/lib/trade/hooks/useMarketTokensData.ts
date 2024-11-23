@@ -41,14 +41,14 @@ function createGetMarketTokensDataQueryOptions(
 
 export default function useMarketTokensData() {
   const [chainId] = useChainId()
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
   const marketTokenAddresses = marketsData
     ? Array.from(marketsData.values()).map(market => market.marketTokenAddress)
     : []
   const previousMarketTokenAddresses = usePreviousDistinct(marketTokenAddresses)
   const queryClient = useQueryClient()
 
-  const {data} = useQuery(
+  return useQuery(
     createGetMarketTokensDataQueryOptions(
       chainId,
       marketTokenAddresses,
@@ -56,5 +56,4 @@ export default function useMarketTokensData() {
       queryClient,
     ),
   )
-  return data
 }

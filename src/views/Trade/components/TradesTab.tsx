@@ -1,3 +1,4 @@
+import {Icon} from '@iconify/react'
 import {
   Button,
   Pagination,
@@ -149,7 +150,7 @@ const SCROLL_SHADOW_PROPS = {
 export default memo(function TradesTab() {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
-  const marketsData = useMarketsData()
+  const {data: marketsData} = useMarketsData()
   const setTokenAddress = useSetTokenAddress()
 
   const markets = useMemo(() => {
@@ -172,7 +173,7 @@ export default memo(function TradesTab() {
   }, [markets])
 
   // GET ACTION
-  function getActionLabel(value: TradeHistoryAction): string {
+  const getActionLabel = useCallback((value: TradeHistoryAction): string => {
     for (const actions of Object.values(actionOptions)) {
       for (const action of actions) {
         if (action.value === value) {
@@ -181,13 +182,7 @@ export default memo(function TradesTab() {
       }
     }
     return 'Unknown Action'
-  }
-
-  // GET MARKET
-  // function getMarketLabel(address: string): string {
-  //   const market = marketsData?.get(address)
-  //   return market ? market.name : 'Unknown Market'
-  // }
+  }, [])
 
   // FORMAT USD
   const formatUsd = useCallback((amount: string | null): string => {
@@ -227,22 +222,18 @@ export default memo(function TradesTab() {
   const [currentPage, setCurrentPage] = useState<number>(1)
 
   // GET TRADE HISTORY
-  const {isLoading, data} = useTradeHistory(
-    selectedActions,
-    selectedMarkets,
-    selectedDirection,
-    currentPage,
-    10,
-  )
+  const {
+    isLoading,
+    data: tradeHistory,
+    refetch,
+    isFetching,
+  } = useTradeHistory(selectedActions, selectedMarkets, selectedDirection, currentPage, 10)
+  const totalPages = tradeHistory?.totalPages ?? 0
+  const tradeHistoryItems = tradeHistory?.data ?? []
 
-  console.log('data', data)
-
-  console.log('Selected actions:', selectedActions)
-  console.log('Selected markets:', selectedMarkets)
-  console.log('Selected direction:', selectedDirection)
-
-  const totalPages = data?.totalPages ?? 0
-  const tradeHistoryItems = data?.data ?? []
+  const refetchTradeHistory = useCallback(() => {
+    void refetch()
+  }, [refetch])
 
   // HANDLE ACTION CHANGE
   const onActionChange = useCallback((action: SharedSelection) => {
@@ -266,7 +257,17 @@ export default memo(function TradesTab() {
   }, [])
 
   return (
-    <>
+    <div className='relative'>
+      <Button
+        className='absolute right-2 top-2 z-10'
+        size='md'
+        variant='solid'
+        isIconOnly
+        isLoading={isFetching}
+        onPress={refetchTradeHistory}
+      >
+        <Icon icon='mdi:refresh' />
+      </Button>
       <Table className='mt-2' aria-label='Trade History Table' classNames={TABLE_CLASS_NAMES}>
         <TableHeader>
           <TableColumn>
@@ -334,7 +335,7 @@ export default memo(function TradesTab() {
         <TableBody
           items={tradeHistoryItems}
           emptyContent={'No trade.'}
-          isLoading={isLoading || !!data?.isPrevious}
+          isLoading={isLoading || !!tradeHistory?.isPrevious}
           loadingContent={<Spinner className='mt-4' />}
         >
           {item => {
@@ -414,6 +415,6 @@ export default memo(function TradesTab() {
           />
         </div>
       )}
-    </>
+    </div>
   )
 })

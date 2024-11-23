@@ -28,6 +28,5 @@ export default function useTokenBalances() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
 
-  const {data} = useQuery(createGetTokenBalancesQueryOptions(chainId, accountAddress))
-  return data
+  return useQuery(createGetTokenBalancesQueryOptions(chainId, accountAddress))
 }

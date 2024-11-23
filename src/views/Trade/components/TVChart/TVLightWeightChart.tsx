@@ -28,14 +28,12 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 const CHART_HEIGHT = 300
 
 function useChartHistoryData(asset: string, interval: ChartInterval) {
-  const {data} = useQuery({
+  return useQuery({
     queryKey: ['!chartHistoryData', asset, interval],
     queryFn: async () => fetchChartHistoryData(`${asset}usdt`, interval),
     ...NO_REFETCH_OPTIONS,
     refetchOnMount: true,
   })
-
-  return data
 }
 
 export default memo(function TVLightWeightChart(props: {
@@ -54,7 +52,7 @@ export default memo(function TVLightWeightChart(props: {
   // CHART_STYLE.AREA_TOP_COLOR
   // CHART_STYLE.AREA_BOTTOM_COLOR
 
-  const historicalData = useChartHistoryData(props.asset, props.interval)
+  const {data: historicalData} = useChartHistoryData(props.asset, props.interval)
 
   const chartStyle = useMemo<PartialDeep<ChartOptions>>(
     () => ({

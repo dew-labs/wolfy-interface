@@ -1,4 +1,4 @@
-import type {QueryClient} from '@tanstack/react-query'
+import type {QueryClient, UseQueryResult} from '@tanstack/react-query'
 import {queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
 import {usePreviousDistinct} from 'react-use'
 import type {StarknetChainId} from 'wolfy-sdk'
@@ -33,14 +33,10 @@ function createGetTokenPricesQueryOptions<T>(
 
 export default function useTokenPrices<T>(
   selector: (tokenPrices: TokenPricesData) => T,
-): T | undefined {
+): UseQueryResult<T | undefined> {
   const [chainId] = useChainId()
   const previousChainId = usePreviousDistinct(chainId)
   const queryClient = useQueryClient()
 
-  const {data} = useQuery(
-    createGetTokenPricesQueryOptions(chainId, previousChainId, selector, queryClient),
-  )
-
-  return data
+  return useQuery(createGetTokenPricesQueryOptions(chainId, previousChainId, selector, queryClient))
 }

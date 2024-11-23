@@ -74,8 +74,8 @@ export default memo(function TokenInputs({
 }: Props) {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
-  const tokenBalances = useTokenBalances()
-  const marketsData = useMarketsData()
+  const {data: tokenBalances} = useTokenBalances()
+  const {data: marketsData} = useMarketsData()
 
   // -------------------------------------------------------------------------------------------------------------------
 

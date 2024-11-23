@@ -35,8 +35,5 @@ export default function usePositionsConstants() {
   const [chainId] = useChainId()
   const previousChainId = usePreviousDistinct(chainId)
   const queryClient = useQueryClient()
-  const {data} = useQuery(
-    createGetPositionsConstantsQueryOptions(chainId, previousChainId, queryClient),
-  )
-  return data
+  return useQuery(createGetPositionsConstantsQueryOptions(chainId, previousChainId, queryClient))
 }

@@ -49,10 +49,10 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
   const latestChainId = useLatest(chainId)
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
-  const tokenPrices = useTokenPrices(data => data)
-  const marketsData = useMarketsData()
-  const marketTokensData = useMarketTokensData()
-  const marketTokenBalances = useMarketTokenBalances()
+  const {data: tokenPrices} = useTokenPrices(data => data)
+  const {data: marketsData} = useMarketsData()
+  const {data: marketTokensData} = useMarketTokensData()
+  const {data: marketTokenBalances} = useMarketTokenBalances()
 
   const marketData = useMemo(
     () => marketsData?.get(marketTokenAddress),

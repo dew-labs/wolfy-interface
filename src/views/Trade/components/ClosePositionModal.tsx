@@ -33,13 +33,13 @@ export function useClosePosition() {
 }
 
 export default function ClosePositionModal() {
-  const positionsInfoData = usePositionsInfoData()
+  const {data: positionsInfoData} = usePositionsInfoData()
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
   const position = positionsInfoData && positionKey ? positionsInfoData.get(positionKey) : undefined
   const latestPosition = useLatest(position)
 
-  const collateralTokenPrice = useTokenPrices(data =>
+  const {data: collateralTokenPrice} = useTokenPrices(data =>
     data.get(position?.collateralTokenAddress ?? ''),
   )
 

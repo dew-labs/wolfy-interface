@@ -35,6 +35,5 @@ export default function useGasLimits() {
   const [chainId] = useChainId()
   const previousChainId = usePreviousDistinct(chainId)
   const queryClient = useQueryClient()
-  const {data} = useQuery(createGetGasLimitsQueryOptions(chainId, previousChainId, queryClient))
-  return data
+  return useQuery(createGetGasLimitsQueryOptions(chainId, previousChainId, queryClient))
 }

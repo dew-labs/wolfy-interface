@@ -21,8 +21,5 @@ function createGetMarketsQueryOptions(chainId: StarknetChainId) {
 
 export default function useMarkets() {
   const [chainId] = useChainId()
-
-  const {data: markets} = useQuery(createGetMarketsQueryOptions(chainId))
-
-  return markets
+  return useQuery(createGetMarketsQueryOptions(chainId))
 }
