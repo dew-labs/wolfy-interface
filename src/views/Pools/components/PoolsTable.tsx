@@ -96,7 +96,7 @@ export function calculateMarketPrice(
 
 export default function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({})
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy')
@@ -273,7 +273,10 @@ export default function PoolsTable() {
       .slice()
 
     return filderedMarkets.sort((a, b) => {
+      if (!sortDescriptor) return 0
+
       const {column, direction} = sortDescriptor
+
       if (!column) return 0
 
       const aValue = a[column as keyof ExtendedMarketData]
@@ -418,7 +421,7 @@ export default function PoolsTable() {
       <Table
         aria-label='Markets table'
         classNames={TABLE_CLASS_NAMES}
-        sortDescriptor={sortDescriptor}
+        {...(sortDescriptor ? {sortDescriptor} : {})}
         onSortChange={onSortChange}
         topContent={topContent}
         topContentPlacement='outside'

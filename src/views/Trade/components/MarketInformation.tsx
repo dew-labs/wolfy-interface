@@ -5,7 +5,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  type SortDescriptor,
   Table,
   TableBody,
   TableCell,
@@ -13,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@nextui-org/react'
-import type {Selection} from '@react-types/shared'
+import type {Selection, SortDescriptor} from '@react-types/shared'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
@@ -113,7 +112,7 @@ export default memo(function MarketInformation() {
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
   const {data: tokenPricesData} = useTokenPrices(data => data)
-  const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>({})
+  const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>()
 
   const {data: marketsData} = useMarketsData()
 
@@ -240,6 +239,8 @@ export default memo(function MarketInformation() {
 
     sortedAndFilteredIndexTokens.sort((a, b) => {
       const column = (() => {
+        if (!marketSortDescriptor) return 'symbol'
+
         switch (marketSortDescriptor.column) {
           case '$.0':
             return 'symbol'
@@ -251,6 +252,8 @@ export default memo(function MarketInformation() {
             return 'symbol'
         }
       })()
+
+      if (!marketSortDescriptor) return 0
 
       const aValue = a[column]
       const bValue = b[column]
@@ -382,7 +385,7 @@ export default memo(function MarketInformation() {
                 selectionMode='single'
                 selectedKeys={selectedMarketKeys}
                 onSelectionChange={handleSelectMarket}
-                sortDescriptor={marketSortDescriptor}
+                {...(marketSortDescriptor ? {sortDescriptor: marketSortDescriptor} : {})}
                 onSortChange={handleSortChange}
               >
                 <TableHeader>
