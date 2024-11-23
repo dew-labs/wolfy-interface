@@ -1,8 +1,8 @@
 import type {QueryClient} from '@tanstack/react-query'
 import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
 import {usePreviousDistinct} from 'react-use'
-import type {StarknetChainId} from 'satoru-sdk'
 import type {WalletAccount} from 'starknet'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'

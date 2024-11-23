@@ -1,12 +1,12 @@
 import {
   cairoIntToBigInt,
-  createSatoruMulticallRequest,
+  createWolfyMulticallRequest,
   DataStoreABI,
-  SatoruContract,
-  satoruMulticall,
   StarknetChainId,
-} from 'satoru-sdk'
-import {MIN_COLLATERAL_USD, MIN_POSITION_SIZE_USD} from 'satoru-sdk/dataStore'
+  WolfyContract,
+  wolfyMulticall,
+} from 'wolfy-sdk'
+import {MIN_COLLATERAL_USD, MIN_POSITION_SIZE_USD} from 'wolfy-sdk/dataStore'
 
 export interface PositionConstants {
   minCollateralUsd: bigint
@@ -14,11 +14,11 @@ export interface PositionConstants {
 }
 
 export default async function fetchPositionsConstants(chainId: StarknetChainId) {
-  const [minCollateralUsd, minPositionSizeUsd] = await satoruMulticall(chainId, [
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+  const [minCollateralUsd, minPositionSizeUsd] = await wolfyMulticall(chainId, [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       MIN_COLLATERAL_USD,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       MIN_POSITION_SIZE_USD,
     ]),
   ] as const)

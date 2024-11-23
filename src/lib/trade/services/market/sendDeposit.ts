@@ -1,12 +1,12 @@
+import {CairoUint256, type Call, type WalletAccount} from 'starknet'
 import {
   createCall,
-  createSatoruContract,
   createTokenContract,
+  createWolfyContract,
   DepositVaultABI,
   ExchangeRouterABI,
-  SatoruContract,
-} from 'satoru-sdk'
-import {CairoUint256, type Call, type WalletAccount} from 'starknet'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 
@@ -45,14 +45,14 @@ export default async function sendDeposit(wallet: WalletAccount, props: DepositP
 
   const chainId = await wallet.getChainId()
 
-  const exchangeRouterContract = createSatoruContract(
+  const exchangeRouterContract = createWolfyContract(
     chainId,
-    SatoruContract.ExchangeRouter,
+    WolfyContract.ExchangeRouter,
     ExchangeRouterABI,
   )
-  const depositVaultContract = createSatoruContract(
+  const depositVaultContract = createWolfyContract(
     chainId,
-    SatoruContract.DepositVault,
+    WolfyContract.DepositVault,
     DepositVaultABI,
   )
   const longTokenContract = createTokenContract(chainId, props.initialLongToken)

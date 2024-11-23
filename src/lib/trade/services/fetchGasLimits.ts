@@ -1,11 +1,11 @@
 import {
   cairoIntToBigInt,
-  createSatoruMulticallRequest,
+  createWolfyMulticallRequest,
   DataStoreABI,
-  SatoruContract,
-  satoruMulticall,
   type StarknetChainId,
-} from 'satoru-sdk'
+  WolfyContract,
+  wolfyMulticall,
+} from 'wolfy-sdk'
 import {
   DECREASE_ORDER_GAS_LIMIT,
   depositGasLimitKey,
@@ -15,7 +15,7 @@ import {
   SINGLE_SWAP_GAS_LIMIT,
   SWAP_ORDER_GAS_LIMIT,
   WITHDRAWAL_GAS_LIMIT,
-} from 'satoru-sdk/dataStore'
+} from 'wolfy-sdk/dataStore'
 
 export default async function fetchGasLimits(chainId: StarknetChainId) {
   const [
@@ -28,32 +28,32 @@ export default async function fetchGasLimits(chainId: StarknetChainId) {
     decreaseOrder,
     estimatedFeeBaseGasLimit,
     estimatedFeeMultiplierFactor,
-  ] = await satoruMulticall(chainId, [
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+  ] = await wolfyMulticall(chainId, [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       depositGasLimitKey(true),
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       depositGasLimitKey(false),
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       WITHDRAWAL_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       SINGLE_SWAP_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       SWAP_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       INCREASE_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       DECREASE_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       ESTIMATED_GAS_FEE_BASE_AMOUNT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
     ]),
   ])

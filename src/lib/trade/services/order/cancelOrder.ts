@@ -1,21 +1,21 @@
+import type {Account} from 'starknet'
 import {
   createCall,
-  createSatoruContract,
+  createWolfyContract,
   ExchangeRouterABI,
   executeAndWait,
-  SatoruContract,
   StarknetChainId,
-} from 'satoru-sdk'
-import type {Account} from 'starknet'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 export default async function cancelOrder(
   chainId: StarknetChainId,
   account: Account,
   orderKey: string,
 ) {
-  const exchangeRouterContract = createSatoruContract(
+  const exchangeRouterContract = createWolfyContract(
     chainId,
-    SatoruContract.ExchangeRouter,
+    WolfyContract.ExchangeRouter,
     ExchangeRouterABI,
   )
 

@@ -1,15 +1,15 @@
-import type {Hashable, StarknetChainId} from 'satoru-sdk'
+import invariant from 'tiny-invariant'
+import type {Hashable, StarknetChainId} from 'wolfy-sdk'
 import {
   cairoIntToBigInt,
-  createSatoruContract,
+  createWolfyContract,
   DataStoreABI,
-  getSatoruContractAddress,
+  getWolfyContractAddress,
   poseidonHash,
   ReaderABI,
-  SatoruContract,
   toStarknetHexString,
-} from 'satoru-sdk'
-import invariant from 'tiny-invariant'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {getTokenMetadata} from '@/constants/tokens'
@@ -130,12 +130,12 @@ export default async function fetchPositions(
 ): Promise<PositionsData> {
   if (!account) return new Map()
 
-  const dataStoreAddress = getSatoruContractAddress(chainId, SatoruContract.DataStore)
-  const dataStoreContract = createSatoruContract(chainId, SatoruContract.DataStore, DataStoreABI)
+  const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
+  const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
 
-  const readerContract = createSatoruContract(chainId, SatoruContract.Reader, ReaderABI)
+  const readerContract = createWolfyContract(chainId, WolfyContract.Reader, ReaderABI)
 
-  const referralStorageAddress = getSatoruContractAddress(chainId, SatoruContract.ReferralStorage)
+  const referralStorageAddress = getWolfyContractAddress(chainId, WolfyContract.ReferralStorage)
 
   const numberOfPositions = await dataStoreContract.get_account_position_count(account)
 

@@ -1,5 +1,5 @@
-import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'satoru-sdk'
 import {Contract} from 'starknet'
+import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'wolfy-sdk'
 
 interface TokenData {
   balance: bigint

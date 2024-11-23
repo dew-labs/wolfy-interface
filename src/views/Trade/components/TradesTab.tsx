@@ -16,7 +16,7 @@ import {
 } from '@nextui-org/react'
 import {t} from 'i18next'
 import {memo, useCallback, useMemo, useState} from 'react'
-import {cairoIntToBigInt} from 'satoru-sdk'
+import {cairoIntToBigInt} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'

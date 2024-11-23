@@ -1,5 +1,5 @@
-import {createCall, createTokenContract} from 'satoru-sdk'
 import {type Call, type WalletAccount} from 'starknet'
+import {createCall, createTokenContract} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import expandDecimals from '@/utils/numbers/expandDecimals'

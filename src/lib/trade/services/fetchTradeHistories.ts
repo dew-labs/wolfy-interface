@@ -1,6 +1,6 @@
 import {type Static, Type} from '@sinclair/typebox'
 import {TypeCompiler} from '@sinclair/typebox/compiler'
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import call from '@/utils/api/call'
 

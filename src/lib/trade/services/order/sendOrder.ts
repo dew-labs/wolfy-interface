@@ -1,15 +1,15 @@
+import {CairoUint256, type Call, type WalletAccount} from 'starknet'
 import {
   createCall,
-  createSatoruContract,
   createTokenContract,
+  createWolfyContract,
   DecreasePositionSwapType,
   ExchangeRouterABI,
-  getSatoruContractAddress,
+  getWolfyContractAddress,
   type OrderType,
-  SatoruContract,
   toCairoCustomEnum,
-} from 'satoru-sdk'
-import {CairoUint256, type Call, type WalletAccount} from 'starknet'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {isIncreaseOrderType} from '@/lib/trade/utils/order/type/isIncreaseOrderType'
@@ -56,13 +56,13 @@ export default async function sendOrder(wallet: WalletAccount, props: OrderParam
 
   const chainId = await wallet.getChainId()
 
-  const exchangeRouterContract = createSatoruContract(
+  const exchangeRouterContract = createWolfyContract(
     chainId,
-    SatoruContract.ExchangeRouter,
+    WolfyContract.ExchangeRouter,
     ExchangeRouterABI,
   )
   const collateralTokenContract = createTokenContract(chainId, props.initialCollateralToken)
-  const orderVaultAddress = getSatoruContractAddress(chainId, SatoruContract.OrderVault)
+  const orderVaultAddress = getWolfyContractAddress(chainId, WolfyContract.OrderVault)
 
   const calls: Call[] = []
 

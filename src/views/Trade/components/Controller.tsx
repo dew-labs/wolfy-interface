@@ -24,8 +24,8 @@ import {
 } from 'react'
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
-import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
+import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, LEVERAGE_DECIMALS, SLIPPAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'

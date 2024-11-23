@@ -1,10 +1,10 @@
 import {
   ProviderType,
   registerProvider,
-  registerSatoruContractAddress,
-  SatoruContract,
+  registerWolfyContractAddress,
   StarknetChainId,
-} from 'satoru-sdk'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 function registerHttpProviders() {
   const HTTP_RPC_PROVIDERS: Partial<Record<StarknetChainId, string[]>> = {
@@ -131,71 +131,70 @@ function registerWssProviders() {
 
 function registerContractAddresses() {
   const CONTRACT_ADDRESSES: Partial<
-    Record<StarknetChainId, Partial<Record<SatoruContract, string>>>
+    Record<StarknetChainId, Partial<Record<WolfyContract, string>>>
   > = {
     [StarknetChainId.SN_SEPOLIA]: {
-      [SatoruContract.Multicall]:
+      [WolfyContract.Multicall]:
         '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
-      [SatoruContract.Reader]: '0x53f9007bdc8a48d0b53741cdc01b65b1475aa6db0083578155dedc63b64f7bc',
-      [SatoruContract.EventEmitter]:
-        '0x218d55d9fc608cc146bd084f0c040b54ad0c222e459166008f66d7cd326112e',
-      [SatoruContract.Router]: '0x1ce688663a3a3dcf016e379ba1fb2e3adf4bbda7e3185e5fdfd213de292d7f1',
-      [SatoruContract.ReferralStorage]:
-        '0x453942b76b775ebc5bd6c36cf7dc8810ec1ae0e5fedf4b18d59effe04215d24',
-      [SatoruContract.DataStore]:
-        '0x3d9d07e2ecb37362660cc8b5a0b1c78af3ce1b7d3fde786bab64ee95f2cbbd5',
-      [SatoruContract.OrderVault]:
-        '0x676de0d2733ae31dc03cc828963beef3bce099121ec0e4aec18aacfbb2bdafc',
-      [SatoruContract.DepositVault]:
-        '0x76d828603031368c5e568df39a97b995c62fcb0c85297acf7213825770ddb55',
-      [SatoruContract.WithdrawalVault]:
-        '0x69b9395bb48e2d2eb26abfa75635ca52ee7795d28b99133ab4ddede50d78755',
-      [SatoruContract.ExchangeRouter]:
-        '0x745c393d796ecc68afed3247d8dd8be8b4280507b3601289e3d2b4a1a680b39',
+      [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
+      [WolfyContract.EventEmitter]:
+        '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
+      [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
+      [WolfyContract.ReferralStorage]:
+        '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
+      [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
+      [WolfyContract.OrderVault]:
+        '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
+      [WolfyContract.DepositVault]:
+        '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
+      [WolfyContract.WithdrawalVault]:
+        '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
+      [WolfyContract.ExchangeRouter]:
+        '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
     },
     // Not available
     [StarknetChainId.SN_MAIN]: {
-      [SatoruContract.Multicall]:
+      [WolfyContract.Multicall]:
         '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
     },
     // Note: this will always change
     [StarknetChainId.SN_KATANA]: {
-      [SatoruContract.Multicall]:
+      [WolfyContract.Multicall]:
         '0x203e20476da9d6147d506d46b568bf217bae5bb8f65b31755da3da4358cb68c',
-      [SatoruContract.Reader]: '0x17a7f571b793477ba195be08661f9f72a2691792cd08e9679c3efa629497ca2',
-      [SatoruContract.EventEmitter]:
+      [WolfyContract.Reader]: '0x17a7f571b793477ba195be08661f9f72a2691792cd08e9679c3efa629497ca2',
+      [WolfyContract.EventEmitter]:
         '0x207a233bc2cf39a127a152344c0fe6a1b5b6a808db767bc9b75b519252ab0d0',
-      [SatoruContract.Router]: '0x7c43781bb9da29ae279ff399d0a048c3df4a4d60f558a5a59906a369692990e',
-      [SatoruContract.ReferralStorage]:
+      [WolfyContract.Router]: '0x7c43781bb9da29ae279ff399d0a048c3df4a4d60f558a5a59906a369692990e',
+      [WolfyContract.ReferralStorage]:
         '0x112949c63bc01ddc8f53f7cc626f794387b2b4898a82843eb9c2527d5b414ca',
-      [SatoruContract.DataStore]:
+      [WolfyContract.DataStore]:
         '0x34d8b2b6fa67e3d519fa1466d47a86468481da639d6f5de1bd64e7e40852f67',
-      [SatoruContract.OrderVault]:
+      [WolfyContract.OrderVault]:
         '0x71d39a703e94aa13b5a851182abbe4e56d617140af067f6234315ba42b74e23',
-      [SatoruContract.DepositVault]:
+      [WolfyContract.DepositVault]:
         '0x5a7d3688afa8c10d68523a93f7a8e2ab5535cb2c52c1be2867409cbcac3199e',
-      [SatoruContract.WithdrawalVault]:
+      [WolfyContract.WithdrawalVault]:
         '0x44062427ac689a16a27bfcf8e73d70227f2897b3b23a3b4613f045005d93221',
-      [SatoruContract.ExchangeRouter]:
+      [WolfyContract.ExchangeRouter]:
         '0x3606041a6a483ae3464036403ab211fdf280a0c43536e15df196c9178664aa4',
     },
   }
 
   Object.entries(CONTRACT_ADDRESSES).forEach(([chainId, contracts]) => {
     Object.entries(contracts).forEach(([contract, address]) => {
-      registerSatoruContractAddress(
+      registerWolfyContractAddress(
         chainId as StarknetChainId,
-        contract as unknown as SatoruContract,
+        contract as unknown as WolfyContract,
         address,
       )
     })
   })
 }
 
-function setupSatoru() {
+function setupWolfy() {
   registerContractAddresses()
   registerHttpProviders()
   registerWssProviders()
 }
 
-setupSatoru()
+setupWolfy()

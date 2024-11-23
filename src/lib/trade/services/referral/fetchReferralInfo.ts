@@ -1,4 +1,4 @@
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import {basisPointsToFloat} from '@/lib/trade/numbers/basisPointsToFloat'
 

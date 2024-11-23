@@ -1,5 +1,5 @@
-import {createCall, createSatoruContract, DataStoreABI, SatoruContract} from 'satoru-sdk'
 import type {WalletAccount} from 'starknet'
+import {createCall, createWolfyContract, DataStoreABI, WolfyContract} from 'wolfy-sdk'
 
 import {BASIS_POINTS_DIVISOR, BASIS_POINTS_DIVISOR_BIGINT} from '@/lib/trade/numbers/constants'
 import {roundToNDecimal} from '@/utils/numbers/roundToNDecimals'
@@ -12,7 +12,7 @@ const FEE_BUFFER_BPS = roundToNDecimal((parseFloat('30.0') * BASIS_POINTS_DIVISO
 export default async function fetchGasPrice(wallet: WalletAccount) {
   try {
     const chainId = await wallet.getChainId()
-    const dataStoreContract = createSatoruContract(chainId, SatoruContract.DataStore, DataStoreABI)
+    const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
     const testCall = createCall(dataStoreContract, 'get_u256', [0])
     let gasPrice = (await wallet.estimateFee(testCall)).gas_price
 

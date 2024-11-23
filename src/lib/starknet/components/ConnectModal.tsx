@@ -16,10 +16,10 @@ import getStarknetCore, {
 import {useAtom} from 'jotai'
 import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
-import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
 import {UAParser} from 'ua-parser-js'
+import {getProvider, ProviderType, type StarknetChainId} from 'wolfy-sdk'
 
 import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'

@@ -1,5 +1,5 @@
 import {PriceServiceConnection} from '@pythnetwork/price-service-client'
-import {StarknetChainId} from 'satoru-sdk'
+import {StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'

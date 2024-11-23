@@ -1,4 +1,4 @@
-import {StarknetChainId} from 'satoru-sdk'
+import {StarknetChainId} from 'wolfy-sdk'
 
 export interface Token {
   name: string

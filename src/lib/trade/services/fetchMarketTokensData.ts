@@ -1,11 +1,11 @@
+import {Contract} from 'starknet'
 import {
   cairoIntToBigInt,
   ERC20ABI,
   getProvider,
   ProviderType,
   type StarknetChainId,
-} from 'satoru-sdk'
-import {Contract} from 'starknet'
+} from 'wolfy-sdk'
 
 export interface MarketTokenData {
   totalSupply: bigint

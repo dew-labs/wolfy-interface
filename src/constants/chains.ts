@@ -1,4 +1,4 @@
-import {StarknetChainId} from 'satoru-sdk'
+import {StarknetChainId} from 'wolfy-sdk'
 
 export const DEFAULT_CHAIN_ID = StarknetChainId.SN_SEPOLIA
 

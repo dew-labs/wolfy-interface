@@ -1,13 +1,13 @@
+import {CairoUint256, type Call, type WalletAccount} from 'starknet'
 import {
   createCall,
-  createSatoruContract,
   createTokenContract,
+  createWolfyContract,
   ExchangeRouterABI,
-  SatoruContract,
   toStarknetHexString,
   WithdrawalVaultABI,
-} from 'satoru-sdk'
-import {CairoUint256, type Call, type WalletAccount} from 'starknet'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 
@@ -41,14 +41,14 @@ export default async function sendWithdrawal(wallet: WalletAccount, props: Withd
 
   const chainId = await wallet.getChainId()
 
-  const exchangeRouterContract = createSatoruContract(
+  const exchangeRouterContract = createWolfyContract(
     chainId,
-    SatoruContract.ExchangeRouter,
+    WolfyContract.ExchangeRouter,
     ExchangeRouterABI,
   )
-  const withdrawalVaultContract = createSatoruContract(
+  const withdrawalVaultContract = createWolfyContract(
     chainId,
-    SatoruContract.WithdrawalVault,
+    WolfyContract.WithdrawalVault,
     WithdrawalVaultABI,
   )
   const marketTokenAddress = toStarknetHexString(props.market)

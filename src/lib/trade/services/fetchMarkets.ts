@@ -1,13 +1,13 @@
 import {
-  createSatoruContract,
+  createWolfyContract,
   DataStoreABI,
-  getSatoruContractAddress,
+  getWolfyContractAddress,
   isRepresentZero,
   ReaderABI,
-  SatoruContract,
   type StarknetChainId,
   toStarknetHexString,
-} from 'satoru-sdk'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {getTokenMetadata} from '@/constants/tokens'
 import getMarketFullName from '@/lib/trade/utils/market/getMarketFullName'
@@ -23,9 +23,9 @@ export interface Market {
 }
 
 export default async function fetchMarkets(chainId: StarknetChainId) {
-  const dataStoreAddress = getSatoruContractAddress(chainId, SatoruContract.DataStore)
-  const dataStoreContract = createSatoruContract(chainId, SatoruContract.DataStore, DataStoreABI)
-  const readerContract = createSatoruContract(chainId, SatoruContract.Reader, ReaderABI)
+  const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
+  const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
+  const readerContract = createWolfyContract(chainId, WolfyContract.Reader, ReaderABI)
 
   const marketNum = await dataStoreContract.get_market_count()
 

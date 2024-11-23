@@ -1,11 +1,11 @@
 import {
-  createSatoruContract,
+  createWolfyContract,
   isRepresentZero,
   ReferralStorageABI,
-  SatoruContract,
   STARKNET_HEX_STRING_ZERO,
   StarknetChainId,
-} from 'satoru-sdk'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 const REFERRAL_CODE_KEY = 'referralCode'
 
@@ -21,9 +21,9 @@ export default async function fetchUserReferralCode(
 ) {
   const localStorageCode = String(simpleStorage.get(REFERRAL_CODE_KEY))
 
-  const referralStorageContract = createSatoruContract(
+  const referralStorageContract = createWolfyContract(
     chainId,
-    SatoruContract.ReferralStorage,
+    WolfyContract.ReferralStorage,
     ReferralStorageABI,
   )
   const onChainCode =

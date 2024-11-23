@@ -1,10 +1,10 @@
 import {
-  createSatoruContract,
+  createWolfyContract,
   ReferralStorageABI,
-  SatoruContract,
   type StarknetChainId,
   toStarknetHexString,
-} from 'satoru-sdk'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 export default async function fetchReferralCodeOwner(
   chainId: StarknetChainId,
@@ -13,9 +13,9 @@ export default async function fetchReferralCodeOwner(
   if (!referralCode) {
     return undefined
   }
-  const referralStorageContract = createSatoruContract(
+  const referralStorageContract = createWolfyContract(
     chainId,
-    SatoruContract.ReferralStorage,
+    WolfyContract.ReferralStorage,
     ReferralStorageABI,
   )
   return toStarknetHexString(await referralStorageContract.code_owners(referralCode))

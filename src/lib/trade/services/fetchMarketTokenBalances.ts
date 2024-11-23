@@ -1,11 +1,11 @@
+import {Contract} from 'starknet'
 import {
   cairoIntToBigInt,
   ERC20ABI,
   getProvider,
   ProviderType,
   type StarknetChainId,
-} from 'satoru-sdk'
-import {Contract} from 'starknet'
+} from 'wolfy-sdk'
 
 export default async function fetchMarketTokenBalances(
   chainId: StarknetChainId,

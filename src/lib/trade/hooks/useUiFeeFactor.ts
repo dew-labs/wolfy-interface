@@ -1,7 +1,7 @@
 import type {QueryClient} from '@tanstack/react-query'
 import {queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
 import {usePreviousDistinct} from 'react-use'
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchUiFeeFactor from '@/lib/trade/services/fetchUiFeeFactor'

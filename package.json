@@ -96,7 +96,7 @@
     "react-i18next": "^15.1.1",
     "react-use": "^17.5.1",
     "remeda": "^2.17.3",
-    "satoru-sdk": "^1.1.11",
+    "wolfy-sdk": "^1.3.0",
     "sonner": "^1.7.0",
     "starknet": "6.12.1",
     "tailwind-merge": "^2.5.4",

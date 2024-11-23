@@ -1,4 +1,4 @@
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata, type Token} from '@/constants/tokens'
 import {getBasisPoints} from '@/lib/trade/numbers/getBasisPoints'

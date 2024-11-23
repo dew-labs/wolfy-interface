@@ -1,13 +1,13 @@
 import {
   cairoIntToBigInt,
-  createSatoruMulticallRequest,
+  createWolfyMulticallRequest,
   DataStoreABI,
-  getSatoruContractAddress,
+  getWolfyContractAddress,
   ReaderABI,
-  SatoruContract,
-  satoruMulticall,
   type StarknetChainId,
-} from 'satoru-sdk'
+  WolfyContract,
+  wolfyMulticall,
+} from 'wolfy-sdk'
 import {
   borrowingExponentFactorKey,
   borrowingFactorKey,
@@ -37,7 +37,7 @@ import {
   swapImpactPoolAmountKey,
   virtualMarketIdKey,
   virtualTokenIdKey,
-} from 'satoru-sdk/dataStore'
+} from 'wolfy-sdk/dataStore'
 
 import type {Token} from '@/constants/tokens'
 import {getTokensMetadata} from '@/constants/tokens'
@@ -192,7 +192,7 @@ export default async function fetchMarketsData(
           short_token: market.shortTokenAddress,
         }
 
-        const dataStoreAddress = getSatoruContractAddress(chainId, SatoruContract.DataStore)
+        const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
 
         try {
           const [
@@ -249,11 +249,11 @@ export default async function fetchMarketsData(
             shortInterestInTokensUsingLongToken,
             shortInterestInTokensUsingShortToken,
             // Fail if any of the call fail
-          ] = await satoruMulticall(chainId, [
+          ] = await wolfyMulticall(chainId, [
             // marketInfo
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.Reader,
+              WolfyContract.Reader,
               ReaderABI,
               'get_market_info',
               [
@@ -265,9 +265,9 @@ export default async function fetchMarketsData(
               ],
             ),
             // marketTokenPriceMax
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.Reader,
+              WolfyContract.Reader,
               ReaderABI,
               'get_market_token_price',
               [
@@ -283,9 +283,9 @@ export default async function fetchMarketsData(
               ],
             ),
             // marketTokenPriceMin
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.Reader,
+              WolfyContract.Reader,
               ReaderABI,
               'get_market_token_price',
               [
@@ -301,393 +301,393 @@ export default async function fetchMarketsData(
               ],
             ),
             // isMarketDisabled
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_bool',
               [isMarketDisabledKey(market.marketTokenAddress)],
             ),
             // virtualMarketId
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_felt252',
               [virtualMarketIdKey(market.marketTokenAddress)],
             ),
             // virtualLongTokenId
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_felt252',
               [virtualTokenIdKey(market.longTokenAddress)],
             ),
             // virtualShortTokenId
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_felt252',
               [virtualTokenIdKey(market.shortTokenAddress)],
             ),
             // longPoolAmount
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [poolAmountKey(market.marketTokenAddress, market.longTokenAddress)],
             ),
             // shortPoolAmount
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [poolAmountKey(market.marketTokenAddress, market.shortTokenAddress)],
             ),
             // maxLongPoolAmount
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPoolAmountKey(market.marketTokenAddress, market.longTokenAddress)],
             ),
             // maxShortPoolAmount
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPoolAmountKey(market.marketTokenAddress, market.shortTokenAddress)],
             ),
             // reserveFactorLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [reserveFactorKey(market.marketTokenAddress, true)],
             ),
             // reserveFactorShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [reserveFactorKey(market.marketTokenAddress, false)],
             ),
             // openInterestReserveFactorLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestReserveFactorKey(market.marketTokenAddress, true)],
             ),
             // openInterestReserveFactorShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestReserveFactorKey(market.marketTokenAddress, false)],
             ),
             // maxOpenInterestLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxOpenInterestKey(market.marketTokenAddress, true)],
             ),
             // maxOpenInterestShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxOpenInterestKey(market.marketTokenAddress, false)],
             ),
             // positionImpactPoolAmount
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionImpactPoolAmountKey(market.marketTokenAddress)],
             ),
             // swapImpactPoolAmountLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapImpactPoolAmountKey(market.marketTokenAddress, market.longTokenAddress)],
             ),
             // swapImpactPoolAmountShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapImpactPoolAmountKey(market.marketTokenAddress, market.shortTokenAddress)],
             ),
             // borrowingFactorLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [borrowingFactorKey(market.marketTokenAddress, true)],
             ),
             // borrowingFactorShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [borrowingFactorKey(market.marketTokenAddress, false)],
             ),
             // borrowingExponentFactorLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [borrowingExponentFactorKey(market.marketTokenAddress, true)],
             ),
             // borrowingExponentFactorShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [borrowingExponentFactorKey(market.marketTokenAddress, false)],
             ),
             // fundingFactor
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [fundingFactorKey(market.marketTokenAddress)],
             ),
             // fundingExponentFactor
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [fundingExponentFactorKey(market.marketTokenAddress)],
             ),
             // maxPnlFactorForTradersLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS, market.marketTokenAddress, true)],
             ),
             // maxPnlFactorForTradersShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPnlFactorKey(MAX_PNL_FACTOR_FOR_TRADERS, market.marketTokenAddress, false)],
             ),
             // positionFeeFactorForPositiveImpact
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionFeeFactorKey(market.marketTokenAddress, true)],
             ),
             // positionFeeFactorForNegativeImpact
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionFeeFactorKey(market.marketTokenAddress, false)],
             ),
             // positionImpactFactorPositive
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionImpactFactorKey(market.marketTokenAddress, true)],
             ),
             // positionImpactFactorNegative
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionImpactFactorKey(market.marketTokenAddress, false)],
             ),
             // maxPositionImpactFactorPositive
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPositionImpactFactorKey(market.marketTokenAddress, true)],
             ),
             // maxPositionImpactFactorNegative
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPositionImpactFactorKey(market.marketTokenAddress, false)],
             ),
             // maxPositionImpactFactorForLiquidations
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [maxPositionImpactFactorForLiquidationsKey(market.marketTokenAddress)],
             ),
             // minCollateralFactor
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [minCollateralFactorKey(market.marketTokenAddress)],
             ),
             // minCollateralFactorForOpenInterestLong
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [minCollateralFactorForOpenInterestMultiplierKey(market.marketTokenAddress, true)],
             ),
             // minCollateralFactorForOpenInterestShort
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [minCollateralFactorForOpenInterestMultiplierKey(market.marketTokenAddress, false)],
             ),
             // positionImpactExponentFactor
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [positionImpactExponentFactorKey(market.marketTokenAddress)],
             ),
             // swapFeeFactorForPositiveImpact
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapFeeFactorKey(market.marketTokenAddress, true)],
             ),
             // swapFeeFactorForNegativeImpact
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapFeeFactorKey(market.marketTokenAddress, false)],
             ),
             // swapImpactFactorPositive
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapImpactFactorKey(market.marketTokenAddress, true)],
             ),
             // swapImpactFactorNegative
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapImpactFactorKey(market.marketTokenAddress, false)],
             ),
             // swapImpactExponentFactor
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [swapImpactExponentFactorKey(market.marketTokenAddress)],
             ),
             // longInterestUsingLongToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestKey(market.marketTokenAddress, market.longTokenAddress, true)],
             ),
             // longInterestUsingShortToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestKey(market.marketTokenAddress, market.shortTokenAddress, true)],
             ),
             // shortInterestUsingLongToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestKey(market.marketTokenAddress, market.longTokenAddress, false)],
             ),
             // shortInterestUsingShortToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestKey(market.marketTokenAddress, market.shortTokenAddress, false)],
             ),
             // longInterestInTokensUsingLongToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestInTokensKey(market.marketTokenAddress, market.longTokenAddress, true)],
             ),
             // longInterestInTokensUsingShortToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestInTokensKey(market.marketTokenAddress, market.shortTokenAddress, true)],
             ),
             // shortInterestInTokensUsingLongToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestInTokensKey(market.marketTokenAddress, market.longTokenAddress, false)],
             ),
             // shortInterestInTokensUsingShortToken
-            createSatoruMulticallRequest(
+            createWolfyMulticallRequest(
               chainId,
-              SatoruContract.DataStore,
+              WolfyContract.DataStore,
               DataStoreABI,
               'get_u256',
               [openInterestInTokensKey(market.marketTokenAddress, market.shortTokenAddress, false)],
