@@ -11,7 +11,7 @@ import useMarketsData from './useMarketsData'
 export function getMarketTokenBalancesQueryKey(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
-  accountAddress: string,
+  accountAddress: string | undefined,
 ) {
   return ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const
 }
@@ -19,7 +19,7 @@ export function getMarketTokenBalancesQueryKey(
 function createGetMarketTokenBalancesQueryOptions(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
-  accountAddress: string,
+  accountAddress: string | undefined,
 ) {
   return queryOptions({
     queryKey: getMarketTokenBalancesQueryKey(chainId, marketTokenAddresses, accountAddress),

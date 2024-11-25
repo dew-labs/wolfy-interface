@@ -35,7 +35,7 @@ export default memo(function Chart() {
     [orders, tokenAddress],
   )
 
-  const {data: positions} = usePositionsInfoData()
+  const {data: positions} = usePositionsInfoData(data => data.positionsInfo)
   const positionOfCurrentToken = useMemo(
     () =>
       Array.from(positions?.values() ?? []).filter(

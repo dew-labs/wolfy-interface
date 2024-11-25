@@ -32,7 +32,12 @@ const TABLE_CLASS_NAMES = {
 }
 
 export default memo(function PositionTab() {
-  const {data: positionsInfo, isLoading, isFetching, refetch} = usePositionsInfoData()
+  const {
+    data: positionsInfo,
+    isLoading,
+    isFetching,
+    refetch,
+  } = usePositionsInfoData(data => data.positionsInfo)
   const {data: tokenPricesData} = useTokenPrices(data => data)
   const setTokenAddress = useSetTokenAddress()
 

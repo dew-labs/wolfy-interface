@@ -20,14 +20,14 @@ import type {Market} from './fetchMarkets'
 import type {MarketsData} from './fetchMarketsData'
 import type {Price, TokenPricesData} from './fetchTokenPrices'
 
-// export function getStringReprenetationOfPosition(
-//   account: string,
-//   marketAddress: string,
-//   collateralAddress: string,
-//   isLong: boolean,
-// ) {
-//   return `${account}:${marketAddress}:${collateralAddress}:${isLong}`
-// }
+export function getStringReprenetationOfPosition(
+  account: string,
+  marketAddress: string,
+  collateralAddress: string,
+  isLong: boolean,
+) {
+  return `${account}:${marketAddress}:${collateralAddress}:${isLong}`
+}
 
 export function hashedPositionKey(
   account: Hashable,
@@ -103,6 +103,7 @@ export interface PendingPositionUpdate {
 
 export interface Position {
   key: bigint
+  stringRepresentation: string
   account: string
   marketAddress: string
   collateralTokenAddress: string
@@ -120,7 +121,10 @@ export interface Position {
   pendingUpdate?: PendingPositionUpdate
 }
 
-export type PositionsData = Map<bigint, Position>
+export interface PositionsData {
+  positionsData: Map<bigint, Position>
+  positionsDataViaStringRepresentation: Map<string, Position>
+}
 
 export default async function fetchPositions(
   chainId: StarknetChainId,
@@ -128,7 +132,7 @@ export default async function fetchPositions(
   tokenPricesData: TokenPricesData,
   account: string | undefined,
 ): Promise<PositionsData> {
-  if (!account) return new Map()
+  if (!account) return {positionsData: new Map(), positionsDataViaStringRepresentation: new Map()}
 
   const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
   const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
@@ -146,8 +150,7 @@ export default async function fetchPositions(
   )
 
   const marketPrices: MarketPrice[] = []
-  const positionHashes: bigint[] = [] // contractPositionsKeys
-  // const stringPositions: string[] = [] // allPositionsKeys
+  const positionHashes: bigint[] = []
 
   Array.from(marketsData.values()).forEach(market => {
     const marketPrice = getMarketPrice(chainId, tokenPricesData, market)
@@ -159,14 +162,6 @@ export default async function fetchPositions(
 
     for (const collateralAddress of collaterals) {
       for (const isLong of [true, false]) {
-        // const stringPosition = getStringReprenetationOfPosition(
-        //   account,
-        //   market.marketTokenAddress,
-        //   collateralAddress,
-        //   isLong,
-        // )
-        // stringPositions.push(stringPosition)
-
         const positionHash = hashedPositionKey(
           account,
           market.marketTokenAddress,
@@ -200,6 +195,7 @@ export default async function fetchPositions(
     })
 
   const positionsData = new Map<bigint, Position>()
+  const positionsDataViaStringRepresentation = new Map<string, Position>()
 
   positionsInfo.forEach((positionInfo, index) => {
     const key = positionHashes[index]
@@ -224,16 +220,14 @@ export default async function fetchPositions(
     const marketAddress = toStarknetHexString(market)
     const collateralTokenAddress = toStarknetHexString(collateral_token)
 
-    // const stringPosition = getStringReprenetationOfPosition(
-    //   accountAddress,
-    //   marketAddress,
-    //   collateralTokenAddress,
-    //   is_long,
-    // )
+    const stringPosition = getStringReprenetationOfPosition(
+      accountAddress,
+      marketAddress,
+      collateralTokenAddress,
+      is_long,
+    )
 
-    // console.log('stringPosition', stringPosition)
-
-    positionsData.set(key, {
+    const pos = {
       key: key,
       account: accountAddress,
       marketAddress: marketAddress,
@@ -248,8 +242,16 @@ export default async function fetchPositions(
       fundingFeeAmount: cairoIntToBigInt(fees.funding.funding_fee_amount),
       claimableLongTokenAmount: cairoIntToBigInt(fees.funding.claimable_long_token_amount),
       claimableShortTokenAmount: cairoIntToBigInt(fees.funding.claimable_short_token_amount),
-    })
+      stringRepresentation: stringPosition,
+    }
+
+    positionsDataViaStringRepresentation.set(stringPosition, pos)
+
+    positionsData.set(key, pos)
   })
 
-  return positionsData
+  return {
+    positionsData,
+    positionsDataViaStringRepresentation,
+  }
 }

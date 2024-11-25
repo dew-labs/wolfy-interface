@@ -181,7 +181,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                 </Button>
               </>
             )}
-            {isConnected && (
+            {isConnected && accountAddress && (
               <>
                 <Dropdown placement='bottom-end'>
                   <DropdownTrigger>

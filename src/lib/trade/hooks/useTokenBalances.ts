@@ -6,11 +6,17 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTokenBalances from '@/lib/trade/services/fetchTokenBalances'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getTokenBalancesQueryKey(chainId: StarknetChainId, accountAddress: string) {
+export function getTokenBalancesQueryKey(
+  chainId: StarknetChainId,
+  accountAddress: string | undefined,
+) {
   return ['tokenBalances', chainId, accountAddress] as const
 }
 
-function createGetTokenBalancesQueryOptions(chainId: StarknetChainId, accountAddress: string) {
+function createGetTokenBalancesQueryOptions(
+  chainId: StarknetChainId,
+  accountAddress: string | undefined,
+) {
   return queryOptions({
     queryKey: getTokenBalancesQueryKey(chainId, accountAddress),
     queryFn: async () => {

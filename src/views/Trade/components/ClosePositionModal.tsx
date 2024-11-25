@@ -33,7 +33,7 @@ export function useClosePosition() {
 }
 
 export default function ClosePositionModal() {
-  const {data: positionsInfoData} = usePositionsInfoData()
+  const {data: positionsInfoData} = usePositionsInfoData(data => data.positionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
   const position = positionsInfoData && positionKey ? positionsInfoData.get(positionKey) : undefined

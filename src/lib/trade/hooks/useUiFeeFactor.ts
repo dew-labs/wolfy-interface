@@ -27,6 +27,7 @@ function createGetUiFeeFactorQueryOptions(
         getUiFeeFactorQueryKey(previousChainId),
       )
     },
+    initialData: 0n,
     ...NO_REFETCH_OPTIONS,
   })
 }

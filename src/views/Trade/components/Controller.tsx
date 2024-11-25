@@ -7,6 +7,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Input,
   Slider,
   Tab,
   Tabs,
@@ -26,10 +27,10 @@ import {
 import type {Key} from 'react-aria-components'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
-import {OrderType} from 'wolfy-sdk'
+import {OrderType, type StarknetChainId} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, LEVERAGE_DECIMALS, SLIPPAGE_PRECISION} from '@/constants/config'
-import {FEE_TOKEN_ADDRESS, getTokensMetadata} from '@/constants/tokens'
+import {FEE_TOKEN_ADDRESS, getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
@@ -38,33 +39,179 @@ import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useGasLimits from '@/lib/trade/hooks/useGasLimits'
 import useGasPrice from '@/lib/trade/hooks/useGasPrice'
+import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
+import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
 import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import {getStringReprenetationOfPosition} from '@/lib/trade/services/fetchPositions'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
 import useTradeMode, {TRADE_MODE_LABEL, TradeMode} from '@/lib/trade/states/useTradeMode'
 import useTradeType, {TRADE_TYPE_LABEL, TradeType} from '@/lib/trade/states/useTradeType'
 import estimateExecuteOrderGasLimit from '@/lib/trade/utils/fee/estimateExecuteOrderGasLimit'
 import {getExecutionFee} from '@/lib/trade/utils/fee/getExecutionFee'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import {getIncreasePositionAmounts} from '@/lib/trade/utils/order/increase/getIncreasePositionAmounts'
+import createSwapEstimator from '@/lib/trade/utils/order/swap/createSwapEstimator'
+import findAllPaths from '@/lib/trade/utils/order/swap/findAllPaths'
+import {getBestSwapPath} from '@/lib/trade/utils/order/swap/getBestSwapPath'
+import getMarketsGraph from '@/lib/trade/utils/order/swap/getMarketsGraph'
+import {getSwapAmountsByFromValue} from '@/lib/trade/utils/order/swap/getSwapAmountsByFromValue'
+import {getSwapAmountsByToValue} from '@/lib/trade/utils/order/swap/getSwapAmountsByToValue'
+import getSwapPathStats from '@/lib/trade/utils/order/swap/getSwapPathStats'
+import type {FindSwapPath} from '@/lib/trade/utils/order/swap/types'
 import getLiquidationPrice from '@/lib/trade/utils/position/getLiquidationPrice'
 import {getEntryPrice} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
+import {getMarkPrice} from '@/lib/trade/utils/price/getMarkPrice'
+import type {TokensRatio} from '@/lib/trade/utils/token/getTokensRatioByAmounts'
+import getTokensRatioByPrice from '@/lib/trade/utils/token/getTokensRatioByPrice'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import createResetableComponent from '@/utils/reset-component/createResettableComponent'
 
+import useAcceptablePriceImpact from './hooks/useAcceptablePriceImpact'
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
 import useCollateralToken from './hooks/useCollateralToken'
 import useMarket from './hooks/useMarket'
 import usePayToken from './hooks/usePayToken'
+import useStrategy from './hooks/useStrategy'
 import useToken from './hooks/useToken'
 import TokenInputs from './TokenInputs'
+
+const getAllPaths = (
+  fromTokenAddress: string | undefined,
+  toTokenAddress: string | undefined,
+  marketsData: MarketsData | undefined,
+  tokenPricesData: TokenPricesData | undefined,
+) => {
+  if (!marketsData || !tokenPricesData || !fromTokenAddress || !toTokenAddress) return undefined
+
+  const graph = getMarketsGraph(marketsData)
+  const isSameToken = fromTokenAddress === toTokenAddress
+
+  if (isSameToken) {
+    return undefined
+  }
+
+  return findAllPaths(marketsData, graph, fromTokenAddress, toTokenAddress, tokenPricesData)?.sort(
+    (a, b) => (b.liquidity - a.liquidity > 0 ? 1 : -1),
+  )
+}
+
+const getSwapEstimator = (
+  marketsData: MarketsData | undefined,
+  tokenPricesData: TokenPricesData | undefined,
+) => {
+  if (!marketsData || !tokenPricesData) return undefined
+  return createSwapEstimator(marketsData, tokenPricesData)
+}
+
+const createFindSwapPath = (
+  fromTokenAddress: string | undefined,
+  toTokenAddress: string | undefined,
+  marketsData: MarketsData | undefined,
+  tokenPricesData: TokenPricesData | undefined,
+) => {
+  const allPaths = getAllPaths(fromTokenAddress, toTokenAddress, marketsData, tokenPricesData)
+  const estimator = getSwapEstimator(marketsData, tokenPricesData)
+
+  const findSwapPath: FindSwapPath = (usdIn: bigint, opts: {byLiquidity?: boolean}) => {
+    if (
+      !allPaths?.length ||
+      !allPaths[0] ||
+      !estimator ||
+      !marketsData ||
+      !fromTokenAddress ||
+      !tokenPricesData
+    ) {
+      return undefined
+    }
+
+    let swapPath: string[] | undefined = undefined
+
+    if (opts.byLiquidity) {
+      swapPath = allPaths[0].path
+    } else {
+      swapPath = getBestSwapPath(allPaths, usdIn, estimator)
+    }
+
+    if (!swapPath) {
+      return undefined
+    }
+
+    return getSwapPathStats({
+      marketsData,
+      tokenPricesData,
+      swapPath,
+      initialCollateralAddress: fromTokenAddress,
+      shouldApplyPriceImpact: true,
+      usdIn,
+    })
+  }
+
+  return findSwapPath
+}
+
+const getTradeRatios = function ({
+  chainId,
+  tradeFlags,
+  fromTokenAddress,
+  toTokenAddress,
+  tokenPrice,
+  tokenPricesData,
+}: {
+  chainId: StarknetChainId
+  tradeFlags: TradeFlags
+  fromTokenAddress: string | undefined
+  toTokenAddress: string | undefined
+  tokenPrice: bigint | undefined
+  tokenPricesData: TokenPricesData | undefined
+}) {
+  const {isSwap, isLong, isIncrease} = tradeFlags
+  if (!isSwap || !fromTokenAddress || !toTokenAddress || !tokenPricesData) return {}
+
+  const toToken = getTokenMetadata(chainId, toTokenAddress)
+  const toTokenPrice = tokenPricesData.get(toToken.address) ?? undefined
+  const fromToken = getTokenMetadata(chainId, fromTokenAddress)
+  const fromTokenPrice = tokenPricesData.get(fromToken.address) ?? undefined
+
+  if (fromTokenPrice === undefined || toTokenPrice === undefined) return {}
+
+  const markPrice = getMarkPrice({price: toTokenPrice, isIncrease, isLong})
+  const triggerRatioValue = tokenPrice
+
+  if (!markPrice) return {}
+
+  const markRatio = getTokensRatioByPrice({
+    fromToken,
+    toToken,
+    fromPrice: fromTokenPrice.min,
+    toPrice: markPrice,
+  })
+
+  if (triggerRatioValue === undefined) {
+    return {markRatio}
+  }
+
+  const triggerRatio: TokensRatio = {
+    ratio: triggerRatioValue > 0n ? triggerRatioValue : markRatio.ratio,
+    largestToken: markRatio.largestToken,
+    smallestToken: markRatio.smallestToken,
+  }
+
+  return {
+    markRatio,
+    triggerRatio,
+  }
+}
 
 const AVAILABLE_TRADE_MODES: Record<TradeType, TradeMode[]> = {
   [TradeType.Long]: [
@@ -95,9 +242,54 @@ const SLIDER_CLASS_NAMES = {
   track: '!rounded-none',
 }
 
+const ACCEPTABLE_PRICE_IMPACT_CLASS_NAMES = {
+  input: 'text-right',
+}
+
+export interface TradeFlags {
+  isLong: boolean
+  isShort: boolean
+  isSwap: boolean
+  /**
+   * ```ts
+   * isLong || isShort
+   * ```
+   */
+  isPosition: boolean
+  isIncrease: boolean
+  isTrigger: boolean
+  isMarket: boolean
+  isLimit: boolean
+}
+
+const getTradeFlags = (tradeType: TradeType, tradeMode: TradeMode): TradeFlags => {
+  const isLong = tradeType === TradeType.Long
+  const isShort = tradeType === TradeType.Short
+  const isSwap = tradeType === TradeType.Swap
+  const isPosition = isLong || isShort
+  const isMarket = tradeMode === TradeMode.Market
+  const isLimit = tradeMode === TradeMode.Limit
+  const isTrigger = tradeMode === TradeMode.Trigger
+  const isIncrease = isPosition && (isMarket || isLimit)
+
+  const tradeFlags: TradeFlags = {
+    isLong,
+    isShort,
+    isSwap,
+    isPosition,
+    isIncrease,
+    isMarket,
+    isLimit,
+    isTrigger,
+  }
+
+  return tradeFlags
+}
+
 const Controller = createResetableComponent(function ({reset}) {
-  const [chainId] = useChainId()
   const latestReset = useLatest(reset)
+  const [chainId] = useChainId()
+  const latestChainId = useRef(chainId)
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
@@ -106,16 +298,42 @@ const Controller = createResetableComponent(function ({reset}) {
   const tokensMetadata = getTokensMetadata(chainId)
   const {data: gasPrice} = useGasPrice()
   const {data: gasLimits} = useGasLimits()
-  const {data: _uiFeeFactor} = useUiFeeFactor()
+  const {data: uiFeeFactor} = useUiFeeFactor()
   const {data: referralInfo} = useReferralInfo()
   const {data: tokenBalancesData} = useTokenBalances()
-  const latestChainId = useRef(chainId)
 
+  // TODO
+  const {
+    // isLeverageLocked,
+    // latestIsLeverageLocked,
+    // setIsLeverageLocked,
+    strategy,
+    focusedInput,
+    // latestFocusedInput,
+    // setFocusedInput,
+  } = useStrategy()
   const [tradeType, setTradeType] = useTradeType()
   const latestTradeType = useLatest(tradeType)
   const [tradeMode, setTradeMode] = useTradeMode()
   const latestTradeMode = useLatest(tradeMode)
+  const tradeFlags = useMemo(() => getTradeFlags(tradeType, tradeMode), [tradeType, tradeMode])
 
+  const handleChangeTradeType = useCallback(
+    (value: Key) => {
+      setTradeType(value as TradeType)
+    },
+    [setTradeType],
+  )
+
+  const handleChangeTradeMode = useCallback(
+    (value: Key) => {
+      const tradeMode = value as TradeMode
+      setTradeMode(tradeMode)
+    },
+    [setTradeMode],
+  )
+
+  // Index token
   const {
     tokenAddress,
     tokenAmount,
@@ -124,6 +342,7 @@ const Controller = createResetableComponent(function ({reset}) {
     latestTokenAmountUsd,
     setTokenAmountUsd,
     tokenPrice,
+    derivedTokenPrice,
     latestDerivedTokenPrice,
     setTokenPrice,
     tokenData,
@@ -142,14 +361,13 @@ const Controller = createResetableComponent(function ({reset}) {
     marketData,
   } = useMarket()
 
-  const {data: tokenPricesData} = useTokenPrices(data => {
-    return {
-      tokenPrice: data.get(tokenAddress ?? ''),
-      longTokenPrice: data.get(marketData?.longTokenAddress ?? ''),
-      shortTokenPrice: data.get(marketData?.shortTokenAddress ?? ''),
-      feeTokenPrice: data.get(FEE_TOKEN_ADDRESS.get(chainId) ?? ''),
-    }
-  })
+  const handlePoolChange = useCallback(
+    (value: unknown) => {
+      if (typeof value !== 'string') return
+      setMarketAddress(value)
+    },
+    [setMarketAddress],
+  )
 
   ;(function setDefaultMarketAddress() {
     if (!tokenAddress || !availableMarkets.length) return
@@ -163,6 +381,7 @@ const Controller = createResetableComponent(function ({reset}) {
     }
   })()
 
+  // collateralToken/toToken: The token that we will swap to, from payToken
   const {
     collateralTokenAddress,
     latestCollateralTokenAddress,
@@ -172,6 +391,16 @@ const Controller = createResetableComponent(function ({reset}) {
     latestCollateralTokenAmount,
     setCollateralTokenAmount,
   } = useCollateralToken()
+
+  const handleCollateralChange = useCallback(
+    (value: unknown) => {
+      if (typeof value !== 'string') return
+      if (!latestAvailableCollateralTokenAddresses.current.length) return
+      if (!latestAvailableCollateralTokenAddresses.current.includes(value)) return
+      setCollateralAddress(value)
+    },
+    [setCollateralAddress, latestAvailableCollateralTokenAddresses],
+  )
 
   ;(function setDefaultCollateralTokenAddress() {
     if (!availableCollateralTokenAddresses.length) return
@@ -184,22 +413,23 @@ const Controller = createResetableComponent(function ({reset}) {
     }
   })()
 
+  // payToken/fromToken: The token that the user pays with
   const {
+    payTokenData,
     payTokenAddress,
     setPayTokenAddress,
     payTokenAmount,
     setPayTokenAmount,
     payTokenAmountUsd,
-    maxLeverageNumber,
     leverageInput,
     latestLeverageInput,
     setLeverageInput,
-    handleLeverageChange,
+    setLeverageInputFocused,
     leverage,
     leverageNumber,
+    handleLeverageChange,
     maxLeverage,
-    payTokenData,
-    setLeverageInputFocused,
+    maxLeverageNumber,
   } = usePayToken(tradeMode, tokenAddress, tokenPrice, tokenAmountUsd, setTokenAmountUsd)
 
   ;(function syncPayTokenAddressWithCollateralTokenAddress() {
@@ -211,43 +441,28 @@ const Controller = createResetableComponent(function ({reset}) {
     }
   })()
 
-  const handleChangeTradeType = useCallback(
-    (value: Key) => {
-      setTradeType(value as TradeType)
-    },
-    [setTradeType],
-  )
+  const {
+    acceptablePriceImpactBps,
+    acceptablePriceImpactBpsInput,
+    handleAcceptablePriceImpactBpsInputChange,
+    handleAcceptablePriceImpactBpsInputBlur,
+  } = useAcceptablePriceImpact()
 
-  const handleChangeTradeMode = useCallback(
-    (value: Key) => {
-      const tradeMode = value as TradeMode
-      setTradeMode(tradeMode)
-    },
-    [setTradeMode],
-  )
-
-  const handlePoolChange = useCallback(
-    (value: unknown) => {
-      if (typeof value !== 'string') return
-      setMarketAddress(value)
-    },
-    [setMarketAddress],
-  )
-
-  const handleCollateralChange = useCallback(
-    (value: unknown) => {
-      if (typeof value !== 'string') return
-      if (!latestAvailableCollateralTokenAddresses.current.length) return
-      if (!latestAvailableCollateralTokenAddresses.current.includes(value)) return
-      setCollateralAddress(value)
-    },
-    [setCollateralAddress, latestAvailableCollateralTokenAddresses],
-  )
+  const {data: tokenPricesDataShortlisted} = useTokenPrices(data => {
+    return {
+      tokenPrice: data.get(tokenAddress ?? ''),
+      payTokenPrice: data.get(payTokenAddress ?? ''),
+      collateralTokenPrice: data.get(collateralTokenAddress ?? ''),
+      longTokenPrice: data.get(marketData?.longTokenAddress ?? ''),
+      shortTokenPrice: data.get(marketData?.shortTokenAddress ?? ''),
+      feeTokenPrice: data.get(FEE_TOKEN_ADDRESS.get(chainId) ?? ''),
+    }
+  })
 
   const {data: positionConstants} = usePositionsConstants()
 
   const priceFractionDigits = calculatePriceFractionDigits(
-    tokenAddress && tokenPricesData ? tokenPricesData.tokenPrice?.min : 0,
+    tokenAddress && tokenPricesDataShortlisted ? tokenPricesDataShortlisted.tokenPrice?.min : 0,
   )
 
   const liquidationPrice =
@@ -306,8 +521,8 @@ const Controller = createResetableComponent(function ({reset}) {
     const longTokenDecimals = marketData?.longToken.decimals ?? 0
     const shortTokenDecimals = marketData?.shortToken.decimals ?? 0
 
-    let longTokenPrice = tokenPricesData?.longTokenPrice?.min ?? 0n
-    let shortTokenPrice = tokenPricesData?.shortTokenPrice?.min ?? 0n
+    let longTokenPrice = tokenPricesDataShortlisted?.longTokenPrice?.min ?? 0n
+    let shortTokenPrice = tokenPricesDataShortlisted?.shortTokenPrice?.min ?? 0n
 
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) {
       if (tokenAddress === longTokenAddress && tokenPrice) longTokenPrice = tokenPrice
@@ -351,34 +566,238 @@ const Controller = createResetableComponent(function ({reset}) {
     return ''
   })()
 
+  const {data: marketsData} = useMarketsData()
+  const {data: tokenPricesData} = useTokenPrices(data => data)
+
+  const swapAmounts = (() => {
+    const payToken = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
+    const payTokenPrice = tokenPricesDataShortlisted?.payTokenPrice?.min
+    const collateralToken = collateralTokenAddress
+      ? tokensMetadata.get(collateralTokenAddress)
+      : undefined
+    const tradeFlags = getTradeFlags(TradeType.Swap, tradeMode)
+
+    if (!payToken || !collateralToken || !tokenPricesData || !payTokenPrice) return undefined
+
+    const findSwapPath = createFindSwapPath(
+      payTokenAddress,
+      tradeFlags.isPosition ? collateralTokenAddress : collateralTokenAddress,
+      marketsData,
+      tokenPricesData,
+    )
+
+    const {markRatio, triggerRatio} = getTradeRatios({
+      chainId,
+      tradeFlags,
+      fromTokenAddress: payTokenAddress,
+      toTokenAddress: collateralTokenAddress,
+      tokenPrice: derivedTokenPrice,
+      tokenPricesData,
+    })
+
+    if (markRatio === undefined) return undefined
+
+    if (focusedInput === 'from') {
+      return getSwapAmountsByFromValue({
+        tokenIn: payToken,
+        tokenOut: collateralToken,
+        amountIn: payTokenAmount,
+        triggerRatio: triggerRatio ?? markRatio,
+        isLimit: tradeFlags.isLimit,
+        findSwapPath,
+        uiFeeFactor,
+        tokenPricesData,
+      })
+    } else {
+      return getSwapAmountsByToValue({
+        tokenIn: payToken,
+        tokenOut: collateralToken,
+        amountOut: collateralTokenAmount,
+        triggerRatio: triggerRatio ?? markRatio,
+        isLimit: tradeFlags.isLimit,
+        findSwapPath,
+        uiFeeFactor,
+        tokenPricesData,
+      })
+    }
+  })()
+
+  const {data: positions} = usePositionsInfoData(data => data.positionsInfoViaStringRepresentation)
+
+  const position = useMemo(() => {
+    if (!accountAddress || !marketData?.marketTokenAddress || !collateralTokenAddress)
+      return undefined
+    const positionString = getStringReprenetationOfPosition(
+      accountAddress,
+      marketData.marketTokenAddress,
+      collateralTokenAddress,
+      tradeFlags.isLong,
+    )
+
+    return positions?.get(positionString)
+  }, [
+    accountAddress,
+    collateralTokenAddress,
+    marketData?.marketTokenAddress,
+    tradeFlags.isLong,
+    positions,
+  ])
+
+  const increaseAmounts = (() => {
+    console.log({collateralTokenData, payTokenData, tokenPricesData, marketData, referralInfo})
+
+    if (!collateralTokenData || !payTokenData || !tokenPricesData || !marketData) return undefined
+
+    // const tokenTypeForSwapRoute = tradeFlags.isPosition ? 'collateralToken' : 'indexToken'
+
+    const findSwapPath = createFindSwapPath(
+      payTokenAddress,
+      // TODO: what is this logic?
+      // tokenTypeForSwapRoute === 'indexToken' ? indexTokenAddress : collateralTokenAddress,
+      collateralTokenAddress,
+      marketsData,
+      tokenPricesData,
+    )
+
+    return getIncreasePositionAmounts({
+      marketInfo: marketData,
+      collateralToken: collateralTokenData,
+      collateralTokenAmount,
+      initialCollateralToken: payTokenData,
+      initialCollateralAmount: payTokenAmount,
+      isLong: tradeFlags.isLong,
+      leverage,
+      triggerPrice: tradeFlags.isLimit ? derivedTokenPrice : undefined,
+      position,
+      fixedAcceptablePriceImpactBps: acceptablePriceImpactBps,
+      acceptablePriceImpactBuffer: 100, // TODO: settings
+      findSwapPath,
+      userReferralInfo: referralInfo,
+      uiFeeFactor,
+      strategy,
+      tokenPricesData,
+    })
+  })()
+
+  console.log(increaseAmounts)
+
+  // const decreaseAmounts = (() => {})()
+
+  // const tradeFees = (() => {
+  //   const tradeFeesType = (() => {
+  //     if (tradeType === TradeType.Swap) return 'swap'
+  //     if (tradeMode === TradeMode.Trigger) return 'decrease'
+  //     return 'increase'
+  //   })()
+
+  //   switch (tradeFeesType) {
+  //     case 'swap': {
+  //       if (!swapAmounts?.swapPathStats) return undefined
+
+  //       return getTradeFees({
+  //         initialCollateralUsd: swapAmounts.usdIn,
+  //         collateralDeltaUsd: 0n,
+  //         sizeDeltaUsd: 0n,
+  //         swapSteps: swapAmounts.swapPathStats.swapSteps,
+  //         positionFeeUsd: 0n,
+  //         swapPriceImpactDeltaUsd: swapAmounts.swapPathStats.totalSwapPriceImpactDeltaUsd,
+  //         positionPriceImpactDeltaUsd: 0n,
+  //         priceImpactDiffUsd: 0n,
+  //         borrowingFeeUsd: 0n,
+  //         fundingFeeUsd: 0n,
+  //         feeDiscountUsd: 0n,
+  //         swapProfitFeeUsd: 0n,
+  //         uiFeeFactor,
+  //       })
+  //     }
+  //     case 'increase': {
+  //       if (!increaseAmounts) return undefined
+
+  //       return getTradeFees({
+  //         initialCollateralUsd: increaseAmounts.initialCollateralUsd,
+  //         collateralDeltaUsd: increaseAmounts.initialCollateralUsd, // pay token amount in usd
+  //         sizeDeltaUsd: increaseAmounts.sizeDeltaUsd,
+  //         swapSteps: increaseAmounts.swapPathStats?.swapSteps ?? [],
+  //         positionFeeUsd: increaseAmounts.positionFeeUsd,
+  //         swapPriceImpactDeltaUsd:
+  //           increaseAmounts.swapPathStats?.totalSwapPriceImpactDeltaUsd ?? 0n,
+  //         positionPriceImpactDeltaUsd: increaseAmounts.positionPriceImpactDeltaUsd,
+  //         priceImpactDiffUsd: 0n,
+  //         borrowingFeeUsd: position?.pendingBorrowingFeesUsd ?? 0n,
+  //         fundingFeeUsd: position?.pendingFundingFeesUsd ?? 0n,
+  //         feeDiscountUsd: increaseAmounts.feeDiscountUsd,
+  //         swapProfitFeeUsd: 0n,
+  //         uiFeeFactor,
+  //       })
+  //     }
+  //     case 'decrease': {
+  //       if (!decreaseAmounts || !position) return undefined
+
+  //       const sizeReductionBps =
+  //         (decreaseAmounts.sizeDeltaUsd * BASIS_POINTS_DIVISOR_BIGINT) / position.sizeInUsd
+
+  //       const collateralDeltaUsd =
+  //         (position.collateralUsd * sizeReductionBps) / BASIS_POINTS_DIVISOR_BIGINT
+
+  //       return getTradeFees({
+  //         initialCollateralUsd: position.collateralUsd,
+  //         collateralDeltaUsd,
+  //         sizeDeltaUsd: decreaseAmounts.sizeDeltaUsd,
+  //         swapSteps: [],
+  //         positionFeeUsd: decreaseAmounts.positionFeeUsd,
+  //         swapPriceImpactDeltaUsd: 0n,
+  //         positionPriceImpactDeltaUsd: decreaseAmounts.positionPriceImpactDeltaUsd,
+  //         priceImpactDiffUsd: decreaseAmounts.priceImpactDiffUsd,
+  //         borrowingFeeUsd: decreaseAmounts.borrowingFeeUsd,
+  //         fundingFeeUsd: decreaseAmounts.fundingFeeUsd,
+  //         feeDiscountUsd: decreaseAmounts.feeDiscountUsd,
+  //         swapProfitFeeUsd: decreaseAmounts.swapProfitFeeUsd,
+  //         uiFeeFactor,
+  //       })
+  //     }
+  //     default:
+  //       return undefined
+  //   }
+  // })()
+
+  // console.log(tradeFees)
+
   const executionFee = useMemo(() => {
-    const feeTokenPrice = tokenPricesData?.feeTokenPrice
+    const {isIncrease, isTrigger, isSwap} = tradeFlags
+    const feeTokenPrice = tokenPricesDataShortlisted?.feeTokenPrice
     if (!feeTokenPrice || !gasLimits || !gasPrice) return undefined
 
     let estimatedGas: bigint | undefined
 
-    // if (isIncrease) {
-    // eslint-disable-next-line prefer-const -- for support multiple type later
-    estimatedGas = estimateExecuteOrderGasLimit('increase', gasLimits, {
-      // TODO: update swapPath
-      swapPath: [],
-    })
-    // }
+    if (isIncrease) {
+      estimatedGas = estimateExecuteOrderGasLimit('increase', gasLimits, {
+        swapPath: increaseAmounts?.swapPathStats?.swapPath,
+      })
+    }
 
-    // if (isTrigger) {
-    //   estimatedGas = estimateExecuteOrderGasLimit('decrease', gasLimits, {})
-    // }
+    if (isTrigger) {
+      estimatedGas = estimateExecuteOrderGasLimit('decrease', gasLimits, {})
+    }
 
-    // if (isSwap) {
-    //   estimatedGas = estimateExecuteOrderGasLimit('swap',gasLimits, {
-    //     swapPath: swapAmounts?.swapPathStats?.swapPath,
-    //   })
-    // }
+    if (isSwap) {
+      estimatedGas = estimateExecuteOrderGasLimit('swap', gasLimits, {
+        swapPath: swapAmounts?.swapPathStats?.swapPath,
+      })
+    }
 
     if (!estimatedGas) return undefined
 
     return getExecutionFee(gasLimits, feeTokenPrice, estimatedGas, gasPrice)
-  }, [tokenPricesData, gasLimits, gasPrice])
+  }, [
+    tradeFlags,
+    tokenPricesDataShortlisted?.feeTokenPrice,
+    gasLimits,
+    gasPrice,
+    increaseAmounts?.swapPathStats?.swapPath,
+    swapAmounts?.swapPathStats?.swapPath,
+  ])
+
+  //----------------------------------------------------------------------------
 
   const [isPlacing, setIsPlacing] = useState(false)
 
@@ -664,6 +1083,25 @@ const Controller = createResetableComponent(function ({reset}) {
               </DropdownMenu>
             </Dropdown>
           </div>
+          {tradeMode === TradeMode.Limit && (
+            <>
+              <Divider className='mt-3 opacity-50' />
+              <div className='mt-3 flex w-full justify-between text-sm'>
+                <div className='flex items-center'>Acceptable Price Impact</div>
+                <Input
+                  type='text'
+                  size='sm'
+                  value={acceptablePriceImpactBpsInput}
+                  className='w-20'
+                  classNames={ACCEPTABLE_PRICE_IMPACT_CLASS_NAMES}
+                  startContent={<div className='text-tiny'>-</div>}
+                  endContent={<div className='text-tiny'>%</div>}
+                  onChange={handleAcceptablePriceImpactBpsInputChange}
+                  onBlur={handleAcceptablePriceImpactBpsInputBlur}
+                />
+              </div>
+            </>
+          )}
           <Divider className='mt-3 opacity-50' />
           <div className='text-sm'>
             <div className='mt-2 flex w-full justify-between'>
@@ -672,7 +1110,9 @@ const Controller = createResetableComponent(function ({reset}) {
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Liquidation Price</div>
-              <div className='flex items-center'>{liquidationPriceText}</div>
+              <div className='flex items-center underline decoration-pink-600 decoration-wavy decoration-1 underline-offset-4'>
+                {liquidationPriceText}
+              </div>
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Available Liquidity</div>
