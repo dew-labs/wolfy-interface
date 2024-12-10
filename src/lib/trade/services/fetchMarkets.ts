@@ -1,7 +1,6 @@
 import {
   createWolfyContract,
   DataStoreABI,
-  getWolfyContractAddress,
   isRepresentZero,
   ReaderABI,
   type StarknetChainId,
@@ -23,14 +22,17 @@ export interface Market {
 }
 
 export default async function fetchMarkets(chainId: StarknetChainId) {
-  const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
   const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
   const readerContract = createWolfyContract(chainId, WolfyContract.Reader, ReaderABI)
 
   const marketNum = await dataStoreContract.get_market_count()
 
+  if (marketNum === 0) {
+    return []
+  }
+
   const markets = await readerContract.get_markets(
-    {contract_address: dataStoreAddress},
+    {contract_address: dataStoreContract.address},
     0,
     marketNum,
   )

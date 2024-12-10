@@ -8,11 +8,12 @@ export default function useStrategy() {
   const latestIsLeverageLocked = useLatest(isLeverageLocked)
   const [focusedInput, setFocusedInput] = useState<'from' | 'to'>('from')
   const latestFocusedInput = useLatest(focusedInput)
-  const strategy: Strategy = isLeverageLocked
-    ? focusedInput === 'from'
-      ? 'leverageByCollateral'
-      : 'leverageBySize'
-    : 'independent'
+  const strategy: Strategy = (() => {
+    if (isLeverageLocked) {
+      return focusedInput === 'from' ? 'leverageByCollateral' : 'leverageBySize'
+    }
+    return 'independent'
+  })()
 
   return {
     isLeverageLocked,

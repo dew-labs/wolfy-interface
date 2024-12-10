@@ -1,9 +1,9 @@
-// import MillionLint from '@million/lint'
 import {execSync} from 'node:child_process'
 import dns from 'node:dns'
 import path from 'node:path'
 
 import {partytownVite} from '@builder.io/partytown/utils'
+import {vite as millionLintVite} from '@million/lint'
 import optimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
@@ -16,7 +16,7 @@ import react from '@vitejs/plugin-react-swc'
 import {FontaineTransform} from 'fontaine'
 import {obfuscator} from 'rollup-obfuscator'
 import Unfonts from 'unplugin-fonts/vite'
-import TurboConsole from 'unplugin-turbo-console/vite'
+import turboConsole from 'unplugin-turbo-console/vite'
 import {defineConfig, loadEnv} from 'vite'
 // import pluginChecker from 'vite-plugin-checker'
 import {compression} from 'vite-plugin-compression2'
@@ -68,6 +68,7 @@ export default defineConfig(({mode}) => {
   const inTestOrDevMode = ['test', 'benchmark', 'development'].includes(mode)
 
   const shouldDisableSentry = process.env.DISABLE_SENTRY === 'true' || inTestOrDevMode
+  const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
   const plugins = [
@@ -85,7 +86,7 @@ export default defineConfig(({mode}) => {
     // Tree-shaking for sentry https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/
     replace({
       preventAssignment: false,
-      __SENTRY_DEBUG__: mode === 'production' ? false : true,
+      __SENTRY_DEBUG__: mode !== 'production',
       // __SENTRY_TRACING__: false,
       __RRWEB_EXCLUDE_IFRAME__: true,
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
@@ -95,7 +96,7 @@ export default defineConfig(({mode}) => {
     partytownVite({
       dest: path.join(__dirname, 'dist', '~partytown'),
     }),
-    TurboConsole({
+    turboConsole({
       /* options here */
     }),
     createHtmlPlugin({
@@ -128,23 +129,24 @@ export default defineConfig(({mode}) => {
         ],
       },
     }),
-    //// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    // MillionLint.vite(),
+    millionLintVite({
+      enabled: shouldEnableProfile,
+    }),
     // SWC React
     react({
       plugins: [
         ['@swc-jotai/debug-label', {}],
         ['@swc-jotai/react-refresh', {}],
-        !inTestOrDevMode
-          ? [
+        inTestOrDevMode
+          ? false
+          : [
               '@swc/plugin-react-remove-properties',
               {
                 // The regexes defined here are processed in Rust so the syntax is different from
                 // JavaScript `RegExp`s. See https://docs.rs/regex.
                 properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
               },
-            ]
-          : false,
+            ],
       ].filter(Boolean),
     }),
     // Babel React for react compiler
@@ -331,7 +333,9 @@ export default defineConfig(({mode}) => {
       devSourcemap: true,
       preprocessorOptions: {
         scss: {
+          api: 'modern-compiler',
           sourceMap: true,
+          sourceMapIncludeSources: true,
         },
       },
     },

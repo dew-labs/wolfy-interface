@@ -7,5 +7,10 @@ export default function getPlusOrMinusSymbol(
   }
 
   const {showPlusForZero = false} = opts
-  return value === 0n ? (showPlusForZero ? '+' : '') : value < 0n ? '-' : '+'
+
+  if (value === 0n) {
+    return showPlusForZero ? '+' : ''
+  }
+
+  return value < 0n ? '-' : '+'
 }

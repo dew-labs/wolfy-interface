@@ -3,10 +3,12 @@ import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} 
 
 import {getTokensMetadata} from '@/constants/tokens'
 
+export type TokenBalancesData = Map<string, bigint>
+
 export default async function getTokenBalances(
   chainId: StarknetChainId,
   accountAddress: string | undefined,
-) {
+): Promise<TokenBalancesData> {
   const balanceMap = new Map<string, bigint>()
 
   if (!accountAddress) return balanceMap

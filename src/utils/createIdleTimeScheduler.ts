@@ -27,7 +27,7 @@ const createIdleTimeScheduler = (timeout = 3000) => {
     if (typeof deadline === 'undefined')
       deadline = {
         didTimeout: false,
-        timeRemaining: function () {
+        timeRemaining() {
           return Number.MAX_VALUE
         },
       }

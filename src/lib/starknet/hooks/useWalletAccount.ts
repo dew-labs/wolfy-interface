@@ -15,16 +15,13 @@ export default function useWalletAccount() {
   const setAccountAddress = useSetAccountAddress()
   const setShouldReconnect = useSetShouldReconnect()
 
-  const disconnect = useCallback(
-    async function () {
-      await getStarknetCore.disconnect()
-      setWalletAccount(undefined)
-      setWalletChainId(undefined)
-      setAccountAddress('')
-      setShouldReconnect(false)
-    },
-    [setShouldReconnect, setWalletChainId, setAccountAddress],
-  )
+  const disconnect = useCallback(async () => {
+    await getStarknetCore.disconnect()
+    setWalletAccount(undefined)
+    setWalletChainId(undefined)
+    setAccountAddress('')
+    setShouldReconnect(false)
+  }, [setShouldReconnect, setWalletChainId, setAccountAddress])
 
   return [walletAccount, disconnect] as const
 }
@@ -35,8 +32,10 @@ export function useSetWalletAccount() {
 
   return useCallback(
     (walletAccount?: WalletAccount) => {
+      if (!walletAccount) return
+
       setWalletAccount(walletAccount)
-      setAccountAddress(walletAccount?.address ?? '')
+      setAccountAddress(walletAccount.address)
     },
     [setWalletAccount, setAccountAddress],
   )

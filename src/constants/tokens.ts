@@ -196,13 +196,14 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
 
 // TODO: support change fee token
 export const FEE_TOKEN_ADDRESS = new Map<StarknetChainId, string>([
-  [StarknetChainId.SN_KATANA, '0x03a2f645ca6481b92c0268d01a52b57a9d06e7ec61d66c069f084bab23a43996'], // wfSTRK
+  [StarknetChainId.SN_KATANA, '0x060daff2e4fbf2a789baa16c01f14733434fb32aa1db9558e9944ad154fa42b2'], // wfETH
   [
     StarknetChainId.SN_SEPOLIA,
-    '0x0257f31f11fa095874ded95a8ad6c8dca9fb851557df83e7cd384bde65c4d1c4',
-  ], // wfSTRK
+    '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+  ], // wfETH
   // [StarknetChainId.SN_MAIN, ''],
 ])
+
 export function getTokenMetadata(chainId: StarknetChainId, address: string) {
   const tokenMetadata = TOKENS_METADATA.get(chainId)?.get(address)
 

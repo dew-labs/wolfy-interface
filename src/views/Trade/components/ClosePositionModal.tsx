@@ -1,7 +1,7 @@
 import {Button, Input, Modal, ModalBody, ModalContent, ModalHeader} from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useMemo, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 import {OrderType} from 'wolfy-sdk'
@@ -11,6 +11,7 @@ import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
+import useFeeToken from '@/lib/trade/hooks/useFeeToken'
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
@@ -32,16 +33,18 @@ export function useClosePosition() {
   }, [])
 }
 
-export default function ClosePositionModal() {
-  const {data: positionsInfoData} = usePositionsInfoData(data => data.positionsInfo)
+export default memo(function ClosePositionModal() {
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: positionsInfoData = new Map()} = usePositionsInfoData(data => data.positionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
-  const position = positionsInfoData && positionKey ? positionsInfoData.get(positionKey) : undefined
+  const position = positionKey ? positionsInfoData.get(positionKey) : undefined
   const latestPosition = useLatest(position)
 
-  const {data: collateralTokenPrice} = useTokenPrices(data =>
-    data.get(position?.collateralTokenAddress ?? ''),
-  )
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: collateralTokenPrice = 0n} = useTokenPrices(data => {
+    return data.get(position?.collateralTokenAddress ?? '')?.min
+  })
 
   const isOpen = useAtomValue(isCLosePositionModalOpenAtom)
 
@@ -54,16 +57,16 @@ export default function ClosePositionModal() {
 
   const maximumCollateralUsdToDecrease = position?.netValue ?? 0n
   const maximumSizeUsdToDecrease = position?.sizeInUsd ?? 0n
-  const maximumCollateralTokenToDecrease =
-    expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) /
-    (collateralTokenPrice?.min ?? 1n)
+  const maximumCollateralTokenToDecrease = collateralTokenPrice
+    ? expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) / collateralTokenPrice
+    : 0n
 
   const maximumCollateralTokenToDecreaseText = formatNumber(
     shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
     Format.READABLE,
     {
       exactFractionDigits: true,
-      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice?.max),
+      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice),
     },
   )
 
@@ -134,6 +137,9 @@ export default function ClosePositionModal() {
   const [chainId] = useChainId()
   const latestChainId = useLatest(chainId)
 
+  const {feeToken} = useFeeToken()
+  const latestFeeToken = useLatest(feeToken)
+
   const [isClosing, setIsClosing] = useState(false)
   const handleClose = useCallback(
     (isFull?: boolean) => {
@@ -165,18 +171,25 @@ export default function ClosePositionModal() {
 
       setIsClosing(true)
       toast.promise(
-        sendOrder(latestWallet.current, {
-          receiver,
-          market,
-          initialCollateralToken,
-          sizeDeltaUsd,
-          initialCollateralDeltaAmount,
-          orderType,
-          isLong,
-          triggerPrice,
-          acceptablePrice,
-          referralCode: 0,
-        }),
+        sendOrder(
+          latestWallet.current,
+          {
+            receiver,
+            market,
+            initialCollateralToken,
+            sizeDeltaUsd,
+            initialCollateralDeltaAmount,
+            orderType,
+            isLong,
+            triggerPrice,
+            acceptablePrice,
+            referralCode: 0,
+            swapPath: [],
+            executionFee: 0n,
+            minOutputAmount: 0n,
+          },
+          latestFeeToken.current,
+        ),
         {
           loading: 'Placing your order...',
           description: 'Waiting for transaction confirmation',
@@ -205,11 +218,7 @@ export default function ClosePositionModal() {
             setIsClosing(false)
           },
           error: error => {
-            return (
-              <>
-                <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
-              </>
-            )
+            return <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
           },
         },
       )
@@ -311,4 +320,4 @@ export default function ClosePositionModal() {
       </ModalContent>
     </Modal>
   )
-}
+})

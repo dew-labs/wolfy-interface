@@ -18,7 +18,6 @@ export function getReservedUsd(
       marketInfo.indexToken.decimals,
       indexTokenPrice.max,
     )
-  } else {
-    return marketInfo.shortInterestUsd
   }
+  return marketInfo.shortInterestUsd
 }

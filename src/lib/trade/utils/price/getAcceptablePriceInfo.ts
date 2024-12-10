@@ -39,7 +39,7 @@ export default function getAcceptablePriceInfo(p: {
     priceImpactDiffUsd: 0n,
   }
 
-  if (sizeDeltaUsd <= 0 || indexPrice == 0n) {
+  if (sizeDeltaUsd <= 0 || indexPrice === 0n) {
     return values
   }
 

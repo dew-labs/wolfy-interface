@@ -35,6 +35,9 @@ const RACLinkComponent = React.forwardRef<
     />
   )
 })
+
+RACLinkComponent.displayName = 'RACLinkComponent'
+
 const CreatedLinkComponent = createLink(RACLinkComponent)
 export const RACLink: LinkComponent<typeof RACLinkComponent> = props => {
   return <CreatedLinkComponent preload={'intent'} {...props} />

@@ -44,8 +44,8 @@ export default memo(function TVLightWeightChart(props: {
   lines: CreatePriceLineOptions[]
 }) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<IChartApi>()
-  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>()
+  const chartRef = useRef<IChartApi>(undefined)
+  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>(undefined)
 
   // NOTE: Unused?
   // CHART_STYLE.LINE_COLOR

@@ -12,5 +12,5 @@ export default function parseNumber(n: string, locale: Intl.LocalesArgument = 'e
 
   n = n.trim().replace(group, '').replace(decimal, '.').replace(numeral, idx)
 
-  return n ? +n : NaN
+  return n ? Number(n) : NaN
 }

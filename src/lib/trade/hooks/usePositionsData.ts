@@ -1,6 +1,5 @@
-import type {QueryClient} from '@tanstack/react-query'
-import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
-import {usePreviousDistinct} from 'react-use'
+import type {UseQueryResult} from '@tanstack/react-query'
+import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
@@ -23,10 +22,8 @@ export function getPositionsQueryKey(
 function createGetPositionsQueryOptions<T>(
   chainId: StarknetChainId,
   marketsData: MarketsData | undefined,
-  previousMarketsData: MarketsData | undefined,
   accountAddress: string | undefined,
-  selector: (data: PositionsData) => T,
-  queryClient: QueryClient,
+  selector?: (data: PositionsData) => T,
 ) {
   return queryOptions({
     queryKey: getPositionsQueryKey(chainId, marketsData, accountAddress),
@@ -36,35 +33,23 @@ function createGetPositionsQueryOptions<T>(
           return await fetchPositions(chainId, marketsData, tokenPricesData, accountAddress)
         }
       : skipToken,
-    placeholderData: () => {
-      if (!previousMarketsData) return undefined
-      return queryClient.getQueryData<Awaited<ReturnType<typeof fetchPositions>>>(
-        getPositionsQueryKey(chainId, previousMarketsData, accountAddress),
-      )
-    },
+    placeholderData: previousData => previousData,
     ...NO_REFETCH_OPTIONS,
-    select: selector,
+    select: selector as (data: PositionsData) => T,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function usePositionsData<T>(selector: (data: PositionsData) => T) {
+export default function usePositionsData(): UseQueryResult<PositionsData>
+export default function usePositionsData<T = PositionsData>(
+  selector: (data: PositionsData) => T,
+): UseQueryResult<T>
+export default function usePositionsData<T = PositionsData>(selector?: (data: PositionsData) => T) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
   const {data: marketsData} = useMarketsData()
-  const previousMarketsData = usePreviousDistinct(marketsData)
-  const queryClient = useQueryClient()
 
-  return useQuery(
-    createGetPositionsQueryOptions(
-      chainId,
-      marketsData,
-      previousMarketsData,
-      accountAddress,
-      selector,
-      queryClient,
-    ),
-  )
+  return useQuery(createGetPositionsQueryOptions(chainId, marketsData, accountAddress, selector))
 }

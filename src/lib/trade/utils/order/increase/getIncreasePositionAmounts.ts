@@ -132,9 +132,9 @@ export function getIncreasePositionAmounts(p: {
     return values
   }
 
-  const isLimit = Boolean(triggerPrice !== undefined && triggerPrice > 0)
+  const isLimit = !!(triggerPrice !== undefined && triggerPrice > 0)
 
-  if (isLimit && triggerPrice !== undefined) {
+  if (isLimit) {
     values.triggerPrice = triggerPrice
     values.triggerThresholdType = getTriggerThresholdType(OrderType.LimitIncrease, isLong)
 
@@ -411,7 +411,7 @@ export function getIncreasePositionAmounts(p: {
         indexPrice: values.collateralPrice,
         sizeDeltaUsd: values.sizeDeltaUsd,
         priceImpactDeltaUsd: values.positionPriceImpactDeltaUsd,
-        acceptablePriceImpactBuffer: acceptablePriceImpactBuffer,
+        acceptablePriceImpactBuffer,
       })
     }
 
@@ -429,7 +429,7 @@ export function getIncreasePositionAmounts(p: {
     values.acceptablePriceDeltaBps = limitAcceptablePriceInfo.acceptablePriceDeltaBps
   }
 
-  let priceImpactAmount = 0n
+  let priceImpactAmount
 
   if (values.positionPriceImpactDeltaUsd > 0) {
     const price =

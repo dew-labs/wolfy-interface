@@ -81,9 +81,11 @@ export function getMarketPrice(
     invariant(indexTokenPrice && longTokenPrice && shortTokenPrice, 'Invalid prices')
 
     return {
+      /* eslint-disable camelcase -- snake_case is used in the contract */
       index_token_price: convertToContractTokenPrices(indexTokenPrice, indexToken.decimals),
       long_token_price: convertToContractTokenPrices(longTokenPrice, longToken.decimals),
       short_token_price: convertToContractTokenPrices(shortTokenPrice, shortToken.decimals),
+      /* eslint-enable camelcase */
     }
   } catch (error) {
     logError(error)
@@ -126,15 +128,19 @@ export interface PositionsData {
   positionsDataViaStringRepresentation: Map<string, Position>
 }
 
+export const DEFAULT_POSITIONS_DATA: PositionsData = {
+  positionsData: new Map(),
+  positionsDataViaStringRepresentation: new Map(),
+}
+
 export default async function fetchPositions(
   chainId: StarknetChainId,
   marketsData: MarketsData,
   tokenPricesData: TokenPricesData,
   account: string | undefined,
 ): Promise<PositionsData> {
-  if (!account) return {positionsData: new Map(), positionsDataViaStringRepresentation: new Map()}
+  if (!account) return DEFAULT_POSITIONS_DATA
 
-  const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
   const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
 
   const readerContract = createWolfyContract(chainId, WolfyContract.Reader, ReaderABI)
@@ -180,7 +186,7 @@ export default async function fetchPositions(
   const positionsInfo = await readerContract
     .get_account_position_info_list(
       {
-        contract_address: dataStoreAddress,
+        contract_address: dataStoreContract.address,
       },
       {
         contract_address: referralStorageAddress,
@@ -202,42 +208,43 @@ export default async function fetchPositions(
     if (!key) return
 
     const {position, fees} = positionInfo
+
     const {
       account,
       market,
-      collateral_token,
-      increased_at_block,
-      is_long,
-      size_in_usd,
-      size_in_tokens,
-      collateral_amount,
-      decreased_at_block,
+      collateral_token: collateralToken,
+      increased_at_block: increasedAtBlock,
+      is_long: isLong,
+      size_in_usd: sizeInUsd,
+      size_in_tokens: sizeInTokens,
+      collateral_amount: collateralAmount,
+      decreased_at_block: decreasedAtBlock,
     } = position
 
-    if (BigInt(increased_at_block) == 0n) return
+    if (BigInt(increasedAtBlock) === 0n) return
 
     const accountAddress = toStarknetHexString(account)
     const marketAddress = toStarknetHexString(market)
-    const collateralTokenAddress = toStarknetHexString(collateral_token)
+    const collateralTokenAddress = toStarknetHexString(collateralToken)
 
     const stringPosition = getStringReprenetationOfPosition(
       accountAddress,
       marketAddress,
       collateralTokenAddress,
-      is_long,
+      isLong,
     )
 
     const pos = {
-      key: key,
+      key,
       account: accountAddress,
-      marketAddress: marketAddress,
-      collateralTokenAddress: collateralTokenAddress,
-      sizeInUsd: cairoIntToBigInt(size_in_usd),
-      sizeInTokens: cairoIntToBigInt(size_in_tokens),
-      collateralAmount: cairoIntToBigInt(collateral_amount),
-      increasedAtBlock: cairoIntToBigInt(increased_at_block),
-      decreasedAtBlock: cairoIntToBigInt(decreased_at_block),
-      isLong: is_long,
+      marketAddress,
+      collateralTokenAddress,
+      sizeInUsd: cairoIntToBigInt(sizeInUsd),
+      sizeInTokens: cairoIntToBigInt(sizeInTokens),
+      collateralAmount: cairoIntToBigInt(collateralAmount),
+      increasedAtBlock: cairoIntToBigInt(increasedAtBlock),
+      decreasedAtBlock: cairoIntToBigInt(decreasedAtBlock),
+      isLong,
       pendingBorrowingFeesUsd: cairoIntToBigInt(fees.borrowing.borrowing_fee_usd),
       fundingFeeAmount: cairoIntToBigInt(fees.funding.funding_fee_amount),
       claimableLongTokenAmount: cairoIntToBigInt(fees.funding.claimable_long_token_amount),

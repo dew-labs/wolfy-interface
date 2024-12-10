@@ -1,4 +1,4 @@
-import {Icon} from '@iconify/react/dist/iconify.js'
+import {Icon} from '@iconify/react'
 import {
   Button,
   Spinner,
@@ -49,8 +49,7 @@ export default memo(function OrdersTab() {
   const queryClient = useQueryClient()
   const setTokenAddress = useSetTokenAddress()
 
-  const {data, isLoading, isFetching, refetch} = useOrders()
-  const orders = data ?? []
+  const {data: orders = [], isLoading, isFetching, refetch} = useOrders()
   const refetchOrders = useCallback(() => {
     void refetch()
   }, [refetch])
@@ -113,7 +112,7 @@ export default memo(function OrdersTab() {
         >
           {order => {
             const indexTokenPrice = order.indexTokenPrice
-
+            // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
             if (!indexTokenPrice) return <></>
 
             const indexName = getMarketIndexName(order.marketData)
@@ -128,7 +127,7 @@ export default memo(function OrdersTab() {
             const collateralUsd = convertTokenAmountToUsd(
               order.initialCollateralDeltaAmount,
               initialCollateralToken.decimals,
-              initialCollateralTokenPrice?.min ?? 0n,
+              initialCollateralTokenPrice?.min,
             )
 
             const collateralUdsShrinked = formatNumber(
@@ -139,7 +138,7 @@ export default memo(function OrdersTab() {
               },
             )
 
-            const collateralText = (function () {
+            const collateralText = (() => {
               if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
 
               const targetCollateralAmount = convertUsdToTokenAmount(
@@ -199,13 +198,12 @@ export default memo(function OrdersTab() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Tooltip content='Press to switch market'>
+                  <Tooltip content='Press to switch market' showArrow>
                     <Button
                       disableRipple
                       disableAnimation
                       variant='light'
                       className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                       onClick={() => {
                         setTokenAddress(order.marketData.indexTokenAddress)
                       }}
@@ -238,7 +236,6 @@ export default memo(function OrdersTab() {
                 <TableCell>
                   <Button
                     size='sm'
-                    // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                     onClick={() => {
                       handleCancelOrder(order.key)
                     }}

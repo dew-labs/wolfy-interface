@@ -1,5 +1,7 @@
 import type {BigNumberish} from 'starknet'
 
+import {roundToNDecimal} from './roundToNDecimals'
+
 export default function expandDecimals(
   value: BigNumberish | undefined,
   decimals: number | bigint,
@@ -13,16 +15,22 @@ export default function expandDecimals(
 
   const dotIndex = valueString.indexOf('.')
 
-  const decimalPart = (dotIndex !== -1 ? valueString.slice(dotIndex + 1) : '')
+  const foundDot = dotIndex !== -1
+
+  const decimalPart = (foundDot ? valueString.slice(dotIndex + 1) : '')
     .padEnd(Number(decimals), '0')
     .slice(0, Number(decimals))
 
-  const integerPart = dotIndex !== -1 ? valueString.slice(0, dotIndex) : valueString
+  const integerPart = foundDot ? valueString.slice(0, dotIndex) : valueString
 
   return BigInt(integerPart + decimalPart)
 }
 
-export function shrinkDecimals(value: BigNumberish | undefined, decimals: number | bigint): string {
+export function shrinkDecimals(
+  value: BigNumberish | undefined,
+  decimals: number | bigint,
+  roundToDecimal?: number,
+): string {
   if (!value) return '0'
 
   decimals = Number(decimals)
@@ -42,5 +50,8 @@ export function shrinkDecimals(value: BigNumberish | undefined, decimals: number
   let fraction = display.slice(display.length - decimals)
   fraction = fraction.replace(/0+$/, '')
 
-  return `${negative ? '-' : ''}${integer || '0'}${fraction ? '.' + fraction : ''}`
+  const result = `${negative ? '-' : ''}${integer || '0'}${fraction ? `.${fraction}` : ''}`
+
+  if (roundToDecimal === undefined) return result
+  return String(roundToNDecimal(result, roundToDecimal))
 }

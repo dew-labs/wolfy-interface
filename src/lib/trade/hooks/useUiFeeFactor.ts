@@ -1,6 +1,4 @@
-import type {QueryClient} from '@tanstack/react-query'
-import {queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
-import {usePreviousDistinct} from 'react-use'
+import {queryOptions, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -11,30 +9,18 @@ export function getUiFeeFactorQueryKey(chainId: StarknetChainId) {
   return ['uiFeeFactor', chainId] as const
 }
 
-function createGetUiFeeFactorQueryOptions(
-  chainId: StarknetChainId,
-  previousChainId: StarknetChainId | undefined,
-  queryClient: QueryClient,
-) {
+function createGetUiFeeFactorQueryOptions(chainId: StarknetChainId) {
   return queryOptions({
     queryKey: getUiFeeFactorQueryKey(chainId),
     queryFn: async () => {
       return await fetchUiFeeFactor(chainId)
     },
-    placeholderData: () => {
-      if (!previousChainId) return undefined
-      return queryClient.getQueryData<Awaited<ReturnType<typeof fetchUiFeeFactor>>>(
-        getUiFeeFactorQueryKey(previousChainId),
-      )
-    },
-    initialData: 0n,
+    placeholderData: previousData => previousData,
     ...NO_REFETCH_OPTIONS,
   })
 }
 
 export default function useUiFeeFactor() {
   const [chainId] = useChainId()
-  const previousChainId = usePreviousDistinct(chainId)
-  const queryClient = useQueryClient()
-  return useQuery(createGetUiFeeFactorQueryOptions(chainId, previousChainId, queryClient))
+  return useQuery(createGetUiFeeFactorQueryOptions(chainId))
 }

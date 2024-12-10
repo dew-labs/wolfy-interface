@@ -3,7 +3,7 @@ import invariant from 'tiny-invariant'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 
-import getSwapStats from './getStapStats'
+import getSwapStats from './getSwapStats'
 import type {MarketEdge, SwapEstimator} from './types'
 
 export default function createSwapEstimator(

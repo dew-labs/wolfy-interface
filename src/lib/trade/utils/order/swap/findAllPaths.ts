@@ -15,7 +15,7 @@ export default function findAllPaths(
 ): SwapRoute[] | undefined {
   const routes: SwapRoute[] = []
 
-  const edges = graph.abjacencyList[from]
+  const edges = graph.adjacencyList[from]
 
   if (!edges?.length) {
     return undefined
@@ -43,7 +43,7 @@ export default function findAllPaths(
     if (edge.to === to) {
       routes.push({
         edged: pathEdges,
-        path: path,
+        path,
         liquidity: getMaxSwapPathLiquidity({
           marketsData,
           swapPath: path,
@@ -54,7 +54,7 @@ export default function findAllPaths(
       return
     }
 
-    const edges = graph.abjacencyList[edge.to]
+    const edges = graph.adjacencyList[edge.to]
 
     if (!edges?.length) {
       return

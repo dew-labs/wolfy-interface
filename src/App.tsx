@@ -1,4 +1,4 @@
-// eslint-disable-next-line import-x/no-unresolved -- This is a workaround for unplugin-fonts
+// This is a workaround for unplugin-fonts
 import 'unfonts.css'
 import './App.scss'
 import 'lazysizes'
@@ -6,7 +6,6 @@ import 'lazysizes/plugins/parent-fit/ls.parent-fit'
 import 'lazysizes/plugins/attrchange/ls.attrchange'
 import './setupSchema'
 import './i18n/setup'
-import './setupWolfy'
 
 import {Partytown} from '@builder.io/partytown/react'
 import {NextUIProvider} from '@nextui-org/react'
@@ -35,6 +34,7 @@ import ThemeUpdater from './lib/theme/ThemeUpdater'
 import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
 import {createQueryClient, createQueryPersistOptions} from './queries/queries'
 import {createRouter} from './router'
+import {setupWolfy, teardownWolfy} from './setupWolfy'
 import ErrorComponent from './views/Error/ErrorComponent'
 
 const JotaiDevTools = import.meta.env.PROD
@@ -93,6 +93,14 @@ function App() {
   useEffect(() => {
     // Init the live announcer, fixes for https://github.com/adobe/react-spectrum/issues/5191
     announce(' ', 'polite', 0)
+  }, [])
+
+  useEffect(function setup() {
+    setupWolfy()
+
+    return () => {
+      teardownWolfy()
+    }
   }, [])
 
   return (

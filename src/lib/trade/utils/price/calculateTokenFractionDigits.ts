@@ -4,7 +4,7 @@ export default function calculateTokenFractionDigits(price?: bigint, decimals = 
   if (!price) return 2
 
   if (price === 0n) return 2
-  const priceNumber = Number(price.toString()) / Math.pow(10, decimals)
+  const priceNumber = Number(price.toString()) / 10 ** decimals
 
   if (priceNumber >= 1000) return 4
   if (priceNumber >= 100) return 3

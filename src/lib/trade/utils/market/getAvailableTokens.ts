@@ -80,7 +80,7 @@ export default function getAvailableTokens(
   return {
     allMarkets,
     swapTokens: collaterals,
-    indexTokens: indexTokens,
+    indexTokens,
     longLiquid: longTokensWithPoolValue,
     shortLiquid: shortTokensWithPoolValue,
   }

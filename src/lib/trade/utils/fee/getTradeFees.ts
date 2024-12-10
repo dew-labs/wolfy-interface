@@ -15,9 +15,8 @@ export type SwapFeeItem = FeeItem & {
 
 export interface TradeFees {
   totalFees?: FeeItem
-  payTotalFees?: FeeItem
   swapFees?: SwapFeeItem[] | undefined
-  positionFee?: FeeItem | undefined
+  positionFee?: FeeItem | undefined // open/close fee
   swapPriceImpact?: FeeItem | undefined
   positionPriceImpact?: FeeItem | undefined
   priceImpactDiff?: FeeItem | undefined
@@ -28,8 +27,8 @@ export interface TradeFees {
   fundingFee?: FeeItem | undefined
   uiFee?: FeeItem | undefined
   uiSwapFee?: FeeItem | undefined
-  feeDiscountUsd?: bigint
   swapProfitFee?: FeeItem | undefined
+  feeDiscountUsd?: bigint
 }
 
 export function getTradeFees(p: {
@@ -70,7 +69,7 @@ export function getTradeFees(p: {
           tokenOutAddress: step.tokenOutAddress,
           marketAddress: step.marketAddress,
           deltaUsd: step.swapFeeUsd * -1n,
-          bps: step.usdIn != 0n ? getBasisPoints(step.swapFeeUsd * -1n, step.usdIn) : 0n,
+          bps: step.usdIn === 0n ? 0n : getBasisPoints(step.swapFeeUsd * -1n, step.usdIn),
         }))
       : undefined
 
@@ -116,20 +115,8 @@ export function getTradeFees(p: {
     uiSwapFee,
   ])
 
-  const payTotalFees = getTotalFeeItem([
-    ...(swapFees ?? []),
-    swapProfitFee,
-    swapPriceImpact,
-    positionFeeAfterDiscount,
-    borrowFee,
-    fundingFee,
-    uiFee,
-    uiSwapFee,
-  ])
-
   return {
     totalFees,
-    payTotalFees,
     swapFees,
     swapProfitFee,
     swapPriceImpact,

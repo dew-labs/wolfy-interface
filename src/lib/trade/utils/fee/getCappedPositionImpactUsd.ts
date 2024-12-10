@@ -27,7 +27,7 @@ export default function getCappedPositionImpactUsd(
   const maxPriceImpactUsdBasedOnImpactPool = convertTokenAmountToUsd(
     impactPoolAmount,
     indexToken.decimals,
-    indexTokenPrice?.min ?? 0n,
+    indexTokenPrice?.min,
   )
 
   let cappedImpactUsd = priceImpactDeltaUsd

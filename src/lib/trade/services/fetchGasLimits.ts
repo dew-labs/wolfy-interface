@@ -29,6 +29,18 @@ export interface GasLimitsConfig {
   estimatedFeeMultiplierFactor: bigint
 }
 
+export const DEFAULT_GAS_LIMITS: GasLimitsConfig = {
+  depositSingleToken: 0n,
+  depositMultiToken: 0n,
+  withdrawalMultiToken: 0n,
+  singleSwap: 0n,
+  swapOrder: 0n,
+  increaseOrder: 0n,
+  decreaseOrder: 0n,
+  estimatedFeeBaseGasLimit: 0n,
+  estimatedFeeMultiplierFactor: 0n,
+}
+
 export default async function fetchGasLimits(chainId: StarknetChainId): Promise<GasLimitsConfig> {
   const [
     depositSingleToken,
@@ -71,14 +83,14 @@ export default async function fetchGasLimits(chainId: StarknetChainId): Promise<
   ])
 
   return {
-    depositSingleToken: cairoIntToBigInt(depositSingleToken ?? 0),
-    depositMultiToken: cairoIntToBigInt(depositMultiToken ?? 0),
-    withdrawalMultiToken: cairoIntToBigInt(withdrawalMultiToken ?? 0),
-    singleSwap: cairoIntToBigInt(singleSwap ?? 0),
-    swapOrder: cairoIntToBigInt(swapOrder ?? 0),
-    increaseOrder: cairoIntToBigInt(increaseOrder ?? 0),
-    decreaseOrder: cairoIntToBigInt(decreaseOrder ?? 0),
-    estimatedFeeBaseGasLimit: cairoIntToBigInt(estimatedFeeBaseGasLimit ?? 0),
-    estimatedFeeMultiplierFactor: cairoIntToBigInt(estimatedFeeMultiplierFactor ?? 0),
+    depositSingleToken: cairoIntToBigInt(depositSingleToken),
+    depositMultiToken: cairoIntToBigInt(depositMultiToken),
+    withdrawalMultiToken: cairoIntToBigInt(withdrawalMultiToken),
+    singleSwap: cairoIntToBigInt(singleSwap),
+    swapOrder: cairoIntToBigInt(swapOrder),
+    increaseOrder: cairoIntToBigInt(increaseOrder),
+    decreaseOrder: cairoIntToBigInt(decreaseOrder),
+    estimatedFeeBaseGasLimit: cairoIntToBigInt(estimatedFeeBaseGasLimit),
+    estimatedFeeMultiplierFactor: cairoIntToBigInt(estimatedFeeMultiplierFactor),
   }
 }

@@ -96,15 +96,12 @@ const tradeDataSchema = Type.Object({
       createdAt: Type.Number(),
     }),
   ),
-  // Custom field, not in API response
-  isPrevious: Type.Optional(Type.Boolean()),
 })
 
 export type TradeData = Static<typeof tradeDataSchema>
 const tradeDataTypeCheck = TypeCompiler.Compile(tradeDataSchema)
 
 export function isTradeData(data: unknown): data is TradeData {
-  console.log('Errors', Array.from(tradeDataTypeCheck.Errors(data)))
   return tradeDataTypeCheck.Check(data)
 }
 

@@ -40,6 +40,5 @@ pnpm build
 
 ## Notes
 
-About SWC version:
-- `swc-jotai/react-refresh`, `swc-jotai/debug-label` is on `swc_core` version `0.90.37`
-- So in order for everything to work properly, we locked `@swc/plugin-react-remove-properties` at `2.0.7` and `@swc/core` at `1.6.13`
+About `abi-wan-kanabi`:
+- Using version `2.2.3` will result in type errors, must pin at `2.2.2`

@@ -170,13 +170,13 @@ export default function getPositionsInfo(
       isLong: position.isLong,
     })
 
-    const pnlPercentage = collateralUsd != 0n ? getBasisPoints(pnl, collateralUsd) : 0n
+    const pnlPercentage = collateralUsd === 0n ? 0n : getBasisPoints(pnl, collateralUsd)
 
     const netValue = getPositionNetValue({
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
       closingFeeUsd,
       uiFeeUsd,
     })
@@ -186,22 +186,22 @@ export default function getPositionsInfo(
 
     const pnlAfterFees = pnl - totalPendingFeesUsd - closingFeeUsd - uiFeeUsd
     const pnlAfterFeesPercentage =
-      collateralUsd != 0n ? getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd) : 0n
+      collateralUsd === 0n ? 0n : getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd)
 
     const leverage = getLeverage({
       sizeInUsd: position.sizeInUsd,
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl: showPnlInLeverage ? pnl : undefined,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
     })
 
     const leverageWithPnl = getLeverage({
       sizeInUsd: position.sizeInUsd,
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
     })
 
     const maxAllowedLeverage = getMaxAllowedLeverageByMinCollateralFactor(

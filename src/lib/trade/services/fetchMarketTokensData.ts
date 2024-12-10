@@ -12,10 +12,12 @@ export interface MarketTokenData {
   decimals: number
 }
 
+export type MarketTokensData = Map<string, MarketTokenData>
+
 export async function fetchMarketTokensData(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
-) {
+): Promise<MarketTokensData> {
   const dataMap = new Map<string, MarketTokenData>()
 
   const provider = getProvider(ProviderType.HTTP, chainId)

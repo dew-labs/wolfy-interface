@@ -1,6 +1,5 @@
-import type {QueryClient} from '@tanstack/react-query'
-import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
-import {usePreviousDistinct} from 'react-use'
+import type {UseQueryResult} from '@tanstack/react-query'
+import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -15,11 +14,10 @@ export function getMarketsDataQueryKey(chainId: StarknetChainId, markets: Market
   return ['marketsData', chainId, markets] as const
 }
 
-function createGetMarketsDataQueryOptions(
+function createGetMarketsDataQueryOptions<T>(
   chainId: StarknetChainId,
   markets: Market[] | undefined,
-  previousMarkets: Market[] | undefined,
-  queryClient: QueryClient,
+  selector?: (data: MarketsData) => T,
 ) {
   return queryOptions({
     queryKey: getMarketsDataQueryKey(chainId, markets),
@@ -29,10 +27,8 @@ function createGetMarketsDataQueryOptions(
           return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
-    placeholderData: () => {
-      if (!previousMarkets) return undefined
-      return queryClient.getQueryData<MarketsData>(getMarketsDataQueryKey(chainId, previousMarkets))
-    },
+    placeholderData: previousData => previousData,
+    select: selector as (data: MarketsData) => T,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,
     refetchOnWindowFocus: true,
@@ -40,11 +36,13 @@ function createGetMarketsDataQueryOptions(
   })
 }
 
-export default function useMarketsData() {
+export default function useMarketsData(): UseQueryResult<MarketsData>
+export default function useMarketsData<T = MarketsData>(
+  selector: (data: MarketsData) => T,
+): UseQueryResult<T>
+export default function useMarketsData<T = MarketsData>(selector?: (data: MarketsData) => T) {
   const [chainId] = useChainId()
   const {data: markets} = useMarkets()
-  const previousMarkets = usePreviousDistinct(markets)
-  const queryClient = useQueryClient()
 
-  return useQuery(createGetMarketsDataQueryOptions(chainId, markets, previousMarkets, queryClient))
+  return useQuery(createGetMarketsDataQueryOptions(chainId, markets, selector))
 }

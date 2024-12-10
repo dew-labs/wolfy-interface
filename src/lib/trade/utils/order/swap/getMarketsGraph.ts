@@ -3,13 +3,13 @@ import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {MarketEdge} from './types'
 
 export interface MarketsGraph {
-  abjacencyList: Record<string, MarketEdge[]>
+  adjacencyList: Record<string, MarketEdge[]>
   edges: MarketEdge[]
 }
 
 export default function getMarketsGraph(marketsData: MarketsData): MarketsGraph {
   const graph: MarketsGraph = {
-    abjacencyList: {},
+    adjacencyList: {},
     edges: [],
   }
 
@@ -35,10 +35,10 @@ export default function getMarketsGraph(marketsData: MarketsData): MarketsGraph 
       to: longTokenAddress,
     }
 
-    graph.abjacencyList[longTokenAddress] = graph.abjacencyList[longTokenAddress] ?? []
-    graph.abjacencyList[longTokenAddress].push(longShortEdge)
-    graph.abjacencyList[shortTokenAddress] = graph.abjacencyList[shortTokenAddress] ?? []
-    graph.abjacencyList[shortTokenAddress].push(shortLongEdge)
+    graph.adjacencyList[longTokenAddress] = graph.adjacencyList[longTokenAddress] ?? []
+    graph.adjacencyList[longTokenAddress].push(longShortEdge)
+    graph.adjacencyList[shortTokenAddress] = graph.adjacencyList[shortTokenAddress] ?? []
+    graph.adjacencyList[shortTokenAddress].push(shortLongEdge)
 
     graph.edges.push(longShortEdge, shortLongEdge)
   })

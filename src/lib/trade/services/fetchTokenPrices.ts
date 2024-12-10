@@ -11,6 +11,11 @@ export interface Price {
   max: bigint
 }
 
+export const DEFAULT_PRICE = {
+  min: 0n,
+  max: 0n,
+}
+
 export type TokenPricesData = Map<string, Price>
 
 export default async function fetchTokenPrices(chainId: StarknetChainId) {
@@ -30,7 +35,6 @@ export default async function fetchTokenPrices(chainId: StarknetChainId) {
 
   try {
     const priceFeeds = await connection.getLatestPriceFeeds(feedIds)
-    connection.closeWebSocket()
 
     if (!priceFeeds) return data
 
@@ -51,6 +55,8 @@ export default async function fetchTokenPrices(chainId: StarknetChainId) {
     })
   } catch (error) {
     logError(error)
+  } finally {
+    connection.closeWebSocket()
   }
 
   return data

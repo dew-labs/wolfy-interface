@@ -26,7 +26,7 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
       <HeadTags title='Error' />
       <main className='relative flex h-[100dvh] w-full flex-col items-center justify-center gap-2 p-4'>
         <h1 className='text-center text-4xl font-bold'>
-          We’re not perfect, error happens{errorCode ? ': ' + errorCode : '!'}
+          We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}
         </h1>
         <span>{errorMessage}</span>
         <div>

@@ -11,7 +11,7 @@ export default function preloadImage(
         preloadImage(u, priority, strategy, () => {
           loadedCounter++
 
-          if (loadedCounter == url.length) {
+          if (loadedCounter === url.length) {
             callback?.()
           }
         })

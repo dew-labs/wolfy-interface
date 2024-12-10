@@ -33,6 +33,7 @@ export default memo(function ChainSelect() {
         aria-label='Select Network'
         items={SUPPORTED_CHAINS}
         selectedKeys={selectedKeys}
+        // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
         selectorIcon={<></>}
         disableSelectorIconRotation
         onSelectionChange={onSelectionChange}

@@ -11,6 +11,6 @@ export default class ErrorWithMetadata extends MaybePermanentError {
     options?: ErrorOptions,
   ) {
     super(message, options)
-    this.name = `${type}${name ? '(' + name + ')' : ''}`
+    this.name = `${type}${name ? `(${name})` : ''}`
   }
 }

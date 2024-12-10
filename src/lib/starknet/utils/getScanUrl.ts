@@ -12,18 +12,18 @@ export default function getScanUrl(
   type = ScanType.Transaction,
   address: string,
 ) {
-  const baseUrl = (function () {
+  const baseUrl = (() => {
     switch (chainId) {
       case StarknetChainId.SN_MAIN:
         return 'https://voyager.online'
       case StarknetChainId.SN_SEPOLIA:
         return 'https://sepolia.voyager.online'
-      default:
-        return 'https://voyager.online'
+      case StarknetChainId.SN_KATANA:
+        return '' // NOTE: katana don't have a scan
     }
   })()
 
-  const scanType = (function () {
+  const scanType = (() => {
     switch (type) {
       case ScanType.Block:
         return 'block'

@@ -11,7 +11,7 @@ export function getAcceptablePriceByPriceImpact(p: {
 }) {
   const {indexPrice, sizeDeltaUsd, priceImpactDeltaUsd} = p
 
-  if (sizeDeltaUsd <= 0 || indexPrice == 0n) {
+  if (sizeDeltaUsd <= 0 || indexPrice === 0n) {
     return {
       acceptablePrice: indexPrice,
       acceptablePriceDeltaBps: 0n,
