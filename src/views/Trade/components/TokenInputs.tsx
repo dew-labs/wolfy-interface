@@ -51,10 +51,11 @@ interface Props {
 const SIZE_CLASS_NAMES = {
   input: 'appearance-none',
   label: 'relative top-4 overflow-visible',
+  inputWrapper: 'data-[hover=true]:bg-default-200',
 }
 
 const TOKEN_AMOUNT_INPUT_CLASS_NAMES = {
-  inputWrapper: 'h-20 relative',
+  inputWrapper: 'h-20 relative data-[hover=true]:bg-default-200',
   label: 'relative top-4 overflow-visible',
   input: 'appearance-none text-3xl',
 }
@@ -274,6 +275,7 @@ export default memo(function TokenInputs({
           placeholder='0.0'
           classNames={{
             input: 'appearance-none',
+            inputWrapper: 'data-[hover=true]:bg-default-200',
           }}
           value={tokenPriceInput}
           onChange={handleTokenPriceInputChange}
@@ -363,8 +365,7 @@ export default memo(function TokenInputs({
               variant='bordered'
               selectedKeys={payTokenSelectedKeys}
               onSelectionChange={onSelectionChange}
-              // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
-              selectorIcon={<></>}
+              selectorIcon={<span />}
               classNames={SELECT_CLASS_NAMES}
               disallowEmptySelection
               selectionMode='single'

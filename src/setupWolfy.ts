@@ -75,7 +75,7 @@ function registerHttpProviders() {
       'https://starknet-sepolia.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
       'https://starknet-sepolia.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
-      'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93',
+      // 'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93', // Somehow cannot config cors
       // -------------------------------------------------------------------------
       // 'https://starknet-sepolia.drpc.org',
       'https://free-rpc.nethermind.io/sepolia-juno',

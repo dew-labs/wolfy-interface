@@ -606,7 +606,7 @@ const Controller = createResetableComponent(({reset}) => {
     }
   })()
 
-  console.log(tradeFees)
+  // console.log(tradeFees)
 
   const tradeFeeUsdText = tradeFees?.totalFees
     ? formatNumber(shrinkDecimals(tradeFees.totalFees.deltaUsd, USD_DECIMALS), Format.USD, {
@@ -969,6 +969,7 @@ const Controller = createResetableComponent(({reset}) => {
                   className='w-20'
                   classNames={{
                     input: 'text-right',
+                    inputWrapper: 'data-[hover=true]:bg-default-200',
                   }}
                   startContent={<div className='text-tiny'>-</div>}
                   endContent={<div className='text-tiny'>%</div>}
