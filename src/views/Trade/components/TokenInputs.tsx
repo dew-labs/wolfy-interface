@@ -426,7 +426,9 @@ export default memo(function TokenInputs({
               <span className='mr-1 whitespace-nowrap text-lg text-default-400'>in</span>
             )}
             <img src={tokenData?.imageUrl} alt='' className='h-6 w-6' />
-            <span className='whitespace-nowrap text-lg text-default-400'>{tokenData?.symbol}</span>
+            <span className='whitespace-nowrap text-lg text-default-400'>
+              &nbsp;{tokenData?.symbol}
+            </span>
           </div>
         }
       />
