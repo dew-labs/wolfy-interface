@@ -19,7 +19,6 @@ import {
   type ChangeEventHandler,
   type DOMAttributes,
   type KeyboardEventHandler,
-  memo,
   useCallback,
   useMemo,
   useRef,
@@ -60,7 +59,6 @@ import useTradeType, {TRADE_TYPE_LABEL, TradeType} from '@/lib/trade/states/useT
 import estimateExecuteOrderGasLimit from '@/lib/trade/utils/fee/estimateExecuteOrderGasLimit'
 import {getExecutionFee} from '@/lib/trade/utils/fee/getExecutionFee'
 import {getTradeFees} from '@/lib/trade/utils/fee/getTradeFees'
-import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import getDecreasePositionAmounts from '@/lib/trade/utils/order/decrease/getDecreasePositionAmounts'
 import {getIncreasePositionAmounts} from '@/lib/trade/utils/order/increase/getIncreasePositionAmounts'
 import {getSwapAmountsByFromValue} from '@/lib/trade/utils/order/swap/getSwapAmountsByFromValue'
@@ -82,6 +80,7 @@ import usePayToken from './hooks/usePayToken'
 import useStrategy from './hooks/useStrategy'
 import useToken from './hooks/useToken'
 import useTradeFlags from './hooks/useTradeFlags'
+import PoolSelectDropdown from './PoolSelectDropdown'
 import TokenInputs from './TokenInputs'
 import createFindSwapPath from './utils/createFindSwapPath'
 import getTradeFlags from './utils/getTradeFlags'
@@ -640,7 +639,7 @@ const Controller = createResetableComponent(({reset}) => {
       })
     }
 
-    if (!estimatedGas) return undefined
+    invariant(estimatedGas !== undefined, 'Estimated gas is undefined')
 
     return getExecutionFee(gasLimits, feeTokenPrice, estimatedGas, gasPrice, feeToken)
   }, [
@@ -689,7 +688,7 @@ const Controller = createResetableComponent(({reset}) => {
     if (!market) return
     if (!receiver) return
     if (!initialCollateralToken) return
-    if (!executionFeeAmount) return
+    if (executionFeeAmount === undefined) return
 
     const tradeMode = latestTradeMode.current
 
@@ -1042,30 +1041,3 @@ const Controller = createResetableComponent(({reset}) => {
 })
 
 export default Controller
-
-interface PoolSelectDropdownProps {
-  availableMarkets: MarketData[]
-  poolName: string | undefined
-  handlePoolChange: (market: Key) => void
-}
-
-const PoolSelectDropdown = memo(function PoolSelectDropdown({
-  availableMarkets,
-  poolName,
-  handlePoolChange,
-}: PoolSelectDropdownProps) {
-  return (
-    <Dropdown backdrop='opaque'>
-      <DropdownTrigger>
-        <Button variant='flat'>{poolName}</Button>
-      </DropdownTrigger>
-      <DropdownMenu aria-label='Change pool' onAction={handlePoolChange} items={availableMarkets}>
-        {market => {
-          return (
-            <DropdownItem key={market.marketTokenAddress}>{getMarketPoolName(market)}</DropdownItem>
-          )
-        }}
-      </DropdownMenu>
-    </Dropdown>
-  )
-})

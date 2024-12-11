@@ -329,8 +329,8 @@ export default memo(function DepositModal({
         !wallet ||
         !marketTokenData ||
         !isInputValid ||
-        !feeTokenAmount ||
-        !feeToken
+        !feeToken ||
+        feeTokenAmount === undefined
       )
         return
 

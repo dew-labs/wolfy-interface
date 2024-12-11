@@ -15,7 +15,7 @@ export function getExecutionFee(
   estimatedGasLimit: bigint,
   gasPrice: bigint,
   feeToken: Token,
-): ExecutionFee | undefined {
+): ExecutionFee {
   const baseGasLimit = gasLimits.estimatedFeeBaseGasLimit
   const multiplierFactor = gasLimits.estimatedFeeMultiplierFactor
   const adjustedGasLimit = baseGasLimit + applyFactor(estimatedGasLimit, multiplierFactor)

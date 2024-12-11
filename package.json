@@ -8,7 +8,7 @@
     "dev:vite": "vite",
     "dev:scss-modules": "pnpm run gen-typed-scss-modules -w",
     "dev": "pnpm run --parallel --reporter-hide-prefix '/^dev:(.+)$/'",
-    "profile": "ENABLE_PROFILE=true pnpm rundev",
+    "profile": "ENABLE_PROFILE=true pnpm run dev",
     "scan": "pnpm dlx react-scan@latest https://localhost:5173/trade",
     "base:lint:script": "eslint --cache",
     "base:lint:style": "stylelint --cache",

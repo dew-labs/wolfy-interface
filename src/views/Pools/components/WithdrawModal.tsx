@@ -242,8 +242,8 @@ export default memo(function WithdrawModal({
         !wallet ||
         !marketTokenData ||
         !isInputValid ||
-        !feeTokenAmount ||
-        !feeToken
+        !feeToken ||
+        feeTokenAmount === undefined
       )
         return
 
