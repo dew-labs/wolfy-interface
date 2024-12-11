@@ -1,10 +1,10 @@
 import {
   cairoIntToBigInt,
-  createSatoruContract,
+  createWolfyContract,
   ReferralStorageABI,
-  SatoruContract,
   type StarknetChainId,
-} from 'satoru-sdk'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 export default async function fetchAffiliateTier(
   chainId: StarknetChainId,
@@ -14,9 +14,9 @@ export default async function fetchAffiliateTier(
     return undefined
   }
 
-  const referralStorageContract = createSatoruContract(
+  const referralStorageContract = createWolfyContract(
     chainId,
-    SatoruContract.ReferralStorage,
+    WolfyContract.ReferralStorage,
     ReferralStorageABI,
   )
   return cairoIntToBigInt(await referralStorageContract.referrer_tiers(account))

@@ -10,14 +10,22 @@ export default memo(function ThemeSwitchButton() {
   const [theme, setTheme] = useTheme()
   const latestTheme = useLatest(theme)
 
-  const handleCorrectNetwork = useCallback(() => {
+  const handleSwitchTheme = useCallback(() => {
     const nextTheme = (() => {
       if (latestTheme.current === Theme.Dark) return Theme.Light
       if (latestTheme.current === Theme.Light) return Theme.System
       return Theme.Dark
     })()
 
-    setTheme(nextTheme)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not supported in all browsers
+    if (!document.startViewTransition) {
+      setTheme(nextTheme)
+      return
+    }
+
+    document.startViewTransition(() => {
+      setTheme(nextTheme)
+    })
   }, [setTheme])
 
   const icon = (() => {
@@ -43,7 +51,7 @@ export default memo(function ThemeSwitchButton() {
   })()
 
   return (
-    <Button isIconOnly color={color} onPress={handleCorrectNetwork}>
+    <Button isIconOnly color={color} onPress={handleSwitchTheme}>
       <Icon icon={icon} />
     </Button>
   )

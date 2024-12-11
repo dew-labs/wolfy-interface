@@ -1,8 +1,11 @@
 import type {BigNumberish} from 'starknet'
 
-import formatLocaleNumber from './formatLocaleNumber'
+import {roundToNDecimal} from './roundToNDecimals'
 
-export default function expandDecimals(value: BigNumberish, decimals: number | bigint): bigint {
+export default function expandDecimals(
+  value: BigNumberish | undefined,
+  decimals: number | bigint,
+): bigint {
   if (!value) return 0n
 
   if (typeof value === 'number') return BigInt(value.toFixed(Number(decimals)).replace('.', ''))
@@ -12,22 +15,24 @@ export default function expandDecimals(value: BigNumberish, decimals: number | b
 
   const dotIndex = valueString.indexOf('.')
 
-  const decimalPart = (dotIndex !== -1 ? valueString.slice(dotIndex + 1) : '')
+  const foundDot = dotIndex !== -1
+
+  const decimalPart = (foundDot ? valueString.slice(dotIndex + 1) : '')
     .padEnd(Number(decimals), '0')
     .slice(0, Number(decimals))
 
-  const integerPart = dotIndex !== -1 ? valueString.slice(0, dotIndex) : valueString
+  const integerPart = foundDot ? valueString.slice(0, dotIndex) : valueString
 
   return BigInt(integerPart + decimalPart)
 }
 
 export function shrinkDecimals(
-  value: BigNumberish,
+  value: BigNumberish | undefined,
   decimals: number | bigint,
-  fractionPlaces?: number | bigint,
-  exactFractionPlaces = false,
-  readable = false,
+  roundToDecimal?: number,
 ): string {
+  if (!value) return '0'
+
   decimals = Number(decimals)
   let display = (() => {
     if (typeof value === 'number') return value.toFixed(0)
@@ -40,11 +45,13 @@ export function shrinkDecimals(
 
   display = display.padStart(decimals, '0')
 
-  let integer = display.slice(0, display.length - decimals)
-  if (readable) integer = formatLocaleNumber(BigInt(integer))
+  const integer = display.slice(0, display.length - decimals)
+
   let fraction = display.slice(display.length - decimals)
   fraction = fraction.replace(/0+$/, '')
-  if (fractionPlaces || fractionPlaces === 0) fraction = fraction.slice(0, Number(fractionPlaces))
-  if (fractionPlaces && exactFractionPlaces) fraction = fraction.padEnd(Number(fractionPlaces), '0')
-  return `${negative ? '-' : ''}${integer || '0'}${fraction ? '.' + fraction : ''}`
+
+  const result = `${negative ? '-' : ''}${integer || '0'}${fraction ? `.${fraction}` : ''}`
+
+  if (roundToDecimal === undefined) return result
+  return String(roundToNDecimal(result, roundToDecimal))
 }

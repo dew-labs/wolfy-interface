@@ -1,4 +1,6 @@
-export default function VisuallyHidden<
+import {memo} from 'react'
+
+function VisuallyHidden<
   T extends keyof React.JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
 >({
   as,
@@ -17,16 +19,19 @@ export default function VisuallyHidden<
       isNotHiddenAnymore?: boolean
       // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
     } & React.ComponentProps<T>): React.JSX.Element {
+  // eslint-disable-next-line no-useless-assignment -- this is a bug https://github.com/typescript-eslint/typescript-eslint/issues/10219
   const Tag = (as ?? 'span') as React.JSX.ElementType
 
   const classNames = []
   if ('className' in props && typeof props.className === 'string') {
     classNames.push(props.className)
   }
-  if (!isNotHiddenAnymore) classNames.push((strict ? 'strict-' : '') + 'visually-hidden')
+  if (!isNotHiddenAnymore) classNames.push(`${strict ? 'strict-' : ''}visually-hidden`)
 
   return <Tag {...props} className={classNames.join(' ')} />
 }
+
+export default memo(VisuallyHidden) as unknown as typeof VisuallyHidden // Somehow wrap in memo changes the type of the component
 
 // -----------------------------------------------------------------------------
 
@@ -38,16 +43,16 @@ export default function VisuallyHidden<
 //   return (
 //     <>
 //       <VisuallyHidden as={TestComponent} test={true}>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as={TestComponent} test={1}>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as='button' srcSet='hihi'>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as='img' srcSet='hihi'>
-//         Children
+//         children
 //       </VisuallyHidden>
 //     </>
 //   )

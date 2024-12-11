@@ -1,24 +1,32 @@
-import {queryOptions, useQuery} from '@tanstack/react-query'
-import type {StarknetChainId} from 'satoru-sdk'
+import {queryOptions, useQuery, type UseQueryResult} from '@tanstack/react-query'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import fetchMarkets from '@/lib/trade/services/fetchMarkets'
+import fetchMarkets, {type Market} from '@/lib/trade/services/fetchMarkets'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-function createGetMarketsQueryOptions(chainId: StarknetChainId) {
+export function getMarketsQueryKey(chainId: StarknetChainId) {
+  return ['markets', chainId] as const
+}
+
+function createGetMarketsQueryOptions<T = Market[]>(
+  chainId: StarknetChainId,
+  selector?: (data: Market[]) => T,
+) {
   return queryOptions({
-    queryKey: ['markets', chainId],
+    queryKey: getMarketsQueryKey(chainId),
     queryFn: async () => {
       return await fetchMarkets(chainId)
     },
+    placeholderData: previousData => previousData,
+    select: selector as (data: Market[]) => T,
     ...NO_REFETCH_OPTIONS,
   })
 }
 
-export default function useMarkets() {
+export default function useMarkets(): UseQueryResult<Market[]>
+export default function useMarkets<T = Market[]>(selector: (data: Market[]) => T): UseQueryResult<T>
+export default function useMarkets<T = Market[]>(selector?: (data: Market[]) => T) {
   const [chainId] = useChainId()
-
-  const {data: markets} = useQuery(createGetMarketsQueryOptions(chainId))
-
-  return markets
+  return useQuery(createGetMarketsQueryOptions(chainId, selector))
 }

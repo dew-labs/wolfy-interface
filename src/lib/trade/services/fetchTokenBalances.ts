@@ -1,12 +1,14 @@
-import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'satoru-sdk'
 import {Contract} from 'starknet'
+import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
+
+export type TokenBalancesData = Map<string, bigint>
 
 export default async function getTokenBalances(
   chainId: StarknetChainId,
   accountAddress: string | undefined,
-) {
+): Promise<TokenBalancesData> {
   const balanceMap = new Map<string, bigint>()
 
   if (!accountAddress) return balanceMap

@@ -1,4 +1,4 @@
-import {OrderType} from 'satoru-sdk'
+import {OrderType} from 'wolfy-sdk'
 
 export enum TriggerThresholdType {
   Above = '>',

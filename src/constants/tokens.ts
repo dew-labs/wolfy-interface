@@ -1,4 +1,4 @@
-import {StarknetChainId} from 'satoru-sdk'
+import {StarknetChainId} from 'wolfy-sdk'
 
 export interface Token {
   name: string
@@ -14,6 +14,12 @@ export interface Token {
   reservesUrl?: string
   imageUrl?: string
   pythFeedId?: string
+}
+
+export const MOCK_SYMBOL_MAP: Record<string, string> = {
+  wfETH: 'eth',
+  wfBTC: 'btc',
+  wfSTRK: 'strk',
 }
 
 const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
@@ -54,7 +60,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/usdt',
-          pythFeedId: '0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588',
+          pythFeedId: '0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b',
         },
       ],
       [
@@ -67,7 +73,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/usdc',
-          pythFeedId: '0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588',
+          pythFeedId: '0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b',
         },
       ],
       [
@@ -80,7 +86,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
-          pythFeedId: '0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6',
+          pythFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
         },
       ],
       [
@@ -93,7 +99,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/26433/standard/starknet.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/strk',
-          pythFeedId: '0xf43ec4cc582241061daceec80cbbdeb0ffae4f5d9870c96a63b08d76aa8bea5e',
+          pythFeedId: '0x6a182399ff70ccf3e06024898942028204125a819e519a335ffa4579e66cd870',
         },
       ],
       [
@@ -106,11 +112,96 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
           priceDecimals: 18,
           imageUrl: 'https://assets.coingecko.com/coins/images/1/standard/bitcoin.png',
           coingeckoUrl: 'https://www.coingecko.com/en/coins/btc',
-          pythFeedId: '0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b',
+          pythFeedId: '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
         },
       ],
     ]),
   ],
+  [
+    StarknetChainId.SN_KATANA,
+    new Map([
+      [
+        '0x07a0516a4258b386cbfde64d0429d3430c7714eee79caad5c2934c645b49d303',
+        {
+          address: '0x07a0516a4258b386cbfde64d0429d3430c7714eee79caad5c2934c645b49d303',
+          name: 'Wolfy USD',
+          symbol: 'wfUSD',
+          decimals: 18,
+          priceDecimals: 18,
+          owner: '0x0127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec',
+          pythFeedId: '0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b',
+          imageUrl: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/usdc',
+        },
+      ],
+      [
+        '0x03bca85a90ade9936e9babf7bc4519bdd1aa63805eb6214cc83a95709c9aa838',
+        {
+          address: '0x03bca85a90ade9936e9babf7bc4519bdd1aa63805eb6214cc83a95709c9aa838',
+          name: 'Dew USD',
+          symbol: 'DUSD',
+          decimals: 18,
+          priceDecimals: 18,
+          owner: '0x0127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec',
+          pythFeedId: '0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b',
+          imageUrl: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/usdt',
+        },
+      ],
+      [
+        '0x060daff2e4fbf2a789baa16c01f14733434fb32aa1db9558e9944ad154fa42b2',
+        {
+          address: '0x060daff2e4fbf2a789baa16c01f14733434fb32aa1db9558e9944ad154fa42b2',
+          name: 'Wolfy Ethereum',
+          symbol: 'wfETH',
+          decimals: 18,
+          priceDecimals: 18,
+          owner: '0x0127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec',
+          pythFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
+          imageUrl: 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/eth',
+        },
+      ],
+      [
+        '0x03a2f645ca6481b92c0268d01a52b57a9d06e7ec61d66c069f084bab23a43996',
+        {
+          address: '0x03a2f645ca6481b92c0268d01a52b57a9d06e7ec61d66c069f084bab23a43996',
+          name: 'Wolfy Starknet',
+          symbol: 'wfSTRK',
+          decimals: 18,
+          priceDecimals: 18,
+          owner: '0x0127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec',
+          pythFeedId: '0x6a182399ff70ccf3e06024898942028204125a819e519a335ffa4579e66cd870',
+          imageUrl: 'https://assets.coingecko.com/coins/images/26433/standard/starknet.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/strk',
+        },
+      ],
+      [
+        '0x000cc2f2cb71fb19d8f54731ad65ae5477bb9bdd15a7f5a1331c395240c34a48',
+        {
+          address: '0x000cc2f2cb71fb19d8f54731ad65ae5477bb9bdd15a7f5a1331c395240c34a48',
+          name: 'Wolfy Bitcoin',
+          symbol: 'wfBTC',
+          decimals: 8,
+          priceDecimals: 18,
+          owner: '0x0127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec',
+          pythFeedId: '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
+          imageUrl: 'https://assets.coingecko.com/coins/images/1/standard/bitcoin.png',
+          coingeckoUrl: 'https://www.coingecko.com/en/coins/btc',
+        },
+      ],
+    ]),
+  ],
+])
+
+// TODO: support change fee token
+export const FEE_TOKEN_ADDRESS = new Map<StarknetChainId, string>([
+  [StarknetChainId.SN_KATANA, '0x060daff2e4fbf2a789baa16c01f14733434fb32aa1db9558e9944ad154fa42b2'], // wfETH
+  [
+    StarknetChainId.SN_SEPOLIA,
+    '0x0161304979f98530f4c3d6659e0a43cad96ceb71531482c7aaba90e07f150315',
+  ], // wfETH
+  // [StarknetChainId.SN_MAIN, ''],
 ])
 
 export function getTokenMetadata(chainId: StarknetChainId, address: string) {

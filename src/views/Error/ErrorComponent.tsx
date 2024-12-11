@@ -1,12 +1,10 @@
-import {useEffect} from 'react'
+import {useCallback, useEffect} from 'react'
 
 import HeadTags from '@/lib/head/HeadTags'
 
-import style from './ErrorComponent.module.scss'
-
 interface Props {
-  errorCode?: string
-  errorMessage?: string
+  errorCode?: string | undefined
+  errorMessage?: string | undefined
   reset?: () => void
 }
 
@@ -15,28 +13,26 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
     localStorage.clear()
   }, [])
 
+  const onTryAgain = useCallback(() => {
+    if (reset) {
+      reset()
+    } else {
+      location.reload()
+    }
+  }, [reset])
+
   return (
-    <div className={style.Page}>
+    <div>
       <HeadTags title='Error' />
-      <main>
-        <div className={style.NotFound}>
-          <h1 className={style.Heading}>
-            We’re not perfect, error happens{errorCode ? ': ' + errorCode : '!'}
-          </h1>
-          <span className={style.Description}>{errorMessage}</span>
-          <div>
-            <button
-              onClick={() => {
-                if (reset) {
-                  reset()
-                } else {
-                  location.reload()
-                }
-              }}
-            >
-              Try again
-            </button>
-          </div>
+      <main className='relative flex h-[100dvh] w-full flex-col items-center justify-center gap-2 p-4'>
+        <h1 className='text-center text-4xl font-bold'>
+          We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}
+        </h1>
+        <span>{errorMessage}</span>
+        <div>
+          <button className='border-spacing-2 border p-2' onClick={onTryAgain}>
+            Try again
+          </button>
         </div>
       </main>
     </div>

@@ -1,7 +1,7 @@
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {toStarknetHexString} from 'satoru-sdk'
 import type {BigNumberish} from 'starknet'
+import {toStarknetHexString} from 'wolfy-sdk'
 
 import {accountAddressAtom} from '@/lib/starknet/atoms'
 

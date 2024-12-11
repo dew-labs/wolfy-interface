@@ -8,6 +8,7 @@ import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   if (tokenAmountUsd <= 0 || payTokenAmountUsd <= 0) return 0n
@@ -27,14 +28,17 @@ export default function usePayToken(
   const tokensMetadata = getTokensMetadata(chainId)
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
-  const payTokenMinPriceData = useTokenPrices(data => data.get(payTokenAddress ?? '')?.min)
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: payTokenMinPriceData = 0n} = useTokenPrices(
+    data => data.get(payTokenAddress ?? '')?.min,
+  )
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
   const latestPayTokenDecimals = useLatest(payTokenDecimals)
   const payTokenPrice = (() => {
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) return tokenPrice ?? 0n
-    return payTokenMinPriceData ?? 0n
+    return payTokenMinPriceData
   })()
   const latestPayTokenPrice = useLatest(payTokenPrice)
 
@@ -62,10 +66,7 @@ export default function usePayToken(
 
   const latestPayTokenAmount = useLatest(payTokenAmount)
   const payTokenAmountUsd = useMemo(
-    () =>
-      payTokenDecimals && payTokenPrice
-        ? convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, payTokenPrice)
-        : 0n,
+    () => convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, payTokenPrice),
     [payTokenAmount, payTokenDecimals, payTokenPrice],
   )
   const latestPayTokenAmountUsd = useLatest(payTokenAmountUsd)
@@ -90,6 +91,7 @@ export default function usePayToken(
 
   const handleLeverageChange = useCallback(
     (value: unknown) => {
+      setLeverageInputFocused(true)
       if (typeof value !== 'string' && typeof value !== 'number') return
       const leverage = expandDecimals(value, LEVERAGE_DECIMALS)
 
@@ -98,16 +100,34 @@ export default function usePayToken(
       const newTokenAmountUsd = (latestPayTokenAmountUsd.current * leverage) / LEVERAGE_PRECISION
       setTokenAmountUsd(newTokenAmountUsd)
 
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS, 2, true)
+      const newLeverageInput = formatNumber(
+        shrinkDecimals(leverage, LEVERAGE_DECIMALS),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: 2,
+        },
+      )
       setLeverageInput(newLeverageInput)
     },
     [setTokenAmountUsd],
   )
 
+  const handleLeverageChangeEnd = useCallback(() => {
+    setLeverageInputFocused(false)
+  }, [])
+
   useEffect(
     function syncLeverageToLeverageInput() {
       if (leverageInputIsFocused) return
-      const newLeverageInput = shrinkDecimals(leverage, LEVERAGE_DECIMALS, 2, true)
+      const newLeverageInput = formatNumber(
+        shrinkDecimals(leverage, LEVERAGE_DECIMALS),
+        Format.PLAIN,
+        {
+          exactFractionDigits: true,
+          fractionDigits: 2,
+        },
+      )
 
       if (newLeverageInput === '0') {
         setLeverageInput('1')
@@ -135,8 +155,11 @@ export default function usePayToken(
     leverageNumber,
     latestLeverage,
     leverageInput,
+    latestLeverageInput,
     setLeverageInput,
     handleLeverageChange,
+    handleLeverageChangeEnd,
+    leverageInputIsFocused,
     setLeverageInputFocused,
   }
 }

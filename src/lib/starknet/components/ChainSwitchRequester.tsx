@@ -17,6 +17,7 @@ export default memo(function ChainSwitchRequester() {
       try {
         const currentChainId = await thisWalletAccount.getChainId()
         if (currentChainId !== chainId) {
+          // @ts-expect-error -- SN_KATANA is not an official chainId
           await thisWalletAccount.switchStarknetChain(chainId)
         }
       } catch (_e: unknown) {

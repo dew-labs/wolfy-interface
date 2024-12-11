@@ -1,17 +1,17 @@
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 import {
   cairoIntToBigInt,
-  createSatoruContract,
-  createSatoruMulticallRequest,
+  createWolfyContract,
+  createWolfyMulticallRequest,
   DataStoreABI,
   DecreasePositionSwapType,
   OrderType,
   parseCairoCustomEnum,
   ReaderABI,
-  SatoruContract,
-  satoruMulticall,
   toStarknetHexString,
-} from 'satoru-sdk'
+  WolfyContract,
+  wolfyMulticall,
+} from 'wolfy-sdk'
 
 import {logError} from '@/utils/logger'
 
@@ -42,18 +42,18 @@ export type OrdersData = Map<string, Order>
 export default async function fetchOrders(chainId: StarknetChainId, account: string | undefined) {
   if (!account) return new Map() as OrdersData
 
-  const dataStoreContract = createSatoruContract(chainId, SatoruContract.DataStore, DataStoreABI)
+  const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
   const orderCount = await dataStoreContract.get_account_order_count(account)
 
-  const [orderKeys, orders] = await satoruMulticall(chainId, [
-    createSatoruMulticallRequest(
+  const [orderKeys, orders] = await wolfyMulticall(chainId, [
+    createWolfyMulticallRequest(
       chainId,
-      SatoruContract.DataStore,
+      WolfyContract.DataStore,
       DataStoreABI,
       'get_account_order_keys',
       [account, 0, orderCount],
     ),
-    createSatoruMulticallRequest(chainId, SatoruContract.Reader, ReaderABI, 'get_account_orders', [
+    createWolfyMulticallRequest(chainId, WolfyContract.Reader, ReaderABI, 'get_account_orders', [
       {
         contract_address: dataStoreContract.address,
       },

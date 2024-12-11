@@ -1,48 +1,48 @@
-import {queryOptions, skipToken, useQuery, useQueryClient} from '@tanstack/react-query'
-import type {StarknetChainId} from 'satoru-sdk'
+import type {UseQueryResult} from '@tanstack/react-query'
+import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {Market} from '@/lib/trade/services/fetchMarkets'
 import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarkets from './useMarkets'
 
-function createGetMarketsDataQueryOptions(chainId: StarknetChainId, markets: Market[] | undefined) {
+export function getMarketsDataQueryKey(chainId: StarknetChainId, markets: Market[] | undefined) {
+  return ['marketsData', chainId, markets] as const
+}
+
+function createGetMarketsDataQueryOptions<T>(
+  chainId: StarknetChainId,
+  markets: Market[] | undefined,
+  selector?: (data: MarketsData) => T,
+) {
   return queryOptions({
-    queryKey: ['marketsData', chainId, markets] as const,
+    queryKey: getMarketsDataQueryKey(chainId, markets),
     queryFn: markets
       ? async () => {
           const tokenPricesData = await fetchTokenPrices(chainId)
           return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
+    placeholderData: previousData => previousData,
+    select: selector as (data: MarketsData) => T,
+    ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function useMarketsData() {
+export default function useMarketsData(): UseQueryResult<MarketsData>
+export default function useMarketsData<T = MarketsData>(
+  selector: (data: MarketsData) => T,
+): UseQueryResult<T>
+export default function useMarketsData<T = MarketsData>(selector?: (data: MarketsData) => T) {
   const [chainId] = useChainId()
-  const markets = useMarkets()
+  const {data: markets} = useMarkets()
 
-  const queryClient = useQueryClient()
-
-  const {data: marketsData} = useQuery({
-    ...createGetMarketsDataQueryOptions(chainId, markets),
-    initialData: () => {
-      const initialData = queryClient.getQueryData<MarketsData>([
-        'marketsData',
-        chainId,
-        markets,
-        null,
-      ])
-      return initialData ?? undefined
-    },
-  })
-
-  return marketsData
+  return useQuery(createGetMarketsDataQueryOptions(chainId, markets, selector))
 }

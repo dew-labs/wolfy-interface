@@ -1,39 +1,55 @@
+import type {UseQueryResult} from '@tanstack/react-query'
 import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
-import fetchPositions from '@/lib/trade/services/fetchPositions'
+import fetchPositions, {type PositionsData} from '@/lib/trade/services/fetchPositions'
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarketsData from './useMarketsData'
 
-function createGetPositionQueryOptions(
+export function getPositionsQueryKey(
   chainId: StarknetChainId,
   marketsData: MarketsData | undefined,
   accountAddress: string | undefined,
 ) {
+  return ['positions', chainId, accountAddress, marketsData] as const
+}
+
+function createGetPositionsQueryOptions<T>(
+  chainId: StarknetChainId,
+  marketsData: MarketsData | undefined,
+  accountAddress: string | undefined,
+  selector?: (data: PositionsData) => T,
+) {
   return queryOptions({
-    queryKey: ['positions', chainId, accountAddress, marketsData] as const,
+    queryKey: getPositionsQueryKey(chainId, marketsData, accountAddress),
     queryFn: marketsData
       ? async () => {
           const tokenPricesData = await fetchTokenPrices(chainId)
           return await fetchPositions(chainId, marketsData, tokenPricesData, accountAddress)
         }
       : skipToken,
+    placeholderData: previousData => previousData,
+    ...NO_REFETCH_OPTIONS,
+    select: selector as (data: PositionsData) => T,
     refetchInterval: 10000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function usePositionsData() {
+export default function usePositionsData(): UseQueryResult<PositionsData>
+export default function usePositionsData<T = PositionsData>(
+  selector: (data: PositionsData) => T,
+): UseQueryResult<T>
+export default function usePositionsData<T = PositionsData>(selector?: (data: PositionsData) => T) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
-  const marketsData = useMarketsData()
-  const {data} = useQuery(createGetPositionQueryOptions(chainId, marketsData, accountAddress))
-  return data
+  const {data: marketsData} = useMarketsData()
+
+  return useQuery(createGetPositionsQueryOptions(chainId, marketsData, accountAddress, selector))
 }

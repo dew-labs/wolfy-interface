@@ -1,10 +1,29 @@
-import {matchQuery, MutationCache, QueryClient, type QueryKey} from '@tanstack/react-query'
+import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister'
+import {
+  matchQuery,
+  MutationCache,
+  type OmitKeyof,
+  QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query'
+import {
+  type PersistedClient,
+  type PersistQueryClientOptions,
+  removeOldestQuery,
+} from '@tanstack/react-query-persist-client'
+import {parse, stringify} from 'devalue'
+import {compress as compressString, decompress as decompressString} from 'lz-string'
 
+import {APP_NAME} from '@/constants/config'
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
+
+const RETRY_COUNT = 4
 
 declare module '@tanstack/react-query' {
   interface Register {
+    // queryMeta: {}
     mutationMeta: {
+      persist?: boolean
       invalidates?: QueryKey[] | 'all'
       awaitInvalidates?: QueryKey[] | 'all'
     }
@@ -19,7 +38,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 1
+          return failureCount < RETRY_COUNT
         },
       },
       mutations: {
@@ -27,7 +46,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 1
+          return failureCount < RETRY_COUNT
         },
       },
     },
@@ -55,5 +74,33 @@ export function createQueryClient() {
       },
     }),
   })
+
   return queryClient
+}
+
+export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions, 'queryClient'> {
+  const persister = createSyncStoragePersister({
+    storage: window.localStorage,
+    serialize: data => compressString(stringify(data)),
+    deserialize: data => parse(decompressString(data)) as PersistedClient,
+    retry: removeOldestQuery,
+    key: `${APP_NAME}-query-data`,
+  })
+
+  return {
+    persister,
+    dehydrateOptions: {
+      shouldDehydrateQuery: ({queryKey}) => {
+        const firstKey = queryKey[0]
+        if (typeof firstKey !== 'string') return true
+        return !firstKey.startsWith('!')
+      },
+      shouldDehydrateMutation: ({meta}) => {
+        if (!meta) return true
+        if (typeof meta.persist !== 'boolean') return true
+        return !!meta.persist
+      },
+    },
+    buster: __COMMIT_HASH__,
+  }
 }

@@ -6,7 +6,9 @@
 async function waitAtLeast<T>(promise: Promise<T>, ms = 300): Promise<T> {
   const result = await Promise.allSettled([
     promise,
-    new Promise(resolve => setTimeout(resolve, ms)),
+    new Promise(resolve => {
+      setTimeout(resolve, ms)
+    }),
   ])
 
   if (result[0].status === 'rejected') {

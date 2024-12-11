@@ -14,15 +14,16 @@ import getStarknetCore, {
   type WalletProvider,
 } from 'get-starknet-core'
 import {useAtom} from 'jotai'
-import {memo, useCallback, useEffect, useRef, useState} from 'react'
+import {memo, type MemoizedCallback, useCallback, useEffect, useRef, useState} from 'react'
 import {useLatest} from 'react-use'
-import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
 import {UAParser} from 'ua-parser-js'
+import {getProvider, ProviderType, type StarknetChainId} from 'wolfy-sdk'
 
-import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
+import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
+import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import {Theme} from '@/lib/theme/theme'
@@ -32,7 +33,7 @@ import toastErrorMessage from '@/utils/errors/toastErrorMessage'
 
 interface AvailableWalletProps {
   wallet: StarknetWindowObject
-  connect: (wallet: StarknetWindowObject) => void
+  connect: MemoizedCallback<(wallet: StarknetWindowObject) => void>
   isLastConnected?: boolean
 }
 
@@ -50,8 +51,6 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
       case Theme.Light:
         return props.wallet.icon.light
       case Theme.Dark:
-        return props.wallet.icon.dark
-      default:
         return props.wallet.icon.dark
     }
   })()
@@ -117,10 +116,13 @@ export default memo(function ConnectModal() {
 
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
+  const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
 
   const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
   const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
   const [unavailableWallets, setUnavailableWallets] = useState<WalletProvider[]>([])
+  const isWalletConnected = useIsWalletConnected()
+  const latestIsWalletConnected = useLatest(isWalletConnected)
 
   const [isConnecting, setIsConnecting] = useState(false)
   const latestIsConnecting = useLatest(isConnecting)
@@ -139,28 +141,31 @@ export default memo(function ConnectModal() {
     }
   }, [])
 
-  useEffect(() => {
-    void (async function () {
-      // TODO:retry
-      const [wallets, discoveryWallets, lastConnectedWallet] = await Promise.all([
-        getStarknetCore.getAvailableWallets(),
-        getStarknetCore.getDiscoveryWallets(),
-        getStarknetCore.getLastConnectedWallet(),
-      ])
+  useEffect(
+    function loadWallets() {
+      void (async () => {
+        // TODO:retry
+        const [newWallets, discoveryWallets, newLastConnectedWallet] = await Promise.all([
+          getStarknetCore.getAvailableWallets(),
+          getStarknetCore.getDiscoveryWallets(),
+          getStarknetCore.getLastConnectedWallet(),
+        ])
 
-      setLastConnectedWallet(lastConnectedWallet ?? undefined)
+        setLastConnectedWallet(newLastConnectedWallet ?? undefined)
 
-      const lowerPriorityWallets = wallets.filter(wallet =>
-        lastConnectedWallet?.id ? wallet.id !== lastConnectedWallet.id : true,
-      )
-      setWallets(lowerPriorityWallets)
+        const lowerPriorityWallets = newWallets.filter(wallet =>
+          newLastConnectedWallet?.id ? wallet.id !== newLastConnectedWallet.id : true,
+        )
+        setWallets(lowerPriorityWallets)
 
-      const unavailableWallets = discoveryWallets.filter(
-        wallet => !wallets.some(w => w.name === wallet.name),
-      )
-      setUnavailableWallets(unavailableWallets)
-    })()
-  }, [isOpen])
+        const newUnavailableWallets = discoveryWallets.filter(
+          wallet => !newWallets.some(w => w.name === wallet.name),
+        )
+        setUnavailableWallets(newUnavailableWallets)
+      })()
+    },
+    [isOpen],
+  )
 
   const connect = useCallback(
     async (wallet: StarknetWindowObject) => {
@@ -174,12 +179,11 @@ export default memo(function ConnectModal() {
         })) as StarknetChainId
         shouldStopConnectingOrContinue()
 
-        const walletAccount = new WalletAccount(
-          isChainIdSupported(connectedWalletChainId)
-            ? getProvider(ProviderType.HTTP, connectedWalletChainId)
-            : {},
+        const walletAccount = await WalletAccount.connect(
+          getProvider(ProviderType.HTTP, connectedWalletChainId),
           connectedWallet,
         )
+        shouldStopConnectingOrContinue()
 
         const permissions = (await connectedWallet.request({
           type: 'wallet_getPermissions',
@@ -202,22 +206,27 @@ export default memo(function ConnectModal() {
 
         setWalletAccount(walletAccount)
         setWalletChainId(connectedWalletChainId)
+        setShouldReconnect(true)
       } catch (error: unknown) {
         console.error(error)
         toastErrorMessage(error, 'Unexpected error occurred while connecting to the wallet')
         void getStarknetCore.disconnect()
+        setShouldReconnect(false)
       }
+
       setIsConnecting(false)
       setIsOpen(false)
     },
-    [setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
+    [setShouldReconnect, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
   )
+
   useEffect(() => {
-    console.log('lastConnectedWallet:', lastConnectedWallet)
     if (!lastConnectedWallet) return
+    if (!shouldReconnect) return
+    if (latestIsWalletConnected.current) return
 
     void connect(lastConnectedWallet)
-  }, [lastConnectedWallet, connect])
+  }, [connect, shouldReconnect, lastConnectedWallet])
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>

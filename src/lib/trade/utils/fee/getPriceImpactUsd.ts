@@ -18,9 +18,8 @@ export default function getPriceImpactUsd(p: {
   if (nextLongUsd < 0 || nextShortUsd < 0) {
     if (p.fallbackToZero) {
       return 0n
-    } else {
-      throw new Error('Negative pool amount')
     }
+    throw new Error('Negative pool amount')
   }
 
   const currentDiff = abs(p.currentLongUsd - p.currentShortUsd)

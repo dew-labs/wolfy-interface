@@ -1,23 +1,26 @@
 import {Button, Input, Modal, ModalBody, ModalContent, ModalHeader} from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useState} from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
-import {OrderType} from 'satoru-sdk'
 import {toast} from 'sonner'
+import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
+import useFeeToken from '@/lib/trade/hooks/useFeeToken'
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 const closePositionKeyAtom = atom<bigint>()
 const isCLosePositionModalOpenAtom = atom(get => !!get(closePositionKeyAtom))
@@ -30,16 +33,18 @@ export function useClosePosition() {
   }, [])
 }
 
-export default function ClosePositionModal() {
-  const positionsInfoData = usePositionsInfoData()
+export default memo(function ClosePositionModal() {
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: positionsInfoData = new Map()} = usePositionsInfoData(data => data.positionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
-  const position = positionsInfoData && positionKey ? positionsInfoData.get(positionKey) : undefined
+  const position = positionKey ? positionsInfoData.get(positionKey) : undefined
   const latestPosition = useLatest(position)
 
-  const collateralTokenPrice = useTokenPrices(data =>
-    data.get(position?.collateralTokenAddress ?? ''),
-  )
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: collateralTokenPrice = 0n} = useTokenPrices(data => {
+    return data.get(position?.collateralTokenAddress ?? '')?.min
+  })
 
   const isOpen = useAtomValue(isCLosePositionModalOpenAtom)
 
@@ -52,23 +57,26 @@ export default function ClosePositionModal() {
 
   const maximumCollateralUsdToDecrease = position?.netValue ?? 0n
   const maximumSizeUsdToDecrease = position?.sizeInUsd ?? 0n
-  const maximumCollateralTokenToDecrease =
-    expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) /
-    (collateralTokenPrice?.min ?? 1n)
+  const maximumCollateralTokenToDecrease = collateralTokenPrice
+    ? expandDecimals(maximumCollateralUsdToDecrease, collateralTokenDecimals) / collateralTokenPrice
+    : 0n
 
-  const maximumCollateralTokenToDecreaseText = shrinkDecimals(
-    maximumCollateralTokenToDecrease,
-    collateralTokenDecimals,
-    calculatePriceDecimals(maximumCollateralTokenToDecrease),
-    true,
-    true,
+  const maximumCollateralTokenToDecreaseText = formatNumber(
+    shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
+    Format.READABLE,
+    {
+      exactFractionDigits: true,
+      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice),
+    },
   )
-  const maximumSizeUsdToDecreaseText = shrinkDecimals(
-    maximumSizeUsdToDecrease,
-    USD_DECIMALS,
-    2,
-    true,
-    true,
+
+  const maximumSizeUsdToDecreaseText = formatNumber(
+    shrinkDecimals(maximumSizeUsdToDecrease, USD_DECIMALS),
+    Format.USD,
+    {
+      exactFractionDigits: true,
+      fractionDigits: 2,
+    },
   )
 
   //----------------------------------------------------------------------------
@@ -126,8 +134,11 @@ export default function ClosePositionModal() {
   const accountAddress = useAccountAddress()
   const latestAccountAddress = useLatest(accountAddress)
   const queryClient = useQueryClient()
-  const chainId = useChainId()
+  const [chainId] = useChainId()
   const latestChainId = useLatest(chainId)
+
+  const {feeToken} = useFeeToken()
+  const latestFeeToken = useLatest(feeToken)
 
   const [isClosing, setIsClosing] = useState(false)
   const handleClose = useCallback(
@@ -160,18 +171,25 @@ export default function ClosePositionModal() {
 
       setIsClosing(true)
       toast.promise(
-        sendOrder(latestWallet.current, {
-          receiver,
-          market,
-          initialCollateralToken,
-          sizeDeltaUsd,
-          initialCollateralDeltaAmount,
-          orderType,
-          isLong,
-          triggerPrice,
-          acceptablePrice,
-          referralCode: 0,
-        }),
+        sendOrder(
+          latestWallet.current,
+          {
+            receiver,
+            market,
+            initialCollateralToken,
+            sizeDeltaUsd,
+            initialCollateralDeltaAmount,
+            orderType,
+            isLong,
+            triggerPrice,
+            acceptablePrice,
+            referralCode: 0,
+            swapPath: [],
+            executionFee: 0n,
+            minOutputAmount: 0n,
+          },
+          latestFeeToken.current,
+        ),
         {
           loading: 'Placing your order...',
           description: 'Waiting for transaction confirmation',
@@ -186,7 +204,11 @@ export default function ClosePositionModal() {
             return (
               <>
                 Order placed.
-                <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank'>
+                <a
+                  href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                  target='_blank'
+                  rel='noreferrer'
+                >
                   View tx
                 </a>
               </>
@@ -196,17 +218,37 @@ export default function ClosePositionModal() {
             setIsClosing(false)
           },
           error: error => {
-            return (
-              <>
-                <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
-              </>
-            )
+            return <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
           },
         },
       )
     },
     [queryClient],
   )
+
+  const inputTokenClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
+    }),
+    [isValidCollateralTokenAmountToDecrease],
+  )
+
+  const inputSizeClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidSizeUsdToDecrease && '!text-danger-500',
+    }),
+    [isValidSizeUsdToDecrease],
+  )
+
+  const handleCloseFull = useCallback(() => {
+    handleClose(true)
+  }, [handleClose])
+
+  const handleClosePartial = useCallback(() => {
+    handleClose(false)
+  }, [handleClose])
 
   if (!positionKey) return
 
@@ -224,10 +266,7 @@ export default function ClosePositionModal() {
             type='text'
             label={`Collateral (Max: ${maximumCollateralTokenToDecreaseText})`}
             placeholder='0.0'
-            classNames={{
-              input: 'appearance-none',
-              label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
-            }}
+            classNames={inputTokenClassNames}
             value={collaterTokenAmountToDecreaseInput}
             onChange={handleTokenAmountInputChange}
             endContent={
@@ -240,12 +279,9 @@ export default function ClosePositionModal() {
             className='mt-0'
             size='lg'
             type='text'
-            label={`Size (Max: $${maximumSizeUsdToDecreaseText})`}
+            label={`Size (Max: ${maximumSizeUsdToDecreaseText})`}
             placeholder='0.0'
-            classNames={{
-              input: 'appearance-none',
-              label: !isValidSizeUsdToDecrease && '!text-danger-500',
-            }}
+            classNames={inputSizeClassNames}
             value={sizeUsdToDecreaseInput}
             onChange={handleSizeUsdInputChange}
             startContent={
@@ -264,9 +300,7 @@ export default function ClosePositionModal() {
               color='warning'
               className='w-full'
               size='lg'
-              onPress={() => {
-                handleClose(true)
-              }}
+              onPress={handleCloseFull}
               isLoading={isClosing}
             >
               Fully close
@@ -275,9 +309,7 @@ export default function ClosePositionModal() {
               color='primary'
               className='w-full'
               size='lg'
-              onPress={() => {
-                handleClose()
-              }}
+              onPress={handleClosePartial}
               isDisabled={!isValid}
               isLoading={isClosing}
             >
@@ -288,4 +320,4 @@ export default function ClosePositionModal() {
       </ModalContent>
     </Modal>
   )
-}
+})

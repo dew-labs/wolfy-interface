@@ -1,8 +1,9 @@
-// import MillionLint from '@million/lint'
+import {execSync} from 'node:child_process'
 import dns from 'node:dns'
 import path from 'node:path'
 
 import {partytownVite} from '@builder.io/partytown/utils'
+import {vite as millionLintVite} from '@million/lint'
 import optimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
@@ -14,7 +15,8 @@ import react from '@vitejs/plugin-react-swc'
 // import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {obfuscator} from 'rollup-obfuscator'
-import TurboConsole from 'unplugin-turbo-console/vite'
+import Unfonts from 'unplugin-fonts/vite'
+import turboConsole from 'unplugin-turbo-console/vite'
 import {defineConfig, loadEnv} from 'vite'
 // import pluginChecker from 'vite-plugin-checker'
 import {compression} from 'vite-plugin-compression2'
@@ -30,6 +32,10 @@ import svgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 // import packageJson from './package.json'
+
+const commitHash = JSON.stringify(
+  execSync('git rev-parse --short HEAD').toString().replaceAll('\n', ''),
+)
 
 dns.setDefaultResultOrder('verbatim')
 
@@ -62,6 +68,7 @@ export default defineConfig(({mode}) => {
   const inTestOrDevMode = ['test', 'benchmark', 'development'].includes(mode)
 
   const shouldDisableSentry = process.env.DISABLE_SENTRY === 'true' || inTestOrDevMode
+  const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
   const plugins = [
@@ -79,7 +86,7 @@ export default defineConfig(({mode}) => {
     // Tree-shaking for sentry https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/
     replace({
       preventAssignment: false,
-      __SENTRY_DEBUG__: mode === 'production' ? false : true,
+      __SENTRY_DEBUG__: mode !== 'production',
       // __SENTRY_TRACING__: false,
       __RRWEB_EXCLUDE_IFRAME__: true,
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
@@ -89,7 +96,7 @@ export default defineConfig(({mode}) => {
     partytownVite({
       dest: path.join(__dirname, 'dist', '~partytown'),
     }),
-    TurboConsole({
+    turboConsole({
       /* options here */
     }),
     createHtmlPlugin({
@@ -106,7 +113,7 @@ export default defineConfig(({mode}) => {
           title: process.env.VITE_APP_TITLE,
           description: process.env.VITE_APP_DESCRIPTION,
           ogImage: '/og.jpg',
-          gtagTagId: 'AW-16526181924',
+          gtagTagId: process.env.GA_TAG_ID,
         },
         tags: [
           /**
@@ -122,23 +129,24 @@ export default defineConfig(({mode}) => {
         ],
       },
     }),
-    //// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    // MillionLint.vite(),
+    millionLintVite({
+      enabled: shouldEnableProfile,
+    }),
     // SWC React
     react({
       plugins: [
         ['@swc-jotai/debug-label', {}],
         ['@swc-jotai/react-refresh', {}],
-        !inTestOrDevMode
-          ? [
+        inTestOrDevMode
+          ? false
+          : [
               '@swc/plugin-react-remove-properties',
               {
                 // The regexes defined here are processed in Rust so the syntax is different from
                 // JavaScript `RegExp`s. See https://docs.rs/regex.
                 properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
               },
-            ]
-          : false,
+            ],
       ].filter(Boolean),
     }),
     // Babel React for react compiler
@@ -196,6 +204,71 @@ export default defineConfig(({mode}) => {
     inspectorServer(),
     compression(), // Useful when serve dist as static files (https://nginx.org/en/docs/http/ngx_http_gzip_static_module.html), but not when serve dist with a backend (since the backend should handle compression)
     optimizeCssModules(),
+    Unfonts({
+      // Fontsource API
+      fontsource: {
+        /**
+         * Fonts families lists
+         */
+        families: [
+          // families can be either strings (load default font set)
+          // Require the `@fontsource/abeezee` package to be installed.
+          'Geist Sans',
+          'Geist Mono',
+          // {
+          //   /**
+          //    * Name of the font family.
+          //    * Require the `@fontsource/roboto` package to be installed.
+          //    */
+          //   name: 'Roboto',
+          //   /**
+          //    * Load only a subset of the font family.
+          //    */
+          //   weights: [400, 700],
+          //   /**
+          //    * Restrict the font styles to load.
+          //    */
+          //   styles: ['italic', 'normal'],
+          //   /**
+          //    * Use another font subset.
+          //    */
+          //   subset: 'latin-ext',
+          // },
+          // {
+          //   /**
+          //    * Name of the font family.
+          //    * Require the `@fontsource-variable/cabin` package to be installed.
+          //    */
+          //   name: 'Cabin',
+          //   /**
+          //    * When using variable fonts, you can choose which axes to load.
+          //    */
+          //   variable: {
+          //     wght: true,
+          //     slnt: true,
+          //     ital: true,
+          //   },
+          // },
+        ],
+      },
+      google: {
+        preconnect: true,
+        display: 'block',
+        injectTo: 'head',
+        families: [
+          {
+            name: 'Pixelify Sans',
+            styles: 'wght@400..700',
+            defer: true,
+          },
+          {
+            name: 'Silkscreen',
+            styles: 'wght@400;700',
+            defer: true,
+          },
+        ],
+      },
+    }),
     FontaineTransform.vite(fontaineOptions),
     // NOTE: enable this if you need support for legacy browsers
     // Legacy plugin need extra setup for CSP (Content Security Policy)
@@ -211,14 +284,22 @@ export default defineConfig(({mode}) => {
       throw new Error('SENTRY_AUTH_TOKEN is required')
     }
 
+    if (!process.env.SENTRY_ORG) {
+      throw new Error('SENTRY_ORG is required')
+    }
+
+    if (!process.env.SENTRY_PROJECT) {
+      throw new Error('SENTRY_PROJECT is required')
+    }
+
     plugins.push(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- some how typescript unable to infer the type correctly
       sentryVitePlugin({
         // release: '',
         applicationKey: process.env.VITE_APP_NAME,
         authToken: process.env.SENTRY_AUTH_TOKEN,
-        org: '<REPLACE_THIS>',
-        project: '<REPLACE_THIS>',
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
         reactComponentAnnotation: {
           enabled: true,
         },
@@ -231,6 +312,9 @@ export default defineConfig(({mode}) => {
   }
 
   return {
+    define: {
+      __COMMIT_HASH__: commitHash,
+    },
     build: {
       sourcemap: true,
       // manifest: true,
@@ -249,7 +333,9 @@ export default defineConfig(({mode}) => {
       devSourcemap: true,
       preprocessorOptions: {
         scss: {
+          api: 'modern-compiler',
           sourceMap: true,
+          sourceMapIncludeSources: true,
         },
       },
     },

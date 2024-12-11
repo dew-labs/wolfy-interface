@@ -1,37 +1,57 @@
-import {queryOptions, useQuery} from '@tanstack/react-query'
-import type {StarknetChainId} from 'satoru-sdk'
+import {queryOptions, useQuery, type UseQueryResult} from '@tanstack/react-query'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchMarketTokenBalances from '@/lib/trade/services/fetchMarketTokenBalances'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-import useMarketsData from './useMarketsData'
+import useMarketTokenAddresses from './useMarketTokenAddresses'
 
-function createGetMarketTokenBalancesQueryOptions(
+export function getMarketTokenBalancesQueryKey(
   chainId: StarknetChainId,
-  marketTokenAddresses: string[],
-  accountAddress: string,
+  marketTokenAddresses: string[] | undefined,
+  accountAddress: string | undefined,
+) {
+  return ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const
+}
+
+function createGetMarketTokenBalancesQueryOptions<T = Map<string, bigint>>(
+  chainId: StarknetChainId,
+  marketTokenAddresses: string[] | undefined,
+  accountAddress: string | undefined,
+  selector?: (data: Map<string, bigint>) => T,
 ) {
   return queryOptions({
-    queryKey: ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const,
+    queryKey: getMarketTokenBalancesQueryKey(chainId, marketTokenAddresses, accountAddress),
     queryFn: async () => {
-      return await fetchMarketTokenBalances(chainId, marketTokenAddresses, accountAddress)
+      return await fetchMarketTokenBalances(chainId, marketTokenAddresses ?? [], accountAddress)
     },
-    refetchInterval: 5000,
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
+    select: selector as (data: Map<string, bigint>) => T,
+    ...NO_REFETCH_OPTIONS,
+    refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
 }
 
-export default function useMarketTokenBalances() {
+export default function useMarketTokenBalances(): UseQueryResult<Map<string, bigint>>
+export default function useMarketTokenBalances<T = Map<string, bigint>>(
+  selector: (data: Map<string, bigint>) => T,
+): UseQueryResult<T>
+export default function useMarketTokenBalances<T = Map<string, bigint>>(
+  selector?: (data: Map<string, bigint>) => T,
+): UseQueryResult<T> {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
-  const marketsData = useMarketsData()
-  const marketTokenAddresses = marketsData ? Array.from(marketsData.keys()) : []
-  const {data} = useQuery(
-    createGetMarketTokenBalancesQueryOptions(chainId, marketTokenAddresses, accountAddress),
+  const {data: marketTokenAddresses} = useMarketTokenAddresses()
+
+  return useQuery(
+    createGetMarketTokenBalancesQueryOptions(
+      chainId,
+      marketTokenAddresses,
+      accountAddress,
+      selector,
+    ),
   )
-  return data
 }

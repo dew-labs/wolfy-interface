@@ -2,20 +2,36 @@
 
 import {nextui} from '@nextui-org/react'
 
+import globs from './globs.js'
+
 export default {
-  content: [
-    './index.{htm,html}',
-    './src/**/*.{?(c|m)[jt]s?(x),vue,svelte}',
-    './node_modules/@nextui-org/theme/dist/**/*.?(c|m)[jt]s?(x)',
-  ],
+  content: globs.TAILWIND_CONTENT,
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Geist Mono'],
+        serif: ['Pixelify Sans'], // Use for highlight
+        mono: ['Geist Mono'],
+      },
+    },
   },
   darkMode: 'class',
   plugins: [
     nextui({
       themes: {
         dark: {
+          layout: {
+            radius: {
+              small: '0',
+              medium: '0',
+              large: '0',
+            },
+            borderWidth: {
+              small: '2px',
+              medium: '3px',
+              large: '4px',
+            },
+          },
           colors: {
             primary: {
               // DEFAULT: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',
@@ -27,6 +43,18 @@ export default {
           },
         },
         light: {
+          layout: {
+            radius: {
+              small: '0',
+              medium: '0',
+              large: '0',
+            },
+            borderWidth: {
+              small: '2px',
+              medium: '3px',
+              large: '4px',
+            },
+          },
           colors: {
             primary: {
               // DEFAULT: 'linear-gradient(233deg, #DB1935 21.41%, #7D000D 72.86%)',

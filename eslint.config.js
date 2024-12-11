@@ -5,79 +5,67 @@ import {fixupConfigRules} from '@eslint/compat'
 import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReact from '@eslint-react/eslint-plugin'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginQuery from '@tanstack/eslint-plugin-query'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
-// import pluginDeprecation from 'eslint-plugin-deprecation'
-import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
+// import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
 import pluginI18next from 'eslint-plugin-i18next'
 import pluginImportX from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
+// import pluginJsdoc from 'eslint-plugin-jsdoc'
 import pluginJsonc from 'eslint-plugin-jsonc'
 import pluginJsxA11y from 'eslint-plugin-jsx-a11y'
 import pluginNoBarrelFiles from 'eslint-plugin-no-barrel-files'
 import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import pluginReactCompiler from 'eslint-plugin-react-compiler'
+import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
-// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: enable later
-// import pluginTestingLibrary from 'eslint-plugin-testing-library' // TODO: check why this plugin is causing issues
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
+// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: investigate why this cause errors
+import pluginTestingLibrary from 'eslint-plugin-testing-library'
+// import pluginUnicorn from 'eslint-plugin-unicorn'
 import pluginVitest from 'eslint-plugin-vitest'
 import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
 import tsEslint from 'typescript-eslint'
 
+import globs from './globs.js'
 import {CAMEL_CASE} from './regexes.js'
 
-// If files is in a nextJs project or not
-// const isNextJsProject = fs.existsSync('next.config.js');
-// const nextJsOrEmptyExtends = isNextJsProject ? ['plugin:@next/next/core-web-vitals'] : [];
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
+const flatCompat = new FlatCompat({
+  baseDirectory: path.dirname(fileURLToPath(import.meta.url)),
 })
-
-// TODO: add all react-use and other hooks libraries to staticHooks
-const reactUseStaticHooks = {
-  useUpdate: true,
-}
-
-// TODO: add all react-use and other hooks libraries to additionalHooks
-const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
 
 //------------------------------------------------------------------------------
 
 function createApplyTo(include, exclude = []) {
-  return function (name, config) {
-    if (Array.isArray(config)) {
-      if (config.length > 1) {
-        return config.map((cfg, index) => ({
+  return (name, configs, enabled = true) => {
+    if (!enabled) {
+      return []
+    }
+
+    let config = configs
+
+    if (Array.isArray(configs)) {
+      if (configs.length > 1) {
+        return configs.map((cfg, index) => ({
           ...cfg,
-          name: name + '-' + index,
+          name: `${name}-${index}`,
           files: include,
           ignores: exclude,
         }))
       }
 
-      config = config.at(0)
+      config = configs.at(0)
     }
 
     return [
@@ -91,385 +79,621 @@ function createApplyTo(include, exclude = []) {
   }
 }
 
-const applyToAll = createApplyTo(['**/*.{?(c|m)[jt]s?(x),json?(c|5)}'])
-const applyToScript = createApplyTo(['**/*.?(c|m)[jt]s?(x)'])
-const applyToJson = createApplyTo(
-  ['**/*.json'],
-  ['**/tsconfig.json', '.vscode/*.json', '.zed/*.json'],
-)
-const applyToJsonc = createApplyTo(['**/*.jsonc', '.vscode/*.json', '.zed/*.json'])
-const applyToJson5 = createApplyTo(['**/*.json5', '**/tsconfig.json'])
-const applyToJsonC5 = createApplyTo(['**/*.json?(c|5)'])
-const applyToTypescript = createApplyTo(['**/*.?(c|m)ts?(x)'])
-const applyToReact = createApplyTo(['**/*.?(c|m)[jt]sx', '**/use*.?(c|m)[jt]s?(x)'])
-const applyToJavascriptReact = createApplyTo(['**/*.?(c|m)tsx', '**/use*.?(c|m)js?(x)'])
-const applyToTypescriptReact = createApplyTo(['**/*.?(c|m)tsx', '**/use*.?(c|m)ts?(x)'])
-const applyToVitest = createApplyTo(
-  ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
-  ['**/cypress/**/*'],
-)
-// const applyToVitestNotReact = createApplyTo(
-//   ['**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)', '**/!(use)*.{test,spec}.?(c|m)[jt]s!(x)'],
-//   ['**/cypress/**/*'],
-// )
-// const applyToVitestReact = createApplyTo(
-//   [
-//     '**/__tests__/**/*.?(c|m)[jt]sx',
-//     '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
-//     '**/*.{test,spec}.?(c|m)[jt]sx',
-//     '**/use*.{test,spec}.?(c|m)[jt]s?(x)',
-//   ],
-//   ['**/cypress/**/*'],
-// )
+const applyTo = {
+  all: createApplyTo(globs.SCRIPT_AND_JSONS),
+  script: createApplyTo(globs.SCRIPT),
+  json: createApplyTo(globs.JSON, globs.NOT_JSON),
+  jsonc: createApplyTo(globs.JSONC, globs.NOT_JSONC),
+  json5: createApplyTo(globs.JSON5, globs.NOT_JSON5),
+  jsonC5: createApplyTo(globs.JSONC5),
+  typescript: createApplyTo(globs.TYPESCRIPT),
+  react: createApplyTo(globs.REACT),
+  javascriptReact: createApplyTo(globs.REACT_JAVASCRIPT),
+  typescriptReact: createApplyTo(globs.REACT_TYPESCRIPT),
+  test: createApplyTo(globs.TEST, globs.TEST_2E2),
+  testNotReact: createApplyTo(globs.TEST_NOT_REACT, globs.TEST_2E2),
+  testReact: createApplyTo(globs.TEST_REACT, globs.TEST_2E2),
+  testE2E: createApplyTo(globs.TEST_2E2),
+}
 
 //------------------------------------------------------------------------------
 
-const coreConfigs = [
-  ...applyToAll('core/eslint-recommended', eslint.configs.recommended),
-  ...applyToAll('core/security', pluginSecurity.configs.recommended),
-  ...applyToAll('core/promise', pluginPromise.configs['flat/recommended']),
-  ...applyToAll('core/import-x', pluginImportX.flatConfigs.recommended),
-  ...applyToAll('core/no-use-extend-native', pluginNoUseExtendNative.configs.recommended),
-  ...applyToAll('core/eslint-comments', {
-    ...pluginEslintComments.configs.recommended,
-    // workaround for https://github.com/eslint-community/eslint-plugin-eslint-comments/issues/215
-    plugins: {
-      '@eslint-community/eslint-comments': pluginEslintComments,
+function getIgnoreConfigs() {
+  return [
+    pluginGitignore({
+      root: true,
+      files: ['.gitignore'],
+      strict: false,
+    }),
+    {
+      ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*'],
     },
-  }),
-  ...applyToAll('core/regexp', pluginRegexp.configs['flat/recommended']),
-  ...applyToAll(
-    'core/ssr-friendly',
-    fixupConfigRules(compat.extends('plugin:ssr-friendly/recommended')),
-  ),
-  ...applyToAll('core/depend', pluginDepend.configs['flat/recommended']),
-  // ...applyToAll('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
-  // ...applyToAll('core/sonarjs/custom-rules', {
-  //   rules: {
-  //     'sonarjs/no-duplicate-string': 'warn',
-  //   }
-  // })
-  ...applyToAll('core/no-relative-import-paths', {
-    plugins: {
-      'no-relative-import-paths': pluginNoRelativeImportPaths,
-    },
-    rules: {
-      'no-relative-import-paths/no-relative-import-paths': [
-        'warn',
-        {allowSameFolder: true, rootDir: 'src', prefix: '@'},
-      ],
-    },
-  }),
-  ...applyToAll('core/simple-import-sort', {
-    plugins: {
-      'simple-import-sort': pluginSimpleImportSort,
-    },
-    rules: {
-      'sort-imports': 'off',
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
-    },
-  }),
-  ...applyToAll('core/css-modules', {
-    plugins: {
-      'css-modules': pluginCssModules,
-    },
-    // rules: pluginCssModules.configs.recommended.rules, // TODO: enable later
-  }),
-  ...applyToAll('core/no-barrel-files', {
-    plugins: {
-      'no-barrel-files': pluginNoBarrelFiles, // switch to eslint-plugin-barrel-files?
-    },
-    rules: {
-      'no-barrel-files/no-barrel-files': 'error',
-    },
-  }),
-  ...applyToAll('core/no-secrets', {
-    plugins: {
-      'no-secrets': pluginNoSecrets,
-    },
-    rules: {
-      'no-secrets/no-secrets': [
-        'error',
-        {
-          tolerance: 4.5,
-          ignoreContent: [new RegExp(CAMEL_CASE)],
-        },
-      ],
-    },
-  }),
-  ...applyToAll('core/exception-handling', {
-    plugins: {
-      'exception-handling': pluginExceptionHandling,
-    },
-    rules: {
-      // 'exception-handling/no-unhandled': 'error',
-    },
-  }),
-  // 'plugin:jsdoc/recommended-typescript', // TODO: To be added later
-  // 'plugin:unicorn/recommended', // TODO: To be added later
-  // 'plugin:isaacscript/recommended' // TODO: To be added later
-]
+  ]
+}
 
-const jsonConfigs = [
-  ...applyToJson('json/json', pluginJsonc.configs['flat/recommended-with-json']),
-  ...applyToJsonc('json/jsonc', pluginJsonc.configs['flat/recommended-with-jsonc']),
-  ...applyToJson5('json/json5', pluginJsonc.configs['flat/recommended-with-json5']),
-  ...applyToJsonC5('json', pluginJsonc.configs['flat/prettier']),
-]
-
-const scriptConfigs = [
-  ...applyToScript('i18next', {
-    plugins: {
-      i18next: pluginI18next,
-    },
-    rules: {
-      'i18next/no-literal-string': 1,
-    },
-  }),
-]
-
-const typescriptConfigs = [
-  ...applyToTypescript('typescript/import-x', {
-    ...pluginImportX.flatConfigs.typescript,
-    settings: {
-      'import-x/parsers': {
-        '@typescript-eslint/parser': ['.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx'],
+function getCoreConfigs() {
+  return [
+    ...applyTo.all('core/recommended', eslint.configs.recommended),
+    ...applyTo.all('core/custom', {
+      rules: {
+        'camelcase': ['error', {allow: ['contract_address']}],
+        'grouped-accessor-pairs': 'error',
+        'accessor-pairs': 'error',
+        // 'default-case': ['error', {commentPattern: '^skip\\sdefault'}],
+        'default-case-last': 'error',
+        // 'default-param-last': 'error',
+        'no-promise-executor-return': 'error',
+        'no-self-compare': 'error',
+        'no-template-curly-in-string': 'error',
+        'no-unmodified-loop-condition': 'error',
+        'no-useless-assignment': 'error',
+        'no-await-in-loop': 'error',
+        'require-atomic-updates': 'error',
+        'eqeqeq': 'error',
+        'func-name-matching': 'error',
+        'func-names': ['error', 'as-needed'],
+        'no-caller': 'error',
+        'no-console': ['warn', {allow: ['warn', 'error', 'info']}],
+        'no-div-regex': 'error',
+        'no-else-return': 'error',
+        'no-eval': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-label': 'error',
+        'no-label-var': 'error',
+        'no-implicit-coercion': ['error', {allow: ['!!', '~']}],
+        'no-return-assign': 'error',
+        'no-lone-blocks': 'error',
+        'no-lonely-if': 'error',
+        'no-loop-func': 'error',
+        'no-new': 'error',
+        'no-invalid-this': 'error',
+        'no-implicit-globals': 'error',
+        // 'no-magic-numbers': 'error',
+        'no-multi-assign': 'error',
+        'no-negated-condition': 'error',
+        'no-nested-ternary': 'error',
+        'no-new-func': 'error',
+        'no-new-wrappers': 'error',
+        'no-proto': 'error',
+        'no-object-constructor': 'error',
+        'no-octal-escape': 'error',
+        // 'no-param-reassign': 'error',
+        'no-script-url': 'error',
+        'no-sequences': ['error', {allowInParentheses: true}],
+        // 'no-shadow': 'error',
+        'no-undef-init': 'error',
+        'no-unneeded-ternary': 'error',
+        'no-useless-call': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'no-bitwise': 'error',
+        'no-implied-eval': 'error',
+        'no-unused-expressions': 'error',
+        // 'new-cap': 'error',
+        'object-shorthand': 'error',
+        'prefer-exponentiation-operator': 'error',
+        'prefer-named-capture-group': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'prefer-object-has-own': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'guard-for-in': 'error',
+        'symbol-description': 'error',
+        'yoda': 'error',
       },
-      'import-x/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-        },
-        node: true,
-      },
-    },
-  }),
-  // Disabled due to poor performance
-  // ...applyToTypescript('typescript/deprecation', {
-  //   plugins: {
-  //     deprecation: fixupPluginRules(pluginDeprecation),
-  //   },
-  //   rules: {
-  //     'deprecation/deprecation': 'error',
-  //   },
-  // }),
-  ...applyToTypescript('typescript/strict', tsEslint.configs.strictTypeChecked),
-  ...applyToTypescript('typescript/stylistic', tsEslint.configs.stylisticTypeChecked),
-  ...applyToTypescript('typescript', {
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      // Our own rules set
-      '@typescript-eslint/consistent-type-exports': [
-        'error',
-        {fixMixedExportsWithInlineTypeSpecifier: false},
-      ],
-      '@typescript-eslint/promise-function-async': ['error'],
-      'no-loop-func': 'off',
-      '@typescript-eslint/no-loop-func': 'error',
-      '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
-      '@typescript-eslint/no-unnecessary-qualifier': 'error',
-      '@typescript-eslint/no-useless-empty-export': 'error',
-      // Extends or disable rules of the presets
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          vars: 'all',
-          args: 'after-used',
-          caughtErrors: 'all',
-          ignoreRestSiblings: false,
-          reportUsedIgnorePattern: true,
-          varsIgnorePattern: '^(?!__)_.*|^_$',
-          argsIgnorePattern: '^(?!__)_.*|^_$',
-          caughtErrorsIgnorePattern: '^(?!__)_.*|^_$',
-          destructuredArrayIgnorePattern: '^(?!__)_.*|^_$',
-        },
-      ],
-      '@typescript-eslint/no-inferrable-types': 'off',
-      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'warn', // TODO: enable
-      '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
-      '@typescript-eslint/restrict-plus-operands': 'warn', // TODO: enable
-    },
-  }),
-]
-
-const reactConfigs = [
-  ...applyToReact(
-    'react/hooks',
-    fixupConfigRules(compat.extends('plugin:react-hooks/recommended')),
-  ),
-  ...applyToReact('react/import-x', pluginImportX.flatConfigs.react),
-  ...applyToReact('react/a11y', {
-    ...pluginJsxA11y.flatConfigs.strict,
-    settings: {
-      'jsx-a11y': {
-        polymorphicPropName: 'as',
-        components: {
-          VisuallyHidden: 'span',
-        },
-      },
-    },
-  }),
-  ...applyToReact('react/query', pluginQuery.configs['flat/recommended']),
-  ...applyToReact('react/dom', pluginReact.configs.dom), // TODO: Exclude react in server?
-  ...applyToJavascriptReact('react/x-javascript', {
-    ...pluginReact.configs['recommended'],
-  }),
-  ...applyToTypescriptReact('react/x-typescript', {
-    ...pluginReact.configs['recommended-type-checked'],
-  }),
-  ...applyToReact('react/x-hooks', {
-    // ...pluginReact.configs['hooks-extra'], // TODO: enable this when available in v2.0.0 instead of manually set rules
-    rules: {
-      '@eslint-react/hooks-extra/prefer-use-state-lazy-initialization': 'error',
-    },
-  }),
-  ...applyToReact('react/x-settings', {
-    settings: {
-      'react-x': {
-        polymorphicPropName: 'as',
-        additionalHooks: {
-          useLayoutEffect: ['useIsomorphicLayoutEffect'],
-        },
-        version: 'detect',
-      },
-    },
-  }),
-  ...applyToReact('react/refresh', {
-    plugins: {
-      'react-refresh': pluginReactRefresh,
-    },
-    rules: {
-      'react-refresh/only-export-components': [
-        'warn',
-        {
-          allowConstantExport: true,
-          checkJS: true,
-        },
-      ],
-    },
-  }),
-  ...applyToReact('react/compiler', {
-    plugins: {
-      'react-compiler': pluginReactCompiler,
-    },
-    rules: {
-      'react-compiler/react-compiler': 'warn',
-    },
-  }),
-  ...applyToReact('react', {
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    rules: {
-      'react-hooks/exhaustive-deps': [
-        'error',
-        {
-          staticHooks: {
-            useState: [false, true, true], // means [unstable, stable, stable]
-            useAtom: [false, true],
-            useSetAtom: true,
-            useMutative: [false, true],
-            useMutativeReducer: [false, true],
-            useLatest: true,
-            useLazyRef: true,
-            useIdleTimeScheduler: true,
-            ...reactUseStaticHooks,
+    }),
+    ...applyTo.all('core/security', pluginSecurity.configs.recommended),
+    ...applyTo.all('core/promise', pluginPromise.configs['flat/recommended']),
+    ...applyTo.all('core/promise/custom', {
+      rules: {
+        'promise/always-return': ['warn', {ignoreLastCallback: true}],
+        'promise/no-callback-in-promise': [
+          'warn',
+          {
+            exceptions: ['process.nextTick', 'setImmediate', 'setTimeout'],
           },
-          additionalHooks: `(${['useMemoClientValue', ...reactUseAdditionalHooks].join('|')})`,
+        ],
+      },
+    }),
+    ...applyTo.all('core/import-x', pluginImportX.flatConfigs.recommended),
+    ...applyTo.all('core/import-x/custom', {
+      rules: {
+        'import-x/no-unresolved': 'error',
+        'import-x/order': 'off',
+        'import-x/namespace': 'off',
+      },
+    }),
+    ...applyTo.all('core/no-use-extend-native', pluginNoUseExtendNative.configs.recommended),
+    ...applyTo.all('core/eslint-comments', {
+      ...pluginEslintComments.configs.recommended,
+      // workaround for https://github.com/eslint-community/eslint-plugin-eslint-comments/issues/215
+      plugins: {
+        '@eslint-community/eslint-comments': pluginEslintComments,
+      },
+    }),
+    ...applyTo.all('core/eslint-comments/custom', {
+      rules: {
+        '@eslint-community/eslint-comments/require-description': [
+          'error',
+          {ignore: ['eslint-enable']},
+        ],
+      },
+    }),
+    ...applyTo.all('core/regexp', pluginRegexp.configs['flat/recommended']),
+    ...applyTo.all(
+      'core/ssr-friendly',
+      fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
+    ),
+    ...applyTo.all('core/depend', pluginDepend.configs['flat/recommended']),
+    // ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
+    // ...applyTo.all('core/sonarjs/custom', {
+    //   rules: {
+    //     'sonarjs/no-duplicate-string': 'warn',
+    //   },
+    // }),
+    ...applyTo.all('core/no-relative-import-paths', {
+      plugins: {
+        'no-relative-import-paths': pluginNoRelativeImportPaths,
+      },
+      rules: {
+        'no-relative-import-paths/no-relative-import-paths': [
+          'warn',
+          {allowSameFolder: true, rootDir: 'src', prefix: '@'},
+        ],
+      },
+    }),
+    ...applyTo.all('core/simple-import-sort', {
+      plugins: {
+        'simple-import-sort': pluginSimpleImportSort,
+      },
+      rules: {
+        'sort-imports': 'off',
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error',
+      },
+    }),
+    ...applyTo.all('core/no-barrel-files', {
+      plugins: {
+        'no-barrel-files': pluginNoBarrelFiles, // switch to eslint-plugin-barrel-files?
+      },
+      rules: {
+        'no-barrel-files/no-barrel-files': 'error',
+      },
+    }),
+    ...applyTo.all('core/no-secrets', {
+      plugins: {
+        'no-secrets': pluginNoSecrets,
+      },
+      rules: {
+        'no-secrets/no-secrets': [
+          'error',
+          {
+            tolerance: 4.5,
+            ignoreContent: [new RegExp(CAMEL_CASE)],
+          },
+        ],
+      },
+    }),
+    // TODO: investigate why this is causing issues
+    // ...applyTo.all('core/exception-handling', {
+    //   plugins: {
+    //     'exception-handling': pluginExceptionHandling,
+    //   },
+    //   rules: {
+    //     'exception-handling/no-unhandled': 'error',
+    //     'exception-handling/might-throw': 'error',
+    //     'exception-handling/use-error-cause': 'error',
+    //   },
+    // }),
+    // TODO: enable later
+    // ...applyTo.all('core/jsdoc', pluginJsdoc.configs['flat/recommended-typescript-error']),
+    // ...applyTo.all('core/unicorn', pluginUnicorn.configs['flat/recommended']),
+    // ...applyTo.all('core/unicorn/custom', {
+    //   rules: {
+    //     // 'unicorn/better-regex': 'warn',
+    //     // 'unicorn/filename-case': [
+    //     //   'error',
+    //     //   {
+    //     //     cases: {
+    //     //       kebabCase: true,
+    //     //       pascalCase: true,
+    //     //     }
+    //     //   }
+    //     // ],
+    //   },
+    // }),
+  ]
+}
+
+function getJsonConfigs() {
+  return [
+    ...applyTo.json('json/json', pluginJsonc.configs['flat/recommended-with-json']),
+    ...applyTo.jsonc('json/jsonc', pluginJsonc.configs['flat/recommended-with-jsonc']),
+    ...applyTo.json5('json/json5', pluginJsonc.configs['flat/recommended-with-json5']),
+    ...applyTo.jsonC5('json', pluginJsonc.configs['flat/prettier']),
+  ]
+}
+
+function getCssModuleConfigs() {
+  return [
+    ...applyTo.all('core/css-modules', {
+      plugins: {
+        'css-modules': pluginCssModules,
+      },
+      rules: pluginCssModules.configs.recommended.rules,
+    }),
+  ]
+}
+
+function getI18nextConfigs() {
+  return [
+    ...applyTo.script('i18next', {
+      plugins: {
+        i18next: pluginI18next,
+      },
+      rules: {
+        'i18next/no-literal-string': 1,
+      },
+    }),
+  ]
+}
+
+function getTypescriptConfigs() {
+  return [
+    ...applyTo.typescript('typescript/import-x', {
+      ...pluginImportX.flatConfigs.typescript,
+      settings: {
+        'import-x/parsers': {
+          '@typescript-eslint/parser': ['.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx'],
         },
-      ],
-      'jsx-a11y/label-has-associated-control': [
-        'error',
-        {
-          controlComponents: ['button'],
+        'import-x/resolver': {
+          typescript: {
+            alwaysTryTypes: true,
+          },
+          node: true,
         },
-      ],
-      '@eslint-react/prefer-shorthand-boolean': 'warn',
-      '@eslint-react/prefer-shorthand-fragment': 'warn',
-    },
-  }),
-  ...applyToTypescriptReact('react/typescript', {
-    rules: {
-      // https://github.com/orgs/react-hook-form/discussions/8020
-      '@typescript-eslint/no-misused-promises': [
-        2,
-        {
-          checksVoidReturn: {
-            attributes: false,
+      },
+    }),
+    // Turn off rules that typescript already provides https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import
+    ...applyTo.typescript('typescript/import-x/custom', {
+      rules: {
+        'import-x/named': 'off',
+        'import-x/namespace': 'off',
+        'import-x/default': 'off',
+        'import-x/no-named-as-default-member': 'off',
+        'import-x/no-unresolved': 'off',
+      },
+    }),
+    ...applyTo.typescript('typescript/strict', tsEslint.configs.strictTypeChecked),
+    ...applyTo.typescript('typescript/stylistic', tsEslint.configs.stylisticTypeChecked),
+    ...applyTo.typescript('typescript', {
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir: import.meta.dirname,
+        },
+      },
+      rules: {
+        // Our own rules set
+        '@typescript-eslint/consistent-type-exports': [
+          'error',
+          {fixMixedExportsWithInlineTypeSpecifier: false},
+        ],
+        '@typescript-eslint/promise-function-async': ['error'],
+        'no-loop-func': 'off',
+        '@typescript-eslint/no-loop-func': 'error',
+        '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
+        '@typescript-eslint/no-unnecessary-qualifier': 'error',
+        '@typescript-eslint/no-useless-empty-export': 'error',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            args: 'after-used',
+            caughtErrors: 'all',
+            ignoreRestSiblings: false,
+            reportUsedIgnorePattern: true,
+            varsIgnorePattern: '^(?!__)_.*|^_$',
+            argsIgnorePattern: '^(?!__)_.*|^_$',
+            caughtErrorsIgnorePattern: '^(?!__)_.*|^_$',
+            destructuredArrayIgnorePattern: '^(?!__)_.*|^_$',
+          },
+        ],
+        '@typescript-eslint/no-inferrable-types': 'off',
+        '@typescript-eslint/switch-exhaustiveness-check': [
+          'error',
+          {allowDefaultCaseForExhaustiveSwitch: false},
+        ],
+        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'warn', // TODO: enable
+        '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
+        '@typescript-eslint/restrict-plus-operands': 'warn', // TODO: enable
+      },
+    }),
+  ]
+}
+
+function getReactConfigs() {
+  // TODO: add all react-use and other hooks libraries to staticHooks
+  const reactUseStaticHooks = {
+    useUpdate: true,
+  }
+
+  // TODO: add all react-use and other hooks libraries to additionalHooks
+  const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
+
+  return [
+    ...applyTo.react(
+      'react/hooks',
+      fixupConfigRules(flatCompat.extends('plugin:react-hooks/recommended')),
+    ),
+    ...applyTo.react('react/hooks/custom', {
+      rules: {
+        'react-hooks/exhaustive-deps': [
+          'error',
+          {
+            staticHooks: {
+              useState: [false, true, true], // means [unstable, stable, stable]
+              useAtom: [false, true],
+              useSetAtom: true,
+              useMutative: [false, true],
+              useMutativeReducer: [false, true],
+              useLatest: true,
+              useLazyRef: true,
+              useIdleTimeScheduler: true,
+              ...reactUseStaticHooks,
+            },
+            additionalHooks: `(${['useMemoClientValue', ...reactUseAdditionalHooks].join('|')})`,
+          },
+        ],
+      },
+    }),
+    ...applyTo.react('react/import-x', pluginImportX.flatConfigs.react),
+    ...applyTo.react('react/a11y', {
+      ...pluginJsxA11y.flatConfigs.strict,
+      settings: {
+        'jsx-a11y': {
+          polymorphicPropName: 'as',
+          components: {
+            VisuallyHidden: 'span',
           },
         },
-      ],
-    },
-  }),
-]
-
-// const reactNativeConfigs = [
-//   ...applyToReactNative('react-native/dom', pluginReactNative.configs.all),
-//   ...applyToReactNative('react-native/off-dom', pluginReact.configs['off-dom'])
-// ]
-
-const testConfigs = [
-  // ...applyToVitestNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
-  // ...applyToVitestReact('testing/react', pluginTestingLibrary.configs['flat/react']),
-  ...applyToVitest('testing/vitest', {
-    plugins: {
-      vitest: pluginVitest,
-    },
-    rules: pluginVitest.configs.all.rules,
-    settings: {
-      vitest: {
-        typecheck: true,
       },
-    },
-    languageOptions: {
-      globals: {
-        ...pluginVitest.environments.env.globals,
-        // pluginVitest.environments.env.globals lack some of the globals, see https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/constants.ts
-        chai: true,
-        expectTypeOf: true,
-        assertType: true,
-        onTestFinished: true,
-        onTestFailed: true,
+    }),
+    ...applyTo.react('react/query', pluginQuery.configs['flat/recommended']),
+    ...applyTo.react('react/dom', pluginReact.configs.dom), // TODO: Exclude react in SSR, RSC??
+    ...applyTo.javascriptReact('react/x-javascript', {
+      ...pluginReact.configs['recommended'],
+    }),
+    ...applyTo.react('react/x-custom', {
+      rules: {
+        '@eslint-react/prefer-shorthand-boolean': 'warn',
+        '@eslint-react/prefer-shorthand-fragment': 'warn',
+        '@eslint-react/no-class-component': 'error',
+        '@eslint-react/no-missing-component-display-name': 'error',
+        '@eslint-react/no-useless-fragment': 'error',
+        '@eslint-react/prefer-react-namespace-import': 'error',
       },
-    },
-  }),
-  ...applyToVitest('testing/vitest/jest-dom', pluginJestDom.configs['flat/recommended']),
-  ...applyToVitest('testing', {
-    plugins: {
-      'no-only-tests': pluginNoOnlyTests,
-    },
-    rules: {
-      'no-only-tests/no-only-tests': 'error', // TODO: check this rule
-    },
-  }),
-  ...applyToVitest('testing/vitest/formatting', compat.extends('plugin:jest-formatting/strict')),
-]
+    }),
+    ...applyTo.react('react/x/hooks', {
+      // TODO: enable this when available in v2.0.0 instead of manually set rules
+      // ...pluginReact.configs['hooks-extra'],
+      rules: {
+        '@eslint-react/hooks-extra/prefer-use-state-lazy-initialization': 'error',
+        '@eslint-react/hooks-extra/no-direct-set-state-in-use-layout-effect': 'error',
+        '@eslint-react/hooks-extra/no-unnecessary-use-callback': 'error',
+        '@eslint-react/hooks-extra/no-unnecessary-use-memo': 'error',
+        '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'error',
+        '@eslint-react/hooks-extra/no-redundant-custom-hook': 'error',
+      },
+    }),
+    ...applyTo.react('react/x-settings', {
+      settings: {
+        'react-x': {
+          polymorphicPropName: 'as',
+          additionalHooks: {
+            useLayoutEffect: ['useIsomorphicLayoutEffect'],
+          },
+          version: 'detect',
+        },
+      },
+    }),
+    ...applyTo.react('react/refresh', {
+      plugins: {
+        'react-refresh': pluginReactRefresh,
+      },
+      rules: {
+        'react-refresh/only-export-components': [
+          'warn',
+          {
+            allowConstantExport: true,
+            checkJS: true,
+          },
+        ],
+      },
+    }),
+    ...applyTo.react('react/compiler', {
+      plugins: {
+        'react-compiler': pluginReactCompiler,
+      },
+      rules: {
+        'react-compiler/react-compiler': 'error',
+      },
+    }),
+    ...applyTo.react('react/perf', pluginReactPerf.configs.flat.all),
+    ...applyTo.react('react/perf-custom', {
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': [
+          'error',
+          {
+            nativeAllowList: 'all',
+            ignoreSources: ['@nextui-org/react'],
+          },
+        ],
+        'react-perf/jsx-no-new-array-as-prop': [
+          'error',
+          {
+            nativeAllowList: 'all',
+            ignoreSources: ['@nextui-org/react'],
+          },
+        ],
+        'react-perf/jsx-no-new-function-as-prop': [
+          'error',
+          {
+            nativeAllowList: 'all',
+            ignoreSources: ['@nextui-org/react'],
+          },
+        ],
+        'react-perf/jsx-no-jsx-as-prop': [
+          'error',
+          {
+            nativeAllowList: 'all',
+            ignoreSources: ['@nextui-org/react'],
+          },
+        ],
+      },
+    }),
+    ...applyTo.react('react', {
+      languageOptions: {
+        globals: {
+          React: true,
+        },
+        parserOptions: {
+          ecmaFeatures: {
+            jsx: true,
+          },
+        },
+      },
+      rules: {
+        'jsx-a11y/label-has-associated-control': [
+          'error',
+          {
+            controlComponents: ['button'],
+          },
+        ],
+      },
+    }),
+  ]
+}
 
-const config = tsEslint.config(
-  pluginGitignore({
-    root: true,
-    files: ['.gitignore'],
-    strict: false,
-  }),
-  {
-    ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*'],
-  },
-  ...coreConfigs,
-  ...jsonConfigs,
-  ...scriptConfigs,
-  ...typescriptConfigs,
-  ...reactConfigs,
-  ...testConfigs,
-  ...applyToAll('core', {
+function getReactNativeConfigs() {
+  return [
+    // ...applyTo.reactNative('react-native/dom', pluginReactNative.configs.all),
+    // ...applyTo.reactNative('react-native/off-dom', pluginReact.configs['off-dom']),
+  ]
+}
+
+function getNextJsConfigs() {
+  // If files is in a nextJs project or not
+  // const isNextJsProject = fs.existsSync('next.config.js');
+  // const nextJsOrEmptyExtends = isNextJsProject ? ['plugin:@next/next/core-web-vitals'] : [];
+
+  return []
+}
+
+function getReactTypescriptConfigs() {
+  return [
+    ...applyTo.typescriptReact('react/x-typescript', {
+      ...pluginReact.configs['recommended-type-checked'],
+    }),
+    ...applyTo.typescriptReact('react/typescript', {
+      rules: {
+        // https://github.com/orgs/react-hook-form/discussions/8020
+        '@typescript-eslint/no-misused-promises': [
+          'error',
+          {
+            checksVoidReturn: {
+              attributes: false,
+            },
+          },
+        ],
+      },
+    }),
+  ]
+}
+
+function getTestConfigs() {
+  return [
+    ...applyTo.test('testing/no-only-tests', {
+      plugins: {
+        'no-only-tests': pluginNoOnlyTests,
+      },
+      rules: {
+        'no-only-tests/no-only-tests': 'error',
+      },
+    }),
+  ]
+}
+
+function getVitestConfigs() {
+  return [
+    ...applyTo.test('testing/vitest', {
+      plugins: {
+        vitest: pluginVitest,
+      },
+      rules: pluginVitest.configs.all.rules,
+      settings: {
+        vitest: {
+          typecheck: true,
+        },
+      },
+      languageOptions: {
+        globals: {
+          ...pluginVitest.environments.env.globals,
+          // pluginVitest.environments.env.globals lack some of the globals, see https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/constants.ts
+          chai: true,
+          expectTypeOf: true,
+          assertType: true,
+          onTestFinished: true,
+          onTestFailed: true,
+        },
+      },
+    }),
+    ...applyTo.test(
+      'testing/vitest/formatting',
+      flatCompat.extends('plugin:jest-formatting/strict'),
+    ),
+  ]
+}
+
+function getTestingLibraryDomConfigs() {
+  return [
+    ...applyTo.test('testing/vitest/jest-dom', pluginJestDom.configs['flat/recommended']),
+    ...applyTo.testNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
+  ]
+}
+
+function getTestingLibraryReactConfigs() {
+  return [...applyTo.testReact('testing/react', pluginTestingLibrary.configs['flat/react'])]
+}
+
+function getCypressConfigs() {
+  return []
+}
+
+//------------------------------------------------------------------------------
+
+export default tsEslint.config(
+  ...getIgnoreConfigs(),
+  ...getCoreConfigs(),
+  ...getJsonConfigs(),
+  ...getCssModuleConfigs(),
+  ...getI18nextConfigs(),
+  ...getTypescriptConfigs(),
+  ...getReactConfigs(),
+  ...getReactNativeConfigs(),
+  ...getNextJsConfigs(),
+  ...getReactTypescriptConfigs(),
+  ...getTestConfigs(),
+  ...getVitestConfigs(),
+  ...getTestingLibraryDomConfigs(),
+  ...getTestingLibraryReactConfigs(),
+  ...getCypressConfigs(),
+  ...applyTo.all('settings', {
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',
@@ -487,34 +711,6 @@ const config = tsEslint.config(
         ...globals.webextensions,
       },
     },
-    rules: {
-      'import-x/no-unresolved': 'error',
-      'import-x/order': 'off',
-      'import-x/namespace': 'off',
-      // 'unicorn/better-regex': 'warn',
-      // 'unicorn/filename-case': [
-      //   'error',
-      //   {
-      //     cases: {
-      //       kebabCase: true,
-      //       pascalCase: true,
-      //     }
-      //   }
-      // ],
-      '@eslint-community/eslint-comments/require-description': [
-        'error',
-        {ignore: ['eslint-enable']},
-      ],
-      'promise/always-return': ['warn', {ignoreLastCallback: true}],
-      'promise/no-callback-in-promise': [
-        'warn',
-        {
-          exceptions: ['process.nextTick', 'setImmediate', 'setTimeout'],
-        },
-      ],
-    },
   }),
-  ...applyToAll('prettier', pluginPrettierRecommended), // Always the last
+  ...applyTo.all('prettier', pluginPrettierRecommended), // always the last
 )
-
-export default config

@@ -8,6 +8,7 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import {getTokenPricesQueryKey} from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {type TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
+import {logError} from '@/utils/logger'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 export default memo(function TokenPricesUpdater() {
@@ -17,37 +18,41 @@ export default memo(function TokenPricesUpdater() {
   useEffect(() => {
     const tokensMetadata = getTokensMetadata(chainId)
     const queryKey = getTokenPricesQueryKey(chainId)
-    const connection = new PriceServiceConnection('https://hermes-beta.pyth.network')
+    const connection = new PriceServiceConnection('https://hermes.pyth.network')
 
     Array.from(tokensMetadata.values()).forEach(token => {
       if (token.pythFeedId) {
-        void connection.subscribePriceFeedUpdates([token.pythFeedId], priceFeed => {
-          const priceData = priceFeed.getPriceNoOlderThan(60)
-          const priceStr = priceData?.price
+        connection
+          .subscribePriceFeedUpdates([token.pythFeedId], priceFeed => {
+            const priceData = priceFeed.getPriceNoOlderThan(60)
+            const priceStr = priceData?.price
 
-          if (!priceStr) return
+            if (!priceStr) return
 
-          const decimals = Math.abs(priceData.expo)
-          const price = expandDecimals(priceStr, USD_DECIMALS - decimals)
+            const decimals = Math.abs(priceData.expo)
+            const price = expandDecimals(priceStr, USD_DECIMALS - decimals)
 
-          if (price) {
-            queryClient.setQueryData<TokenPricesData>(queryKey, prevData => {
-              if (!prevData) return new Map() as TokenPricesData
+            if (price) {
+              queryClient.setQueryData<TokenPricesData>(queryKey, prevData => {
+                if (!prevData) return new Map() as TokenPricesData
 
-              const existingPrice = prevData.get(token.address)
-              if (existingPrice && existingPrice.min === price) return prevData
+                const existingPrice = prevData.get(token.address)
+                if (existingPrice && existingPrice.min === price) return prevData
 
-              const newData = klona(prevData)
+                const newData = klona(prevData)
 
-              newData.set(token.address, {
-                min: price,
-                max: price,
+                newData.set(token.address, {
+                  min: price,
+                  max: price,
+                })
+
+                return newData
               })
-
-              return newData
-            })
-          }
-        })
+            }
+          })
+          .catch(error => {
+            logError(error)
+          })
       }
     })
 

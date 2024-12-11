@@ -1,15 +1,16 @@
+import {CairoUint256, type Call, type WalletAccount} from 'starknet'
 import {
   createCall,
-  createSatoruContract,
   createTokenContract,
+  createWolfyContract,
   ExchangeRouterABI,
-  SatoruContract,
   toStarknetHexString,
   WithdrawalVaultABI,
-} from 'satoru-sdk'
-import {CairoUint256, type Call, type WalletAccount} from 'starknet'
+  WolfyContract,
+} from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
+import type {Token} from '@/constants/tokens'
 
 interface WithdrawalParams {
   receiver: string
@@ -17,38 +18,47 @@ interface WithdrawalParams {
   marketTokenAmount: bigint
   minLongToken: bigint
   minShortToken: bigint
+  executionFee: bigint
+  longTokenSwapPath: string[]
+  shortTokenSwapPath: string[]
 }
 
 function createWithdrawalParams(props: WithdrawalParams) {
+  /* eslint-disable camelcase -- this is the contract's naming */
   return {
-    receiver: props.receiver,
     callback_contract: '0',
+    callback_gas_limit: new CairoUint256(0),
+    receiver: props.receiver,
     ui_fee_receiver: UI_FEE_RECEIVER_ADDRESS,
     market: props.market,
-    long_token_swap_path: {snapshot: []},
-    short_token_swap_path: {snapshot: []},
+    long_token_swap_path: {snapshot: props.longTokenSwapPath},
+    short_token_swap_path: {snapshot: props.shortTokenSwapPath},
     min_long_token_amount: new CairoUint256(props.minLongToken),
     min_short_token_amount: new CairoUint256(props.minShortToken),
-    execution_fee: new CairoUint256(0),
-    callback_gas_limit: new CairoUint256(0),
+    execution_fee: new CairoUint256(props.executionFee),
   }
+  /* eslint-enable camelcase */
 }
 
-export default async function sendWithdrawal(wallet: WalletAccount, props: WithdrawalParams) {
+export default async function sendWithdrawal(
+  wallet: WalletAccount,
+  props: WithdrawalParams,
+  feeToken: Token,
+) {
   const params = createWithdrawalParams(props)
 
   console.log(params)
 
   const chainId = await wallet.getChainId()
 
-  const exchangeRouterContract = createSatoruContract(
+  const exchangeRouterContract = createWolfyContract(
     chainId,
-    SatoruContract.ExchangeRouter,
+    WolfyContract.ExchangeRouter,
     ExchangeRouterABI,
   )
-  const withdrawalVaultContract = createSatoruContract(
+  const withdrawalVaultContract = createWolfyContract(
     chainId,
-    SatoruContract.WithdrawalVault,
+    WolfyContract.WithdrawalVault,
     WithdrawalVaultABI,
   )
   const marketTokenAddress = toStarknetHexString(props.market)
@@ -62,12 +72,33 @@ export default async function sendWithdrawal(wallet: WalletAccount, props: Withd
       new CairoUint256(props.marketTokenAmount),
     ]),
   )
+
   calls.push(
     createCall(marketTokenContract, 'transfer', [
       withdrawalVaultContract.address,
       new CairoUint256(props.marketTokenAmount),
     ]),
   )
+
+  if (props.executionFee > 0n) {
+    const feeTokenContract = createTokenContract(chainId, feeToken.address)
+
+    calls.push(
+      createCall(feeTokenContract, 'approve', [
+        exchangeRouterContract.address,
+        new CairoUint256(props.executionFee),
+      ]),
+    )
+
+    calls.push(
+      createCall(exchangeRouterContract, 'send_tokens', [
+        feeTokenContract.address,
+        withdrawalVaultContract.address,
+        new CairoUint256(props.executionFee),
+      ]),
+    )
+  }
+
   calls.push(createCall(exchangeRouterContract, 'create_withdrawal', [params]))
 
   const result = await wallet.execute(calls)
@@ -82,7 +113,6 @@ export default async function sendWithdrawal(wallet: WalletAccount, props: Withd
     return {
       tx: receipt.transaction_hash,
     }
-  } else {
-    throw new Error('Cannot deposit')
   }
+  throw new Error('Cannot withdrawal')
 }

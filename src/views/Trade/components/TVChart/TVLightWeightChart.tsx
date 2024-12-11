@@ -1,14 +1,20 @@
+import {useQuery} from '@tanstack/react-query'
 import {
+  type ChartOptions,
   ColorType,
   createChart,
+  type CreatePriceLineOptions,
   type IChartApi,
   type ISeriesApi,
   LineStyle,
 } from 'lightweight-charts'
 import {memo, useEffect, useMemo, useRef} from 'react'
 import {useLatest} from 'react-use'
+import type {PartialDeep} from 'type-fest'
 
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import type {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
+import {isIntervalSmallerThan1D} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {
   CANDLE_STICK_SERIES,
   CANDLE_STICKS_TO_RIGHT_BORDER,
@@ -17,29 +23,43 @@ import {
 } from '@/lib/tvchart/constants.ts'
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 const CHART_HEIGHT = 300
+
+function useChartHistoryData(asset: string, interval: ChartInterval) {
+  return useQuery({
+    queryKey: ['!chartHistoryData', asset, interval],
+    queryFn: async () => fetchChartHistoryData(`${asset}usdt`, interval),
+    ...NO_REFETCH_OPTIONS,
+    refetchOnMount: true,
+  })
+}
 
 export default memo(function TVLightWeightChart(props: {
   asset: string
   textColor: string
   gridColor: string
   interval: ChartInterval
+  lines: CreatePriceLineOptions[]
 }) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<IChartApi>()
-  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>()
+  const chartRef = useRef<IChartApi>(undefined)
+  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>(undefined)
 
   // NOTE: Unused?
   // CHART_STYLE.LINE_COLOR
   // CHART_STYLE.AREA_TOP_COLOR
   // CHART_STYLE.AREA_BOTTOM_COLOR
 
-  const chartStyle = useMemo(
+  const {data: historicalData} = useChartHistoryData(props.asset, props.interval)
+
+  const chartStyle = useMemo<PartialDeep<ChartOptions>>(
     () => ({
       layout: {
         background: {type: ColorType.Solid, color: CHART_STYLE.BACKGROUND_COLOR},
         textColor: props.textColor,
+        fontFamily: 'Geist Mono',
       },
       grid: {
         vertLines: {
@@ -56,17 +76,20 @@ export default memo(function TVLightWeightChart(props: {
       },
       timeScale: {
         borderVisible: false,
+        timeVisible: isIntervalSmallerThan1D(props.interval),
+        secondsVisible: false,
       },
     }),
-    [props.gridColor, props.textColor],
+    [props.gridColor, props.textColor, props.interval],
   )
   const latestChartStyle = useLatest(chartStyle)
 
-  useEffect(() => {
-    if (!chartContainerRef.current) return
+  useEffect(function initChart() {
+    const container = chartContainerRef.current
+    if (!container) return
 
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
+    const chart = createChart(container, {
+      width: container.clientWidth,
       height: CHART_HEIGHT,
       ...latestChartStyle.current,
     })
@@ -81,27 +104,59 @@ export default memo(function TVLightWeightChart(props: {
       wickDownColor: CANDLE_STICK_SERIES.WICK_DOWN_COLOR,
     })
 
-    void (async function updateChartWithHistoricalData() {
-      const initialData = await fetchChartHistoryData(`${props.asset}usdt`, props.interval)
-      if (!chartMainCandlestickSeries.current) return
-      chartMainCandlestickSeries.current.setData(initialData)
-      if (chartRef.current)
-        chartRef.current.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
-    })()
-
     return () => {
+      chartRef.current = undefined
+      chartMainCandlestickSeries.current = undefined
       chart.remove()
     }
-  }, [props.interval, props.asset])
+  }, [])
+
+  useEffect(
+    function updateChartData() {
+      if (!historicalData) return
+      if (!chartMainCandlestickSeries.current) return
+
+      chartMainCandlestickSeries.current.setData(historicalData)
+
+      chartRef.current?.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
+      chartMainCandlestickSeries.current.priceScale().applyOptions({
+        autoScale: true,
+      })
+    },
+    [historicalData],
+  )
+
+  useEffect(
+    function updatePriceLines() {
+      const series = chartMainCandlestickSeries.current
+      if (!series) return
+
+      const createdLines = props.lines.map(line => series.createPriceLine(line))
+
+      return () => {
+        createdLines.forEach(line => {
+          series.removePriceLine(line)
+        })
+      }
+    },
+    [props.lines],
+  )
 
   useEffect(
     function applyNewChartStyle() {
-      if (!chartRef.current) return
-
-      chartRef.current.applyOptions(chartStyle)
+      chartRef.current?.applyOptions(chartStyle)
     },
     [chartStyle],
   )
+
+  useEffect(function updatePriceFormatter() {
+    if (!chartRef.current) return
+    chartRef.current.applyOptions({
+      localization: {
+        priceFormatter: (price: number) => price.toFixed(calculatePriceFractionDigits(price, 0)),
+      },
+    })
+  }, [])
 
   useEffect(
     function updateRealTimeData() {
@@ -110,6 +165,7 @@ export default memo(function TVLightWeightChart(props: {
 
       const eventHandler = (event: MessageEvent<unknown>) => {
         if (!chartMainCandlestickSeries.current) return
+
         if (typeof event.data !== 'string') {
           return
         }
@@ -126,6 +182,7 @@ export default memo(function TVLightWeightChart(props: {
 
       return () => {
         chartDataWS.removeEventListener('message', eventHandler)
+        chartDataWS.close()
       }
     },
     [props.interval, props.asset],

@@ -8,154 +8,293 @@ import {
   ModalHeader,
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
-import React, {useMemo, useState} from 'react'
+import clsx from 'clsx'
+import * as React from 'react'
+import {memo, type MemoizedCallback, useCallback, useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
+import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendWithdrawal from '@/lib/trade/services/market/sendWithdrawal'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
+import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
+import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
-
-import {calculateMarketPrice} from './PoolsTable'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import {useDepositWithdrawalAmounts} from '@/views/Pools/hooks/useDepositWithdrawalAmounts'
+import useDepositWithdrawalExecutionFee from '@/views/Pools/hooks/useDepositWithdrawalExecutionFee'
 
 interface WithdrawModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose: MemoizedCallback<() => void>
   marketTokenAddress: string
 }
 
-export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: WithdrawModalProps) {
+export default memo(function WithdrawModal({
+  isOpen,
+  onClose,
+  marketTokenAddress,
+}: WithdrawModalProps) {
+  const latestMarketTokenAddress = useLatest(marketTokenAddress)
+
   const [wmAmount, setWmAmount] = useState('')
+  const latestWmAmount = useLatest(wmAmount)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const queryClient = useQueryClient()
+  const [chainId] = useChainId()
+  const latestChainId = useLatest(chainId)
   const [wallet] = useWalletAccount()
-  const tokenPrices = useTokenPrices(data => data)
-  const marketsData = useMarketsData()
-  const marketTokensData = useMarketTokensData()
-  const marketTokenBalances = useMarketTokenBalances()
+  const latestWallet = useLatest(wallet)
+  //TODO: optimize, do not subscribe to entire token prices
+  const {data: tokenPrices = new Map()} = useTokenPrices()
+  const {data: marketsData = new Map()} = useMarketsData()
+  const {data: marketTokensData = new Map()} = useMarketTokensData()
+  const {data: marketTokenBalances = new Map()} = useMarketTokenBalances()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
 
   const marketData = useMemo(
-    () => marketsData?.get(marketTokenAddress),
+    () => marketsData.get(marketTokenAddress),
     [marketsData, marketTokenAddress],
   )
+  const latestMarketData = useLatest(marketData)
   const marketTokenData = useMemo(
-    () => marketTokensData?.get(marketTokenAddress),
+    () => marketTokensData.get(marketTokenAddress),
     [marketTokensData, marketTokenAddress],
   )
+  const latestMarketTokenData = useLatest(marketTokenData)
 
-  const userBalance = useMemo(() => {
-    if (!marketTokenBalances || !marketTokenData) return '0'
-    const balance = marketTokenBalances.get(marketTokenAddress) ?? 0n
-    return shrinkDecimals(balance, marketTokenData.decimals, 6)
-  }, [marketTokenBalances, marketTokenData, marketTokenAddress])
-
-  const price =
-    marketData && marketTokenData
-      ? calculateMarketPrice(marketData, marketTokenData, tokenPrices) ||
-        expandDecimals(1, USD_DECIMALS)
-      : expandDecimals(1, USD_DECIMALS)
-
-  const priceDecimals = calculatePriceDecimals(price)
-
-  const priceNumber = shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
-
-  const {longTokenAmount, shortTokenAmount} = useMemo(() => {
-    if (!marketData || !marketTokenData || !wmAmount) {
-      return {longTokenAmount: '', shortTokenAmount: ''}
+  const {longTokenPrice, shortTokenPrice} = useMemo(() => {
+    if (!marketData) return {}
+    return {
+      longTokenPrice: tokenPrices.get(marketData.longTokenAddress),
+      shortTokenPrice: tokenPrices.get(marketData.shortTokenAddress),
     }
+  }, [tokenPrices, marketData])
 
-    const wmAmountBigInt = BigInt(Math.floor(parseFloat(wmAmount) * 10 ** marketTokenData.decimals))
-    const totalSupply = marketTokenData.totalSupply
+  const price = calculateMarketPrice(
+    marketData,
+    marketTokenData,
+    longTokenPrice,
+    shortTokenPrice,
+  ).max
 
-    if (totalSupply === 0n) {
-      return {longTokenAmount: '0', shortTokenAmount: '0'}
-    }
+  const userBalance = Number(
+    shrinkDecimals(
+      marketTokenBalances.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+  )
+  const latestUserBalance = useLatest(userBalance)
+  const userBalanceFractionDigits = calculateTokenFractionDigits(price)
+  const userBalanceNumber = Number(
+    shrinkDecimals(
+      marketTokenBalances.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+  )
+  const latestUserBalanceNumber = useLatest(userBalanceNumber)
+  const userBalanceString = formatNumber(
+    shrinkDecimals(
+      marketTokenBalances.get(marketTokenAddress) ?? 0n,
+      marketTokenData?.decimals ?? 18,
+    ),
+    Format.PLAIN,
+    {
+      fractionDigits: userBalanceFractionDigits,
+    },
+  )
 
-    const longTokenAmount = (wmAmountBigInt * marketData.longPoolAmount) / totalSupply
-    const shortTokenAmount = (wmAmountBigInt * marketData.shortPoolAmount) / totalSupply
+  const priceFractionDigits = calculatePriceFractionDigits(price)
+
+  const priceNumber = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+    exactFractionDigits: true,
+    fractionDigits: priceFractionDigits,
+  })
+
+  const wmAmountBigInt = useMemo(
+    () => (wmAmount ? expandDecimals(parseFloat(wmAmount), marketTokenData?.decimals ?? 18) : 0n),
+    [wmAmount, marketTokenData?.decimals],
+  )
+
+  const executionFee = useDepositWithdrawalExecutionFee(0n, 0n, false)
+
+  const latestFeeTokenAmount = useLatest(executionFee?.feeTokenAmount)
+  const latestFeeToken = useLatest(executionFee?.feeToken)
+
+  const feeUsdText = formatNumber(
+    shrinkDecimals(executionFee?.feeUsd ?? 0n, USD_DECIMALS),
+    Format.USD,
+    {
+      exactFractionDigits: false,
+      fractionDigits: 6,
+    },
+  )
+
+  const feeTokenAmountText = formatNumber(
+    shrinkDecimals(executionFee?.feeTokenAmount ?? 0n, executionFee?.feeToken.decimals ?? 18),
+    Format.READABLE,
+    {
+      exactFractionDigits: false,
+      fractionDigits: 6,
+    },
+  )
+
+  const amounts = useDepositWithdrawalAmounts({
+    isDeposit: false,
+    marketInfo: marketData,
+    marketToken: marketTokenData,
+    longTokenInputState: {
+      address: marketData?.longTokenAddress,
+      amount: 0n,
+    },
+    shortTokenInputState: {
+      address: marketData?.shortTokenAddress,
+      amount: 0n,
+    },
+    marketTokenAmount: wmAmountBigInt,
+    uiFeeFactor,
+    focusedInput: 'market',
+  })
+  const {swapFeeUsd, swapPriceImpactDeltaUsd} = amounts ?? {}
+
+  const feesAndPriceImpact = (swapFeeUsd ?? 0n) + (swapPriceImpactDeltaUsd ?? 0n)
+  const feesAndPriceImpactText = formatNumber(
+    shrinkDecimals(feesAndPriceImpact, USD_DECIMALS),
+    Format.USD,
+    {
+      exactFractionDigits: false,
+      fractionDigits: 6,
+    },
+  )
+
+  const {longTokenAmount, shortTokenAmount} = amounts ?? {}
+
+  const {longTokenAmountText, shortTokenAmountText} = useMemo(() => {
+    if (!amounts) return {longTokenAmount: '0', shortTokenAmount: '0'}
+
+    const longTokenFractionDigits = calculateTokenFractionDigits(longTokenPrice?.max)
+    const shortTokenFractionDigits = calculateTokenFractionDigits(shortTokenPrice?.max)
 
     return {
-      longTokenAmount: shrinkDecimals(longTokenAmount, marketData.longToken.decimals, 6),
-      shortTokenAmount: shrinkDecimals(shortTokenAmount, marketData.shortToken.decimals, 6),
+      longTokenAmountText: formatNumber(
+        shrinkDecimals(amounts.longTokenAmount, marketData?.longToken.decimals ?? 18),
+        Format.READABLE,
+        {
+          exactFractionDigits: false,
+          fractionDigits: longTokenFractionDigits,
+        },
+      ),
+      shortTokenAmountText: formatNumber(
+        shrinkDecimals(amounts.shortTokenAmount, marketData?.shortToken.decimals ?? 18),
+        Format.READABLE,
+        {
+          exactFractionDigits: false,
+          fractionDigits: shortTokenFractionDigits,
+        },
+      ),
     }
-  }, [marketData, marketTokenData, wmAmount])
+  }, [amounts, longTokenPrice?.max, shortTokenPrice?.max, marketData])
 
-  const handleWmAmountChange = (value: string) => {
-    const numValue = parseFloat(value)
-    const maxValue = parseFloat(userBalance)
-    if (!isNaN(numValue) && numValue <= maxValue) {
-      setWmAmount(value)
-    } else if (numValue > maxValue) {
-      setWmAmount(userBalance)
-    }
-  }
+  const latestLongTokenAmount = useLatest(longTokenAmount)
+  const latestShortTokenAmount = useLatest(shortTokenAmount)
+
+  const handleWmAmountChange = useCallback((value: string) => {
+    setWmAmount(() => {
+      const newValue = value.replace(/[^0-9.]/g, '')
+      const numValue = parseFloat(newValue)
+      if (isNaN(numValue)) return ''
+      return numValue > latestUserBalance.current ? latestUserBalance.current.toString() : newValue
+    })
+  }, [])
+
+  const handleWmAmountSetToMax = useCallback(() => {
+    setWmAmount(latestUserBalanceNumber.current.toString())
+  }, [])
 
   const isInputValid = useMemo(() => {
     const amount = parseFloat(wmAmount)
-    return !isNaN(amount) && amount > 0 && amount <= parseFloat(userBalance)
+    return !isNaN(amount) && amount > 0 && amount <= userBalance
   }, [wmAmount, userBalance])
+  const latestIsInputValid = useLatest(isInputValid)
 
-  const handleSubmit = (_e: PressEvent) => {
-    if (!marketData || !wallet || !marketTokenData || !isInputValid) return
+  const handleSubmit = useCallback(
+    (_e: PressEvent) => {
+      const wallet = latestWallet.current
+      const marketData = latestMarketData.current
+      const marketTokenData = latestMarketTokenData.current
+      const isInputValid = latestIsInputValid.current
+      const feeTokenAmount = latestFeeTokenAmount.current
+      const feeToken = latestFeeToken.current
 
-    setIsSubmitting(true)
-    toast.promise(
-      async () => {
-        try {
-          const wmAmountBigInt = expandDecimals(parseFloat(wmAmount), marketTokenData.decimals)
+      if (
+        !marketData ||
+        !wallet ||
+        !marketTokenData ||
+        !isInputValid ||
+        !feeTokenAmount ||
+        !feeToken
+      )
+        return
 
-          const withdrawalParams = {
-            receiver: wallet.address,
-            market: marketTokenAddress,
-            marketTokenAmount: wmAmountBigInt,
-            minLongToken: expandDecimals(
-              parseFloat(longTokenAmount) * 0.99,
-              marketData.longToken.decimals,
-            ), // 1% slippage
-            minShortToken: expandDecimals(
-              parseFloat(shortTokenAmount) * 0.99,
-              marketData.shortToken.decimals,
-            ), // 1% slippage
+      setIsSubmitting(true)
+      toast.promise(
+        async () => {
+          try {
+            const wmAmountBigInt = expandDecimals(
+              parseFloat(latestWmAmount.current),
+              marketTokenData.decimals,
+            )
+
+            const withdrawalParams = {
+              receiver: wallet.address,
+              market: latestMarketTokenAddress.current,
+              marketTokenAmount: wmAmountBigInt,
+              minLongToken: ((latestLongTokenAmount.current ?? 0n) * 99n) / 100n, // 1% slippage
+              minShortToken: ((latestShortTokenAmount.current ?? 0n) * 99n) / 100n, // 1% slippage
+              longTokenSwapPath: [],
+              shortTokenSwapPath: [],
+              executionFee: feeTokenAmount,
+            }
+
+            const result = await sendWithdrawal(wallet, withdrawalParams, feeToken)
+            await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
+            onClose()
+            return result
+          } finally {
+            setIsSubmitting(false)
           }
-
-          const result = await sendWithdrawal(wallet, withdrawalParams)
-          await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
-          onClose()
-          return result
-        } finally {
-          setIsSubmitting(false)
-        }
-      },
-      {
-        loading: 'Submitting withdrawal...',
-        success: data => (
-          <>
-            Withdrawal successful.
-            <a href={`https://sepolia.starkscan.co/tx/${data.tx}`} target='_blank' rel='noreferrer'>
-              View transaction
-            </a>
-          </>
-        ),
-        error: error => (
-          <>
-            <div>{errorMessageOrUndefined(error) ?? 'Withdrawal failed.'}</div>
-          </>
-        ),
-      },
-    )
-  }
-
-  // Add new state for fees and price impact
-  const [feesAndPriceImpact, _setFeesAndPriceImpact] = useState('0')
-  const [networkFee, _setNetworkFee] = useState('0')
+        },
+        {
+          loading: 'Submitting withdrawal...',
+          success: data => (
+            <>
+              Withdrawal successful.
+              <a
+                href={getScanUrl(latestChainId.current, ScanType.Transaction, data.tx)}
+                target='_blank'
+                rel='noreferrer'
+              >
+                View transaction
+              </a>
+            </>
+          ),
+          error: error => <div>{errorMessageOrUndefined(error) ?? 'Withdrawal failed.'}</div>,
+        },
+      )
+    },
+    [onClose, queryClient],
+  )
 
   if (!marketData || !marketTokenData) {
     return null
@@ -164,23 +303,55 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
-        <ModalHeader className='flex flex-col gap-1'>Sell {marketData.name}</ModalHeader>
+        <ModalHeader className='flex flex-col gap-1'>Withdraw {marketData.name}</ModalHeader>
         <ModalBody>
-          <p>Current Market Price: ${priceNumber}</p>
+          <p>Current Market Price: {priceNumber}</p>
           <Input
-            label={`WM Amount (Max: ${userBalance})`}
-            placeholder='Enter WM token amount'
+            label='WM Amount'
+            placeholder='Enter WM amount'
             value={wmAmount}
             onChange={e => {
               handleWmAmountChange(e.target.value)
             }}
+            endContent={
+              <button
+                className={clsx(
+                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  parseFloat(wmAmount.replace(/,/g, '')) > userBalance && 'text-danger-500',
+                )}
+                onClick={handleWmAmountSetToMax}
+                type='button'
+              >
+                Max: {userBalanceString}
+              </button>
+            }
           />
-          <p>
-            You will receive: ~ {longTokenAmount} {marketData.longToken.symbol} and{' '}
-            {shortTokenAmount} {marketData.shortToken.symbol}
-          </p>
-          <p>Fees and price impact: ${feesAndPriceImpact}</p>
-          <p>Network Fee: ${networkFee}</p>
+          <div className='flex flex-col gap-2'>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Receive:</span>
+              <div className='text-right'>
+                <div>
+                  ~ {longTokenAmountText} {marketData.longToken.symbol}
+                </div>
+                <div>
+                  ~ {shortTokenAmountText} {marketData.shortToken.symbol}
+                </div>
+              </div>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Fees and price impact:</span>
+              <span>{feesAndPriceImpactText}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-sm'>Network Fee:</span>
+              <div className='text-right'>
+                <div>{feeUsdText}</div>
+                <div className='text-xs'>
+                  {feeTokenAmountText} {executionFee?.feeToken.symbol}
+                </div>
+              </div>
+            </div>
+          </div>
         </ModalBody>
         <ModalFooter>
           <Button color='danger' variant='light' onPress={onClose}>
@@ -192,10 +363,10 @@ export default function WithdrawModal({isOpen, onClose, marketTokenAddress}: Wit
             isLoading={isSubmitting}
             isDisabled={!isInputValid}
           >
-            {isSubmitting ? 'Submitting...' : 'Sell'}
+            {isSubmitting ? 'Submitting...' : 'Withdraw'}
           </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
   )
-}
+})

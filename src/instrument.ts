@@ -9,7 +9,7 @@ import {
   thirdPartyErrorFilterIntegration,
 } from '@sentry/react'
 
-import {APP_NAME, DEBUG, MODE} from './constants/config'
+import {APP_NAME, DEBUG, MODE, SENTRY_DSN} from './constants/config'
 
 // TODO: Shared Environment implementation
 if (!DEBUG) {
@@ -17,9 +17,9 @@ if (!DEBUG) {
     environment: MODE,
     debug: MODE !== 'production',
     // release: '1.0.0', // TODO: config release
-    dsn: 'https://8a49479f668e7be85d81efd56c0e688b@o4507446794518528.ingest.us.sentry.io/4507446797533184',
-    integrations: function (integrations) {
-      const filteredIntergrations = integrations.filter(function (integration) {
+    dsn: SENTRY_DSN,
+    integrations(integrations) {
+      const filteredIntergrations = integrations.filter(integration => {
         return !['LinkedErrors'].includes(integration.name) // lazyload it later
       })
 

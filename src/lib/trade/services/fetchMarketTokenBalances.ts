@@ -1,18 +1,20 @@
+import {Contract} from 'starknet'
 import {
   cairoIntToBigInt,
   ERC20ABI,
   getProvider,
   ProviderType,
   type StarknetChainId,
-} from 'satoru-sdk'
-import {Contract} from 'starknet'
+} from 'wolfy-sdk'
 
 export default async function fetchMarketTokenBalances(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
-  accountAddress: string,
+  accountAddress: string | undefined,
 ) {
   const balanceMap = new Map<string, bigint>()
+
+  if (!accountAddress) return balanceMap
 
   const provider = getProvider(ProviderType.HTTP, chainId)
 

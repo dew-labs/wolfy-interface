@@ -1,21 +1,23 @@
+import {Contract} from 'starknet'
 import {
   cairoIntToBigInt,
   ERC20ABI,
   getProvider,
   ProviderType,
   type StarknetChainId,
-} from 'satoru-sdk'
-import {Contract} from 'starknet'
+} from 'wolfy-sdk'
 
 export interface MarketTokenData {
   totalSupply: bigint
   decimals: number
 }
 
+export type MarketTokensData = Map<string, MarketTokenData>
+
 export async function fetchMarketTokensData(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
-) {
+): Promise<MarketTokensData> {
   const dataMap = new Map<string, MarketTokenData>()
 
   const provider = getProvider(ProviderType.HTTP, chainId)

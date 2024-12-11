@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+declare const __COMMIT_HASH__: string
 
 interface ImportMetaEnv {
   // MARK: BEGIN .env environment variables
@@ -6,7 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_API_URL: string
   readonly VITE_APP_TITLE: string
   readonly VITE_APP_DESCRIPTION: string
-  readonly VITE_GOOGLE_AUTH_CLIENT_ID: string
+  readonly VITE_SENTRY_DSN: string
   // MARK: END .env environment variables
 }
 

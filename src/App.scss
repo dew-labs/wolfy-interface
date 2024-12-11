@@ -75,3 +75,49 @@ $nextUiForeground: hsl(
   pointer-events: auto;
   cursor: not-allowed;
 }
+
+// Theme toggle animation
+
+::view-transition-group(root) {
+  animation-duration: 0.7s;
+  /* stylelint-disable-next-line custom-property-pattern */
+  animation-timing-function: var(--expo-out);
+}
+
+::view-transition-new(root) {
+  animation-name: reveal-light;
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  z-index: -1;
+  animation: none;
+}
+
+.dark::view-transition-new(root) {
+  animation-name: reveal-dark;
+}
+
+@keyframes reveal-dark {
+  from {
+    clip-path: polygon(50% -71%, -50% 71%, -50% 71%, 50% -71%);
+  }
+
+  to {
+    clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
+  }
+}
+@keyframes reveal-light {
+  from {
+    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+  }
+
+  to {
+    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+  }
+}
+
+.truncate-none {
+  overflow: visible;
+  text-overflow: unset;
+}

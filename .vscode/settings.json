@@ -105,7 +105,10 @@
     "env*": true,
     "**/routeTree.gen.ts": true
   },
+  "files.watcherExclude": {
+    "**/routeTree.gen.ts": true
+  },
   "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locales"],
   "i18n-ally.keystyle": "nested",
-  "cSpell.words": ["Numberish", "Satoru"]
+  "cSpell.words": ["nextui", "Numberish", "Wolfy"]
 }

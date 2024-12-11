@@ -29,7 +29,9 @@ export const renderHookServer = <Hook extends () => unknown>(
     results.push(value)
   }
 
+  // eslint-disable-next-line no-useless-assignment -- this is a bug https://github.com/typescript-eslint/typescript-eslint/issues/10219
   const Component = ({useHook}: {useHook: Hook}) => {
+    // eslint-disable-next-line react-compiler/react-compiler -- its intentional
     setValue(useHook() as ReturnType<Hook>)
     return null
   }
@@ -61,7 +63,7 @@ export const renderHookServer = <Hook extends () => unknown>(
 
   return {
     result,
-    hydrate: hydrate,
+    hydrate,
   }
 }
 

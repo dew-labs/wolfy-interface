@@ -1,9 +1,9 @@
 import autoprefixer from 'autoprefixer'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
 import calc from 'postcss-calc'
 import flexbugsFixes from 'postcss-flexbugs-fixes'
-// eslint-disable-next-line import-x/default, import-x/no-named-as-default, import-x/no-named-as-default-member -- import-x error
+import focus from 'postcss-focus'
 import presetEnv from 'postcss-preset-env'
+import willChange from 'postcss-will-change'
 import tailwindCss from 'tailwindcss'
 
 export default () => {
@@ -11,6 +11,8 @@ export default () => {
     plugins: [
       tailwindCss,
       flexbugsFixes,
+      focus,
+      willChange,
       presetEnv({
         stage: 1,
       }),

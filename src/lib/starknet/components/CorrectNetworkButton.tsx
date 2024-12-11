@@ -31,7 +31,7 @@ export default memo(function CorrectNetworkButton() {
 
   if (!matched)
     return (
-      <Tooltip content='Wrong network'>
+      <Tooltip content='Wrong network' showArrow>
         <Button isIconOnly color='warning' onPress={handleCorrectNetwork}>
           <Icon icon='jam:triangle-danger-f' />
         </Button>

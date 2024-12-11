@@ -1,6 +1,8 @@
+import {Icon} from '@iconify/react'
 import {
   Button,
   Input,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -9,19 +11,23 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {SortDescriptor} from '@react-types/shared'
-import React, {useCallback, useMemo, useState} from 'react'
+import * as React from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
+import {useLatest} from 'react-use'
 
+import {getTokenMetadata} from '@/constants/tokens'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
-import calculatePriceDecimals from '@/lib/trade/utils/price/calculatePriceDecimals'
-import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
-import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
+import {logError} from '@/utils/logger'
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
@@ -30,109 +36,220 @@ const columns = [
   {name: 'MARKET', uid: 'market', sortable: true},
   {name: 'PRICE', uid: 'price', sortable: true},
   {name: 'TOTAL SUPPLY', uid: 'totalSupply', sortable: true},
-  {name: 'VALUE', uid: 'value', sortable: true},
+  // {name: 'VALUE', uid: 'value', sortable: true},
   {name: 'WALLET BALANCE', uid: 'balance', sortable: true},
   {name: 'APY', uid: 'apy', sortable: true},
   {name: 'ACTIONS', uid: 'actions'},
 ]
 
 export interface ExtendedMarketData {
+  imageUrl: string
   marketTokenAddress: string
   market: string
-  price: string
-  totalSupply: string
-  value: string
-  balance: string
+  price: number
+  priceString: string
+  totalSupply: number
+  totalSupplyString: string
+  value: number
+  valueString: string
+  balance: number
+  balanceString: string
+  balanceValue: number
+  balanceValueString: string
   apy: string
   actions?: React.ReactNode
 }
 
-export function calculateMarketPrice(
-  market: MarketData,
-  marketTokenData: MarketTokenData,
-  tokenPrices: TokenPricesData | undefined,
-) {
-  if (!tokenPrices) return 0n
-
-  const longTokenPrice = tokenPrices.get(market.longTokenAddress)?.max ?? 0n
-  const shortTokenPrice = tokenPrices.get(market.shortTokenAddress)?.max ?? 0n
-
-  const longTokenValue = convertTokenAmountToUsd(
-    market.longPoolAmount,
-    market.longToken.decimals,
-    longTokenPrice,
-  )
-  const shortTokenValue = convertTokenAmountToUsd(
-    market.shortPoolAmount,
-    market.shortToken.decimals,
-    shortTokenPrice,
-  )
-
-  // TODO: how to get pending pnl?
-  const pendingPnl = 0n
-
-  const totalValue = longTokenValue + shortTokenValue - pendingPnl
-  const totalSupply = marketTokenData.totalSupply
-
-  return totalSupply > 0n ? expandDecimals(totalValue, marketTokenData.decimals) / totalSupply : 0n
+const TABLE_CLASS_NAMES = {
+  th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
 }
 
-export default function PoolsTable() {
+export default memo(function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({})
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy')
+  const [chainId] = useChainId()
 
-  const marketsData = useMarketsData()
-  const tokenPrices = useTokenPrices(data => data)
-  const marketTokensData = useMarketTokensData()
-  const marketTokensBalances = useMarketTokenBalances()
+  const {
+    data: marketsData = [],
+    isLoading: isMarketsDataLoading,
+    isFetching: isMarketsDataFetching,
+    refetch: refetchMarketsData,
+  } = useMarketsData(data => data.values().toArray())
+  const {
+    data: marketTokensData = new Map(),
+    isLoading: isMarketTokensDataLoading,
+    isFetching: isMarketTokensDataFetching,
+    refetch: refetchMarketTokensData,
+  } = useMarketTokensData()
+  const {
+    data: marketTokensBalances = new Map(),
+    isLoading: isMarketTokensBalancesLoading,
+    isFetching: isMarketTokensBalancesFetching,
+    refetch: refetchMarketTokensBalances,
+  } = useMarketTokenBalances()
+
+  const refetchPools = useCallback(() => {
+    void refetchMarketsData()
+    void refetchMarketTokensData()
+    void refetchMarketTokensBalances()
+  }, [refetchMarketsData, refetchMarketTokensData, refetchMarketTokensBalances])
+
+  const poolsIsLoading = useMemo(
+    () => isMarketsDataLoading || isMarketTokensDataLoading || isMarketTokensBalancesLoading,
+    [isMarketsDataLoading, isMarketTokensDataLoading, isMarketTokensBalancesLoading],
+  )
+
+  const poolsIsFetching = useMemo(() => {
+    return isMarketsDataFetching || isMarketTokensDataFetching || isMarketTokensBalancesFetching
+  }, [isMarketsDataFetching, isMarketTokensDataFetching, isMarketTokensBalancesFetching])
+
+  const filteredMarkets = useMemo(
+    () =>
+      marketsData
+        .filter(market => market.name.toLowerCase().includes(filterValue.toLowerCase()))
+        .slice(),
+    [marketsData, filterValue],
+  )
+
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(prices => {
+    if (filteredMarkets.length === 0) return new Map() as TokenPricesData
+    const tokenAddresses = new Set()
+    filteredMarkets.forEach(market => {
+      tokenAddresses.add(market.longToken.address)
+      tokenAddresses.add(market.shortToken.address)
+    })
+
+    prices.forEach((_, key) => {
+      if (!tokenAddresses.has(key)) {
+        prices.delete(key)
+      }
+    })
+
+    return prices
+  })
 
   const extendedMarkets = useMemo(() => {
-    if (!marketsData || !marketTokensData) return []
-    return Array.from(marketsData.values())
+    return filteredMarkets
       .map(market => {
-        const marketTokenData = marketTokensData.get(market.marketTokenAddress)
+        try {
+          const marketTokenData = marketTokensData.get(market.marketTokenAddress)
 
-        if (!marketTokenData) return null
+          if (!marketTokenData) return null
 
-        const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
+          const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
 
-        const price =
-          calculateMarketPrice(market, marketTokenData, tokenPrices) ||
-          expandDecimals(1, USD_DECIMALS)
+          const balance = marketTokensBalances.get(market.marketTokenAddress) ?? 0n
 
-        const value = (marketTokenData.totalSupply * price) / expandDecimals(1, USD_DECIMALS)
-        const valueNumber = '$' + shrinkDecimals(value, marketTokenData.decimals, 2)
-        const priceDecimals = calculatePriceDecimals(price)
-        const priceNumber = '$' + shrinkDecimals(price, USD_DECIMALS, priceDecimals, true, true)
-        const balanceNumber = shrinkDecimals(balance, marketTokenData.decimals, 2) + ' WM'
-        const totalSupplyNumber =
-          shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals, 2) + ' WM'
+          const longTokenPrice = shortlistedTokenPrices.get(market.longToken.address) ?? {
+            min: 0n,
+            max: 0n,
+          }
+          const shortTokenPrice = shortlistedTokenPrices.get(market.shortToken.address) ?? {
+            min: 0n,
+            max: 0n,
+          }
+          const price = calculateMarketPrice(
+            market,
+            marketTokenData,
+            longTokenPrice,
+            shortTokenPrice,
+          ).max
+          const tokenFractionDigits = calculateTokenFractionDigits(price)
 
-        return {
-          marketTokenAddress: market.marketTokenAddress,
-          market: market.name,
-          price: priceNumber,
-          value: valueNumber,
-          totalSupply: totalSupplyNumber,
-          balance: balanceNumber,
-          apy: '--',
+          const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
+            exactFractionDigits: true,
+            fractionDigits: 3,
+          })
+          const priceNumber = Number(shrinkDecimals(price, USD_DECIMALS))
+
+          const valueString = formatNumber(
+            shrinkDecimals(
+              marketTokenData.totalSupply * price,
+              marketTokenData.decimals + USD_DECIMALS,
+            ),
+            Format.USD,
+            {
+              fractionDigits: 0,
+            },
+          )
+
+          const valueNumber = Number(
+            shrinkDecimals(
+              marketTokenData.totalSupply * price,
+              marketTokenData.decimals + USD_DECIMALS,
+            ),
+          )
+
+          const balanceString = formatNumber(
+            shrinkDecimals(balance, marketTokenData.decimals),
+            Format.READABLE,
+            {
+              fractionDigits: tokenFractionDigits,
+            },
+          )
+
+          const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
+
+          const balanceValueString = formatNumber(
+            shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+            Format.READABLE,
+            {
+              fractionDigits: 2,
+              exactFractionDigits: true,
+            },
+          )
+
+          const balanceValueNumber = Number(
+            shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
+          )
+
+          const totalSupplyString = formatNumber(
+            shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+            Format.READABLE,
+            {
+              fractionDigits: 0,
+              exactFractionDigits: true,
+            },
+          )
+
+          const totalSupplyNumber = Number(
+            shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
+          )
+
+          return {
+            imageUrl: indexTokenData.imageUrl,
+            marketTokenAddress: market.marketTokenAddress,
+            market: market.name,
+            price: priceNumber,
+            priceString,
+            totalSupply: totalSupplyNumber,
+            totalSupplyString,
+            value: valueNumber,
+            valueString,
+            balance: balanceNumber,
+            balanceString,
+            balanceValue: balanceValueNumber,
+            balanceValueString,
+            apy: '--',
+          }
+        } catch (error) {
+          logError(error)
+          return null
         }
       })
       .filter((market): market is ExtendedMarketData => market !== null)
-  }, [marketsData, marketTokensData, tokenPrices, marketTokensBalances])
-
-  const filteredMarkets = useMemo(() => {
-    return extendedMarkets.filter(market =>
-      market.market.toLowerCase().includes(filterValue.toLowerCase()),
-    )
-  }, [extendedMarkets, filterValue])
+  }, [marketTokensData, filteredMarkets, chainId, marketTokensBalances, shortlistedTokenPrices])
 
   const sortedMarkets = useMemo(() => {
-    return [...filteredMarkets].sort((a, b) => {
+    return extendedMarkets.sort((a, b) => {
+      if (!sortDescriptor) return 0
+
       const {column, direction} = sortDescriptor
+
       if (!column) return 0
 
       const aValue = a[column as keyof ExtendedMarketData]
@@ -150,7 +267,7 @@ export default function PoolsTable() {
 
       return 0
     })
-  }, [filteredMarkets, sortDescriptor])
+  }, [extendedMarkets, sortDescriptor])
 
   const handleOpenModal = useCallback((marketTokenAddress: string, action: 'buy' | 'sell') => {
     setSelectedMarketAddress(marketTokenAddress)
@@ -158,49 +275,85 @@ export default function PoolsTable() {
     setIsModalOpen(true)
   }, [])
 
+  const latestHandleOpenModal = useLatest(handleOpenModal)
+
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setSelectedMarketAddress(null)
   }, [])
 
-  const renderCell = useCallback(
-    (market: ExtendedMarketData, columnKey: React.Key) => {
-      const key = String(columnKey) as keyof ExtendedMarketData
-      if (key === 'actions') {
-        return (
-          <div className='flex gap-2'>
-            <Button
-              size='sm'
-              color='success'
-              onPress={() => {
-                handleOpenModal(market.marketTokenAddress, 'buy')
-              }}
-            >
-              Buy
-            </Button>
-            <Button
-              size='sm'
-              color='danger'
-              onPress={() => {
-                handleOpenModal(market.marketTokenAddress, 'sell')
-              }}
-            >
-              Sell
-            </Button>
-          </div>
-        )
-      }
-      return market[key] as React.ReactNode
-    },
-    [handleOpenModal],
-  )
+  const renderCell = useCallback((market: ExtendedMarketData, columnKey: React.Key) => {
+    const key = String(columnKey) as keyof ExtendedMarketData
 
-  const onSearchChange = useCallback((value: string | undefined) => {
-    setFilterValue(value ?? '')
+    if (['market'].includes(key)) {
+      return (
+        <div className='flex items-center gap-2'>
+          <img src={market.imageUrl} alt={market.market} className='h-6 w-6' />
+          <span className='text-nowrap'>{market.market}</span>
+        </div>
+      )
+    }
+
+    if (['price'].includes(key)) {
+      return <span className='text-nowrap'>{market.priceString}</span>
+    }
+
+    if (['totalSupply'].includes(key)) {
+      return (
+        <>
+          <div className='text-nowrap'>{market.totalSupplyString} WM</div>
+          <div className='text-nowrap text-xs opacity-50'>{market.valueString}</div>
+        </>
+      )
+    }
+
+    if (['balance'].includes(key)) {
+      return (
+        <>
+          <div className='text-nowrap'>{market.balanceString} WM</div>
+          <div className='text-nowrap text-xs opacity-50'>${market.balanceValueString}</div>
+        </>
+      )
+    }
+
+    if (key === 'actions') {
+      return (
+        <div className='flex gap-2'>
+          <Button
+            size='sm'
+            color='success'
+            onPress={() => {
+              latestHandleOpenModal.current(market.marketTokenAddress, 'buy')
+            }}
+          >
+            Buy
+          </Button>
+          <Button
+            size='sm'
+            color='danger'
+            onPress={() => {
+              latestHandleOpenModal.current(market.marketTokenAddress, 'sell')
+            }}
+          >
+            Sell
+          </Button>
+        </div>
+      )
+    }
+
+    return market[key]
+  }, [])
+
+  const onSearchChange = useCallback((value: string) => {
+    setFilterValue(value)
   }, [])
 
   const onSortChange = useCallback((descriptor: SortDescriptor) => {
     setSortDescriptor(descriptor)
+  }, [])
+
+  const onClear = useCallback(() => {
+    setFilterValue('')
   }, [])
 
   const topContent = useMemo(() => {
@@ -210,32 +363,36 @@ export default function PoolsTable() {
           <Input
             isClearable
             className='w-full sm:max-w-[44%]'
+            name='market-search'
             placeholder='Search by market name...'
             value={filterValue}
-            onClear={() => {
-              setFilterValue('')
-            }}
+            onClear={onClear}
             onValueChange={onSearchChange}
           />
         </div>
         <div className='flex items-center justify-between'>
-          <span className='text-small text-default-400'>
-            Total {filteredMarkets.length} markets
-          </span>
+          <span className='text-small text-default-400'>Total {sortedMarkets.length} markets</span>
         </div>
       </div>
     )
-  }, [filterValue, onSearchChange, filteredMarkets.length])
+  }, [filterValue, onSearchChange, sortedMarkets.length, onClear])
 
   return (
-    <>
+    <div className='relative'>
+      <Button
+        className='absolute -right-2 top-20 z-10'
+        size='md'
+        variant='solid'
+        isIconOnly
+        isLoading={poolsIsFetching}
+        onPress={refetchPools}
+      >
+        <Icon icon='mdi:refresh' />
+      </Button>
       <Table
         aria-label='Markets table'
-        classNames={{
-          base: ['max-w-7xl', 'm-auto'],
-          th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
-        }}
-        sortDescriptor={sortDescriptor}
+        classNames={TABLE_CLASS_NAMES}
+        {...(sortDescriptor ? {sortDescriptor} : {})}
         onSortChange={onSortChange}
         topContent={topContent}
         topContentPlacement='outside'
@@ -247,7 +404,12 @@ export default function PoolsTable() {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={'No markets found'} items={sortedMarkets}>
+        <TableBody
+          emptyContent={'No markets.'}
+          items={sortedMarkets}
+          isLoading={poolsIsLoading}
+          loadingContent={<Spinner className='mt-4' />}
+        >
           {item => (
             <TableRow key={item.marketTokenAddress}>
               {columnKey => <TableCell>{renderCell(item, columnKey)}</TableCell>}
@@ -270,6 +432,6 @@ export default function PoolsTable() {
           marketTokenAddress={selectedMarketAddress}
         />
       )}
-    </>
+    </div>
   )
-}
+})
