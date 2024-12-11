@@ -17,6 +17,8 @@ import {compress as compressString, decompress as decompressString} from 'lz-str
 import {APP_NAME} from '@/constants/config'
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
+const RETRY_COUNT = 4
+
 declare module '@tanstack/react-query' {
   interface Register {
     // queryMeta: {}
@@ -36,7 +38,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 1
+          return failureCount < RETRY_COUNT
         },
       },
       mutations: {
@@ -44,7 +46,7 @@ export function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
-          return failureCount < 1
+          return failureCount < RETRY_COUNT
         },
       },
     },
@@ -82,7 +84,7 @@ export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions
     serialize: data => compressString(stringify(data)),
     deserialize: data => parse(decompressString(data)) as PersistedClient,
     retry: removeOldestQuery,
-    key: APP_NAME + '-query-data',
+    key: `${APP_NAME}-query-data`,
   })
 
   return {

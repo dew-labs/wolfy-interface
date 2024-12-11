@@ -9,6 +9,7 @@ const PREMIUM = 3n // 3 FRI
 // TODO: let user setting this
 const FEE_BUFFER_BPS = roundToNDecimal((parseFloat('30.0') * BASIS_POINTS_DIVISOR) / 100) // 30.0% buffer for gas price estimation
 
+// gasPrice in gwei (eth, not strk)
 export default async function fetchGasPrice(wallet: WalletAccount) {
   try {
     const chainId = await wallet.getChainId()
@@ -27,6 +28,6 @@ export default async function fetchGasPrice(wallet: WalletAccount) {
     return gasPrice
   } catch (e) {
     console.error(e)
-    return null
+    return 0n
   }
 }

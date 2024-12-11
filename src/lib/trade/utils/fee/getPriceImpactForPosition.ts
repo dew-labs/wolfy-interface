@@ -24,7 +24,7 @@ export default function getPriceImpactForPosition(
     currentLongUsd: longInterestUsd,
     currentShortUsd: shortInterestUsd,
     usdDelta: sizeDeltaUsd,
-    isLong: isLong,
+    isLong,
   })
 
   const priceImpactUsd = getPriceImpactUsd({
@@ -49,7 +49,7 @@ export default function getPriceImpactForPosition(
   const virtualInventoryParams = getNextOpenInterestForVirtualInventory({
     virtualInventory: virtualInventoryForPositions,
     usdDelta: sizeDeltaUsd,
-    isLong: isLong,
+    isLong,
   })
 
   const priceImpactUsdForVirtualInventory = getPriceImpactUsd({

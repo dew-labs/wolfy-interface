@@ -21,7 +21,7 @@ const call = axios.create({
   },
 })
 
-call.interceptors.response.use(function (response) {
+call.interceptors.response.use(response => {
   // isAuthenticatedPubSubChannel.pub(isAuthenticated())
   return response
 })

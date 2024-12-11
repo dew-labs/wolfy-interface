@@ -33,7 +33,7 @@ export default memo(function ChainSelect() {
         aria-label='Select Network'
         items={SUPPORTED_CHAINS}
         selectedKeys={selectedKeys}
-        selectorIcon={<></>}
+        selectorIcon={<span />}
         disableSelectorIconRotation
         onSelectionChange={onSelectionChange}
         classNames={SELECT_CLASS_NAMES}

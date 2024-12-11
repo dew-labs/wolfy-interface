@@ -19,10 +19,11 @@ export default async function fetchTiers(chainId: StarknetChainId, tierLevel: bi
     WolfyContract.ReferralStorage,
     ReferralStorageABI,
   )
-  const {discount_share, total_rebate} = await referralStorageContract.tiers(tierLevel)
+  const {discount_share: discountShare, total_rebate: totalRebate} =
+    await referralStorageContract.tiers(tierLevel)
 
   return {
-    totalRebate: cairoIntToBigInt(total_rebate),
-    discountShare: cairoIntToBigInt(discount_share),
+    totalRebate: cairoIntToBigInt(totalRebate),
+    discountShare: cairoIntToBigInt(discountShare),
   }
 }

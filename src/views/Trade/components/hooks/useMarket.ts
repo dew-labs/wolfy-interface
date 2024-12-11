@@ -2,26 +2,38 @@ import {useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 
-export default function useMarket() {
-  const {data: marketsData} = useMarketsData()
+export default function useMarket(
+  tokenAddress: string | undefined,
+  availableMarkets: MarketData[],
+) {
   const [marketAddress, setMarketAddress] = useState<string>()
   const latestMarketAddress = useLatest(marketAddress)
-
-  const marketData = useMemo(
-    () => (marketAddress ? marketsData?.get(marketAddress) : undefined),
-    [marketAddress, marketsData],
-  )
+  const {data: marketData} = useMarketsData(data => data.get(marketAddress ?? ''))
   const latestMarketData = useLatest(marketData)
 
   const poolName = marketData && getMarketPoolName(marketData)
 
+  // TODO: available collateral token addresses should calculated from all pools
   const availableCollateralTokenAddresses = useMemo(
     () => (marketData ? [marketData.longTokenAddress, marketData.shortTokenAddress] : []),
     [marketData],
   )
   const latestAvailableCollateralTokenAddresses = useLatest(availableCollateralTokenAddresses)
+
+  ;(function setDefaultMarketAddress() {
+    if (!tokenAddress || !availableMarkets.length) return
+
+    const currentMarketAddressIsAvailable =
+      !!marketAddress &&
+      availableMarkets.map(market => market.marketTokenAddress).includes(marketAddress)
+
+    if (!currentMarketAddressIsAvailable) {
+      setMarketAddress(availableMarkets[0]?.marketTokenAddress)
+    }
+  })()
 
   return {
     marketAddress,

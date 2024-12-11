@@ -3,7 +3,7 @@ import type {GasLimitsConfig} from '@/lib/trade/services/fetchGasLimits'
 export default function estimateExecuteOrderGasLimit(
   type: 'increase' | 'decrease' | 'swap',
   gasLimits: GasLimitsConfig,
-  order: {swapPath?: string[]; callbackGasLimit?: bigint},
+  order: {swapPath?: string[] | undefined; callbackGasLimit?: bigint},
 ) {
   const swapsCount = BigInt(order.swapPath?.length ?? 0)
 

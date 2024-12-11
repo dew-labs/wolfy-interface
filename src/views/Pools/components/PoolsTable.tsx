@@ -1,4 +1,4 @@
-import {Icon} from '@iconify/react/dist/iconify.js'
+import {Icon} from '@iconify/react'
 import {
   Button,
   Input,
@@ -11,7 +11,9 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {SortDescriptor} from '@react-types/shared'
-import React, {useCallback, useMemo, useState} from 'react'
+import * as React from 'react'
+import {memo, useCallback, useMemo, useState} from 'react'
+import {useLatest} from 'react-use'
 
 import {getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -20,13 +22,11 @@ import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
-import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
+import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
-import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import {logError} from '@/utils/logger'
-import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import DepositModal from './DepositModal'
@@ -64,37 +64,7 @@ const TABLE_CLASS_NAMES = {
   th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
 }
 
-export function calculateMarketPrice(
-  market: MarketData,
-  marketTokenData: MarketTokenData,
-  tokenPrices: TokenPricesData | undefined,
-) {
-  if (!tokenPrices) return 0n
-
-  const longTokenPrice = tokenPrices.get(market.longTokenAddress)?.max ?? 0n
-  const shortTokenPrice = tokenPrices.get(market.shortTokenAddress)?.max ?? 0n
-
-  const longTokenValue = convertTokenAmountToUsd(
-    market.longPoolAmount,
-    market.longToken.decimals,
-    longTokenPrice,
-  )
-  const shortTokenValue = convertTokenAmountToUsd(
-    market.shortPoolAmount,
-    market.shortToken.decimals,
-    shortTokenPrice,
-  )
-
-  // TODO: check why netPnlMax is not right
-  const pendingPnl = market.netPnlMax
-
-  const totalValue = longTokenValue + shortTokenValue - pendingPnl
-  const totalSupply = marketTokenData.totalSupply
-
-  return totalSupply > 0n ? expandDecimals(totalValue, marketTokenData.decimals) / totalSupply : 0n
-}
-
-export default function PoolsTable() {
+export default memo(function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string | null>(null)
@@ -103,25 +73,19 @@ export default function PoolsTable() {
   const [chainId] = useChainId()
 
   const {
-    data: marketsData,
+    data: marketsData = [],
     isLoading: isMarketsDataLoading,
     isFetching: isMarketsDataFetching,
     refetch: refetchMarketsData,
-  } = useMarketsData()
+  } = useMarketsData(data => data.values().toArray())
   const {
-    data: tokenPrices,
-    isLoading: isTokenPricesLoading,
-    isFetching: isTokenPricesFetching,
-    refetch: refetchTokenPrices,
-  } = useTokenPrices(data => data)
-  const {
-    data: marketTokensData,
+    data: marketTokensData = new Map(),
     isLoading: isMarketTokensDataLoading,
     isFetching: isMarketTokensDataFetching,
     refetch: refetchMarketTokensData,
   } = useMarketTokensData()
   const {
-    data: marketTokensBalances,
+    data: marketTokensBalances = new Map(),
     isLoading: isMarketTokensBalancesLoading,
     isFetching: isMarketTokensBalancesFetching,
     refetch: refetchMarketTokensBalances,
@@ -131,40 +95,45 @@ export default function PoolsTable() {
     void refetchMarketsData()
     void refetchMarketTokensData()
     void refetchMarketTokensBalances()
-    void refetchTokenPrices()
-  }, [refetchMarketsData, refetchMarketTokensData, refetchMarketTokensBalances, refetchTokenPrices])
+  }, [refetchMarketsData, refetchMarketTokensData, refetchMarketTokensBalances])
 
-  const poolsIsLoading = useMemo(() => {
-    return (
-      isMarketsDataLoading ||
-      isMarketTokensDataLoading ||
-      isMarketTokensBalancesLoading ||
-      isTokenPricesLoading
-    )
-  }, [
-    isMarketsDataLoading,
-    isMarketTokensDataLoading,
-    isMarketTokensBalancesLoading,
-    isTokenPricesLoading,
-  ])
+  const poolsIsLoading = useMemo(
+    () => isMarketsDataLoading || isMarketTokensDataLoading || isMarketTokensBalancesLoading,
+    [isMarketsDataLoading, isMarketTokensDataLoading, isMarketTokensBalancesLoading],
+  )
 
   const poolsIsFetching = useMemo(() => {
-    return (
-      isMarketsDataFetching ||
-      isMarketTokensDataFetching ||
-      isMarketTokensBalancesFetching ||
-      isTokenPricesFetching
-    )
-  }, [
-    isMarketsDataFetching,
-    isMarketTokensDataFetching,
-    isMarketTokensBalancesFetching,
-    isTokenPricesFetching,
-  ])
+    return isMarketsDataFetching || isMarketTokensDataFetching || isMarketTokensBalancesFetching
+  }, [isMarketsDataFetching, isMarketTokensDataFetching, isMarketTokensBalancesFetching])
+
+  const filteredMarkets = useMemo(
+    () =>
+      marketsData
+        .filter(market => market.name.toLowerCase().includes(filterValue.toLowerCase()))
+        .slice(),
+    [marketsData, filterValue],
+  )
+
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(prices => {
+    if (filteredMarkets.length === 0) return new Map() as TokenPricesData
+    const tokenAddresses = new Set()
+    filteredMarkets.forEach(market => {
+      tokenAddresses.add(market.longToken.address)
+      tokenAddresses.add(market.shortToken.address)
+    })
+
+    prices.forEach((_, key) => {
+      if (!tokenAddresses.has(key)) {
+        prices.delete(key)
+      }
+    })
+
+    return prices
+  })
 
   const extendedMarkets = useMemo(() => {
-    if (!marketsData || !marketTokensData) return []
-    return Array.from(marketsData.values())
+    return filteredMarkets
       .map(market => {
         try {
           const marketTokenData = marketTokensData.get(market.marketTokenAddress)
@@ -173,14 +142,22 @@ export default function PoolsTable() {
 
           const indexTokenData = getTokenMetadata(chainId, market.indexTokenAddress)
 
-          const balance = marketTokensBalances?.get(market.marketTokenAddress) ?? 0n
+          const balance = marketTokensBalances.get(market.marketTokenAddress) ?? 0n
 
-          // const price = market.priceMax
-
-          const price =
-            calculateMarketPrice(market, marketTokenData, tokenPrices) ||
-            expandDecimals(1, USD_DECIMALS)
-
+          const longTokenPrice = shortlistedTokenPrices.get(market.longToken.address) ?? {
+            min: 0n,
+            max: 0n,
+          }
+          const shortTokenPrice = shortlistedTokenPrices.get(market.shortToken.address) ?? {
+            min: 0n,
+            max: 0n,
+          }
+          const price = calculateMarketPrice(
+            market,
+            marketTokenData,
+            longTokenPrice,
+            shortTokenPrice,
+          ).max
           const tokenFractionDigits = calculateTokenFractionDigits(price)
 
           const priceString = formatNumber(shrinkDecimals(price, USD_DECIMALS), Format.USD, {
@@ -265,14 +242,10 @@ export default function PoolsTable() {
         }
       })
       .filter((market): market is ExtendedMarketData => market !== null)
-  }, [marketsData, marketTokensData, tokenPrices, marketTokensBalances, chainId])
+  }, [marketTokensData, filteredMarkets, chainId, marketTokensBalances, shortlistedTokenPrices])
 
   const sortedMarkets = useMemo(() => {
-    const filderedMarkets = extendedMarkets
-      .filter(market => market.market.toLowerCase().includes(filterValue.toLowerCase()))
-      .slice()
-
-    return filderedMarkets.sort((a, b) => {
+    return extendedMarkets.sort((a, b) => {
       if (!sortDescriptor) return 0
 
       const {column, direction} = sortDescriptor
@@ -294,7 +267,7 @@ export default function PoolsTable() {
 
       return 0
     })
-  }, [sortDescriptor, filterValue, extendedMarkets])
+  }, [extendedMarkets, sortDescriptor])
 
   const handleOpenModal = useCallback((marketTokenAddress: string, action: 'buy' | 'sell') => {
     setSelectedMarketAddress(marketTokenAddress)
@@ -302,79 +275,77 @@ export default function PoolsTable() {
     setIsModalOpen(true)
   }, [])
 
+  const latestHandleOpenModal = useLatest(handleOpenModal)
+
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setSelectedMarketAddress(null)
   }, [])
 
-  const renderCell = useCallback(
-    (market: ExtendedMarketData, columnKey: React.Key) => {
-      const key = String(columnKey) as keyof ExtendedMarketData
+  const renderCell = useCallback((market: ExtendedMarketData, columnKey: React.Key) => {
+    const key = String(columnKey) as keyof ExtendedMarketData
 
-      if (['market'].includes(key)) {
-        return (
-          <div className='flex items-center gap-2'>
-            <img src={market.imageUrl} alt={market.market} className='h-6 w-6' />
-            <span className='text-nowrap'>{market.market}</span>
-          </div>
-        )
-      }
+    if (['market'].includes(key)) {
+      return (
+        <div className='flex items-center gap-2'>
+          <img src={market.imageUrl} alt={market.market} className='h-6 w-6' />
+          <span className='text-nowrap'>{market.market}</span>
+        </div>
+      )
+    }
 
-      if (['price'].includes(key)) {
-        return <span className='text-nowrap'>{market.priceString}</span>
-      }
+    if (['price'].includes(key)) {
+      return <span className='text-nowrap'>{market.priceString}</span>
+    }
 
-      if (['totalSupply'].includes(key)) {
-        return (
-          <>
-            <div className='text-nowrap'>{market.totalSupplyString} WM</div>
-            <div className='text-nowrap text-xs opacity-50'>{market.valueString}</div>
-          </>
-        )
-      }
+    if (['totalSupply'].includes(key)) {
+      return (
+        <>
+          <div className='text-nowrap'>{market.totalSupplyString} WM</div>
+          <div className='text-nowrap text-xs opacity-50'>{market.valueString}</div>
+        </>
+      )
+    }
 
-      if (['balance'].includes(key)) {
-        return (
-          <>
-            <div className='text-nowrap'>{market.balanceString} WM</div>
-            <div className='text-nowrap text-xs opacity-50'>${market.balanceValueString}</div>
-          </>
-        )
-      }
+    if (['balance'].includes(key)) {
+      return (
+        <>
+          <div className='text-nowrap'>{market.balanceString} WM</div>
+          <div className='text-nowrap text-xs opacity-50'>${market.balanceValueString}</div>
+        </>
+      )
+    }
 
-      if (key === 'actions') {
-        return (
-          <div className='flex gap-2'>
-            <Button
-              size='sm'
-              color='success'
-              // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
-              onPress={() => {
-                handleOpenModal(market.marketTokenAddress, 'buy')
-              }}
-            >
-              Buy
-            </Button>
-            <Button
-              size='sm'
-              color='danger'
-              // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
-              onPress={() => {
-                handleOpenModal(market.marketTokenAddress, 'sell')
-              }}
-            >
-              Sell
-            </Button>
-          </div>
-        )
-      }
-      return market[key] as React.ReactNode
-    },
-    [handleOpenModal],
-  )
+    if (key === 'actions') {
+      return (
+        <div className='flex gap-2'>
+          <Button
+            size='sm'
+            color='success'
+            onPress={() => {
+              latestHandleOpenModal.current(market.marketTokenAddress, 'buy')
+            }}
+          >
+            Buy
+          </Button>
+          <Button
+            size='sm'
+            color='danger'
+            onPress={() => {
+              latestHandleOpenModal.current(market.marketTokenAddress, 'sell')
+            }}
+          >
+            Sell
+          </Button>
+        </div>
+      )
+    }
 
-  const onSearchChange = useCallback((value: string | undefined) => {
-    setFilterValue(value ?? '')
+    return market[key]
+  }, [])
+
+  const onSearchChange = useCallback((value: string) => {
+    setFilterValue(value)
   }, [])
 
   const onSortChange = useCallback((descriptor: SortDescriptor) => {
@@ -463,4 +434,4 @@ export default function PoolsTable() {
       )}
     </div>
   )
-}
+})

@@ -2,7 +2,7 @@ import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {getOppositeCollateral} from '@/lib/trade/utils/market/getOppositeCollateral'
 
-import getSwapStats from './getStapStats'
+import getSwapStats from './getSwapStats'
 
 export interface SwapStats {
   marketAddress: string

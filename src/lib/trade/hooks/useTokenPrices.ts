@@ -1,6 +1,5 @@
-import type {QueryClient, UseQueryResult} from '@tanstack/react-query'
-import {queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
-import {usePreviousDistinct} from 'react-use'
+import type {UseQueryResult} from '@tanstack/react-query'
+import {queryOptions, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -13,30 +12,27 @@ export function getTokenPricesQueryKey(chainId: StarknetChainId) {
 
 function createGetTokenPricesQueryOptions<T>(
   chainId: StarknetChainId,
-  previousChainId: StarknetChainId | undefined,
-  selector: (data: TokenPricesData) => T,
-  queryClient: QueryClient,
+  selector?: (data: TokenPricesData) => T,
 ) {
   return queryOptions({
     queryKey: getTokenPricesQueryKey(chainId),
     queryFn: async () => {
       return await fetchTokenPrices(chainId)
     },
-    placeholderData: () => {
-      if (!previousChainId) return undefined
-      return queryClient.getQueryData<TokenPricesData>(getTokenPricesQueryKey(previousChainId))
-    },
-    select: selector,
+    placeholderData: previousData => previousData,
+    select: selector as (data: TokenPricesData) => T,
     ...NO_REFETCH_OPTIONS,
   })
 }
 
-export default function useTokenPrices<T>(
-  selector: (tokenPrices: TokenPricesData) => T,
+export default function useTokenPrices(): UseQueryResult<TokenPricesData>
+export default function useTokenPrices<T = TokenPricesData>(
+  selector: (data: TokenPricesData) => T,
+): UseQueryResult<T>
+export default function useTokenPrices<T = TokenPricesData>(
+  selector?: (data: TokenPricesData) => T,
 ): UseQueryResult<T | undefined> {
   const [chainId] = useChainId()
-  const previousChainId = usePreviousDistinct(chainId)
-  const queryClient = useQueryClient()
 
-  return useQuery(createGetTokenPricesQueryOptions(chainId, previousChainId, selector, queryClient))
+  return useQuery(createGetTokenPricesQueryOptions(chainId, selector))
 }

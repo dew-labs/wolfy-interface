@@ -1,6 +1,6 @@
 import {InferSeoMetaPlugin} from '@unhead/addons'
 import {renderDOMHead} from '@unhead/dom'
-import {useEffect} from 'react'
+import {memo, useEffect} from 'react'
 import {CapoPlugin, createHead} from 'unhead'
 
 import {TITLE} from '@/constants/config'
@@ -21,7 +21,7 @@ head.hooks.hook('dom:beforeRender', context => {
   context.shouldRender = !pauseDOMUpdates
 })
 
-export default function Head() {
+export default memo(function Head() {
   useEffect(() => {
     pauseDOMUpdates = false
     renderDOMHead(head).catch(() => {
@@ -30,4 +30,4 @@ export default function Head() {
   }, [])
 
   return null
-}
+})

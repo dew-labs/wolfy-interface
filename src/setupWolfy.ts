@@ -1,4 +1,5 @@
 import {
+  clearProviders,
   ProviderType,
   registerProvider,
   registerWolfyContractAddress,
@@ -16,11 +17,9 @@ function registerHttpProviders() {
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/JnR9OZ0EoYZTyhz91Kko2UkLLZ1jH7Eu',
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/G9wJH34O_F038b_k329lcjOd_o38JA3j',
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK',
-      'https://starknet-mainnet.reddio.com/rpc/v0_7/rk-78e6eebf-b107-440c-89dd-889014500fdc',
       'https://starknet-mainnet.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
       'https://starknet-mainnet.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-mainnet.infura.io/v3/82802c15c3d242d2846e464a66238198',
-      'https://api-starknet-mainnet.dwellir.com/dd28e566-3260-4d8d-8180-6ef1a161e41c',
       'https://mainnet-rpc.spaceshard.io/',
       'https://starknet-mainnet.blastapi.io/6e65b40f-7148-4714-856f-9754a74d9d5d/rpc/v0_7',
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/Snq-IYMCQSA2MqkyN85BljqG6-8SpM0z',
@@ -35,7 +34,6 @@ function registerHttpProviders() {
       'https://starknet-mainnet.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
       'https://starknet-mainnet.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
-      'https://starknet-mainnet.reddio.com/rpc/v0_7/rk-b244da45-a8ff-40e7-978c-76979267e390',
       'https://api.zan.top/node/v1/starknet/mainnet/ad0e71cf58b14af0838cf9a75a531a0e',
       'https://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
       'https://starknet.w3node.com/4e6ef792fb835d49ba525d0dc7af601a1654b70a5975817933dff40d31307766/api',
@@ -61,11 +59,9 @@ function registerHttpProviders() {
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/JnR9OZ0EoYZTyhz91Kko2UkLLZ1jH7Eu',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/G9wJH34O_F038b_k329lcjOd_o38JA3j',
       // 'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK', // SEPOLIA turned off
-      'https://starknet-sepolia.reddio.com/rpc/v0_7/rk-78e6eebf-b107-440c-89dd-889014500fdc',
       'https://starknet-sepolia.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/82802c15c3d242d2846e464a66238198',
-      'https://api-starknet-sepolia.dwellir.com/dd28e566-3260-4d8d-8180-6ef1a161e41c',
-      'https://testnet-rpc.spaceshard.io/',
+      // 'https://testnet-rpc.spaceshard.io/',
       'https://starknet-sepolia.blastapi.io/6e65b40f-7148-4714-856f-9754a74d9d5d/rpc/v0_7',
       'https://starknet-sepolia.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/Snq-IYMCQSA2MqkyN85BljqG6-8SpM0z',
@@ -78,9 +74,8 @@ function registerHttpProviders() {
       'https://starknet-sepolia.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
-      'https://starknet-sepolia.reddio.com/rpc/v0_7/rk-b244da45-a8ff-40e7-978c-76979267e390',
       'https://starknet-sepolia.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
-      'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93',
+      // 'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93', // Somehow cannot config cors
       // -------------------------------------------------------------------------
       // 'https://starknet-sepolia.drpc.org',
       'https://free-rpc.nethermind.io/sepolia-juno',
@@ -136,22 +131,42 @@ function registerContractAddresses() {
     [StarknetChainId.SN_SEPOLIA]: {
       [WolfyContract.Multicall]:
         '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
-      [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
+      [WolfyContract.Reader]: '0x2941ae49e308eab801a0f7942837d117a41c15e0e273f97ae0ad2eb65e31fc9',
       [WolfyContract.EventEmitter]:
-        '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
-      [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
+        '0x6bd9bbce44c7e0a52225f723a623f59ae960608e40957d9e83eace4114afb9',
+      [WolfyContract.Router]: '0x3b9dfe3f0c3d1150af8f659f544948c3298228a3fd743020fe8640f76b29384',
       [WolfyContract.ReferralStorage]:
-        '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
-      [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
+        '0x61b8570a75a020cd6b07352ad18e663526194cc166f94fbb7d955aac89ab62c',
+      [WolfyContract.DataStore]:
+        '0x411aee1bebd02751044e28062c0b87bdc172bdb7080aebe1f3d6b7679452443',
       [WolfyContract.OrderVault]:
-        '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
+        '0x18c6c77430e03c54b23108c26735ce449c75baa8d0c313837341f6c18b80d2b',
       [WolfyContract.DepositVault]:
-        '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
+        '0x7941e5ecfd5562c8d749a708a23063f0e94eeeb8dc7a9e11a592ce8b3890f54',
       [WolfyContract.WithdrawalVault]:
-        '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
+        '0x706f2af7b558e221703d83dd55ad7df0eb106fb8847aa9276777efbf180d50f',
       [WolfyContract.ExchangeRouter]:
-        '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
+        '0x731be42ea0b72a50644e72e48e93238675cd37a3aa8d20d26fe37a7a25c765c',
     },
+    // [StarknetChainId.SN_SEPOLIA]: {
+    //   [WolfyContract.Multicall]:
+    //     '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
+    //   [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
+    //   [WolfyContract.EventEmitter]:
+    //     '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
+    //   [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
+    //   [WolfyContract.ReferralStorage]:
+    //     '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
+    //   [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
+    //   [WolfyContract.OrderVault]:
+    //     '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
+    //   [WolfyContract.DepositVault]:
+    //     '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
+    //   [WolfyContract.WithdrawalVault]:
+    //     '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
+    //   [WolfyContract.ExchangeRouter]:
+    //     '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
+    // },
     // Not available
     [StarknetChainId.SN_MAIN]: {
       [WolfyContract.Multicall]:
@@ -191,10 +206,17 @@ function registerContractAddresses() {
   })
 }
 
-function setupWolfy() {
+export function setupWolfy() {
   registerContractAddresses()
   registerHttpProviders()
   registerWssProviders()
 }
 
-setupWolfy()
+export function teardownWolfy() {
+  clearProviders(ProviderType.HTTP, StarknetChainId.SN_SEPOLIA)
+  clearProviders(ProviderType.HTTP, StarknetChainId.SN_MAIN)
+  clearProviders(ProviderType.HTTP, StarknetChainId.SN_KATANA)
+  clearProviders(ProviderType.WSS, StarknetChainId.SN_SEPOLIA)
+  clearProviders(ProviderType.WSS, StarknetChainId.SN_MAIN)
+  clearProviders(ProviderType.WSS, StarknetChainId.SN_KATANA)
+}

@@ -18,8 +18,8 @@ if (!DEBUG) {
     debug: MODE !== 'production',
     // release: '1.0.0', // TODO: config release
     dsn: SENTRY_DSN,
-    integrations: function (integrations) {
-      const filteredIntergrations = integrations.filter(function (integration) {
+    integrations(integrations) {
+      const filteredIntergrations = integrations.filter(integration => {
         return !['LinkedErrors'].includes(integration.name) // lazyload it later
       })
 

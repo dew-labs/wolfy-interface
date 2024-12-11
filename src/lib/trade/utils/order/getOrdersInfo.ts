@@ -42,12 +42,16 @@ export type PositionOrderInfo = Order & {
   triggerThresholdType: TriggerThresholdType
 }
 
+export type OrderInfo = SwapOrderInfo | PositionOrderInfo
+
+export type OrderInfosData = Map<string, OrderInfo>
+
 export default function getOrdersInfo(
   chainId: StarknetChainId,
   marketsData: MarketsData,
   ordersData: OrdersData,
   tokenPricesData: TokenPricesData,
-) {
+): OrderInfosData {
   const tokensMetadata = getTokensMetadata(chainId)
 
   const newOrdersData = new Map<string, SwapOrderInfo | PositionOrderInfo>()

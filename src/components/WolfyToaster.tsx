@@ -1,3 +1,4 @@
+import {memo} from 'react'
 import {Toaster} from 'sonner'
 
 import {Theme} from '@/lib/theme/theme'
@@ -9,7 +10,7 @@ const TOASTER_OPTIONS = {
   duration: 10000,
 }
 
-export default function WolfyToaster() {
+export default memo(function WolfyToaster() {
   const [theme] = useCurrentTheme()
 
   return (
@@ -21,4 +22,4 @@ export default function WolfyToaster() {
       toastOptions={TOASTER_OPTIONS}
     />
   )
-}
+})

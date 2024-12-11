@@ -2,6 +2,7 @@
 import os from 'os'
 import {coverageConfigDefaults, defineConfig, mergeConfig} from 'vitest/config'
 
+import globs from './globs'
 import viteConfig from './vite.config'
 
 export default defineConfig(configEnv =>
@@ -15,14 +16,14 @@ export default defineConfig(configEnv =>
         passWithNoTests: true,
         globals: true,
         unstubGlobals: true,
+        include: globs.TEST,
         environment: 'happy-dom',
-        environmentMatchGlobs: [
-          ['**/*.ssr.{test,spec}.?(c|m)[jt]s?(x)', 'node'],
-          ['**/*.{test,spec}.?(c|m)[jt]s?(x)', 'happy-dom'],
-        ],
+        environmentMatchGlobs: globs.TEST_SSR.map(path => [path, 'node']),
         setupFiles: 'src/setupTest.ts',
         typecheck: {
           enabled: true,
+          ignoreSourceErrors: true,
+          include: globs.TEST_TYPE,
         },
         coverage: {
           enabled: false,

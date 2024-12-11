@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@nextui-org/react'
+import NumberFlow from '@number-flow/react'
 import type {Selection, SortDescriptor} from '@react-types/shared'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
@@ -33,7 +34,7 @@ import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData'
 import max from '@/utils/numbers/bigint/max'
 import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
-import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import formatNumber, {Format, getIntlNumberFormatOptions} from '@/utils/numbers/formatNumber'
 
 interface TokenOption {
   longLiquidity: bigint
@@ -111,22 +112,17 @@ export default memo(function MarketInformation() {
   const [chainId] = useChainId()
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
-  const {data: tokenPricesData} = useTokenPrices(data => data)
+  //TODO: optimize, do not subscribe to entire token prices
+  const {data: tokenPricesData = new Map()} = useTokenPrices()
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>()
 
-  const {data: marketsData} = useMarketsData()
-
-  const dataIsLoaded = !!marketsData && !!tokenPricesData
+  const {data: marketsData = new Map()} = useMarketsData()
 
   const availableTokens: AvailableTokens | undefined = useMemo(() => {
-    if (marketsData && tokenPricesData) {
-      return getAvailableTokens(marketsData, tokenPricesData)
-    }
+    return getAvailableTokens(marketsData, tokenPricesData)
   }, [marketsData, tokenPricesData])
 
   const marketsWithLiquidityGrouppedByIndexToken = useMemo(() => {
-    if (!tokenPricesData || !availableTokens?.allMarkets) return new Map<string, TokenOption[]>()
-
     const allMarkets = Array.from(availableTokens.allMarkets)
 
     const marketsWithLiquidity = allMarkets.map(marketInfo => {
@@ -162,7 +158,7 @@ export default memo(function MarketInformation() {
     )
 
     return new Map(Object.entries(indexes))
-  }, [availableTokens?.allMarkets, tokenPricesData])
+  }, [availableTokens.allMarkets, tokenPricesData])
 
   const indexTokensWithLiquidityInformation = useMemo(() => {
     const indexes = new Map<
@@ -186,7 +182,7 @@ export default memo(function MarketInformation() {
       const selectedLongLiquid = max(...longLiquids)
       const selectedShortLiquid = max(...shortLiquids)
 
-      const price = tokenPricesData?.get(token)?.max ?? 0n
+      const price = tokenPricesData.get(token)?.max ?? 0n
       const priceFractionDigits = calculatePriceFractionDigits(price)
 
       indexes.set(token, {
@@ -260,9 +256,9 @@ export default memo(function MarketInformation() {
 
       if (marketSortDescriptor.direction === 'ascending') {
         return aValue > bValue ? 1 : -1
-      } else {
-        return aValue > bValue ? -1 : 1
       }
+      return aValue > bValue ? -1 : 1
+
       return 0
     })
 
@@ -276,12 +272,12 @@ export default memo(function MarketInformation() {
 
   useEffect(() => {
     if (
-      (!tokenAddress || (dataIsLoaded && !indexTokenAddressList.includes(tokenAddress))) &&
+      (!tokenAddress || !indexTokenAddressList.includes(tokenAddress)) &&
       indexTokenAddressList[0]
     ) {
       setTokenAddress(indexTokenAddressList[0])
     }
-  }, [dataIsLoaded, indexTokenAddressList, setTokenAddress, tokenAddress])
+  }, [indexTokenAddressList, setTokenAddress, tokenAddress])
 
   const tokenMetadata = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
 
@@ -306,8 +302,8 @@ export default memo(function MarketInformation() {
 
   const {change, changePercent, high, low, volume} = use1DMarketInformation(tokenMetadata?.symbol)
 
-  const priceIndex = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.max : 0n
-  const priceMark = tokenPricesData && tokenAddress ? tokenPricesData.get(tokenAddress)?.min : 0n
+  const priceIndex = tokenAddress ? tokenPricesData.get(tokenAddress)?.max : 0n
+  const priceMark = tokenAddress ? tokenPricesData.get(tokenAddress)?.min : 0n
 
   const priceFractionDigits = calculatePriceFractionDigits(priceIndex)
 
@@ -317,6 +313,21 @@ export default memo(function MarketInformation() {
         fractionDigits: priceFractionDigits,
       })
     : '--'
+
+  const numberFlowFormat = useMemo(() => {
+    return getIntlNumberFormatOptions(Format.USD, {
+      exactFractionDigits: true,
+      fractionDigits: priceFractionDigits,
+    })
+  }, [priceFractionDigits])
+
+  const priceIndexComp = (
+    <NumberFlow
+      value={Number(shrinkDecimals(priceIndex, USD_DECIMALS))}
+      format={numberFlowFormat}
+      willChange
+    />
+  )
   const priceMarkText = priceMark
     ? formatNumber(shrinkDecimals(priceMark, USD_DECIMALS), Format.USD, {
         exactFractionDigits: true,
@@ -426,7 +437,7 @@ export default memo(function MarketInformation() {
           </Popover>
           <div className='flex flex-1 flex-row gap-4'>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-2xl leading-6'>{priceIndexText}</div>
+              <div className='text-nowrap text-2xl leading-6'>{priceIndexComp}</div>
               <div className='text-nowrap text-xs opacity-70'>{priceMarkText}</div>
             </div>
             <div className='flex flex-col items-start justify-center'>

@@ -96,15 +96,8 @@ const actionOptions = {
   ],
 }
 
-const TABLE_CLASS_NAMES = {
-  th: '!rounded-none font-serif',
-}
-
-const HEADING_CLASSES =
-  'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small'
-
 const SELECT_SECTION_CLASS_NAMES = {
-  heading: HEADING_CLASSES,
+  heading: 'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small',
   base: 'last:mb-0',
 }
 
@@ -115,49 +108,72 @@ const SELECT_CLASS_NAMES = {
   label: 'text-xs',
 }
 
-const LIST_BOX_ITEM_CLASSES = {
-  base: [
-    'text-default-500',
-    'transition-opacity',
-    'data-[hover=true]:text-foreground',
-    'dark:data-[hover=true]:bg-default-50',
-    'data-[pressed=true]:opacity-70',
-    'data-[hover=true]:bg-default-200',
-    'data-[selectable=true]:focus:bg-default-100',
-    'data-[focus-visible=true]:ring-default-500',
-  ],
-}
-
-const POPOVER_CLASSNAMES = {
-  base: 'rounded-large',
-  content: 'p-1 bg-background min-w-max',
-}
-
 const LIST_BOX_PROPS = {
-  itemClasses: LIST_BOX_ITEM_CLASSES,
+  itemClasses: {
+    base: [
+      'text-default-500',
+      'transition-opacity',
+      'data-[hover=true]:text-foreground',
+      'dark:data-[hover=true]:bg-default-50',
+      'data-[pressed=true]:opacity-70',
+      'data-[hover=true]:bg-default-200',
+      'data-[selectable=true]:focus:bg-default-100',
+      'data-[focus-visible=true]:ring-default-500',
+    ],
+  },
 }
 
 const POPOVER_PROPS = {
   offset: 10,
-  classNames: POPOVER_CLASSNAMES,
+  classNames: {
+    base: 'rounded-large',
+    content: 'p-1 bg-background min-w-max',
+  },
 }
 
 const SCROLL_SHADOW_PROPS = {
   isEnabled: false,
 }
 
+const formatLocaleDateTime = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString()
+}
+
+const getActionLabel = (value: TradeHistoryAction): string => {
+  for (const actions of Object.values(actionOptions)) {
+    for (const action of actions) {
+      if (action.value === value) {
+        return action.label
+      }
+    }
+  }
+  return 'Unknown Action'
+}
+
+const formatUsd = (amount: string | null): string => {
+  if (amount === null) return '-'
+  const amountBigNumberish = cairoIntToBigInt(amount)
+  return formatNumber(shrinkDecimals(amountBigNumberish, USD_DECIMALS), Format.USD, {
+    exactFractionDigits: true,
+    fractionDigits: 2,
+  })
+}
+
 export default memo(function TradesTab() {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
-  const {data: marketsData} = useMarketsData()
+  const {data: marketsData = new Map()} = useMarketsData()
   const setTokenAddress = useSetTokenAddress()
 
   const markets = useMemo(() => {
-    return Array.from(marketsData?.values() ?? []).map(market => ({
-      label: market.name,
-      value: market.marketTokenAddress,
-      indexTokenAddress: market.indexTokenAddress,
-    }))
+    return marketsData
+      .values()
+      .map(market => ({
+        label: market.name,
+        value: market.marketTokenAddress,
+        indexTokenAddress: market.indexTokenAddress,
+      }))
+      .toArray()
   }, [marketsData])
 
   const marketOptions = useMemo(() => {
@@ -171,32 +187,10 @@ export default memo(function TradesTab() {
     } as const
   }, [markets])
 
-  // GET ACTION
-  const getActionLabel = useCallback((value: TradeHistoryAction): string => {
-    for (const actions of Object.values(actionOptions)) {
-      for (const action of actions) {
-        if (action.value === value) {
-          return action.label
-        }
-      }
-    }
-    return 'Unknown Action'
-  }, [])
-
-  // FORMAT USD
-  const formatUsd = useCallback((amount: string | null): string => {
-    if (amount === null) return '-'
-    const amountBigNumberish = cairoIntToBigInt(amount)
-    return formatNumber(shrinkDecimals(amountBigNumberish, USD_DECIMALS), Format.USD, {
-      exactFractionDigits: true,
-      fractionDigits: 2,
-    })
-  }, [])
-
   // FORMAT MARKET USD
   const formatMarketUsd = useCallback(
     (amount: string, marketAddress: string): string => {
-      const market = marketsData?.get(marketAddress)
+      const market = marketsData.get(marketAddress)
       if (!market) return '0'
       const indexTokenAddress = market.indexTokenAddress
       const decimals = tokensMetadata.get(indexTokenAddress)?.decimals
@@ -210,11 +204,6 @@ export default memo(function TradesTab() {
     [marketsData, tokensMetadata],
   )
 
-  // FORMAT DATE TIME
-  const formatLocaleDateTime = useCallback((timestamp: number): string => {
-    return new Date(timestamp).toLocaleString()
-  }, [])
-
   const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
   const [selectedDirection, setSelectedDirection] = useState<boolean[]>([])
@@ -222,9 +211,9 @@ export default memo(function TradesTab() {
 
   // GET TRADE HISTORY
   const {
-    isLoading,
     data: tradeHistory,
     refetch,
+    isLoading,
     isFetching,
   } = useTradeHistory(selectedActions, selectedMarkets, selectedDirection, currentPage, 10)
   const totalPages = tradeHistory?.totalPages ?? 0
@@ -267,7 +256,13 @@ export default memo(function TradesTab() {
       >
         <Icon icon='mdi:refresh' />
       </Button>
-      <Table className='mt-2' aria-label='Trade History Table' classNames={TABLE_CLASS_NAMES}>
+      <Table
+        className='mt-2'
+        aria-label='Trade History Table'
+        classNames={{
+          th: '!rounded-none font-serif',
+        }}
+      >
         <TableHeader>
           <TableColumn>
             <Select
@@ -305,6 +300,7 @@ export default memo(function TradesTab() {
               popoverProps={POPOVER_PROPS}
               scrollShadowProps={SCROLL_SHADOW_PROPS}
               items={Array.from(Object.entries(marketOptions))}
+              isLoading={isLoading}
             >
               {([category, markets]) => (
                 <SelectSection
@@ -334,11 +330,12 @@ export default memo(function TradesTab() {
         <TableBody
           items={tradeHistoryItems}
           emptyContent={'No trade.'}
-          isLoading={isLoading || !!tradeHistory?.isPrevious}
+          isLoading={isFetching}
           loadingContent={<Spinner className='mt-4' />}
         >
           {item => {
-            const market = marketsData?.get(item.market)
+            const market = marketsData.get(item.market)
+            // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
             if (!market) return <></>
 
             const poolName = getMarketPoolName(market)
@@ -347,34 +344,39 @@ export default memo(function TradesTab() {
               <TableRow key={item.id}>
                 <TableCell>
                   <div
-                    className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${
-                      item.action === TradeHistoryAction.MarketIncrease ||
-                      item.action === TradeHistoryAction.RequestMarketIncrease ||
-                      item.action === TradeHistoryAction.FailedMarketIncrease ||
-                      item.action === TradeHistoryAction.CancelMarketIncrease ||
-                      item.action === TradeHistoryAction.PositionIncrease
-                        ? 'bg-green-500'
-                        : item.action === TradeHistoryAction.MarketDecrease ||
-                            item.action === TradeHistoryAction.RequestMarketDecrease ||
-                            item.action === TradeHistoryAction.FailedMarketDecrease ||
-                            item.action === TradeHistoryAction.CancelMarketDecrease ||
-                            item.action === TradeHistoryAction.PositionDecrease
-                          ? 'bg-red-500'
-                          : item.isLong
-                            ? 'bg-green-500'
-                            : 'bg-red-500'
-                    }`}
+                    className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${(() => {
+                      if (
+                        item.action === TradeHistoryAction.MarketIncrease ||
+                        item.action === TradeHistoryAction.RequestMarketIncrease ||
+                        item.action === TradeHistoryAction.FailedMarketIncrease ||
+                        item.action === TradeHistoryAction.CancelMarketIncrease ||
+                        item.action === TradeHistoryAction.PositionIncrease
+                      ) {
+                        return 'bg-green-500'
+                      }
+
+                      if (
+                        item.action === TradeHistoryAction.MarketDecrease ||
+                        item.action === TradeHistoryAction.RequestMarketDecrease ||
+                        item.action === TradeHistoryAction.FailedMarketDecrease ||
+                        item.action === TradeHistoryAction.CancelMarketDecrease ||
+                        item.action === TradeHistoryAction.PositionDecrease
+                      ) {
+                        return 'bg-red-500'
+                      }
+
+                      return item.isLong ? 'bg-green-500' : 'bg-red-500'
+                    })()}`}
                   />
                   {getActionLabel(item.action)}
                 </TableCell>
                 <TableCell>
-                  <Tooltip content='Press to switch market'>
+                  <Tooltip content='Press to switch market' showArrow>
                     <Button
                       disableRipple
                       disableAnimation
                       variant='light'
                       className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop -- nextui error when separate all this to a new component
                       onClick={() => {
                         setTokenAddress(market.indexTokenAddress)
                       }}

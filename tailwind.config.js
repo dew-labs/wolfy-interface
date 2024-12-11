@@ -2,12 +2,10 @@
 
 import {nextui} from '@nextui-org/react'
 
+import globs from './globs.js'
+
 export default {
-  content: [
-    './index.{htm,html}',
-    './src/**/*.{?(c|m)[jt]s?(x),vue,svelte}',
-    './node_modules/@nextui-org/theme/dist/**/*.?(c|m)[jt]s?(x)',
-  ],
+  content: globs.TAILWIND_CONTENT,
   theme: {
     extend: {
       fontFamily: {

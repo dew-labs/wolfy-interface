@@ -43,6 +43,7 @@ import type {Token} from '@/constants/tokens'
 import {getTokensMetadata} from '@/constants/tokens'
 import {type Market} from '@/lib/trade/services/fetchMarkets'
 import {logError} from '@/utils/logger'
+import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import type {TokenPricesData} from './fetchTokenPrices'
 
@@ -166,8 +167,8 @@ export default async function fetchMarketsData(
         const shortToken = tokensData.get(market.shortTokenAddress)
 
         const indexTokenPrice = tokenPriceData.get(market.indexTokenAddress)
-        const longTokenPrice = tokenPriceData.get(market.shortTokenAddress)
-        const shortTokenPrice = tokenPriceData.get(market.longTokenAddress)
+        const longTokenPrice = tokenPriceData.get(market.longTokenAddress)
+        const shortTokenPrice = tokenPriceData.get(market.shortTokenAddress)
 
         if (
           !longToken ||
@@ -179,18 +180,29 @@ export default async function fetchMarketsData(
         )
           return false
 
+        /* eslint-disable camelcase -- this is the contract's naming */
         const tokenPricesInMarket = {
-          index_token_price: indexTokenPrice,
-          long_token_price: longTokenPrice,
-          short_token_price: shortTokenPrice,
+          index_token_price: {
+            min: indexTokenPrice.min / expandDecimals(1, indexToken.decimals),
+            max: indexTokenPrice.max / expandDecimals(1, indexToken.decimals),
+          },
+          long_token_price: {
+            min: longTokenPrice.min / expandDecimals(1, longToken.decimals),
+            max: longTokenPrice.max / expandDecimals(1, longToken.decimals),
+          },
+          short_token_price: {
+            min: shortTokenPrice.min / expandDecimals(1, shortToken.decimals),
+            max: shortTokenPrice.max / expandDecimals(1, shortToken.decimals),
+          },
         }
 
         const marketProps = {
-          market_token: market.indexTokenAddress,
+          market_token: market.marketTokenAddress,
           index_token: market.indexTokenAddress,
           long_token: market.longTokenAddress,
           short_token: market.shortTokenAddress,
         }
+        /* eslint-enable camelcase */
 
         const dataStoreAddress = getWolfyContractAddress(chainId, WolfyContract.DataStore)
 

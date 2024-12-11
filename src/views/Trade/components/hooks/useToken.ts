@@ -13,7 +13,11 @@ export default function useToken(tradeMode: TradeMode) {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
   const [tokenAddress] = useTokenAddress()
-  const {data: tokenMinPriceData} = useTokenPrices(data => data.get(tokenAddress ?? '')?.min)
+
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: tokenMinPriceData = 0n} = useTokenPrices(tokenPrices => {
+    return tokenPrices.get(tokenAddress ?? '')?.min
+  })
 
   const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
   const tokenDecimals = tokenData?.decimals ?? 0
@@ -21,22 +25,26 @@ export default function useToken(tradeMode: TradeMode) {
 
   const [tokenAmountUsd, setTokenAmountUsd] = useState(0n)
   const latestTokenAmountUsd = useLatest(tokenAmountUsd)
-  const [tokenPrice, setTokenPrice] = useState<bigint>()
+  const [tokenPrice, setTokenPrice] = useState(0n)
   const derivedTokenPrice =
-    tokenPrice && tradeMode !== TradeMode.Market ? tokenPrice : (tokenMinPriceData ?? 0n)
+    tokenPrice && tradeMode !== TradeMode.Market ? tokenPrice : tokenMinPriceData // TODO: market shouldn't use min price?
   const latestDerivedTokenPrice = useLatest(derivedTokenPrice)
 
   const tokenAmount = useMemo(() => {
     if (!derivedTokenPrice) return 0n
-    return convertUsdToTokenAmount(tokenAmountUsd, tokenDecimals, derivedTokenPrice)
+    return convertUsdToTokenAmount(tokenAmountUsd, tokenDecimals, latestDerivedTokenPrice.current)
   }, [derivedTokenPrice, tokenAmountUsd, tokenDecimals])
 
   const setTokenAmount = useCallback(
     (tokenAmount: bigint) => {
-      const tokenAmountUsd = convertTokenAmountToUsd(tokenAmount, tokenDecimals, derivedTokenPrice)
+      const tokenAmountUsd = convertTokenAmountToUsd(
+        tokenAmount,
+        tokenDecimals,
+        latestDerivedTokenPrice.current,
+      )
       setTokenAmountUsd(tokenAmountUsd)
     },
-    [derivedTokenPrice, tokenDecimals],
+    [tokenDecimals],
   )
 
   return {
@@ -47,6 +55,7 @@ export default function useToken(tradeMode: TradeMode) {
     latestTokenAmountUsd,
     setTokenAmount,
     tokenPrice,
+    derivedTokenPrice,
     latestDerivedTokenPrice,
     setTokenPrice,
     setTokenAmountUsd,

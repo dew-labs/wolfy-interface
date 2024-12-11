@@ -32,8 +32,8 @@ export default async function fetchUserReferralCode(
   const localStorageCodeOwner = await fetchReferralCodeOwner(chainId, localStorageCode)
 
   let attachedOnChain = false
-  let userReferralCode: string | undefined = undefined
-  let userReferralCodeString: string | undefined = undefined
+  let userReferralCode: string | undefined
+  let userReferralCodeString: string | undefined
   let referralCodeForTxn = STARKNET_HEX_STRING_ZERO
 
   if (skipLocalReferralCode || (onChainCode && !isRepresentZero(onChainCode))) {

@@ -11,6 +11,8 @@ import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
+import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
+import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import {ChartInterval, isChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import useChartConfig from '@/lib/tvchart/configs/useChartConfigs.ts'
@@ -24,24 +26,24 @@ export default memo(function Chart() {
   const chartConfigs = useChartConfig()
   const [chartInterval, setChartInterval] = useState(ChartInterval['1h'])
   const [tokenAddress] = useTokenAddress()
-  const tokenMetadata = getTokensMetadata(chainId)
-  const asset = MOCK_SYMBOL_MAP[tokenMetadata.get(tokenAddress ?? '')?.symbol ?? '']
-  const {data: tokenPrices} = useTokenPrices(data => data)
+  const tokenSymbol = getTokensMetadata(chainId).get(tokenAddress ?? '')?.symbol
+  const asset = tokenSymbol ? MOCK_SYMBOL_MAP[tokenSymbol] : undefined
+  //TODO: optimize, do not subscribe to entire token prices
+  const {data: tokenPrices = new Map()} = useTokenPrices()
   const latestTokenPrices = useLatest(tokenPrices)
 
-  const {data: orders} = useOrders()
-  const ordersOfCurrentToken = useMemo(
-    () => orders?.filter(order => order.indexToken.address === tokenAddress) ?? [],
-    [orders, tokenAddress],
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: ordersOfCurrentToken = []} = useOrders(orders =>
+    orders.filter(isPositionOrder).filter(order => order.indexToken.address === tokenAddress),
   )
 
-  const {data: positions} = usePositionsInfoData()
-  const positionOfCurrentToken = useMemo(
-    () =>
-      Array.from(positions?.values() ?? []).filter(
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: positionOfCurrentToken = []} = usePositionsInfoData(
+    (positions: PositionsInfoData) => {
+      return Array.from(positions.positionsInfoViaStringRepresentation.values()).filter(
         position => position.marketData.indexTokenAddress === tokenAddress,
-      ),
-    [positions, tokenAddress],
+      )
+    },
   )
 
   const lines = useMemo(() => {
@@ -53,7 +55,7 @@ export default memo(function Chart() {
         fractionDigits: 2,
       })
       const collateralFractionDigits = calculateTokenFractionDigits(
-        latestTokenPrices.current?.get(order.initialCollateralToken.address)?.max ?? 0n,
+        latestTokenPrices.current.get(order.initialCollateralToken.address)?.max ?? 0n,
       )
 
       const collateral = formatNumber(
@@ -83,7 +85,7 @@ export default memo(function Chart() {
         fractionDigits: 2,
       })
       const collateralFractionDigits = calculateTokenFractionDigits(
-        latestTokenPrices.current?.get(position.collateralTokenAddress)?.max ?? 0n,
+        latestTokenPrices.current.get(position.collateralTokenAddress)?.max ?? 0n,
       )
 
       const collateral = formatNumber(

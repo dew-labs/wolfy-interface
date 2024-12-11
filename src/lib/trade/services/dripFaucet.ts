@@ -10,6 +10,7 @@ export default async function dripFaucet(wallet: WalletAccount) {
   const tokens = getTokensMetadata(chainId)
 
   for (const token of tokens) {
+    // eslint-disable-next-line no-await-in-loop -- this is the desired behavior
     await wallet.watchAsset({
       type: 'ERC20',
       options: {
@@ -35,7 +36,6 @@ export default async function dripFaucet(wallet: WalletAccount) {
     return {
       tx: receipt.transaction_hash,
     }
-  } else {
-    throw new Error('Cannot drip faucet')
   }
+  throw new Error('Cannot drip faucet')
 }

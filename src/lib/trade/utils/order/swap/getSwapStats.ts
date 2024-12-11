@@ -83,7 +83,6 @@ export default function getSwapStats(p: {
   const usdInAfterFees = usdIn - swapFeeUsd
 
   let usdOut = usdInAfterFees
-  let amountOut = convertUsdToTokenAmount(usdOut, tokenOut.decimals, priceOut)
 
   let cappedImpactDeltaUsd: bigint
 
@@ -134,7 +133,7 @@ export default function getSwapStats(p: {
     usdOut = 0n
   }
 
-  amountOut = convertUsdToTokenAmount(usdOut, tokenOut.decimals, priceOut)
+  const amountOut = convertUsdToTokenAmount(usdOut, tokenOut.decimals, priceOut)
 
   const liquidity = getAvailableUsdLiquidityForCollateral(
     marketInfo,

@@ -10,7 +10,7 @@ export default memo(function ThemeSwitchButton() {
   const [theme, setTheme] = useTheme()
   const latestTheme = useLatest(theme)
 
-  const handleCorrectNetwork = useCallback(() => {
+  const handleSwitchTheme = useCallback(() => {
     const nextTheme = (() => {
       if (latestTheme.current === Theme.Dark) return Theme.Light
       if (latestTheme.current === Theme.Light) return Theme.System
@@ -51,7 +51,7 @@ export default memo(function ThemeSwitchButton() {
   })()
 
   return (
-    <Button isIconOnly color={color} onPress={handleCorrectNetwork}>
+    <Button isIconOnly color={color} onPress={handleSwitchTheme}>
       <Icon icon={icon} />
     </Button>
   )

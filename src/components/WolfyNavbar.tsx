@@ -168,7 +168,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                   className={'hidden md:flex'}
                   isLoading={isDripping}
                 >
-                  {!isDripping ? t('Faucet') : t('Dripping...')}
+                  {isDripping ? t('Dripping...') : t('Faucet')}
                 </Button>
                 <Button
                   onPress={handleOnDrip}
@@ -181,36 +181,34 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
                 </Button>
               </>
             )}
-            {isConnected && (
-              <>
-                <Dropdown placement='bottom-end'>
-                  <DropdownTrigger>
-                    <button className='mt-1 h-8 w-8 transition-transform'>
-                      <Badge color='success' content='' placement='bottom-right' shape='circle'>
-                        {!!accountAddress && (
-                          <BoringAvatar size='32px' variant='beam' name={accountAddress} />
-                        )}
-                      </Badge>
-                    </button>
-                  </DropdownTrigger>
-                  <DropdownMenu aria-label='Profile Actions' variant='flat'>
-                    <DropdownItem key='profile'>
-                      <a
-                        href={getScanUrl(chainId, ScanType.Contract, accountAddress)}
-                        target='_blank'
-                        rel='noreferrer'
-                        className='font-semibold'
-                      >
-                        {!!accountAddress && middleEllipsis(accountAddress)}
-                      </a>
-                    </DropdownItem>
-                    <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
-                    <DropdownItem key='disconnect' color='danger' onPress={handleDisconnect}>
-                      {t('Disconnect')}
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </>
+            {isConnected && accountAddress && (
+              <Dropdown placement='bottom-end'>
+                <DropdownTrigger>
+                  <button className='mt-1 h-8 w-8 transition-transform'>
+                    <Badge color='success' content='' placement='bottom-right' shape='circle'>
+                      {!!accountAddress && (
+                        <BoringAvatar size='32px' variant='beam' name={accountAddress} />
+                      )}
+                    </Badge>
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label='Profile Actions' variant='flat'>
+                  <DropdownItem key='profile'>
+                    <a
+                      href={getScanUrl(chainId, ScanType.Contract, accountAddress)}
+                      target='_blank'
+                      rel='noreferrer'
+                      className='font-semibold'
+                    >
+                      {!!accountAddress && middleEllipsis(accountAddress)}
+                    </a>
+                  </DropdownItem>
+                  <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
+                  <DropdownItem key='disconnect' color='danger' onPress={handleDisconnect}>
+                    {t('Disconnect')}
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
             )}
           </NavbarItem>
         </NavbarContent>

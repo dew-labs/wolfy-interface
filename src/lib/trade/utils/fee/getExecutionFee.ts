@@ -1,3 +1,4 @@
+import type {Token} from '@/constants/tokens'
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
 import type {GasLimitsConfig} from '@/lib/trade/services/fetchGasLimits'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
@@ -13,6 +14,7 @@ export function getExecutionFee(
   feeTokenPrice: Price,
   estimatedGasLimit: bigint,
   gasPrice: bigint,
+  feeToken: Token,
 ): ExecutionFee | undefined {
   const baseGasLimit = gasLimits.estimatedFeeBaseGasLimit
   const multiplierFactor = gasLimits.estimatedFeeMultiplierFactor
@@ -20,7 +22,7 @@ export function getExecutionFee(
 
   const feeTokenAmount = adjustedGasLimit * gasPrice
 
-  const feeUsd = convertTokenAmountToUsd(feeTokenAmount, 18, feeTokenPrice.min)
+  const feeUsd = convertTokenAmountToUsd(feeTokenAmount, feeToken.decimals, feeTokenPrice.min)
 
   return {
     feeUsd,

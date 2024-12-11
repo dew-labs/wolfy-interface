@@ -28,14 +28,17 @@ export default function usePayToken(
   const tokensMetadata = getTokensMetadata(chainId)
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
-  const {data: payTokenMinPriceData} = useTokenPrices(data => data.get(payTokenAddress ?? '')?.min)
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: payTokenMinPriceData = 0n} = useTokenPrices(
+    data => data.get(payTokenAddress ?? '')?.min,
+  )
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
   const payTokenDecimals = payTokenData?.decimals ?? 0
   const latestPayTokenDecimals = useLatest(payTokenDecimals)
   const payTokenPrice = (() => {
     if (tradeMode === TradeMode.Limit && tokenAddress === payTokenAddress) return tokenPrice ?? 0n
-    return payTokenMinPriceData ?? 0n
+    return payTokenMinPriceData
   })()
   const latestPayTokenPrice = useLatest(payTokenPrice)
 
@@ -63,10 +66,7 @@ export default function usePayToken(
 
   const latestPayTokenAmount = useLatest(payTokenAmount)
   const payTokenAmountUsd = useMemo(
-    () =>
-      payTokenDecimals && payTokenPrice
-        ? convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, payTokenPrice)
-        : 0n,
+    () => convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, payTokenPrice),
     [payTokenAmount, payTokenDecimals, payTokenPrice],
   )
   const latestPayTokenAmountUsd = useLatest(payTokenAmountUsd)
@@ -91,6 +91,7 @@ export default function usePayToken(
 
   const handleLeverageChange = useCallback(
     (value: unknown) => {
+      setLeverageInputFocused(true)
       if (typeof value !== 'string' && typeof value !== 'number') return
       const leverage = expandDecimals(value, LEVERAGE_DECIMALS)
 
@@ -111,6 +112,10 @@ export default function usePayToken(
     },
     [setTokenAmountUsd],
   )
+
+  const handleLeverageChangeEnd = useCallback(() => {
+    setLeverageInputFocused(false)
+  }, [])
 
   useEffect(
     function syncLeverageToLeverageInput() {
@@ -153,6 +158,8 @@ export default function usePayToken(
     latestLeverageInput,
     setLeverageInput,
     handleLeverageChange,
+    handleLeverageChangeEnd,
+    leverageInputIsFocused,
     setLeverageInputFocused,
   }
 }

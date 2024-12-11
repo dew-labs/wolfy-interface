@@ -16,7 +16,7 @@ export default function getLimitedDisplay(
   const min = expandDecimals(minThreshold, tokenDecimals)
   const absAmount = abs(amount)
 
-  if (absAmount == 0n) {
+  if (absAmount === 0n) {
     return {
       symbol: '',
       value: absAmount,
@@ -29,7 +29,11 @@ export default function getLimitedDisplay(
     return ''
   })()
 
-  const value = max !== null && absAmount > max ? max : absAmount < min ? min : absAmount
+  const value = (() => {
+    if (max !== null && absAmount > max) return max
+    if (absAmount < min) return min
+    return absAmount
+  })()
 
   return {
     symbol,

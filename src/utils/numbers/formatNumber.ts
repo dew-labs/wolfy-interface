@@ -1,3 +1,5 @@
+import type {Format as NumberFlowFormat} from '@number-flow/react'
+
 import formatLocaleNumber from './formatLocaleNumber'
 
 export enum Format {
@@ -10,62 +12,71 @@ export enum Format {
   PERCENT_SIGNED,
 }
 
-export default function formatNumber(
-  number: string | number | bigint,
+export interface FormatOptions {
+  fractionDigits?: number | undefined
+  exactFractionDigits?: boolean
+}
+
+export function getIntlNumberFormatOptions(
   format: Format,
-  options?: {
-    fractionDigits?: number | undefined
-    exactFractionDigits?: boolean
-  },
-) {
+  options?: FormatOptions,
+): NumberFlowFormat {
   switch (format) {
     case Format.PLAIN:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         useGrouping: false,
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
-      })
+      }
     case Format.READABLE:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
-      })
+      }
     case Format.USD:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         style: 'currency',
         currency: 'USD',
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
-      })
+      }
     case Format.USD_SIGNED:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         style: 'currency',
         currency: 'USD',
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 0,
         signDisplay: 'exceptZero',
-      })
+      }
     case Format.USD_ABBREVIATED:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         style: 'currency',
         currency: 'USD',
         notation: 'compact',
         compactDisplay: 'short',
         maximumFractionDigits: options?.fractionDigits ?? 2,
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 2,
-      })
+      }
     case Format.PERCENT:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         style: 'percent',
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
-      })
+      }
     case Format.PERCENT_SIGNED:
-      return formatLocaleNumber(Number(number), 'en-US', {
+      return {
         style: 'percent',
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
         signDisplay: 'exceptZero',
-      })
+      }
   }
+}
+
+export default function formatNumber(
+  number: string | number | bigint,
+  format: Format,
+  options?: FormatOptions,
+) {
+  return formatLocaleNumber(Number(number), 'en-US', getIntlNumberFormatOptions(format, options))
 }

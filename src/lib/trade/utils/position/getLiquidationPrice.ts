@@ -46,7 +46,7 @@ function getPriceImpactDeltaUsd(p: {
   const maxNegativePriceImpactUsd =
     -1n * applyFactor(sizeInUsd, marketInfo.maxPositionImpactFactorForLiquidations)
 
-  let priceImpactDeltaUsd = 0n
+  let priceImpactDeltaUsd: bigint
 
   if (useMaxPriceImpact) {
     priceImpactDeltaUsd = maxNegativePriceImpactUsd
@@ -160,30 +160,30 @@ export default function getLiquidationPrice(p: {
   let liquidationPrice: bigint
 
   if (isEquivalentTokens(collateralToken, indexToken)) {
-    const denominator = (function () {
+    const denominator = (() => {
       if (isLong) return sizeInTokens + collateralAmount
       return sizeInTokens - collateralAmount
     })()
 
-    if (denominator == 0n) {
+    if (denominator === 0n) {
       return undefined
     }
 
-    const numerator = (function () {
+    const numerator = (() => {
       if (isLong) return sizeInUsd + liquidationCollateralUsd - priceImpactDeltaUsd + totalFeesUsd
       return sizeInUsd - liquidationCollateralUsd + priceImpactDeltaUsd - totalFeesUsd
     })()
 
     liquidationPrice = (numerator * expandDecimals(1, indexToken.decimals)) / denominator
   } else {
-    if (sizeInTokens == 0n) {
+    if (sizeInTokens === 0n) {
       return undefined
     }
 
     const remainingCollateralUsd =
       collateralUsd + priceImpactDeltaUsd - totalPendingFeesUsd - closingFeeUsd
 
-    const numerator = (function () {
+    const numerator = (() => {
       if (isLong) return liquidationCollateralUsd - remainingCollateralUsd + sizeInUsd
       return liquidationCollateralUsd - remainingCollateralUsd - sizeInUsd
     })()

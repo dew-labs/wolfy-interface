@@ -1,6 +1,4 @@
-import type {QueryClient} from '@tanstack/react-query'
-import {queryOptions, useQuery, useQueryClient} from '@tanstack/react-query'
-import {usePreviousDistinct} from 'react-use'
+import {queryOptions, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -11,22 +9,13 @@ export function getGasLimitsQueryKey(chainId: StarknetChainId) {
   return ['gasLimits', chainId] as const
 }
 
-function createGetGasLimitsQueryOptions(
-  chainId: StarknetChainId,
-  previousChainId: StarknetChainId | undefined,
-  queryClient: QueryClient,
-) {
+function createGetGasLimitsQueryOptions(chainId: StarknetChainId) {
   return queryOptions({
     queryKey: getGasLimitsQueryKey(chainId),
     queryFn: async () => {
       return await fetchGasLimits(chainId)
     },
-    placeholderData: () => {
-      if (!previousChainId) return undefined
-      return queryClient.getQueryData<Awaited<ReturnType<typeof fetchGasLimits>>>(
-        getGasLimitsQueryKey(previousChainId),
-      )
-    },
+    placeholderData: previousData => previousData,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 100000,
   })
@@ -34,7 +23,5 @@ function createGetGasLimitsQueryOptions(
 
 export default function useGasLimits() {
   const [chainId] = useChainId()
-  const previousChainId = usePreviousDistinct(chainId)
-  const queryClient = useQueryClient()
-  return useQuery(createGetGasLimitsQueryOptions(chainId, previousChainId, queryClient))
+  return useQuery(createGetGasLimitsQueryOptions(chainId))
 }
