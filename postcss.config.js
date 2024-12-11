@@ -1,7 +1,9 @@
 import autoprefixer from 'autoprefixer'
 import calc from 'postcss-calc'
 import flexbugsFixes from 'postcss-flexbugs-fixes'
+import focus from 'postcss-focus'
 import presetEnv from 'postcss-preset-env'
+import willChange from 'postcss-will-change'
 import tailwindCss from 'tailwindcss'
 
 export default () => {
@@ -9,6 +11,8 @@ export default () => {
     plugins: [
       tailwindCss,
       flexbugsFixes,
+      focus,
+      willChange,
       presetEnv({
         stage: 1,
       }),
