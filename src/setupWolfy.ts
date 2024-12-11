@@ -128,45 +128,45 @@ function registerContractAddresses() {
   const CONTRACT_ADDRESSES: Partial<
     Record<StarknetChainId, Partial<Record<WolfyContract, string>>>
   > = {
-    [StarknetChainId.SN_SEPOLIA]: {
-      [WolfyContract.Multicall]:
-        '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
-      [WolfyContract.Reader]: '0x2941ae49e308eab801a0f7942837d117a41c15e0e273f97ae0ad2eb65e31fc9',
-      [WolfyContract.EventEmitter]:
-        '0x6bd9bbce44c7e0a52225f723a623f59ae960608e40957d9e83eace4114afb9',
-      [WolfyContract.Router]: '0x3b9dfe3f0c3d1150af8f659f544948c3298228a3fd743020fe8640f76b29384',
-      [WolfyContract.ReferralStorage]:
-        '0x61b8570a75a020cd6b07352ad18e663526194cc166f94fbb7d955aac89ab62c',
-      [WolfyContract.DataStore]:
-        '0x411aee1bebd02751044e28062c0b87bdc172bdb7080aebe1f3d6b7679452443',
-      [WolfyContract.OrderVault]:
-        '0x18c6c77430e03c54b23108c26735ce449c75baa8d0c313837341f6c18b80d2b',
-      [WolfyContract.DepositVault]:
-        '0x7941e5ecfd5562c8d749a708a23063f0e94eeeb8dc7a9e11a592ce8b3890f54',
-      [WolfyContract.WithdrawalVault]:
-        '0x706f2af7b558e221703d83dd55ad7df0eb106fb8847aa9276777efbf180d50f',
-      [WolfyContract.ExchangeRouter]:
-        '0x731be42ea0b72a50644e72e48e93238675cd37a3aa8d20d26fe37a7a25c765c',
-    },
     // [StarknetChainId.SN_SEPOLIA]: {
     //   [WolfyContract.Multicall]:
     //     '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
-    //   [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
+    //   [WolfyContract.Reader]: '0x2941ae49e308eab801a0f7942837d117a41c15e0e273f97ae0ad2eb65e31fc9',
     //   [WolfyContract.EventEmitter]:
-    //     '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
-    //   [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
+    //     '0x6bd9bbce44c7e0a52225f723a623f59ae960608e40957d9e83eace4114afb9',
+    //   [WolfyContract.Router]: '0x3b9dfe3f0c3d1150af8f659f544948c3298228a3fd743020fe8640f76b29384',
     //   [WolfyContract.ReferralStorage]:
-    //     '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
-    //   [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
+    //     '0x61b8570a75a020cd6b07352ad18e663526194cc166f94fbb7d955aac89ab62c',
+    //   [WolfyContract.DataStore]:
+    //     '0x411aee1bebd02751044e28062c0b87bdc172bdb7080aebe1f3d6b7679452443',
     //   [WolfyContract.OrderVault]:
-    //     '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
+    //     '0x18c6c77430e03c54b23108c26735ce449c75baa8d0c313837341f6c18b80d2b',
     //   [WolfyContract.DepositVault]:
-    //     '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
+    //     '0x7941e5ecfd5562c8d749a708a23063f0e94eeeb8dc7a9e11a592ce8b3890f54',
     //   [WolfyContract.WithdrawalVault]:
-    //     '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
+    //     '0x706f2af7b558e221703d83dd55ad7df0eb106fb8847aa9276777efbf180d50f',
     //   [WolfyContract.ExchangeRouter]:
-    //     '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
+    //     '0x731be42ea0b72a50644e72e48e93238675cd37a3aa8d20d26fe37a7a25c765c',
     // },
+    [StarknetChainId.SN_SEPOLIA]: {
+      [WolfyContract.Multicall]:
+        '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
+      [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
+      [WolfyContract.EventEmitter]:
+        '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
+      [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
+      [WolfyContract.ReferralStorage]:
+        '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
+      [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
+      [WolfyContract.OrderVault]:
+        '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
+      [WolfyContract.DepositVault]:
+        '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
+      [WolfyContract.WithdrawalVault]:
+        '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
+      [WolfyContract.ExchangeRouter]:
+        '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
+    },
     // Not available
     [StarknetChainId.SN_MAIN]: {
       [WolfyContract.Multicall]:
