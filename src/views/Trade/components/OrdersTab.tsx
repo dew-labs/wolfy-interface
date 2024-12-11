@@ -20,24 +20,33 @@ import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
-import useOrders from '@/lib/trade/hooks/useOrders'
+import useOrdersInfosData from '@/lib/trade/hooks/useOrderInfosData'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import type {OrderInfosData} from '@/lib/trade/utils/order/getOrdersInfo'
 import {isDecreaseOrderType} from '@/lib/trade/utils/order/type/isDecreaseOrderType'
 import {isIncreaseOrderType} from '@/lib/trade/utils/order/type/isIncreaseOrderType'
+import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import {getMarkPrice} from '@/lib/trade/utils/price/getMarkPrice'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import markAsMemoized from '@/utils/react/markAsMemoized'
 
 const TABLE_CLASS_NAMES = {
   th: '!rounded-none font-serif',
 }
+
+const selectReversedPositionOrders = markAsMemoized((data: OrderInfosData) => {
+  const orders = Array.from(data.values()).reverse()
+
+  return orders.filter(order => isPositionOrder(order))
+})
 
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
@@ -49,7 +58,12 @@ export default memo(function OrdersTab() {
   const queryClient = useQueryClient()
   const setTokenAddress = useSetTokenAddress()
 
-  const {data: orders = [], isLoading, isFetching, refetch} = useOrders()
+  const {
+    data: orders = [],
+    isLoading,
+    isFetching,
+    refetch,
+  } = useOrdersInfosData(selectReversedPositionOrders)
   const refetchOrders = useCallback(() => {
     void refetch()
   }, [refetch])
@@ -204,7 +218,7 @@ export default memo(function OrdersTab() {
                       disableAnimation
                       variant='light'
                       className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                      onClick={() => {
+                      onPress={() => {
                         setTokenAddress(order.marketData.indexTokenAddress)
                       }}
                     >
@@ -236,7 +250,7 @@ export default memo(function OrdersTab() {
                 <TableCell>
                   <Button
                     size='sm'
-                    onClick={() => {
+                    onPress={() => {
                       handleCancelOrder(order.key)
                     }}
                   >

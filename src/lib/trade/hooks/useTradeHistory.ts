@@ -1,4 +1,5 @@
 import {useQuery, type UseQueryResult} from '@tanstack/react-query'
+import type {MemoizedCallback} from 'react'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -21,7 +22,7 @@ export default function useTradeHistory<T = TradeData>(
   isLong: boolean[],
   page: number,
   limit: number,
-  selector: (data: TradeData) => T,
+  selector: MemoizedCallback<(data: TradeData) => T>,
 ): UseQueryResult<T>
 export default function useTradeHistory<T = TradeData>(
   actions: TradeHistoryAction[],
@@ -29,7 +30,7 @@ export default function useTradeHistory<T = TradeData>(
   isLong: boolean[],
   page: number,
   limit: number,
-  selector?: (data: TradeData) => T,
+  selector?: MemoizedCallback<(data: TradeData) => T>,
 ) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()

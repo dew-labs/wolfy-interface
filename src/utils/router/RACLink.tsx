@@ -11,10 +11,13 @@ import {mergeProps, useFocusRing, useHover, useLink, useObjectRef} from 'react-a
 interface RACLinkProps extends Omit<AriaLinkOptions, 'href'> {
   children?: React.ReactNode
 }
-const RACLinkComponent = React.forwardRef<
-  HTMLAnchorElement,
-  RACLinkProps & AnchorHTMLAttributes<HTMLAnchorElement> & {href?: string}
->((props, forwardedRef) => {
+const RACLinkComponent = ({
+  ref: forwardedRef,
+  ...props
+}: RACLinkProps &
+  AnchorHTMLAttributes<HTMLAnchorElement> & {href?: string} & {
+    ref: React.RefObject<HTMLAnchorElement>
+  }) => {
   const ref = useObjectRef(forwardedRef)
   const {isPressed, linkProps} = useLink(props, ref)
   const {isHovered, hoverProps} = useHover(props)
@@ -34,7 +37,7 @@ const RACLinkComponent = React.forwardRef<
       }
     />
   )
-})
+}
 
 RACLinkComponent.displayName = 'RACLinkComponent'
 

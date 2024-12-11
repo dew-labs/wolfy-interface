@@ -1,5 +1,6 @@
 import type {UseQueryResult} from '@tanstack/react-query'
 import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
+import type {MemoizedCallback} from 'react'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
@@ -23,7 +24,7 @@ function createGetPositionsQueryOptions<T>(
   chainId: StarknetChainId,
   marketsData: MarketsData | undefined,
   accountAddress: string | undefined,
-  selector?: (data: PositionsData) => T,
+  selector?: MemoizedCallback<(data: PositionsData) => T>,
 ) {
   return queryOptions({
     queryKey: getPositionsQueryKey(chainId, marketsData, accountAddress),
@@ -44,9 +45,11 @@ function createGetPositionsQueryOptions<T>(
 
 export default function usePositionsData(): UseQueryResult<PositionsData>
 export default function usePositionsData<T = PositionsData>(
-  selector: (data: PositionsData) => T,
+  selector: MemoizedCallback<(data: PositionsData) => T>,
 ): UseQueryResult<T>
-export default function usePositionsData<T = PositionsData>(selector?: (data: PositionsData) => T) {
+export default function usePositionsData<T = PositionsData>(
+  selector?: MemoizedCallback<(data: PositionsData) => T>,
+) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
   const {data: marketsData} = useMarketsData()

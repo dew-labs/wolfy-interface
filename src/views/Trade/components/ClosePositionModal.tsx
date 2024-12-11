@@ -16,11 +16,13 @@ import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
+import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import markAsMemoized from '@/utils/react/markAsMemoized'
 
 const closePositionKeyAtom = atom<bigint>()
 const isCLosePositionModalOpenAtom = atom(get => !!get(closePositionKeyAtom))
@@ -33,18 +35,25 @@ export function useClosePosition() {
   }, [])
 }
 
+const selectPositionsInfo = markAsMemoized((data: PositionsInfoData) => data.positionsInfo)
+
 export default memo(function ClosePositionModal() {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: positionsInfoData = new Map()} = usePositionsInfoData(data => data.positionsInfo)
+  const {data: positionsInfoData = new Map()} = usePositionsInfoData(selectPositionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
   const position = positionKey ? positionsInfoData.get(positionKey) : undefined
   const latestPosition = useLatest(position)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: collateralTokenPrice = 0n} = useTokenPrices(data => {
-    return data.get(position?.collateralTokenAddress ?? '')?.min
-  })
+  const {data: collateralTokenPrice = 0n} = useTokenPrices(
+    useCallback(
+      data => {
+        return data.get(position?.collateralTokenAddress ?? '')?.min
+      },
+      [position],
+    ),
+  )
 
   const isOpen = useAtomValue(isCLosePositionModalOpenAtom)
 

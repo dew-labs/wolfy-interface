@@ -15,9 +15,14 @@ export default function useToken(tradeMode: TradeMode) {
   const [tokenAddress] = useTokenAddress()
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: tokenMinPriceData = 0n} = useTokenPrices(tokenPrices => {
-    return tokenPrices.get(tokenAddress ?? '')?.min
-  })
+  const {data: tokenMinPriceData = 0n} = useTokenPrices(
+    useCallback(
+      tokenPrices => {
+        return tokenPrices.get(tokenAddress ?? '')?.min
+      },
+      [tokenAddress],
+    ),
+  )
 
   const tokenData = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
   const tokenDecimals = tokenData?.decimals ?? 0

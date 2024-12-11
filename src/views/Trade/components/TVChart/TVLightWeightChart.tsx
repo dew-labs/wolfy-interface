@@ -5,11 +5,22 @@ import {
   createChart,
   type CreatePriceLineOptions,
   type IChartApi,
+  type IPriceLine,
   type ISeriesApi,
   LineStyle,
 } from 'lightweight-charts'
-import {memo, useEffect, useMemo, useRef} from 'react'
+import {
+  createContext,
+  memo,
+  type PropsWithChildren,
+  type ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
 import {useLatest} from 'react-use'
+import {debounce} from 'remeda'
 import type {PartialDeep} from 'type-fest'
 
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
@@ -36,38 +47,76 @@ function useChartHistoryData(asset: string, interval: ChartInterval) {
   })
 }
 
-export default memo(function TVLightWeightChart(props: {
+interface ChartContextValue {
+  createPriceLine: ((options: CreatePriceLineOptions) => IPriceLine) | null
+  removePriceLine: ((line: IPriceLine) => void) | null
+}
+
+const ChartContext = createContext<ChartContextValue>({
+  createPriceLine: null,
+  removePriceLine: null,
+})
+
+interface LineProps {
+  options: CreatePriceLineOptions
+}
+
+export const Line = memo(function Line({options}: LineProps) {
+  const {createPriceLine, removePriceLine} = useContext(ChartContext)
+  const lineRef = useRef<IPriceLine | null>(null)
+
+  useEffect(() => {
+    if (!createPriceLine || !removePriceLine) return
+
+    const line = createPriceLine(options)
+    lineRef.current = line
+
+    return () => {
+      if (lineRef.current) {
+        removePriceLine(lineRef.current)
+        lineRef.current = null
+      }
+    }
+  }, [createPriceLine, removePriceLine, options])
+
+  return null
+})
+
+interface TVLightWeightChartProps extends PropsWithChildren {
   asset: string
   textColor: string
   gridColor: string
   interval: ChartInterval
-  lines: CreatePriceLineOptions[]
-}) {
+  children: ReactElement<LineProps> | ReactElement<LineProps>[]
+}
+
+export default memo(function TVLightWeightChart({
+  asset,
+  textColor,
+  gridColor,
+  interval,
+  children,
+}: TVLightWeightChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<IChartApi>(undefined)
-  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'>>(undefined)
+  const chartRef = useRef<IChartApi | null>(null)
+  const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'> | null>(null)
 
-  // NOTE: Unused?
-  // CHART_STYLE.LINE_COLOR
-  // CHART_STYLE.AREA_TOP_COLOR
-  // CHART_STYLE.AREA_BOTTOM_COLOR
-
-  const {data: historicalData} = useChartHistoryData(props.asset, props.interval)
+  const {data: historicalData} = useChartHistoryData(asset, interval)
 
   const chartStyle = useMemo<PartialDeep<ChartOptions>>(
     () => ({
       layout: {
         background: {type: ColorType.Solid, color: CHART_STYLE.BACKGROUND_COLOR},
-        textColor: props.textColor,
+        textColor,
         fontFamily: 'Geist Mono',
       },
       grid: {
         vertLines: {
-          color: props.gridColor,
+          color: gridColor,
           style: LineStyle.Dashed,
         },
         horzLines: {
-          color: props.gridColor,
+          color: gridColor,
           style: LineStyle.Dashed,
         },
       },
@@ -76,11 +125,11 @@ export default memo(function TVLightWeightChart(props: {
       },
       timeScale: {
         borderVisible: false,
-        timeVisible: isIntervalSmallerThan1D(props.interval),
+        timeVisible: isIntervalSmallerThan1D(interval),
         secondsVisible: false,
       },
     }),
-    [props.gridColor, props.textColor, props.interval],
+    [gridColor, textColor, interval],
   )
   const latestChartStyle = useLatest(chartStyle)
 
@@ -105,9 +154,11 @@ export default memo(function TVLightWeightChart(props: {
     })
 
     return () => {
-      chartRef.current = undefined
-      chartMainCandlestickSeries.current = undefined
-      chart.remove()
+      if (chartRef.current) {
+        chartRef.current.remove()
+        chartRef.current = null
+        chartMainCandlestickSeries.current = null
+      }
     }
   }, [])
 
@@ -124,22 +175,6 @@ export default memo(function TVLightWeightChart(props: {
       })
     },
     [historicalData],
-  )
-
-  useEffect(
-    function updatePriceLines() {
-      const series = chartMainCandlestickSeries.current
-      if (!series) return
-
-      const createdLines = props.lines.map(line => series.createPriceLine(line))
-
-      return () => {
-        createdLines.forEach(line => {
-          series.removePriceLine(line)
-        })
-      }
-    },
-    [props.lines],
   )
 
   useEffect(
@@ -160,7 +195,7 @@ export default memo(function TVLightWeightChart(props: {
 
   useEffect(
     function updateRealTimeData() {
-      const wssUrl = getChartWssUrl(props.asset, props.interval)
+      const wssUrl = getChartWssUrl(asset, interval)
       const chartDataWS = new WebSocket(wssUrl)
 
       const eventHandler = (event: MessageEvent<unknown>) => {
@@ -171,7 +206,7 @@ export default memo(function TVLightWeightChart(props: {
         }
 
         const rawData = JSON.parse(event.data)
-        const data = parseChartData(rawData, props.interval)
+        const data = parseChartData(rawData, interval)
 
         if (data) {
           chartMainCandlestickSeries.current.update(data)
@@ -185,21 +220,51 @@ export default memo(function TVLightWeightChart(props: {
         chartDataWS.close()
       }
     },
-    [props.interval, props.asset],
+    [interval, asset],
   )
 
   useEffect(function resizeChartWhenContainerResize() {
-    const handleResize = () => {
-      if (!chartContainerRef.current || !chartRef.current) return
-      chartRef.current.applyOptions({width: chartContainerRef.current.clientWidth})
-    }
+    const handleResize = debounce(
+      () => {
+        if (!chartContainerRef.current || !chartRef.current) return
+        chartRef.current.applyOptions({width: chartContainerRef.current.clientWidth})
+      },
+      {
+        waitMs: 100,
+        maxWaitMs: 200,
+      },
+    )
 
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize.call)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      handleResize.cancel()
+      window.removeEventListener('resize', handleResize.call)
     }
   }, [])
 
-  return <div ref={chartContainerRef} />
+  const contextValue = useMemo<ChartContextValue>(
+    () => ({
+      createPriceLine: options => {
+        if (!chartMainCandlestickSeries.current) {
+          throw new Error('Chart series not initialized')
+        }
+        return chartMainCandlestickSeries.current.createPriceLine(options)
+      },
+      removePriceLine: line => {
+        if (!chartMainCandlestickSeries.current) {
+          throw new Error('Chart series not initialized')
+        }
+        chartMainCandlestickSeries.current.removePriceLine(line)
+      },
+    }),
+    [],
+  )
+
+  return (
+    <ChartContext value={contextValue}>
+      <div ref={chartContainerRef} />
+      {children}
+    </ChartContext>
+  )
 })

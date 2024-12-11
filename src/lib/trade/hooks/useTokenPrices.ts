@@ -1,5 +1,6 @@
 import type {UseQueryResult} from '@tanstack/react-query'
 import {queryOptions, useQuery} from '@tanstack/react-query'
+import type {MemoizedCallback} from 'react'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -12,7 +13,7 @@ export function getTokenPricesQueryKey(chainId: StarknetChainId) {
 
 function createGetTokenPricesQueryOptions<T>(
   chainId: StarknetChainId,
-  selector?: (data: TokenPricesData) => T,
+  selector?: MemoizedCallback<(data: TokenPricesData) => T>,
 ) {
   return queryOptions({
     queryKey: getTokenPricesQueryKey(chainId),
@@ -27,10 +28,10 @@ function createGetTokenPricesQueryOptions<T>(
 
 export default function useTokenPrices(): UseQueryResult<TokenPricesData>
 export default function useTokenPrices<T = TokenPricesData>(
-  selector: (data: TokenPricesData) => T,
+  selector: MemoizedCallback<(data: TokenPricesData) => T>,
 ): UseQueryResult<T>
 export default function useTokenPrices<T = TokenPricesData>(
-  selector?: (data: TokenPricesData) => T,
+  selector?: MemoizedCallback<(data: TokenPricesData) => T>,
 ): UseQueryResult<T | undefined> {
   const [chainId] = useChainId()
 

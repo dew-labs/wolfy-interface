@@ -1,4 +1,5 @@
 import {queryOptions, useQuery, type UseQueryResult} from '@tanstack/react-query'
+import type {MemoizedCallback} from 'react'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
@@ -20,7 +21,7 @@ function createGetMarketTokenBalancesQueryOptions<T = Map<string, bigint>>(
   chainId: StarknetChainId,
   marketTokenAddresses: string[] | undefined,
   accountAddress: string | undefined,
-  selector?: (data: Map<string, bigint>) => T,
+  selector?: MemoizedCallback<(data: Map<string, bigint>) => T>,
 ) {
   return queryOptions({
     queryKey: getMarketTokenBalancesQueryKey(chainId, marketTokenAddresses, accountAddress),
@@ -37,10 +38,10 @@ function createGetMarketTokenBalancesQueryOptions<T = Map<string, bigint>>(
 
 export default function useMarketTokenBalances(): UseQueryResult<Map<string, bigint>>
 export default function useMarketTokenBalances<T = Map<string, bigint>>(
-  selector: (data: Map<string, bigint>) => T,
+  selector: MemoizedCallback<(data: Map<string, bigint>) => T>,
 ): UseQueryResult<T>
 export default function useMarketTokenBalances<T = Map<string, bigint>>(
-  selector?: (data: Map<string, bigint>) => T,
+  selector?: MemoizedCallback<(data: Map<string, bigint>) => T>,
 ): UseQueryResult<T> {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()

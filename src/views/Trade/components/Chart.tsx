@@ -1,25 +1,172 @@
 import {Card} from '@nextui-org/react'
-import {type CreatePriceLineOptions, LineStyle} from 'lightweight-charts'
-import {memo, useCallback, useMemo, useState} from 'react'
+import {LineStyle} from 'lightweight-charts'
+import {memo, useCallback, useState} from 'react'
 import type {Key} from 'react-aria-components'
-import useLatest from 'react-use/lib/useLatest'
 
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useOrders from '@/lib/trade/hooks/useOrders'
+import useOrderInfosData from '@/lib/trade/hooks/useOrderInfosData'
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
-import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import {ChartInterval, isChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import useChartConfig from '@/lib/tvchart/configs/useChartConfigs.ts'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import TVLightWeightChart from '@/views/Trade/components/TVChart/TVLightWeightChart.tsx'
+import TVLightWeightChart, {Line} from '@/views/Trade/components/TVChart/TVLightWeightChart.tsx'
 import TVLightWeightTimeFrame from '@/views/Trade/components/TVChart/TVLightWeightTimeFrame.tsx'
+
+function useOrderKeysOfCurrentToken(tokenAddress: string | undefined) {
+  return useOrderInfosData(
+    useCallback(
+      orders =>
+        orders
+          .values()
+          .filter(isPositionOrder)
+          .filter(order => order.indexToken.address === tokenAddress)
+          .map(order => order.key)
+          .toArray(),
+      [tokenAddress],
+    ),
+  )
+}
+
+function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
+  return usePositionsInfoData(
+    useCallback(
+      positions =>
+        positions.positionsInfoViaStringRepresentation
+          .values()
+          .filter(position => position.marketData.indexTokenAddress === tokenAddress)
+          .map(position => position.key)
+          .toArray(),
+      [tokenAddress],
+    ),
+  )
+}
+
+function OrderLine({orderKey}: {orderKey: string}) {
+  const {data: order} = useOrderInfosData(useCallback(data => data.get(orderKey), [orderKey]))
+  const {data: initialCollateralTokenPrice} = useTokenPrices(
+    useCallback(
+      data => {
+        if (!order || !isPositionOrder(order)) return null
+        return data.get(order.initialCollateralToken.address)
+      },
+      [order],
+    ),
+  )
+
+  if (!order) return null
+  if (!isPositionOrder(order)) return null
+
+  const price = Number(shrinkDecimals(order.triggerPrice, USD_DECIMALS))
+  const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
+    fractionDigits: 2,
+  })
+  const collateralFractionDigits = calculateTokenFractionDigits(
+    initialCollateralTokenPrice?.max ?? 0n,
+  )
+
+  const collateral = formatNumber(
+    shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
+    Format.PLAIN,
+    {
+      exactFractionDigits: true,
+      fractionDigits: collateralFractionDigits,
+    },
+  )
+  const collateralSymbol = order.initialCollateralToken.symbol
+
+  return (
+    <Line
+      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop -- not needed
+      options={{
+        price,
+        color: order.isLong ? '#22c55e' : '#ef4444',
+        lineWidth: 1 as const,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: `OPEN ${order.isLong ? 'LONG' : 'SHORT'} ${size} with ${collateral} ${collateralSymbol}`,
+      }}
+    />
+  )
+}
+
+function PositionLine({positionKey}: {positionKey: bigint}) {
+  const {data: position} = usePositionsInfoData(
+    useCallback(data => data.positionsInfo.get(positionKey), [positionKey]),
+  )
+
+  const {data: collateralTokenPrice} = useTokenPrices(
+    useCallback(
+      data => {
+        if (!position) return null
+        return data.get(position.collateralTokenAddress)
+      },
+      [position],
+    ),
+  )
+
+  if (!position) return null
+
+  const price = Number(shrinkDecimals(position.entryPrice, USD_DECIMALS))
+  const size = formatNumber(shrinkDecimals(position.sizeInUsd, USD_DECIMALS), Format.USD, {
+    fractionDigits: 2,
+  })
+  const collateralFractionDigits = calculateTokenFractionDigits(collateralTokenPrice?.max ?? 0n)
+
+  const collateral = formatNumber(
+    shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
+    Format.PLAIN,
+    {
+      exactFractionDigits: true,
+      fractionDigits: collateralFractionDigits,
+    },
+  )
+
+  const collateralSymbol = position.collateralToken.symbol
+
+  const pnl = formatNumber(shrinkDecimals(position.pnlAfterFees, USD_DECIMALS), Format.USD_SIGNED, {
+    fractionDigits: 2,
+  })
+
+  const isProfit = position.pnlAfterFees >= 0n
+
+  return (
+    <Line
+      // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop -- not needed
+      options={{
+        price,
+        color: position.isLong ? '#22c55e' : '#ef4444',
+        lineWidth: 2 as const,
+        lineStyle: LineStyle.Dashed,
+        axisLabelVisible: true,
+        axisLabelColor: isProfit ? '#22c55e' : '#ef4444',
+        title: `${position.isLong ? 'LONGING' : 'SHORTING'} ${size} with ${collateral} ${collateralSymbol}: ${pnl}`,
+      }}
+    />
+  )
+}
+
+const Lines = memo(function Lines() {
+  const [tokenAddress] = useTokenAddress()
+  // TODO: investigate why the component still re-renders even orderKeysOfCurrentToken and positionKeysOfCurrentToken are not changed
+  const {data: orderKeysOfCurrentToken} = useOrderKeysOfCurrentToken(tokenAddress)
+  const {data: positionKeysOfCurrentToken} = usePositionKeysOfCurrentToken(tokenAddress)
+
+  return (
+    <>
+      {orderKeysOfCurrentToken?.map(orderKey => <OrderLine key={orderKey} orderKey={orderKey} />)}
+      {positionKeysOfCurrentToken?.map(positionKey => (
+        <PositionLine key={positionKey} positionKey={positionKey} />
+      ))}
+    </>
+  )
+})
 
 export default memo(function Chart() {
   const [chainId] = useChainId()
@@ -28,100 +175,6 @@ export default memo(function Chart() {
   const [tokenAddress] = useTokenAddress()
   const tokenSymbol = getTokensMetadata(chainId).get(tokenAddress ?? '')?.symbol
   const asset = tokenSymbol ? MOCK_SYMBOL_MAP[tokenSymbol] : undefined
-  //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPrices = new Map()} = useTokenPrices()
-  const latestTokenPrices = useLatest(tokenPrices)
-
-  // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: ordersOfCurrentToken = []} = useOrders(orders =>
-    orders.filter(isPositionOrder).filter(order => order.indexToken.address === tokenAddress),
-  )
-
-  // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: positionOfCurrentToken = []} = usePositionsInfoData(
-    (positions: PositionsInfoData) => {
-      return Array.from(positions.positionsInfoViaStringRepresentation.values()).filter(
-        position => position.marketData.indexTokenAddress === tokenAddress,
-      )
-    },
-  )
-
-  const lines = useMemo(() => {
-    const lines: CreatePriceLineOptions[] = []
-
-    ordersOfCurrentToken.forEach(order => {
-      const price = Number(shrinkDecimals(order.triggerPrice, USD_DECIMALS))
-      const size = formatNumber(shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS), Format.USD, {
-        fractionDigits: 2,
-      })
-      const collateralFractionDigits = calculateTokenFractionDigits(
-        latestTokenPrices.current.get(order.initialCollateralToken.address)?.max ?? 0n,
-      )
-
-      const collateral = formatNumber(
-        shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
-        Format.PLAIN,
-        {
-          exactFractionDigits: true,
-          fractionDigits: collateralFractionDigits,
-        },
-      )
-      const collateralSymbol = order.initialCollateralToken.symbol
-
-      lines.push({
-        price,
-        color: order.isLong ? '#22c55e' : '#ef4444',
-        lineWidth: 1 as const,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: `OPEN ${order.isLong ? 'LONG' : 'SHORT'} ${size} with ${collateral} ${collateralSymbol}`,
-      })
-    })
-
-    positionOfCurrentToken.forEach(position => {
-      if (!position.entryPrice) return
-      const price = Number(shrinkDecimals(position.entryPrice, USD_DECIMALS))
-      const size = formatNumber(shrinkDecimals(position.sizeInUsd, USD_DECIMALS), Format.USD, {
-        fractionDigits: 2,
-      })
-      const collateralFractionDigits = calculateTokenFractionDigits(
-        latestTokenPrices.current.get(position.collateralTokenAddress)?.max ?? 0n,
-      )
-
-      const collateral = formatNumber(
-        shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
-        Format.PLAIN,
-        {
-          exactFractionDigits: true,
-          fractionDigits: collateralFractionDigits,
-        },
-      )
-
-      const collateralSymbol = position.collateralToken.symbol
-
-      const pnl = formatNumber(
-        shrinkDecimals(position.pnlAfterFees, USD_DECIMALS),
-        Format.USD_SIGNED,
-        {
-          fractionDigits: 2,
-        },
-      )
-
-      const isProfit = position.pnlAfterFees >= 0n
-
-      lines.push({
-        price,
-        color: position.isLong ? '#22c55e' : '#ef4444',
-        lineWidth: 2 as const,
-        lineStyle: LineStyle.Dashed,
-        axisLabelVisible: true,
-        axisLabelColor: isProfit ? '#22c55e' : '#ef4444',
-        title: `${position.isLong ? 'LONGING' : 'SHORTING'} ${size} with ${collateral} ${collateralSymbol}: ${pnl}`,
-      })
-    })
-
-    return lines
-  }, [ordersOfCurrentToken, positionOfCurrentToken])
 
   const handleChartIntervalSelection = useCallback((key: Key) => {
     if (isChartInterval(key)) {
@@ -139,11 +192,12 @@ export default memo(function Chart() {
         {asset && (
           <TVLightWeightChart
             asset={asset}
-            lines={lines}
             textColor={chartConfigs.textColor}
             gridColor={chartConfigs.gridColor}
             interval={chartInterval}
-          />
+          >
+            <Lines />
+          </TVLightWeightChart>
         )}
       </div>
     </Card>

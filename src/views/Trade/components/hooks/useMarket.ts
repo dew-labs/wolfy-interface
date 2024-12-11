@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
@@ -11,7 +11,9 @@ export default function useMarket(
 ) {
   const [marketAddress, setMarketAddress] = useState<string>()
   const latestMarketAddress = useLatest(marketAddress)
-  const {data: marketData} = useMarketsData(data => data.get(marketAddress ?? ''))
+  const {data: marketData} = useMarketsData(
+    useCallback(data => data.get(marketAddress ?? ''), [marketAddress]),
+  )
   const latestMarketData = useLatest(marketData)
 
   const poolName = marketData && getMarketPoolName(marketData)

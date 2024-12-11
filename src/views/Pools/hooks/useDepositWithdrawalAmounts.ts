@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
@@ -59,21 +59,24 @@ export function useDepositWithdrawalAmounts({
 }): DepositWithdrawalAmounts | undefined {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
   const {data: {longTokenPrice, marketTokenPrice, shortTokenPrice} = {}} = useTokenPrices(
-    prices => {
-      const longTokenPrice = prices.get(marketInfo?.longTokenAddress ?? '')
-      const shortTokenPrice = prices.get(marketInfo?.shortTokenAddress ?? '')
-      const marketTokenPrice = calculateMarketPrice(
-        marketInfo,
-        marketToken,
-        longTokenPrice,
-        shortTokenPrice,
-      )
-      return {
-        longTokenPrice,
-        marketTokenPrice,
-        shortTokenPrice,
-      }
-    },
+    useCallback(
+      prices => {
+        const longTokenPrice = prices.get(marketInfo?.longTokenAddress ?? '')
+        const shortTokenPrice = prices.get(marketInfo?.shortTokenAddress ?? '')
+        const marketTokenPrice = calculateMarketPrice(
+          marketInfo,
+          marketToken,
+          longTokenPrice,
+          shortTokenPrice,
+        )
+        return {
+          longTokenPrice,
+          marketTokenPrice,
+          shortTokenPrice,
+        }
+      },
+      [marketInfo, marketToken],
+    ),
   )
   const halfOfLong = longTokenInputState.amount ? longTokenInputState.amount / 2n : undefined
 

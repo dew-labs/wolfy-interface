@@ -8,7 +8,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +
 +const {get} = require('http')
 +const {type} = require('os')
- 
+
  function createRule(description, errorMessage, isViolation) {
    return {
      meta: {
@@ -77,7 +77,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
          },
        ],
      },
- 
+
      create: function (context) {
 -      const { options } = context;
 -      const { nativeAllowList } = options[0] || {};
@@ -147,7 +147,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 -            return;
 +            return
            }
- 
+
 -          var violationFound = false;
 -          findRelevantNodes(context, node.value.expression).forEach(function (
 -            node
@@ -167,7 +167,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +              const property = node.parent.name.property.name
 +              const realSource = sourceMap.get(object)
 +
-+              source = [realSource[0], property]
++              if (realSource) { source = [realSource[0], property] }
 +            } else {
 +              source = sourceMap.get(node.parent.name.name)
 +            }
@@ -200,7 +200,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 -  };
 +  }
  }
- 
+
  function findRelevantNodes(context, node) {
    function _findRelevantNodes(node) {
 -    if (node.type === "Literal") {
@@ -217,7 +217,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +    if (node.type === 'Identifier') {
 +      const sourceCode = context.sourceCode || context.getSourceCode()
 +      const scope = sourceCode.getScope ? sourceCode.getScope(node) : context.getScope()
- 
+
        var variable = scope.variables.find(function (variable) {
 -        return variable.name === node.name;
 -      });
@@ -266,11 +266,11 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +    if (node.type === 'ConditionalExpression') {
 +      return _findRelevantNodes(node.consequent) || _findRelevantNodes(node.alternate)
      }
- 
+
 -    nodes.push(node);
 +    nodes.push(node)
    }
- 
+
 -  var nodes = [];
 -  _findRelevantNodes(node);
 -  return nodes;
@@ -278,7 +278,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +  _findRelevantNodes(node)
 +  return nodes
  }
- 
+
  function checkConstructor(node, className) {
    if (node.callee && node.callee.name === className) {
 -    if (["NewExpression", "CallExpression"].indexOf(node.type) !== -1) {
@@ -288,7 +288,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
      }
    }
  }
- 
+
  function isNativeElement(node) {
 -  if (node.parent.name.type !== "JSXIdentifier") {
 -    return false;
@@ -306,7 +306,7 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +function hashSourceAndImportName(source, importName) {
 +  return source + '%%%' + importName
  }
- 
+
  module.exports = {
    createRule,
    checkConstructor,

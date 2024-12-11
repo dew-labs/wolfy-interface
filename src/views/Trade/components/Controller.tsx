@@ -70,6 +70,7 @@ import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountT
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import markAsMemoized from '@/utils/react/markAsMemoized'
 import createResetableComponent from '@/utils/reset-component/createResettableComponent'
 
 import useAcceptablePriceImpact from './hooks/useAcceptablePriceImpact'
@@ -107,6 +108,10 @@ const SUPPORTED_TRADE_TYPES: TradeType[] = [
 ]
 
 const DEFAULT_AVAILABLE_MARKETS: MarketData[] = []
+
+const selectPositionsInfoViaStringRepresentation = markAsMemoized(
+  (data: PositionsInfoData) => data.positionsInfoViaStringRepresentation,
+)
 
 const Controller = createResetableComponent(({reset}) => {
   const latestReset = useLatest(reset)
@@ -261,23 +266,37 @@ const Controller = createResetableComponent(({reset}) => {
       shortTokenPrice: undefined,
       feeTokenPrice: undefined,
     },
-  } = useTokenPrices(data => {
-    const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
-    invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
+  } = useTokenPrices(
+    useCallback(
+      data => {
+        const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
+        invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
 
-    return {
-      tokenPrice: tokenAddress ? data.get(tokenAddress) : undefined,
-      payTokenPrice: payTokenAddress ? data.get(payTokenAddress) : undefined,
-      collateralTokenPrice: collateralTokenAddress ? data.get(collateralTokenAddress) : undefined,
-      longTokenPrice: marketData?.longTokenAddress
-        ? data.get(marketData.longTokenAddress)
-        : undefined,
-      shortTokenPrice: marketData?.shortTokenAddress
-        ? data.get(marketData.shortTokenAddress)
-        : undefined,
-      feeTokenPrice: data.get(feeTokenAddress),
-    }
-  })
+        return {
+          tokenPrice: tokenAddress ? data.get(tokenAddress) : undefined,
+          payTokenPrice: payTokenAddress ? data.get(payTokenAddress) : undefined,
+          collateralTokenPrice: collateralTokenAddress
+            ? data.get(collateralTokenAddress)
+            : undefined,
+          longTokenPrice: marketData?.longTokenAddress
+            ? data.get(marketData.longTokenAddress)
+            : undefined,
+          shortTokenPrice: marketData?.shortTokenAddress
+            ? data.get(marketData.shortTokenAddress)
+            : undefined,
+          feeTokenPrice: data.get(feeTokenAddress),
+        }
+      },
+      [
+        chainId,
+        collateralTokenAddress,
+        marketData?.longTokenAddress,
+        marketData?.shortTokenAddress,
+        payTokenAddress,
+        tokenAddress,
+      ],
+    ),
+  )
 
   const {data: positionConstants = DEFAULT_POSITION_CONSTANTS} = usePositionsConstants()
 
@@ -444,7 +463,7 @@ const Controller = createResetableComponent(({reset}) => {
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
   const {data: positions = new Map()} = usePositionsInfoData(
-    (data: PositionsInfoData) => data.positionsInfoViaStringRepresentation,
+    selectPositionsInfoViaStringRepresentation,
   )
 
   const position = useMemo(() => {

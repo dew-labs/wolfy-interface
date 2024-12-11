@@ -20,16 +20,27 @@ import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 // import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
+import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
 import max from '@/utils/numbers/bigint/max'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import markAsMemoized from '@/utils/react/markAsMemoized'
 
 import ClosePositionModal, {useClosePosition} from './ClosePositionModal'
 
 const TABLE_CLASS_NAMES = {
   th: '!rounded-none font-serif',
 }
+
+const selectSortedPositions = markAsMemoized((data: PositionsInfoData) => {
+  console.log(data)
+  return Array.from(data.positionsInfo.values()).sort((a, b) => {
+    const timeA = max(a.increasedAtBlock, a.decreasedAtBlock)
+    const timeB = max(b.increasedAtBlock, b.decreasedAtBlock)
+    return Number(timeB - timeA)
+  })
+})
 
 export default memo(function PositionTab() {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
@@ -38,13 +49,8 @@ export default memo(function PositionTab() {
     isLoading,
     isFetching,
     refetch,
-  } = usePositionsInfoData(data =>
-    Array.from(data.positionsInfo.values()).sort((a, b) => {
-      const timeA = max(a.increasedAtBlock, a.decreasedAtBlock)
-      const timeB = max(b.increasedAtBlock, b.decreasedAtBlock)
-      return Number(timeB - timeA)
-    }),
-  )
+  } = usePositionsInfoData(selectSortedPositions)
+
   //TODO: optimize, do not subscribe to entire token prices
   const {data: tokenPricesData = new Map()} = useTokenPrices()
   const setTokenAddress = useSetTokenAddress()
@@ -121,7 +127,7 @@ export default memo(function PositionTab() {
                         disableAnimation
                         variant='light'
                         className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                        onClick={() => {
+                        onPress={() => {
                           setTokenAddress(position.marketData.indexTokenAddress)
                         }}
                       >
@@ -217,7 +223,7 @@ export default memo(function PositionTab() {
                   <TableCell>
                     <Button
                       size='sm'
-                      onClick={() => {
+                      onPress={() => {
                         closePosition(position.key)
                       }}
                     >

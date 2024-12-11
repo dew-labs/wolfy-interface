@@ -30,7 +30,7 @@ export default function usePayToken(
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
   const {data: payTokenMinPriceData = 0n} = useTokenPrices(
-    data => data.get(payTokenAddress ?? '')?.min,
+    useCallback(data => data.get(payTokenAddress ?? '')?.min, [payTokenAddress]),
   )
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined

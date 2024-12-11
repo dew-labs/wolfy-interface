@@ -377,7 +377,7 @@ export default memo(function TradesTab() {
                       disableAnimation
                       variant='light'
                       className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
-                      onClick={() => {
+                      onPress={() => {
                         setTokenAddress(market.indexTokenAddress)
                       }}
                     >

@@ -1,3 +1,4 @@
+import {useCallback} from 'react'
 import invariant from 'tiny-invariant'
 
 import {FEE_TOKEN_ADDRESS, getTokenMetadata} from '@/constants/tokens'
@@ -13,7 +14,9 @@ export default function useFeeToken() {
 
   const feeToken = getTokenMetadata(chainId, feeTokenAddress)
 
-  const {data: feeTokenPrice = DEFAULT_PRICE} = useTokenPrices(data => data.get(feeTokenAddress))
+  const {data: feeTokenPrice = DEFAULT_PRICE} = useTokenPrices(
+    useCallback(data => data.get(feeTokenAddress), [feeTokenAddress]),
+  )
 
   return {
     feeToken,

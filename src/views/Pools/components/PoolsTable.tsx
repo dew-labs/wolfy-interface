@@ -22,12 +22,14 @@ import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import {logError} from '@/utils/logger'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+import markAsMemoized from '@/utils/react/markAsMemoized'
 
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
@@ -64,6 +66,8 @@ const TABLE_CLASS_NAMES = {
   th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
 }
 
+const selectMarketTokenAddresses = markAsMemoized((data: MarketsData) => data.values().toArray())
+
 export default memo(function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>()
@@ -77,7 +81,7 @@ export default memo(function PoolsTable() {
     isLoading: isMarketsDataLoading,
     isFetching: isMarketsDataFetching,
     refetch: refetchMarketsData,
-  } = useMarketsData(data => data.values().toArray())
+  } = useMarketsData(selectMarketTokenAddresses)
   const {
     data: marketTokensData = new Map(),
     isLoading: isMarketTokensDataLoading,
@@ -115,22 +119,27 @@ export default memo(function PoolsTable() {
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(prices => {
-    if (filteredMarkets.length === 0) return new Map() as TokenPricesData
-    const tokenAddresses = new Set()
-    filteredMarkets.forEach(market => {
-      tokenAddresses.add(market.longToken.address)
-      tokenAddresses.add(market.shortToken.address)
-    })
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(
+    useCallback(
+      prices => {
+        if (filteredMarkets.length === 0) return new Map() as TokenPricesData
+        const tokenAddresses = new Set()
+        filteredMarkets.forEach(market => {
+          tokenAddresses.add(market.longToken.address)
+          tokenAddresses.add(market.shortToken.address)
+        })
 
-    prices.forEach((_, key) => {
-      if (!tokenAddresses.has(key)) {
-        prices.delete(key)
-      }
-    })
+        prices.forEach((_, key) => {
+          if (!tokenAddresses.has(key)) {
+            prices.delete(key)
+          }
+        })
 
-    return prices
-  })
+        return prices
+      },
+      [filteredMarkets],
+    ),
+  )
 
   const extendedMarkets = useMemo(() => {
     return filteredMarkets

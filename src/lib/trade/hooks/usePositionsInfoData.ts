@@ -1,4 +1,5 @@
 import type {UseQueryResult} from '@tanstack/react-query'
+import {type MemoizedCallback, useCallback} from 'react'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {PositionsData} from '@/lib/trade/services/fetchPositions'
@@ -13,10 +14,10 @@ import useUiFeeFactor from './useUiFeeFactor'
 
 export default function usePositionsInfoData(): UseQueryResult<PositionsInfoData>
 export default function usePositionsInfoData<T = PositionsInfoData>(
-  selector: (data: PositionsInfoData) => T,
+  selector: MemoizedCallback<(data: PositionsInfoData) => T>,
 ): UseQueryResult<T>
 export default function usePositionsInfoData<T = PositionsInfoData>(
-  selector?: (data: PositionsInfoData) => T,
+  selector?: MemoizedCallback<(data: PositionsInfoData) => T>,
 ) {
   const [chainId] = useChainId()
   const {data: marketsData} = useMarketsData()
@@ -26,22 +27,35 @@ export default function usePositionsInfoData<T = PositionsInfoData>(
   //TODO: optimize, do not subscribe to entire token prices
   const {data: tokenPricesData} = useTokenPrices()
 
-  return usePositionsData((positionsData: PositionsData) => {
-    if (!marketsData || !tokenPricesData || !positionConstants || !uiFeeFactor || !referralInfo)
-      return undefined
+  return usePositionsData(
+    useCallback(
+      (positionsData: PositionsData) => {
+        if (!marketsData || !tokenPricesData || !positionConstants || uiFeeFactor === undefined)
+          return undefined
 
-    const data = getPositionsInfo(
-      chainId,
-      marketsData,
-      tokenPricesData,
-      positionsData,
-      positionConstants,
-      uiFeeFactor,
-      true,
-      referralInfo,
-    )
+        const data = getPositionsInfo(
+          chainId,
+          marketsData,
+          tokenPricesData,
+          positionsData,
+          positionConstants,
+          uiFeeFactor,
+          true,
+          referralInfo,
+        )
 
-    if (selector) return selector(data)
-    return data
-  })
+        if (selector) return selector(data)
+        return data
+      },
+      [
+        chainId,
+        marketsData,
+        positionConstants,
+        referralInfo,
+        tokenPricesData,
+        uiFeeFactor,
+        selector,
+      ],
+    ),
+  )
 }

@@ -1,5 +1,6 @@
 import type {UseQueryResult} from '@tanstack/react-query'
 import {queryOptions, useQuery} from '@tanstack/react-query'
+import type {MemoizedCallback} from 'react'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -21,7 +22,7 @@ export function getMarketTokensDataQueryKey(
 function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
   chainId: StarknetChainId,
   marketTokenAddresses: string[] | undefined,
-  selector?: (data: MarketTokensData) => T,
+  selector?: MemoizedCallback<(data: MarketTokensData) => T>,
 ) {
   return queryOptions({
     queryKey: getMarketTokensDataQueryKey(chainId, marketTokenAddresses),
@@ -39,10 +40,10 @@ function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
 
 export default function useMarketTokensData(): UseQueryResult<MarketTokensData>
 export default function useMarketTokensData<T = MarketTokensData>(
-  selector: (data: MarketTokensData) => T,
+  selector: MemoizedCallback<(data: MarketTokensData) => T>,
 ): UseQueryResult<T>
 export default function useMarketTokensData<T = MarketTokensData>(
-  selector?: (data: MarketTokensData) => T,
+  selector?: MemoizedCallback<(data: MarketTokensData) => T>,
 ): UseQueryResult<T> {
   const [chainId] = useChainId()
   const {data: marketTokenAddresses} = useMarketTokenAddresses()

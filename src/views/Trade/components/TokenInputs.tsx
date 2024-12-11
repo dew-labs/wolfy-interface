@@ -94,22 +94,44 @@ export default memo(function TokenInputs({
   const latestTokensMetadata = useLatest(tokensMetadata)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: payTokenBalance = 0n} = useTokenBalances(data => {
-    return data.get(payTokenAddress ?? '')
-  })
+  const {data: payTokenBalance = 0n} = useTokenBalances(
+    useCallback(
+      data => {
+        return data.get(payTokenAddress ?? '')
+      },
+      [payTokenAddress],
+    ),
+  )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: currentMarketData} = useMarketsData(data => {
-    return data.get(marketAddress ?? '')
-  })
+  const {data: currentMarketData} = useMarketsData(
+    useCallback(
+      data => {
+        return data.get(marketAddress ?? '')
+      },
+      [marketAddress],
+    ),
+  )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: realTokenPrice} = useTokenPrices(data => {
-    return data.get(currentMarketData?.indexToken.address ?? '')
-  })
-  const {data: payTokenPrice} = useTokenPrices(data => {
-    return data.get(payTokenAddress ?? '')
-  })
+  const {data: realTokenPrice} = useTokenPrices(
+    useCallback(
+      data => {
+        return data.get(currentMarketData?.indexToken.address ?? '')
+      },
+      [currentMarketData],
+    ),
+  )
+
+  const {data: payTokenPrice} = useTokenPrices(
+    useCallback(
+      data => {
+        return data.get(payTokenAddress ?? '')
+      },
+      [payTokenAddress],
+    ),
+  )
+
   const derivedTokenPrice =
     tradeMode === TradeMode.Limit ? {min: tokenPrice ?? 0n, max: tokenPrice ?? 0n} : realTokenPrice
   const derivedPayTokenPrice =
