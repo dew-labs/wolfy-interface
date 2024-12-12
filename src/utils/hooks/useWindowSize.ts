@@ -24,7 +24,7 @@
 //   })
 // }
 
-import {useEffect, useState} from 'react'
+import {useLayoutEffect, useState} from 'react'
 
 import useClientValue from './useClientValue'
 
@@ -37,7 +37,7 @@ export default function useWindowSize() {
   )
   const [windowSize, setWindowSize] = useState(sizes)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleWindowResize = () => {
       setWindowSize([window.innerWidth, window.innerHeight])
     }

@@ -151,23 +151,26 @@ function PositionLine({positionKey}: {positionKey: bigint}) {
   )
 }
 
-const Lines = memo(function Lines() {
+const OrderLines = memo(function Lines() {
   const [tokenAddress] = useTokenAddress()
-  // TODO: investigate why the component still re-renders even orderKeysOfCurrentToken and positionKeysOfCurrentToken are not changed
+  // TODO: investigate why the component still re-renders even if orderKeysOfCurrentToken is not changed
   const {data: orderKeysOfCurrentToken} = useOrderKeysOfCurrentToken(tokenAddress)
-  const {data: positionKeysOfCurrentToken} = usePositionKeysOfCurrentToken(tokenAddress)
 
   // console.log('orderKeysOfCurrentToken', orderKeysOfCurrentToken)
+
+  return orderKeysOfCurrentToken?.map(orderKey => <OrderLine key={orderKey} orderKey={orderKey} />)
+})
+
+const PositionLines = memo(function Lines() {
+  const [tokenAddress] = useTokenAddress()
+  // TODO: investigate why the component still re-renders even if positionKeysOfCurrentToken is not changed
+  const {data: positionKeysOfCurrentToken} = usePositionKeysOfCurrentToken(tokenAddress)
+
   // console.log('positionKeysOfCurrentToken', positionKeysOfCurrentToken)
 
-  return (
-    <>
-      {orderKeysOfCurrentToken?.map(orderKey => <OrderLine key={orderKey} orderKey={orderKey} />)}
-      {positionKeysOfCurrentToken?.map(positionKey => (
-        <PositionLine key={positionKey} positionKey={positionKey} />
-      ))}
-    </>
-  )
+  return positionKeysOfCurrentToken?.map(positionKey => (
+    <PositionLine key={positionKey} positionKey={positionKey} />
+  ))
 })
 
 export default memo(function Chart() {
@@ -198,7 +201,8 @@ export default memo(function Chart() {
             gridColor={chartConfigs.gridColor}
             interval={chartInterval}
           >
-            <Lines />
+            <OrderLines />
+            <PositionLines />
           </TVLightWeightChart>
         )}
       </div>

@@ -1,4 +1,4 @@
-import {memo, useEffect} from 'react'
+import {memo, useLayoutEffect} from 'react'
 
 import {logError} from '@/utils/logger'
 
@@ -8,7 +8,7 @@ import {useCurrentTheme} from './useCurrentTheme'
 export default memo(function ThemeSubscriber() {
   const [currentTheme] = useCurrentTheme()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     try {
       if (currentTheme === Theme.Dark) {
         document.documentElement.classList.add('dark')

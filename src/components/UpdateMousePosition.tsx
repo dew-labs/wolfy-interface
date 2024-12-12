@@ -1,7 +1,7 @@
-import {memo, useEffect} from 'react'
+import {memo, useLayoutEffect} from 'react'
 
 export default memo(function UpdateMousePosition() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement
 
     const eventListener = (e: MouseEvent) => {
@@ -15,5 +15,6 @@ export default memo(function UpdateMousePosition() {
       root.removeEventListener('mousemove', eventListener)
     }
   }, [])
+
   return null
 })

@@ -16,6 +16,7 @@ import {
   type ReactElement,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react'
@@ -129,7 +130,7 @@ export default memo(function TVLightWeightChart({
   )
   const latestChartStyle = useLatest(chartStyle)
 
-  useEffect(function initChart() {
+  useLayoutEffect(function initChart() {
     const container = chartContainerRef.current
     if (!container) return
 
@@ -158,7 +159,7 @@ export default memo(function TVLightWeightChart({
     }
   }, [])
 
-  useEffect(
+  useLayoutEffect(
     function updateChartData() {
       if (!historicalData) return
       if (!chartMainCandlestickSeries.current) return
@@ -173,14 +174,14 @@ export default memo(function TVLightWeightChart({
     [historicalData],
   )
 
-  useEffect(
+  useLayoutEffect(
     function applyNewChartStyle() {
       chartRef.current?.applyOptions(chartStyle)
     },
     [chartStyle],
   )
 
-  useEffect(function updatePriceFormatter() {
+  useLayoutEffect(function updatePriceFormatter() {
     if (!chartRef.current) return
     chartRef.current.applyOptions({
       localization: {
@@ -219,7 +220,7 @@ export default memo(function TVLightWeightChart({
     [interval, asset],
   )
 
-  useEffect(function resizeChartWhenContainerResize() {
+  useLayoutEffect(function resizeChartWhenContainerResize() {
     const handleResize = debounce(
       () => {
         if (!chartContainerRef.current || !chartRef.current) return

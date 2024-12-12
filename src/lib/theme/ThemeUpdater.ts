@@ -1,4 +1,4 @@
-import {memo, useEffect} from 'react'
+import {memo, useLayoutEffect} from 'react'
 
 import getPreferColorScheme from './getPreferColorScheme'
 import {Theme} from './theme'
@@ -12,7 +12,7 @@ export default memo(function ThemeUpdater() {
 
   const setCurrentTheme = useSetCurrentTheme()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (theme !== Theme.System) {
       setCurrentTheme(theme)
       return
