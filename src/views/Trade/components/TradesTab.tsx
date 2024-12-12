@@ -121,6 +121,7 @@ const LIST_BOX_PROPS = {
       'data-[focus-visible=true]:ring-default-500',
     ],
   },
+  isVirtualized: false,
 }
 
 const POPOVER_PROPS = {
@@ -300,7 +301,6 @@ export default memo(function TradesTab() {
               popoverProps={POPOVER_PROPS}
               scrollShadowProps={SCROLL_SHADOW_PROPS}
               items={Array.from(Object.entries(marketOptions))}
-              isLoading={isLoading}
             >
               {([category, markets]) => (
                 <SelectSection
@@ -330,7 +330,7 @@ export default memo(function TradesTab() {
         <TableBody
           items={tradeHistoryItems}
           emptyContent={'No trade.'}
-          isLoading={isFetching}
+          isLoading={isLoading}
           loadingContent={<Spinner className='mt-4' />}
         >
           {item => {
