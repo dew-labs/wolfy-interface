@@ -11,6 +11,7 @@ interface PoolSelectDropdownProps {
   handlePoolChange: (market: Key) => void
 }
 
+// TODO: provide more information about the pool
 export default memo(function PoolSelectDropdown({
   availableMarkets,
   poolName,

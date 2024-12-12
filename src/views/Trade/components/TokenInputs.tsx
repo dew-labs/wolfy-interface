@@ -381,6 +381,7 @@ export default memo(function TokenInputs({
                 Balance: ~{payTokenBalanceShrinked}
               </button>
             </Tooltip>
+            {/* TODO: use drawer instead of select, provide more information about the token */}
             <Select
               aria-label='Select pay asset'
               className='max-w-xs'
@@ -443,14 +444,12 @@ export default memo(function TokenInputs({
           )
         }
         endContent={
-          <div className='pointer-events-none flex h-full min-w-max items-center justify-center'>
+          <div className='pointer-events-none flex h-full min-w-max items-center justify-center gap-2'>
             {tokenInputMode === InputMode.Usd && (
-              <span className='mr-1 whitespace-nowrap text-lg text-default-400'>in</span>
+              <span className='whitespace-nowrap text-lg text-default-400'>in</span>
             )}
             <img src={tokenData?.imageUrl} alt='' className='h-6 w-6' />
-            <span className='whitespace-nowrap text-lg text-default-400'>
-              &nbsp;{tokenData?.symbol}
-            </span>
+            <span className='whitespace-nowrap text-lg text-default-400'>{tokenData?.symbol}</span>
           </div>
         }
       />

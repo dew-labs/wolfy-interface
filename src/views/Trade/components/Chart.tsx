@@ -25,8 +25,7 @@ function useOrderKeysOfCurrentToken(tokenAddress: string | undefined) {
       orders =>
         orders
           .values()
-          .filter(isPositionOrder)
-          .filter(order => order.indexToken.address === tokenAddress)
+          .filter(order => isPositionOrder(order) && order.indexToken.address === tokenAddress)
           .map(order => order.key)
           .toArray(),
       [tokenAddress],
@@ -157,6 +156,9 @@ const Lines = memo(function Lines() {
   // TODO: investigate why the component still re-renders even orderKeysOfCurrentToken and positionKeysOfCurrentToken are not changed
   const {data: orderKeysOfCurrentToken} = useOrderKeysOfCurrentToken(tokenAddress)
   const {data: positionKeysOfCurrentToken} = usePositionKeysOfCurrentToken(tokenAddress)
+
+  // console.log('orderKeysOfCurrentToken', orderKeysOfCurrentToken)
+  // console.log('positionKeysOfCurrentToken', positionKeysOfCurrentToken)
 
   return (
     <>

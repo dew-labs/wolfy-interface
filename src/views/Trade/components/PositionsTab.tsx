@@ -34,7 +34,6 @@ const TABLE_CLASS_NAMES = {
 }
 
 const selectSortedPositions = markAsMemoized((data: PositionsInfoData) => {
-  console.log(data)
   return Array.from(data.positionsInfo.values()).sort((a, b) => {
     const timeA = max(a.increasedAtBlock, a.decreasedAtBlock)
     const timeB = max(b.increasedAtBlock, b.decreasedAtBlock)

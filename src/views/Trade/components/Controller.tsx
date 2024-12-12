@@ -962,7 +962,7 @@ const Controller = createResetableComponent(({reset}) => {
           />
           <div className='mt-2 flex w-full justify-between'>
             <div className='flex items-center'>Collateral in</div>
-            <Dropdown backdrop='blur'>
+            <Dropdown backdrop='opaque'>
               <DropdownTrigger>
                 <Button variant='flat'>{collateralTokenData?.symbol}</Button>
               </DropdownTrigger>

@@ -21,6 +21,7 @@ import {
 } from 'react'
 import {useLatest} from 'react-use'
 import {debounce} from 'remeda'
+import invariant from 'tiny-invariant'
 import type {PartialDeep} from 'type-fest'
 
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
@@ -63,19 +64,14 @@ interface LineProps {
 
 export const Line = memo(function Line({options}: LineProps) {
   const {createPriceLine, removePriceLine} = useContext(ChartContext)
-  const lineRef = useRef<IPriceLine | null>(null)
 
   useEffect(() => {
     if (!createPriceLine || !removePriceLine) return
 
     const line = createPriceLine(options)
-    lineRef.current = line
 
     return () => {
-      if (lineRef.current) {
-        removePriceLine(lineRef.current)
-        lineRef.current = null
-      }
+      removePriceLine(line)
     }
   }, [createPriceLine, removePriceLine, options])
 
@@ -246,16 +242,11 @@ export default memo(function TVLightWeightChart({
   const contextValue = useMemo<ChartContextValue>(
     () => ({
       createPriceLine: options => {
-        if (!chartMainCandlestickSeries.current) {
-          throw new Error('Chart series not initialized')
-        }
+        invariant(chartMainCandlestickSeries.current, 'Chart series not initialized')
         return chartMainCandlestickSeries.current.createPriceLine(options)
       },
       removePriceLine: line => {
-        if (!chartMainCandlestickSeries.current) {
-          throw new Error('Chart series not initialized')
-        }
-        chartMainCandlestickSeries.current.removePriceLine(line)
+        chartMainCandlestickSeries.current?.removePriceLine(line)
       },
     }),
     [],

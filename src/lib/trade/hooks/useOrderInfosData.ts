@@ -22,8 +22,10 @@ export default function useOrdersInfosData<T = OrderInfosData>(
   return useOrdersData(
     useCallback(
       ordersData => {
-        if (!marketsData || !tokenPricesData) return new Map()
-        const ordersInfo = getOrdersInfo(chainId, marketsData, ordersData, tokenPricesData)
+        const ordersInfo =
+          marketsData && tokenPricesData
+            ? getOrdersInfo(chainId, marketsData, ordersData, tokenPricesData)
+            : (new Map() as OrderInfosData)
         if (selector) return selector(ordersInfo)
         return ordersInfo
       },
