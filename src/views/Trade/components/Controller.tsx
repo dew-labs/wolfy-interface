@@ -964,14 +964,26 @@ const Controller = createResetableComponent(({reset}) => {
             <div className='flex items-center'>Collateral in</div>
             <Dropdown backdrop='opaque'>
               <DropdownTrigger>
-                <Button variant='flat'>{collateralTokenData?.symbol}</Button>
+                <Button variant='flat' className='flex items-center gap-2'>
+                  {collateralTokenData?.imageUrl && (
+                    <img src={collateralTokenData.imageUrl} alt='' className='h-6 w-6' />
+                  )}
+                  {collateralTokenData?.symbol}
+                </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label='Change collateral' onAction={handleCollateralChange}>
-                {availableCollateralTokenAddresses.map(tokenAddress => (
-                  <DropdownItem key={tokenAddress}>
-                    {tokensMetadata.get(tokenAddress)?.symbol}
-                  </DropdownItem>
-                ))}
+                {availableCollateralTokenAddresses.map(tokenAddress => {
+                  const token = tokensMetadata.get(tokenAddress)
+
+                  return (
+                    <DropdownItem key={tokenAddress}>
+                      <div className='flex items-center gap-2'>
+                        <img src={token?.imageUrl} alt='' className='h-6 w-6' />
+                        {token?.symbol}
+                      </div>
+                    </DropdownItem>
+                  )
+                })}
               </DropdownMenu>
             </Dropdown>
           </div>
