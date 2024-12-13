@@ -144,6 +144,14 @@ export default async function fetchTradeHistories(
       throw new Error('Invalid trade data received from API')
     }
 
+    response.data.data.sort((a, b) => {
+      const result = b.createdAt - a.createdAt
+      if (result === 0) {
+        return b.action - a.action
+      }
+      return result
+    })
+
     return response.data
   } catch (error) {
     console.error('Error fetching trade histories:', error)

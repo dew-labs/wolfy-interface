@@ -9,7 +9,6 @@
     "planbcoding.vscode-react-refactor",
     "stkb.rewrap",
     "oouo-diogo-perdigao.docthis",
-    "wmaurer.vscode-jumpy",
     "sburg.vscode-javascript-booster",
     "yoavbls.pretty-ts-errors",
     "nhoizey.gremlins",
@@ -41,6 +40,7 @@
     "formulahendry.auto-close-tag",
     "christian-kohler.path-intellisense",
     "formulahendry.auto-rename-tag",
-    "dbaeumer.vscode-eslint"
+    "dbaeumer.vscode-eslint",
+    "davidlgoldberg.jumpy2"
   ]
 }
