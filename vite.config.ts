@@ -10,7 +10,7 @@ import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import {TanStackRouterVite} from '@tanstack/router-vite-plugin'
 import UnheadVite from '@unhead/addons/vite'
-import legacy from '@vitejs/plugin-legacy'
+// import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
 // import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
@@ -272,10 +272,10 @@ export default defineConfig(({mode}) => {
     FontaineTransform.vite(fontaineOptions),
     // NOTE: enable this if you need support for legacy browsers
     // Legacy plugin need extra setup for CSP (Content Security Policy)
-    legacy({
-      // `terser` package must be available in the dependencies
-      targets: ['defaults', 'not IE 11'],
-    }),
+    // legacy({
+    //   // `terser` package must be available in the dependencies
+    //   targets: ['defaults', 'not IE 11'],
+    // }),
   ]
 
   // Put the Sentry vite plugin after all other plugins
@@ -325,6 +325,18 @@ export default defineConfig(({mode}) => {
           manualChunks: {
             sentry: ['@sentry/react'],
           },
+        },
+      },
+      target: 'esnext',
+    },
+    optimizeDeps: {
+      esbuildOptions: {
+        target: 'esnext',
+        define: {
+          global: 'globalThis',
+        },
+        supported: {
+          bigint: true,
         },
       },
     },
