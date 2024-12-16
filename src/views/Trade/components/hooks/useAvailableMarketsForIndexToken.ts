@@ -8,10 +8,9 @@ export default function useAvailableMarketsForIndexToken(indexTokenAddress: stri
       data => {
         if (!indexTokenAddress) return []
 
-        return data
-          .values()
-          .toArray()
-          .filter(market => market.indexTokenAddress === indexTokenAddress)
+        return Array.from(data.values()).filter(
+          market => market.indexTokenAddress === indexTokenAddress,
+        )
       },
       [indexTokenAddress],
     ),

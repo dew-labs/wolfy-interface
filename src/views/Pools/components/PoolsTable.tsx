@@ -66,7 +66,7 @@ const TABLE_CLASS_NAMES = {
   th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
 }
 
-const selectMarketTokenAddresses = markAsMemoized((data: MarketsData) => data.values().toArray())
+const selectMarketTokenAddresses = markAsMemoized((data: MarketsData) => Array.from(data.values()))
 
 export default memo(function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')

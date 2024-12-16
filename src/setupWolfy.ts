@@ -34,6 +34,7 @@ function registerHttpProviders() {
       'https://starknet-mainnet.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
       'https://starknet-mainnet.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
+      'https://g.w.lavanet.xyz:443/gateway/strk/rpc-http/2ca1d8a490566df47090a33ec1238e50',
       'https://api.zan.top/node/v1/starknet/mainnet/ad0e71cf58b14af0838cf9a75a531a0e',
       'https://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
       'https://starknet.w3node.com/4e6ef792fb835d49ba525d0dc7af601a1654b70a5975817933dff40d31307766/api',
@@ -67,6 +68,7 @@ function registerHttpProviders() {
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/Snq-IYMCQSA2MqkyN85BljqG6-8SpM0z',
       'https://rpc.nethermind.io/sepolia-juno/?apikey=YUVMGlmfoAEUCrf9vRERnyb7YeCNFE5sA8Awf0htjD2RyKS7',
       // -------------------------------------------------------------------------
+      'https://g.w.lavanet.xyz:443/gateway/strks/rpc-http/2ca1d8a490566df47090a33ec1238e50',
       'https://api-starknet-sepolia.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952',
       // 'https://lb.drpc.org/ogrpc?network=starknet-sepolia&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-xREXsAaaQDXnEY1ZQmOqhcBjnQbbvza',

@@ -77,18 +77,18 @@ const actionOptions = {
     {label: 'Failed Limit Swap', value: TradeHistoryAction.FailedLimitSwap}, //30
     {label: 'Cancel Limit Swap', value: TradeHistoryAction.CancelLimitSwap}, //31
   ],
-  'Deposits': [
-    {label: 'Request Deposit', value: TradeHistoryAction.RequestDeposit}, //32
-    {label: 'Deposit', value: TradeHistoryAction.Deposit}, //33
-    {label: 'Failed Deposit', value: TradeHistoryAction.FailedDeposit}, //34
-    {label: 'Cancel Deposit', value: TradeHistoryAction.CancelDeposit}, //35
-  ],
-  'Withdraws': [
-    {label: 'Request Withdraw', value: TradeHistoryAction.RequestWithdraw}, //36
-    {label: 'Withdraw', value: TradeHistoryAction.Withdraw}, //37
-    {label: 'Failed Withdraw', value: TradeHistoryAction.FailedWithdraw}, //38
-    {label: 'Cancel Withdraw', value: TradeHistoryAction.CancelWithdraw}, //39
-  ],
+  // 'Deposits': [
+  //   {label: 'Request Deposit', value: TradeHistoryAction.RequestDeposit}, //32
+  //   {label: 'Deposit', value: TradeHistoryAction.Deposit}, //33
+  //   {label: 'Failed Deposit', value: TradeHistoryAction.FailedDeposit}, //34
+  //   {label: 'Cancel Deposit', value: TradeHistoryAction.CancelDeposit}, //35
+  // ],
+  // 'Withdraws': [
+  //   {label: 'Request Withdraw', value: TradeHistoryAction.RequestWithdraw}, //36
+  //   {label: 'Withdraw', value: TradeHistoryAction.Withdraw}, //37
+  //   {label: 'Failed Withdraw', value: TradeHistoryAction.FailedWithdraw}, //38
+  //   {label: 'Cancel Withdraw', value: TradeHistoryAction.CancelWithdraw}, //39
+  // ],
   'Liquidations': [{label: 'Liquidation', value: TradeHistoryAction.Liquidation}], //40
   'Position': [
     {label: 'Position Increase', value: TradeHistoryAction.PositionIncrease}, //41
@@ -167,14 +167,11 @@ export default memo(function TradesTab() {
   const setTokenAddress = useSetTokenAddress()
 
   const markets = useMemo(() => {
-    return marketsData
-      .values()
-      .map(market => ({
-        label: market.name,
-        value: market.marketTokenAddress,
-        indexTokenAddress: market.indexTokenAddress,
-      }))
-      .toArray()
+    return Array.from(marketsData.values()).map(market => ({
+      label: market.name,
+      value: market.marketTokenAddress,
+      indexTokenAddress: market.indexTokenAddress,
+    }))
   }, [marketsData])
 
   const marketOptions = useMemo(() => {

@@ -23,11 +23,9 @@ function useOrderKeysOfCurrentToken(tokenAddress: string | undefined) {
   return useOrderInfosData(
     useCallback(
       orders =>
-        orders
-          .values()
+        Array.from(orders.values())
           .filter(order => isPositionOrder(order) && order.indexToken.address === tokenAddress)
-          .map(order => order.key)
-          .toArray(),
+          .map(order => order.key),
       [tokenAddress],
     ),
   )
@@ -37,11 +35,9 @@ function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
   return usePositionsInfoData(
     useCallback(
       positions =>
-        positions.positionsInfoViaStringRepresentation
-          .values()
+        Array.from(positions.positionsInfoViaStringRepresentation.values())
           .filter(position => position.marketData.indexTokenAddress === tokenAddress)
-          .map(position => position.key)
-          .toArray(),
+          .map(position => position.key),
       [tokenAddress],
     ),
   )
