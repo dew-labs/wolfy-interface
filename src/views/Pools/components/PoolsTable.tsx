@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import type {SortDescriptor} from '@react-types/shared'
+import {create} from 'mutative'
 import * as React from 'react'
 import {memo, useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
@@ -123,19 +124,19 @@ export default memo(function PoolsTable() {
     useCallback(
       prices => {
         if (filteredMarkets.length === 0) return new Map() as TokenPricesData
-        const tokenAddresses = new Set()
+        const tokenAddresses = new Set<string>()
         filteredMarkets.forEach(market => {
           tokenAddresses.add(market.longToken.address)
           tokenAddresses.add(market.shortToken.address)
         })
 
-        prices.forEach((_, key) => {
-          if (!tokenAddresses.has(key)) {
-            prices.delete(key)
-          }
+        return create(prices, draft => {
+          draft.forEach((_, key) => {
+            if (!tokenAddresses.has(key)) {
+              draft.delete(key)
+            }
+          })
         })
-
-        return prices
       },
       [filteredMarkets],
     ),

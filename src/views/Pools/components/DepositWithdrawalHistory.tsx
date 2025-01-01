@@ -15,6 +15,8 @@ import {
   TableRow,
 } from '@nextui-org/react'
 import {t} from 'i18next'
+import {create} from 'mutative'
+import type * as React from 'react'
 import {memo, useCallback, useMemo, useState} from 'react'
 
 import useDepositWithdrawalHistory from '@/lib/trade/hooks/useDepositWithdrawalHistory'
@@ -139,13 +141,13 @@ export default memo(function DepositWithdrawalHistory() {
       prices => {
         if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData
 
-        prices.forEach((_, key) => {
-          if (!shortlistedTokenAddresses.has(key)) {
-            prices.delete(key)
-          }
+        return create(prices, draft => {
+          draft.forEach((_, key) => {
+            if (!shortlistedTokenAddresses.has(key)) {
+              draft.delete(key)
+            }
+          })
         })
-
-        return prices
       },
       [shortlistedTokenAddresses],
     ),
@@ -246,10 +248,10 @@ export default memo(function DepositWithdrawalHistory() {
               const market = marketsData.get(item.market)
               const marketTokenData = marketTokensData.get(item.market)
               // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
-              if (!market || !marketTokenData) return <></>
+              if (!market) return <></>
 
               const marketTokenAmount = item.marketTokenAmount
-                ? shrinkDecimals(item.marketTokenAmount, marketTokenData.decimals)
+                ? shrinkDecimals(item.marketTokenAmount, marketTokenData?.decimals ?? 0)
                 : '0'
 
               const marketTokenPrice = shortlistedTokenPrices.get(market.marketTokenAddress)
