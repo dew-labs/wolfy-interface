@@ -1,0 +1,350 @@
+import {Icon} from '@iconify/react'
+import {
+  Button,
+  Pagination,
+  Select,
+  SelectItem,
+  SelectSection,
+  type SharedSelection,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from '@nextui-org/react'
+import {t} from 'i18next'
+import {memo, useCallback, useMemo, useState} from 'react'
+
+import useDepositWithdrawalHistory from '@/lib/trade/hooks/useDepositWithdrawalHistory'
+import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
+import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
+import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
+import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
+import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import formatNumber, {Format} from '@/utils/numbers/formatNumber'
+
+const actionOptions = {
+  Deposits: [
+    {label: 'Request Deposit', value: TradeHistoryAction.RequestDeposit},
+    {label: 'Deposit', value: TradeHistoryAction.Deposit},
+    {label: 'Failed Deposit', value: TradeHistoryAction.FailedDeposit},
+    {label: 'Cancel Deposit', value: TradeHistoryAction.CancelDeposit},
+  ],
+  Withdrawals: [
+    {label: 'Request Withdraw', value: TradeHistoryAction.RequestWithdraw},
+    {label: 'Withdraw', value: TradeHistoryAction.Withdraw},
+    {label: 'Failed Withdraw', value: TradeHistoryAction.FailedWithdraw},
+    {label: 'Cancel Withdraw', value: TradeHistoryAction.CancelWithdraw},
+  ],
+} as const
+
+const SELECT_SECTION_CLASS_NAMES = {
+  heading: 'flex w-full sticky top-1 z-20 py-1.5 px-2 bg-default-100 shadow-small rounded-small',
+  base: 'last:mb-0',
+}
+
+const SELECT_CLASS_NAMES = {
+  base: 'w-max -mx-[0.6875rem] min-w-[100px]',
+  mainWrapper: 'w-full',
+  value: 'pr-6 truncate-none text-xs',
+  label: 'text-xs',
+}
+
+const LIST_BOX_PROPS = {
+  itemClasses: {
+    base: [
+      'text-default-500',
+      'transition-opacity',
+      'data-[hover=true]:text-foreground',
+      'dark:data-[hover=true]:bg-default-50',
+      'data-[pressed=true]:opacity-70',
+      'data-[hover=true]:bg-default-200',
+      'data-[selectable=true]:focus:bg-default-100',
+      'data-[focus-visible=true]:ring-default-500',
+    ],
+  },
+  isVirtualized: false,
+}
+
+const POPOVER_PROPS = {
+  offset: 10,
+  classNames: {
+    base: 'rounded-large',
+    content: 'p-1 bg-background min-w-max',
+  },
+}
+
+const SCROLL_SHADOW_PROPS = {
+  isEnabled: false,
+}
+
+const formatLocaleDateTime = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString()
+}
+
+const getActionLabel = (value: TradeHistoryAction): string => {
+  for (const actions of Object.values(actionOptions)) {
+    for (const action of actions) {
+      if (action.value === value) {
+        return action.label
+      }
+    }
+  }
+  return 'Unknown Action'
+}
+
+export default memo(function DepositWithdrawalHistory() {
+  const {data: marketsData = new Map()} = useMarketsData()
+  const {data: marketTokensData = new Map()} = useMarketTokensData()
+
+  const markets = useMemo(() => {
+    return Array.from(marketsData.values()).map(market => ({
+      label: market.name,
+      value: market.marketTokenAddress,
+    }))
+  }, [marketsData])
+
+  const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
+  const [currentPage, setCurrentPage] = useState<number>(1)
+
+  // GET DEPOSIT/WITHDRAWAL HISTORY
+  const {
+    data: history,
+    refetch,
+    isLoading,
+    isFetching,
+  } = useDepositWithdrawalHistory(selectedActions, selectedMarkets, currentPage, 10)
+  const totalPages = history?.totalPages ?? 0
+  const historyItems = useMemo(() => history?.data ?? [], [history])
+
+  const shortlistedTokenAddresses = useMemo(() => {
+    return new Set(
+      historyItems.flatMap(item => {
+        const market = marketsData.get(item.market)
+        if (!market) return [item.market]
+        return [item.market, market.longToken.address, market.shortToken.address]
+      }),
+    )
+  }, [historyItems, marketsData])
+
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(
+    useCallback(
+      prices => {
+        if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData
+
+        prices.forEach((_, key) => {
+          if (!shortlistedTokenAddresses.has(key)) {
+            prices.delete(key)
+          }
+        })
+
+        return prices
+      },
+      [shortlistedTokenAddresses],
+    ),
+  )
+
+  const refetchHistory = useCallback(() => {
+    void refetch()
+  }, [refetch])
+
+  // HANDLE ACTION CHANGE
+  const onActionChange = useCallback((action: SharedSelection) => {
+    setSelectedActions(Array.from(action) as TradeHistoryAction[])
+  }, [])
+
+  // HANDLE MARKET CHANGE
+  const onMarketChange = useCallback((selection: SharedSelection) => {
+    setSelectedMarkets(Array.from(selection) as string[])
+  }, [])
+
+  return (
+    <>
+      <h2 className='mt-4 text-lg font-bold text-default-900'>Deposit/Withdrawal History</h2>
+      <div className='relative mt-4'>
+        <Button
+          className='absolute right-2 top-2 z-10'
+          size='md'
+          variant='solid'
+          isIconOnly
+          isLoading={isFetching}
+          onPress={refetchHistory}
+        >
+          <Icon icon='mdi:refresh' />
+        </Button>
+        <Table
+          className='mt-2'
+          aria-label='Deposit/Withdrawal History Table'
+          classNames={{
+            th: '!rounded-none font-serif',
+          }}
+        >
+          <TableHeader>
+            <TableColumn>
+              <Select
+                classNames={SELECT_CLASS_NAMES}
+                label={t('Action')}
+                selectionMode='multiple'
+                onSelectionChange={onActionChange}
+                listboxProps={LIST_BOX_PROPS}
+                popoverProps={POPOVER_PROPS}
+                scrollShadowProps={SCROLL_SHADOW_PROPS}
+                items={Array.from(Object.entries(actionOptions))}
+              >
+                {([category, actions]) => (
+                  <SelectSection
+                    key={category}
+                    title={category}
+                    classNames={SELECT_SECTION_CLASS_NAMES}
+                  >
+                    {actions.map(action => (
+                      <SelectItem key={action.value} value={action.value} className='text-nowrap'>
+                        {action.label}
+                      </SelectItem>
+                    ))}
+                  </SelectSection>
+                )}
+              </Select>
+            </TableColumn>
+            <TableColumn>
+              <Select
+                classNames={SELECT_CLASS_NAMES}
+                label={t('Market')}
+                selectionMode='multiple'
+                onSelectionChange={onMarketChange}
+                listboxProps={LIST_BOX_PROPS}
+                popoverProps={POPOVER_PROPS}
+                scrollShadowProps={SCROLL_SHADOW_PROPS}
+              >
+                {markets.map(market => (
+                  <SelectItem key={market.value} value={market.value} className='text-nowrap'>
+                    {market.label}
+                  </SelectItem>
+                ))}
+              </Select>
+            </TableColumn>
+            <TableColumn>{t('Market Token')}</TableColumn>
+            <TableColumn>{t('Long Token')}</TableColumn>
+            <TableColumn>{t('Short Token')}</TableColumn>
+            <TableColumn>{t('Fee')}</TableColumn>
+            <TableColumn>{t('Time')}</TableColumn>
+          </TableHeader>
+          <TableBody
+            items={historyItems}
+            emptyContent={'No deposit/withdrawal history.'}
+            isLoading={isLoading}
+            loadingContent={<Spinner className='mt-4' />}
+          >
+            {item => {
+              const market = marketsData.get(item.market)
+              const marketTokenData = marketTokensData.get(item.market)
+              // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
+              if (!market || !marketTokenData) return <></>
+
+              const marketTokenAmount = item.marketTokenAmount
+                ? shrinkDecimals(item.marketTokenAmount, marketTokenData.decimals)
+                : '0'
+
+              const marketTokenPrice = shortlistedTokenPrices.get(market.marketTokenAddress)
+              const marketTokenFractionDigits = calculateTokenFractionDigits(marketTokenPrice?.max)
+
+              const marketTokenAmountText = formatNumber(marketTokenAmount, Format.READABLE, {
+                fractionDigits: marketTokenFractionDigits,
+              })
+
+              const longTokenAmount = item.longTokenAmount
+                ? shrinkDecimals(item.longTokenAmount, market.longToken.decimals)
+                : '0'
+
+              const longTokenPrice = shortlistedTokenPrices.get(market.longToken.address)
+              const longTokenFractionDigits = calculateTokenFractionDigits(longTokenPrice?.max)
+
+              const longTokenAmountText = formatNumber(longTokenAmount, Format.READABLE, {
+                fractionDigits: longTokenFractionDigits,
+              })
+
+              const shortTokenAmount = item.shortTokenAmount
+                ? shrinkDecimals(item.shortTokenAmount, market.shortToken.decimals)
+                : '0'
+
+              const shortTokenPrice = shortlistedTokenPrices.get(market.shortToken.address)
+
+              const shortTokenFractionDigits = calculateTokenFractionDigits(shortTokenPrice?.max)
+
+              const shortTokenAmountText = formatNumber(shortTokenAmount, Format.READABLE, {
+                fractionDigits: shortTokenFractionDigits,
+              })
+
+              const executionFee = item.executionFee
+                ? shrinkDecimals(item.executionFee, USD_DECIMALS)
+                : '0'
+              const executionFeeText = formatNumber(executionFee, Format.USD)
+
+              return (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <div
+                      className={`!absolute left-[-1rem] top-[10%] h-4/5 w-1 ${(() => {
+                        if (
+                          item.action === TradeHistoryAction.RequestDeposit ||
+                          item.action === TradeHistoryAction.Deposit ||
+                          item.action === TradeHistoryAction.FailedDeposit ||
+                          item.action === TradeHistoryAction.CancelDeposit
+                        ) {
+                          return 'bg-green-500'
+                        }
+                        return 'bg-red-500'
+                      })()}`}
+                    />
+                    {getActionLabel(item.action)}
+                  </TableCell>
+                  <TableCell>
+                    <div className='flex items-center gap-2'>
+                      <img
+                        src={market.indexToken.imageUrl}
+                        alt={market.indexToken.symbol}
+                        className='h-6 w-6 rounded'
+                      />
+                      <div className='flex flex-col'>
+                        <div>{market.indexToken.symbol}</div>
+                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                          {getMarketPoolName(market)}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{marketTokenAmountText} WM</TableCell>
+                  <TableCell>
+                    {longTokenAmountText} {market.longToken.symbol}
+                  </TableCell>
+                  <TableCell>
+                    {shortTokenAmountText} {market.shortToken.symbol}
+                  </TableCell>
+                  <TableCell>{executionFeeText}</TableCell>
+                  <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
+                </TableRow>
+              )
+            }}
+          </TableBody>
+        </Table>
+        {totalPages > 1 && (
+          <div className='mt-4 flex justify-center'>
+            <Pagination
+              showControls
+              total={totalPages}
+              page={currentPage}
+              onChange={setCurrentPage}
+            />
+          </div>
+        )}
+      </div>
+    </>
+  )
+})

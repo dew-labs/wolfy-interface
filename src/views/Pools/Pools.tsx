@@ -6,6 +6,7 @@ import WolfyNavbar from '@/components/WolfyNavbar'
 import HeadTags from '@/lib/head/HeadTags'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 
+import DepositWithdrawalHistory from './components/DepositWithdrawalHistory'
 import PoolsTable from './components/PoolsTable'
 
 export default function Pools() {
@@ -33,6 +34,7 @@ export default function Pools() {
         </div>
         <div className='m-auto max-w-7xl'>
           <PoolsTable />
+          <DepositWithdrawalHistory />
         </div>
       </main>
     </div>

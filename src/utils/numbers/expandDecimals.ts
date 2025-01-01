@@ -35,8 +35,8 @@ export function shrinkDecimals(
 
   decimals = Number(decimals)
   let display = (() => {
-    if (typeof value === 'number') return value.toFixed(0)
-    if (typeof value === 'string') return parseInt(value).toFixed(0)
+    if (typeof value === 'number') return String(BigInt(Math.round(value)))
+    if (typeof value === 'string') return String(BigInt(parseInt(value)))
     return String(value)
   })()
 
