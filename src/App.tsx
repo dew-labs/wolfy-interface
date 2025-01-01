@@ -11,18 +11,16 @@ import {Partytown} from '@builder.io/partytown/react'
 import {NextUIProvider} from '@nextui-org/react'
 import {announce} from '@react-aria/live-announcer'
 import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/react'
-import {useQueryErrorResetBoundary} from '@tanstack/react-query'
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
-import {lazy, type PropsWithChildren, Suspense, useEffect, useState} from 'react'
+import {lazy, Suspense, useEffect, useState} from 'react'
 // import {Inspector} from 'react-dev-inspector'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 
 import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
 import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'
 import {logError} from '@/utils/logger'
-import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
 import UpdateMousePosition from './components/UpdateMousePosition'
 import WolfyBackground from './components/WolfyBackground'
@@ -35,21 +33,12 @@ import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
 import {createQueryClient, createQueryPersistOptions} from './queries/queries'
 import {createRouter} from './router'
 import {setupWolfy, teardownWolfy} from './setupWolfy'
+import {QueryErrorBoundary} from './utils/query/QueryErrorBoundary'
 import ErrorComponent from './views/Error/ErrorComponent'
 
 const JotaiDevTools = import.meta.env.PROD
   ? () => null
   : lazy(async () => import('./utils/components/JotaiDevTools'))
-
-function QueryErrorBoundary({children}: PropsWithChildren) {
-  const {reset} = useQueryErrorResetBoundary()
-
-  return (
-    <ErrorBoundary onReset={reset} fallbackRender={QueryErrorComponent}>
-      {children}
-    </ErrorBoundary>
-  )
-}
 
 const PARTYTOWN_FORWARD = ['dataLayer.push']
 
