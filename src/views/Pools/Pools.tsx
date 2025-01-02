@@ -1,5 +1,6 @@
 import {Icon} from '@iconify/react'
 import {Button} from '@nextui-org/react'
+import {ErrorBoundary} from 'react-error-boundary'
 
 import SkipLink from '@/components/SkipLink'
 import WolfyNavbar from '@/components/WolfyNavbar'
@@ -34,7 +35,9 @@ export default function Pools() {
         </div>
         <div className='m-auto mb-4 max-w-7xl'>
           <PoolsTable />
-          <DepositWithdrawalHistory />
+          <ErrorBoundary fallback={null}>
+            <DepositWithdrawalHistory />
+          </ErrorBoundary>
         </div>
       </main>
     </div>
