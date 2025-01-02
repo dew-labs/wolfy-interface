@@ -236,6 +236,7 @@ export default async function fetchPositions(
 
     const pos = {
       key,
+      stringRepresentation: stringPosition,
       account: accountAddress,
       marketAddress,
       collateralTokenAddress,
@@ -249,7 +250,6 @@ export default async function fetchPositions(
       fundingFeeAmount: cairoIntToBigInt(fees.funding.funding_fee_amount),
       claimableLongTokenAmount: cairoIntToBigInt(fees.funding.claimable_long_token_amount),
       claimableShortTokenAmount: cairoIntToBigInt(fees.funding.claimable_short_token_amount),
-      stringRepresentation: stringPosition,
     }
 
     positionsDataViaStringRepresentation.set(stringPosition, pos)

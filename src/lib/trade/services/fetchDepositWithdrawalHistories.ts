@@ -13,7 +13,6 @@ const DepositWithdrawalHistorySchema = Type.Object({
   marketTokenAmount: Type.Union([Type.String(), Type.Null()]),
   longTokenAmount: Type.String(),
   shortTokenAmount: Type.String(),
-  minMarketTokenAmount: Type.Union([Type.String(), Type.Null()]),
   executionFee: Type.String(),
   createdAt: Type.Number(),
   txHash: Type.String(),

@@ -147,13 +147,14 @@ export default memo(function PositionTab() {
                       </Button>
                     </Tooltip>
                   </TableCell>
+                  {/* TODO: show funding fee, borrowing fee */}
                   <TableCell>
                     <div>
                       {formatNumber(shrinkDecimals(position.netValue, USD_DECIMALS), Format.USD, {
                         exactFractionDigits: true,
                       })}
                     </div>
-                    <div className={position.pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                    <div className={pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
                       <div>{pnlText}</div>
                       <div className='text-xs'>{pnlPercentageText}</div>
                     </div>
