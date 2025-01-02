@@ -16,19 +16,21 @@ import {
   Tooltip,
 } from '@nextui-org/react'
 import {t} from 'i18next'
+import type * as React from 'react'
 import {memo, useCallback, useMemo, useState} from 'react'
 import {cairoIntToBigInt} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
+import useFeeToken from '@/lib/trade/hooks/useFeeToken'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
-import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 const actionOptions = {
@@ -166,6 +168,7 @@ export default memo(function TradesTab() {
   const tokensMetadata = getTokensMetadata(chainId)
   const {data: marketsData = new Map()} = useMarketsData()
   const setTokenAddress = useSetTokenAddress()
+  const {feeToken, feeTokenPrice} = useFeeToken()
 
   const markets = useMemo(() => {
     return Array.from(marketsData.values()).map(market => ({
@@ -338,6 +341,19 @@ export default memo(function TradesTab() {
 
             const poolName = getMarketPoolName(market)
 
+            const executionFee = item.fee ? shrinkDecimals(item.fee, feeToken.decimals) : '0'
+
+            const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
+              fractionDigits: 6,
+            })} ${feeToken.symbol}`
+
+            const executionFeeUsd = shrinkDecimals(
+              expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
+              USD_DECIMALS + feeToken.decimals,
+            )
+
+            const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
+
             const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
 
             return (
@@ -400,7 +416,10 @@ export default memo(function TradesTab() {
                 <TableCell>{formatUsd(item.size)}</TableCell>
                 <TableCell>{formatMarketUsd(item.price, item.market)}</TableCell>
                 <TableCell>{formatUsd(item.rpnl)}</TableCell>
-                <TableCell>{formatUsd(item.fee)}</TableCell>
+                <TableCell>
+                  <div>{executionFeeUsdText}</div>
+                  <div className='whitespace-nowrap text-xs opacity-50'>{executionFeeText}</div>
+                </TableCell>
                 <TableCell>
                   <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
                     {formatLocaleDateTime(item.createdAt * 1000)}

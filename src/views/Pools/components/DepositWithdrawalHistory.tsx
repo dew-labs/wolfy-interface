@@ -22,6 +22,7 @@ import {memo, useCallback, useMemo, useState} from 'react'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useDepositWithdrawalHistory from '@/lib/trade/hooks/useDepositWithdrawalHistory'
+import useFeeToken from '@/lib/trade/hooks/useFeeToken'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -30,7 +31,7 @@ import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
-import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
+import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 const actionOptions = {
@@ -107,6 +108,7 @@ export default memo(function DepositWithdrawalHistory() {
   const [chainId] = useChainId()
   const {data: marketsData = new Map()} = useMarketsData()
   const {data: marketTokensData = new Map()} = useMarketTokensData()
+  const {feeToken, feeTokenPrice} = useFeeToken()
 
   const markets = useMemo(() => {
     return Array.from(marketsData.values()).map(market => ({
@@ -288,9 +290,20 @@ export default memo(function DepositWithdrawalHistory() {
               })
 
               const executionFee = item.executionFee
-                ? shrinkDecimals(item.executionFee, USD_DECIMALS)
+                ? shrinkDecimals(item.executionFee, feeToken.decimals)
                 : '0'
-              const executionFeeText = formatNumber(executionFee, Format.USD)
+
+              const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
+                fractionDigits: 6,
+              })} ${feeToken.symbol}`
+
+              const executionFeeUsd = shrinkDecimals(
+                expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
+                USD_DECIMALS + feeToken.decimals,
+              )
+
+              const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
+
               const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
 
               return (
@@ -333,7 +346,10 @@ export default memo(function DepositWithdrawalHistory() {
                   <TableCell>
                     {shortTokenAmountText} {market.shortToken.symbol}
                   </TableCell>
-                  <TableCell>{executionFeeText}</TableCell>
+                  <TableCell>
+                    <div>{executionFeeUsdText}</div>
+                    <div className='whitespace-nowrap text-xs opacity-50'>{executionFeeText}</div>
+                  </TableCell>
                   <TableCell>
                     <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
                       {formatLocaleDateTime(item.createdAt * 1000)}
