@@ -19,6 +19,8 @@ import {create} from 'mutative'
 import type * as React from 'react'
 import {memo, useCallback, useMemo, useState} from 'react'
 
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useDepositWithdrawalHistory from '@/lib/trade/hooks/useDepositWithdrawalHistory'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
@@ -102,6 +104,7 @@ const getActionLabel = (value: TradeHistoryAction): string => {
 }
 
 export default memo(function DepositWithdrawalHistory() {
+  const [chainId] = useChainId()
   const {data: marketsData = new Map()} = useMarketsData()
   const {data: marketTokensData = new Map()} = useMarketTokensData()
 
@@ -288,6 +291,7 @@ export default memo(function DepositWithdrawalHistory() {
                 ? shrinkDecimals(item.executionFee, USD_DECIMALS)
                 : '0'
               const executionFeeText = formatNumber(executionFee, Format.USD)
+              const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
 
               return (
                 <TableRow key={item.id}>
@@ -330,7 +334,11 @@ export default memo(function DepositWithdrawalHistory() {
                     {shortTokenAmountText} {market.shortToken.symbol}
                   </TableCell>
                   <TableCell>{executionFeeText}</TableCell>
-                  <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
+                  <TableCell>
+                    <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
+                      {formatLocaleDateTime(item.createdAt * 1000)}
+                    </a>
+                  </TableCell>
                 </TableRow>
               )
             }}

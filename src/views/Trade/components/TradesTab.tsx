@@ -21,6 +21,7 @@ import {cairoIntToBigInt} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
+import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
@@ -337,6 +338,8 @@ export default memo(function TradesTab() {
 
             const poolName = getMarketPoolName(market)
 
+            const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
+
             return (
               <TableRow key={item.id}>
                 <TableCell>
@@ -398,7 +401,11 @@ export default memo(function TradesTab() {
                 <TableCell>{formatMarketUsd(item.price, item.market)}</TableCell>
                 <TableCell>{formatUsd(item.rpnl)}</TableCell>
                 <TableCell>{formatUsd(item.fee)}</TableCell>
-                <TableCell>{formatLocaleDateTime(item.createdAt * 1000)}</TableCell>
+                <TableCell>
+                  <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
+                    {formatLocaleDateTime(item.createdAt * 1000)}
+                  </a>
+                </TableCell>
               </TableRow>
             )
           }}

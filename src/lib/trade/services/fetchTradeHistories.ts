@@ -94,6 +94,7 @@ const tradeDataSchema = Type.Object({
       fee: Type.Union([Type.String(), Type.Null()]),
       rpnl: Type.Union([Type.String(), Type.Null()]),
       createdAt: Type.Number(),
+      txHash: Type.String(),
     }),
   ),
 })
