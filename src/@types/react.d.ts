@@ -9,9 +9,9 @@ declare module 'react' {
     (...args: Parameters<T>): ReturnType<T>
     memoized: true
   }
-  type MemoizedCallbackOrDispatch<T extends (...arg: [any]) => any> =
-    | MemoizedCallback<T>
-    | Dispatch<SetStateAction<Parameters<T>[0]>>
+  type MemoizedCallbackOrDispatch<T> =
+    | MemoizedCallback<(arg: T) => void>
+    | Dispatch<SetStateAction<T>>
 
   function useCallback<T extends (...args: any[]) => any>(
     callback: T,

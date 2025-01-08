@@ -36,15 +36,15 @@ interface Props {
   tradeMode: Exclude<TradeMode, TradeMode.Trigger>
   marketAddress: string | undefined
   tokenAmount: bigint
-  setTokenAmount: MemoizedCallbackOrDispatch<(amount: bigint) => void>
+  setTokenAmount: MemoizedCallbackOrDispatch<bigint>
   tokenAmountUsd: bigint
   tokenPrice: bigint | undefined
-  setTokenPrice: MemoizedCallbackOrDispatch<(price: bigint) => void>
+  setTokenPrice: MemoizedCallbackOrDispatch<bigint>
   availablePayTokenAddresses: string[]
   payTokenAddress: string | undefined
-  setPayTokenAddress: MemoizedCallbackOrDispatch<(tokenAddress: string | undefined) => void>
+  setPayTokenAddress: MemoizedCallbackOrDispatch<string | undefined>
   payTokenAmount: bigint
-  setPayTokenAmount: MemoizedCallbackOrDispatch<(amount: bigint) => void>
+  setPayTokenAmount: MemoizedCallbackOrDispatch<bigint>
   sync: boolean
 }
 

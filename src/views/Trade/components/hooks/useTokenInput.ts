@@ -31,7 +31,7 @@ const DEFAULT_OPTIONS = {
 export default function useTokenInput(
   decimals: bigint | number,
   amount: bigint | undefined,
-  setAmount: MemoizedCallbackOrDispatch<(amount: bigint) => void>,
+  setAmount: MemoizedCallbackOrDispatch<bigint>,
   price: Price,
   options: Options = DEFAULT_OPTIONS,
 ) {
