@@ -352,7 +352,11 @@ export default memo(function DepositWithdrawalHistory() {
                   </TableCell>
                   <TableCell>
                     <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
-                      {formatLocaleDateTime(item.createdAt * 1000)}
+                      {formatLocaleDateTime(item.createdAt * 1000)
+                        .split(', ')
+                        .map(time => (
+                          <div key={time}>{time}</div>
+                        ))}
                     </a>
                   </TableCell>
                 </TableRow>
