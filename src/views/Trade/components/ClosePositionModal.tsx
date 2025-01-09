@@ -4,18 +4,29 @@ import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import {memo, useCallback, useMemo, useState} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
+import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
+import {FEE_TOKEN_ADDRESS} from '@/constants/tokens'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
+import useGasLimits from '@/lib/trade/hooks/useGasLimits'
+import useGasPrice from '@/lib/trade/hooks/useGasPrice'
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
+import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
+import {BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS} from '@/lib/trade/numbers/constants'
+import {DEFAULT_GAS_LIMITS} from '@/lib/trade/services/fetchGasLimits'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
+import estimateExecuteOrderGasLimit from '@/lib/trade/utils/fee/estimateExecuteOrderGasLimit'
+import {getExecutionFee} from '@/lib/trade/utils/fee/getExecutionFee'
+import {getTradeFees} from '@/lib/trade/utils/fee/getTradeFees'
+import getDecreasePositionAmounts from '@/lib/trade/utils/order/decrease/getDecreasePositionAmounts'
 import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
@@ -149,6 +160,146 @@ export default memo(function ClosePositionModal() {
   const {feeToken} = useFeeToken()
   const latestFeeToken = useLatest(feeToken)
 
+  const inputTokenClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
+    }),
+    [isValidCollateralTokenAmountToDecrease],
+  )
+
+  const inputSizeClassNames = useMemo(
+    () => ({
+      input: 'appearance-none',
+      label: !isValidSizeUsdToDecrease && '!text-danger-500',
+    }),
+    [isValidSizeUsdToDecrease],
+  )
+
+  const {data: gasPrice = 0n} = useGasPrice()
+  const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimits()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
+  const {data: referralInfo} = useReferralInfo()
+  const {data: tokenPricesData = new Map()} = useTokenPrices()
+
+  const {
+    data: tokenPricesDataShortlisted = {
+      tokenPrice: undefined,
+      payTokenPrice: undefined,
+      collateralTokenPrice: undefined,
+      longTokenPrice: undefined,
+      shortTokenPrice: undefined,
+      feeTokenPrice: undefined,
+    },
+  } = useTokenPrices(
+    useCallback(
+      data => {
+        const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
+        invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
+
+        return {
+          tokenPrice: position?.indexToken.address
+            ? data.get(position.indexToken.address)
+            : undefined,
+          collateralTokenPrice: position?.collateralToken.address
+            ? data.get(position.collateralToken.address)
+            : undefined,
+          longTokenPrice: position?.marketData.longTokenAddress
+            ? data.get(position.marketData.longTokenAddress)
+            : undefined,
+          shortTokenPrice: position?.marketData.shortTokenAddress
+            ? data.get(position.marketData.shortTokenAddress)
+            : undefined,
+          feeTokenPrice: data.get(feeTokenAddress),
+        }
+      },
+      [chainId, position],
+    ),
+  )
+
+  const decreaseAmounts = useMemo(() => {
+    if (!position?.marketData) return undefined
+
+    const closeSizeUsd = sizeUsdToDecrease
+    const keepLeverage = false
+    const minCollateralUsd = 0n
+    const minPositionSizeUsd = 0n
+
+    return getDecreasePositionAmounts({
+      marketInfo: position.marketData,
+      collateralToken: position.collateralToken,
+      isLong: position.isLong,
+      position,
+      closeSizeUsd,
+      keepLeverage,
+      triggerPrice: 0n,
+      fixedAcceptablePriceImpactBps: 0n,
+      acceptablePriceImpactBuffer: 100,
+      userReferralInfo: referralInfo,
+      minCollateralUsd,
+      minPositionSizeUsd,
+      uiFeeFactor,
+      receiveToken: undefined,
+      tokenPricesData,
+    })
+  }, [position, referralInfo, sizeUsdToDecrease, tokenPricesData, uiFeeFactor])
+
+  const tradeFees = useMemo(() => {
+    if (!decreaseAmounts || !position) return undefined
+
+    const sizeReductionBps =
+      (decreaseAmounts.sizeDeltaUsd * BASIS_POINTS_DIVISOR_BIGINT) / position.sizeInUsd
+    const collateralDeltaUsd =
+      (position.collateralUsd * sizeReductionBps) / BASIS_POINTS_DIVISOR_BIGINT
+
+    return getTradeFees({
+      initialCollateralUsd: position.collateralUsd,
+      collateralDeltaUsd,
+      sizeDeltaUsd: decreaseAmounts.sizeDeltaUsd,
+      swapSteps: [],
+      positionFeeUsd: decreaseAmounts.positionFeeUsd,
+      swapPriceImpactDeltaUsd: 0n,
+      positionPriceImpactDeltaUsd: decreaseAmounts.positionPriceImpactDeltaUsd,
+      priceImpactDiffUsd: decreaseAmounts.priceImpactDiffUsd,
+      borrowingFeeUsd: decreaseAmounts.borrowingFeeUsd,
+      fundingFeeUsd: decreaseAmounts.fundingFeeUsd,
+      feeDiscountUsd: decreaseAmounts.feeDiscountUsd,
+      swapProfitFeeUsd: decreaseAmounts.swapProfitFeeUsd,
+      uiFeeFactor,
+    })
+  }, [decreaseAmounts, position, uiFeeFactor])
+
+  const tradeFeeUsdText = tradeFees?.totalFees
+    ? formatNumber(shrinkDecimals(tradeFees.totalFees.deltaUsd, USD_DECIMALS), Format.USD, {
+        fractionDigits: 2,
+      })
+    : '-'
+
+  const executionFee = useMemo(() => {
+    const feeTokenPrice = tokenPricesDataShortlisted.feeTokenPrice
+    if (!feeTokenPrice || !gasPrice) return undefined
+
+    const estimatedGas = estimateExecuteOrderGasLimit('decrease', gasLimits, {})
+
+    return getExecutionFee(gasLimits, feeTokenPrice, estimatedGas, gasPrice, feeToken)
+  }, [feeToken, tokenPricesDataShortlisted.feeTokenPrice, gasLimits, gasPrice])
+  const latestExecutionFee = useLatest(executionFee)
+
+  const executionFeeUsdText = executionFee?.feeUsd
+    ? `-${formatNumber(shrinkDecimals(executionFee.feeUsd, USD_DECIMALS), Format.USD, {
+        fractionDigits: 6,
+      })}`
+    : '-'
+  const executionFeeText = executionFee?.feeTokenAmount
+    ? `-${formatNumber(
+        shrinkDecimals(executionFee.feeTokenAmount, feeToken.decimals),
+        Format.READABLE,
+        {
+          fractionDigits: 8,
+        },
+      )} ${feeToken.symbol}`
+    : '-'
+
   const [isClosing, setIsClosing] = useState(false)
   const handleClose = useCallback(
     (isFull?: boolean) => {
@@ -157,6 +308,10 @@ export default memo(function ClosePositionModal() {
       const receiver = latestPosition.current.account
       const market = latestPosition.current.marketAddress
       const initialCollateralToken = latestPosition.current.collateralTokenAddress
+
+      const executionFeeAmount = latestExecutionFee.current?.feeTokenAmount
+
+      if (executionFeeAmount === undefined) return
 
       const sizeDeltaUsd = isFull
         ? latestPosition.current.sizeInUsd
@@ -194,7 +349,7 @@ export default memo(function ClosePositionModal() {
             acceptablePrice,
             referralCode: 0,
             swapPath: [],
-            executionFee: 0n,
+            executionFee: executionFeeAmount,
             minOutputAmount: 0n,
           },
           latestFeeToken.current,
@@ -233,22 +388,6 @@ export default memo(function ClosePositionModal() {
       )
     },
     [queryClient],
-  )
-
-  const inputTokenClassNames = useMemo(
-    () => ({
-      input: 'appearance-none',
-      label: !isValidCollateralTokenAmountToDecrease && '!text-danger-500',
-    }),
-    [isValidCollateralTokenAmountToDecrease],
-  )
-
-  const inputSizeClassNames = useMemo(
-    () => ({
-      input: 'appearance-none',
-      label: !isValidSizeUsdToDecrease && '!text-danger-500',
-    }),
-    [isValidSizeUsdToDecrease],
   )
 
   const handleCloseFull = useCallback(() => {
@@ -304,6 +443,19 @@ export default memo(function ClosePositionModal() {
               </div>
             }
           />
+          <div className='text-sm'>
+            <div className='mt-2 flex w-full justify-between'>
+              <div className='flex items-center'>Fee</div>
+              <div className='flex items-center'>{tradeFeeUsdText}</div>
+            </div>
+            <div className='mt-2 flex w-full justify-between'>
+              <div className='flex items-center'>Network Fee</div>
+              <div className='flex flex-col items-center justify-end'>
+                <div className='flex w-full justify-end'>{executionFeeUsdText}</div>
+                <div className='flex w-full justify-end text-xs'>{executionFeeText}</div>
+              </div>
+            </div>
+          </div>
           <div className='mt-0 flex w-full gap-2'>
             <Button
               color='warning'

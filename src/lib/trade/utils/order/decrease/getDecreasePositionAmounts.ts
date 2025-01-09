@@ -78,7 +78,7 @@ export default function getDecreasePositionAmounts(p: {
   triggerPrice?: bigint | undefined
   fixedAcceptablePriceImpactBps?: bigint | undefined
   acceptablePriceImpactBuffer?: number | undefined
-  userReferralInfo: ReferralInfo | undefined
+  userReferralInfo?: ReferralInfo | undefined | null
   minCollateralUsd: bigint
   minPositionSizeUsd: bigint
   uiFeeFactor: bigint

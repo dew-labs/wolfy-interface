@@ -519,10 +519,8 @@ const Controller = createResetableComponent(({reset}) => {
     })
   })()
 
-  // console.log(increaseAmounts)
-
   const decreaseAmounts = (() => {
-    if (!marketData || !collateralTokenData || !position || !referralInfo) return undefined
+    if (!marketData || !collateralTokenData || !position) return undefined
 
     const closeSizeUsd = 0n
     const keepLeverage = true
@@ -623,8 +621,6 @@ const Controller = createResetableComponent(({reset}) => {
       }
     }
   })()
-
-  // console.log(tradeFees)
 
   const tradeFeeUsdText = tradeFees?.totalFees
     ? formatNumber(shrinkDecimals(tradeFees.totalFees.deltaUsd, USD_DECIMALS), Format.USD, {
