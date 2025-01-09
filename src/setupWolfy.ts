@@ -17,6 +17,7 @@ function registerHttpProviders() {
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/JnR9OZ0EoYZTyhz91Kko2UkLLZ1jH7Eu',
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/G9wJH34O_F038b_k329lcjOd_o38JA3j',
       'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK',
+      'https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/_910wzQ89BvgehMsFBf8bc3bcQn5hs-t',
       'https://starknet-mainnet.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
       'https://starknet-mainnet.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-mainnet.infura.io/v3/82802c15c3d242d2846e464a66238198',
@@ -59,6 +60,7 @@ function registerHttpProviders() {
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-RKRlVd3tmxZAHYO2QbBNp6E6y7vCXXE',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/JnR9OZ0EoYZTyhz91Kko2UkLLZ1jH7Eu',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/G9wJH34O_F038b_k329lcjOd_o38JA3j',
+      'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/_910wzQ89BvgehMsFBf8bc3bcQn5hs-t',
       // 'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/ekJheYMyUgzO8bxrMq0e6PCgir5WuJqK', // SEPOLIA turned off
       'https://starknet-sepolia.blastapi.io/a419bd5a-ec9e-40a7-93a4-d16467fb79b3/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/82802c15c3d242d2846e464a66238198',
