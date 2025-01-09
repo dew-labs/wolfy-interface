@@ -1,5 +1,11 @@
 import type {ChartInterval} from './chartdata/ChartData'
 
+const TIME_ZONE_OFFSET = new Date().getTimezoneOffset() // in minutes
+
+export function correctTimezone(time: number) {
+  return time + -1 * TIME_ZONE_OFFSET * 60
+}
+
 export function getChartHistoryUrl(symbol: string, interval: ChartInterval) {
   return `https://testnet.binancefuture.com/fapi/v1/markPriceKlines?${new URLSearchParams({
     symbol,

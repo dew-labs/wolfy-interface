@@ -4,6 +4,7 @@ import type {UTCTimestamp} from 'lightweight-charts'
 
 import type {ChartData, ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 import {ChartIntervalTime} from '@/lib/tvchart/chartdata/ChartData.ts'
+import {correctTimezone} from '@/lib/tvchart/constants'
 
 // {
 //   "e": "kline",     // Event type
@@ -65,7 +66,7 @@ export function binanaceDataToChartData(
   const rounded = new Date(Math.floor(date.getTime() / coeff) * coeff)
 
   return {
-    time: (rounded.getTime() / 1000) as UTCTimestamp,
+    time: correctTimezone(rounded.getTime() / 1000) as UTCTimestamp,
     open: Number(binanceData.k.o),
     high: Number(binanceData.k.h),
     low: Number(binanceData.k.l),
