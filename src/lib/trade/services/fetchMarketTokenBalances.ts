@@ -1,11 +1,16 @@
-import {Contract} from 'starknet'
+import {createMulticallRequest, multicall} from 'starknet_multicall'
+import invariant from 'tiny-invariant'
 import {
   cairoIntToBigInt,
   ERC20ABI,
   getProvider,
+  getWolfyContractAddress,
   ProviderType,
   type StarknetChainId,
+  WolfyContract,
 } from 'wolfy-sdk'
+
+import chunkify from '@/utils/chunkify'
 
 export default async function fetchMarketTokenBalances(
   chainId: StarknetChainId,
@@ -16,13 +21,24 @@ export default async function fetchMarketTokenBalances(
 
   if (!accountAddress) return balanceMap
 
-  const provider = getProvider(ProviderType.HTTP, chainId)
+  const marketTokenAddressChunks = Array.from(chunkify(marketTokenAddresses, 50))
 
   await Promise.allSettled(
-    marketTokenAddresses.map(async address => {
-      const contract = new Contract(ERC20ABI, address, provider).typedv2(ERC20ABI)
-      const balance = await contract.balance_of(accountAddress)
-      balanceMap.set(address, cairoIntToBigInt(balance))
+    marketTokenAddressChunks.map(async addresses => {
+      const calls = addresses.map(address =>
+        createMulticallRequest(address, ERC20ABI, 'balance_of', [accountAddress]),
+      )
+
+      const balances = await multicall(
+        calls,
+        getWolfyContractAddress(chainId, WolfyContract.Multicall),
+        getProvider(ProviderType.HTTP, chainId),
+      )
+
+      balances.forEach((balance, index) => {
+        invariant(addresses[index])
+        balanceMap.set(addresses[index], cairoIntToBigInt(balance))
+      })
     }),
   )
 

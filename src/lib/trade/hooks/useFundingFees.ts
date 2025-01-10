@@ -3,10 +3,8 @@ import type {MemoizedCallback} from 'react'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import fetchFundingFees, {
-  type FundingFeeData,
-  type FundingFeesData,
-} from '@/lib/trade/services/fetchFundingFees'
+import type {FundingFeeData} from '@/lib/trade/services/fetchFundingFee'
+import fetchFundingFees, {type FundingFeesData} from '@/lib/trade/services/fetchFundingFees'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarkets from './useMarkets'

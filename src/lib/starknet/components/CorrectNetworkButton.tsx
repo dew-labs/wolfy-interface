@@ -24,7 +24,7 @@ export default memo(function CorrectNetworkButton() {
           chainId: latestChainId.current,
         },
       })
-    } catch (_e: unknown) {
+    } catch {
       toast.error('Cannot switch chain, please switch manually in your wallet')
     }
   }, [])

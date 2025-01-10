@@ -1,5 +1,5 @@
 import type {Token} from '@/constants/tokens'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import getMidPrice from '@/lib/trade/utils/price/getMidPrice'

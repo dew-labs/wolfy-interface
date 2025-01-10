@@ -1,6 +1,6 @@
 import type {Token} from '@/constants/tokens'
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import getPriceImpactForSwap from '@/lib/trade/utils/fee/getPriceImpactForSwap'

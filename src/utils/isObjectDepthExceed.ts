@@ -1,7 +1,7 @@
 function isObject(value: unknown): value is object {
   try {
     return typeof value === 'object' && !Array.isArray(value)
-  } catch (_) {
+  } catch {
     return false
   }
 }
@@ -50,7 +50,7 @@ export default function isObjectDepthExceed(obj: unknown, n: number) {
 
   try {
     return checkDepth(obj, 1, new Set())
-  } catch (_) {
+  } catch {
     return true
   }
 }

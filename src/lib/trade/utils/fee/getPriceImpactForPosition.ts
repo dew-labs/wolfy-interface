@@ -1,4 +1,4 @@
-import {type MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import abs from '@/utils/numbers/bigint/abs'
 
 import getNextOpenInterestForVirtualInventory from './getNextOpenInterestForVirtualInventory'

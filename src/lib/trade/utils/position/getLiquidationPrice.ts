@@ -1,6 +1,6 @@
 import type {Token} from '@/constants/tokens'
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {ReferralInfo} from '@/lib/trade/services/referral/fetchReferralInfo'
 import {getPositionFee} from '@/lib/trade/utils/fee/getPositionFee'
 import getPriceImpactForPosition from '@/lib/trade/utils/fee/getPriceImpactForPosition'

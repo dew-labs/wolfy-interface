@@ -119,43 +119,38 @@ export default async function fetchTradeHistories(
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    })
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  })
 
-    actions.forEach(action => {
-      params.append('actions', action.toString())
-    })
-    markets.forEach(market => {
-      params.append('markets', market)
-    })
-    isLong.forEach(long => {
-      params.append('isLong', long ? 'true' : 'false')
-    })
+  actions.forEach(action => {
+    params.append('actions', action.toString())
+  })
+  markets.forEach(market => {
+    params.append('markets', market)
+  })
+  isLong.forEach(long => {
+    params.append('isLong', long ? 'true' : 'false')
+  })
 
-    const query = params.toString()
+  const query = params.toString()
 
-    const response = await call.get(
-      `/api/v1/accounts/${accountAddress}/trade-history${query ? `?${query}` : ''}`,
-    )
+  const response = await call.get(
+    `/api/v1/accounts/${accountAddress}/trade-history${query ? `?${query}` : ''}`,
+  )
 
-    if (!isTradeData(response.data)) {
-      throw new Error('Invalid trade data received from API')
-    }
-
-    response.data.data.sort((a, b) => {
-      const result = b.createdAt - a.createdAt
-      if (result === 0) {
-        return b.action - a.action
-      }
-      return result
-    })
-
-    return response.data
-  } catch (error) {
-    console.error('Error fetching trade histories:', error)
-    throw error
+  if (!isTradeData(response.data)) {
+    throw new Error('Invalid trade data received from API')
   }
+
+  response.data.data.sort((a, b) => {
+    const result = b.createdAt - a.createdAt
+    if (result === 0) {
+      return b.action - a.action
+    }
+    return result
+  })
+
+  return response.data
 }

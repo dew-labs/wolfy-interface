@@ -37,37 +37,31 @@ export default async function fetchMarkets(chainId: StarknetChainId) {
     marketNum,
   )
 
-  return markets
-    .map(market => {
-      try {
-        const indexTokenHex = toStarknetHexString(market.index_token)
-        const longTokenHex = toStarknetHexString(market.long_token)
-        const shortTokenHex = toStarknetHexString(market.short_token)
-        const marketTokenHex = toStarknetHexString(market.market_token)
+  return markets.map(market => {
+    const indexTokenHex = toStarknetHexString(market.index_token)
+    const longTokenHex = toStarknetHexString(market.long_token)
+    const shortTokenHex = toStarknetHexString(market.short_token)
+    const marketTokenHex = toStarknetHexString(market.market_token)
 
-        const indexToken = getTokenMetadata(chainId, indexTokenHex)
-        const longToken = getTokenMetadata(chainId, longTokenHex)
-        const shortToken = getTokenMetadata(chainId, shortTokenHex)
+    const indexToken = getTokenMetadata(chainId, indexTokenHex)
+    const longToken = getTokenMetadata(chainId, longTokenHex)
+    const shortToken = getTokenMetadata(chainId, shortTokenHex)
 
-        const isSameCollaterals = market.long_token === market.short_token
-        const isSpotOnly = isRepresentZero(indexTokenHex)
+    const isSameCollaterals = market.long_token === market.short_token
+    const isSpotOnly = isRepresentZero(indexTokenHex)
 
-        const name = getMarketFullName({indexToken, longToken, shortToken, isSpotOnly})
+    const name = getMarketFullName({indexToken, longToken, shortToken, isSpotOnly})
 
-        const mk: Market = {
-          marketTokenAddress: marketTokenHex,
-          indexTokenAddress: indexTokenHex,
-          longTokenAddress: longTokenHex,
-          shortTokenAddress: shortTokenHex,
-          isSameCollaterals,
-          isSpotOnly,
-          name,
-        }
-        return mk
-      } catch (e) {
-        console.warn('unsupported market', e)
-        return false
-      }
-    })
-    .filter(Boolean)
+    const mk: Market = {
+      marketTokenAddress: marketTokenHex,
+      indexTokenAddress: indexTokenHex,
+      longTokenAddress: longTokenHex,
+      shortTokenAddress: shortTokenHex,
+      isSameCollaterals,
+      isSpotOnly,
+      name,
+    }
+
+    return mk
+  })
 }

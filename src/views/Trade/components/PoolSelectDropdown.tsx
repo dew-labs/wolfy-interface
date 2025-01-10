@@ -2,7 +2,7 @@ import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@ne
 import {memo} from 'react'
 import type {Key} from 'react-aria-components'
 
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 
 interface PoolSelectDropdownProps {

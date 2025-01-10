@@ -1,7 +1,8 @@
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata, type Token} from '@/constants/tokens'
-import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
+import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Order, OrdersData} from '@/lib/trade/services/fetchOrders'
 import type {Price, TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'

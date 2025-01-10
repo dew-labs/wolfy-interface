@@ -1,4 +1,4 @@
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {applySwapImpactWithCap} from '@/lib/trade/utils/fee/applySwapImpactWithCap'
 import getPriceImpactForSwap from '@/lib/trade/utils/fee/getPriceImpactForSwap'

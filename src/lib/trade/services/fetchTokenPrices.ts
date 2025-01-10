@@ -3,7 +3,6 @@ import {StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import {logError} from '@/utils/logger'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 export interface Price {
@@ -19,21 +18,20 @@ export const DEFAULT_PRICE = {
 export type TokenPricesData = Map<string, Price>
 
 export default async function fetchTokenPrices(chainId: StarknetChainId) {
-  const tokensMetadata = getTokensMetadata(chainId)
-
   const connection = new PriceServiceConnection('https://hermes.pyth.network')
-  const data: TokenPricesData = new Map()
-
-  const tokens = Array.from(tokensMetadata.values())
-    .map(token => {
-      if (token.pythFeedId) return token
-    })
-    .filter(Boolean)
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed
-  const feedIds = tokens.map(token => token.pythFeedId!)
 
   try {
+    const tokensMetadata = getTokensMetadata(chainId)
+    const data: TokenPricesData = new Map()
+
+    const tokens = Array.from(tokensMetadata.values())
+      .map(token => {
+        if (token.pythFeedId) return token
+      })
+      .filter(Boolean)
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guranteed
+    const feedIds = tokens.map(token => token.pythFeedId!)
     const priceFeeds = await connection.getLatestPriceFeeds(feedIds)
 
     if (!priceFeeds) return data
@@ -53,11 +51,9 @@ export default async function fetchTokenPrices(chainId: StarknetChainId) {
         max: price + 1n,
       })
     })
-  } catch (error) {
-    logError(error)
+
+    return data
   } finally {
     connection.closeWebSocket()
   }
-
-  return data
 }

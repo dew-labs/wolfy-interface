@@ -9,7 +9,7 @@ export default function errorMessageOrUndefined(error: unknown): string | undefi
       }
       return stringify(error.message)
     }
-  } catch (_) {
+  } catch {
     return undefined
   }
 }

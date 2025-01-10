@@ -11,23 +11,18 @@ const FEE_BUFFER_BPS = roundToNDecimal((parseFloat('30.0') * BASIS_POINTS_DIVISO
 
 // gasPrice in gwei (eth, not strk)
 export default async function fetchGasPrice(wallet: WalletAccount) {
-  try {
-    const chainId = await wallet.getChainId()
-    const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
-    const testCall = createCall(dataStoreContract, 'get_u256', [0])
-    let gasPrice = (await wallet.estimateFee(testCall)).gas_price
+  const chainId = await wallet.getChainId()
+  const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
+  const testCall = createCall(dataStoreContract, 'get_u256', [0])
+  let gasPrice = (await wallet.estimateFee(testCall)).gas_price
 
-    gasPrice += PREMIUM
+  gasPrice += PREMIUM
 
-    const buffer = (gasPrice * BigInt(FEE_BUFFER_BPS * 100)) / 100n / BASIS_POINTS_DIVISOR_BIGINT
-    gasPrice += buffer
+  const buffer = (gasPrice * BigInt(FEE_BUFFER_BPS * 100)) / 100n / BASIS_POINTS_DIVISOR_BIGINT
+  gasPrice += buffer
 
-    // Add 10% margin in case the gas price is under-evaluated
-    gasPrice *= 11n / 10n
+  // Add 10% margin in case the gas price is under-evaluated
+  gasPrice *= 11n / 10n
 
-    return gasPrice
-  } catch (e) {
-    console.error(e)
-    return 0n
-  }
+  return gasPrice
 }

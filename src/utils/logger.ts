@@ -30,7 +30,7 @@ const logError = function (
           // @ts-expect-error optimistically set metadata for the error
           setContext('metadata', error.metadata)
           return
-        } catch (_) {
+        } catch {
           /* empty */
         }
       }
@@ -41,7 +41,7 @@ const logError = function (
         serializedMetadata = stringify(error.metadata, {
           Function: value => value instanceof Function && (value as () => unknown).toString(),
         })
-      } catch (_) {
+      } catch {
         /* empty */
       }
 
@@ -77,7 +77,7 @@ const logEvent = function (
 ) {
   try {
     window.gtag('event', eventName, eventParams)
-  } catch (_) {
+  } catch {
     console.error('Cannot log event', eventName, eventParams)
     /* empty */
   }

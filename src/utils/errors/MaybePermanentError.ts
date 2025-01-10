@@ -10,7 +10,7 @@ export default class MaybePermanentError extends Error {
 export function isPermanentError(e: unknown) {
   try {
     return e && typeof e === 'object' && 'isPermanent' in e && !!e.isPermanent
-  } catch (_) {
+  } catch {
     return false
   }
 }

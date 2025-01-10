@@ -1,4 +1,3 @@
-import invariant from 'tiny-invariant'
 import type {Hashable, StarknetChainId} from 'wolfy-sdk'
 import {
   cairoIntToBigInt,
@@ -13,7 +12,7 @@ import {
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
 import {getTokenMetadata} from '@/constants/tokens'
-import {logError} from '@/utils/logger'
+import ErrorWithMetadata from '@/utils/errors/ErrorWithMetadata'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import type {Market} from './fetchMarkets'
@@ -68,28 +67,27 @@ export function getMarketPrice(
   chainId: StarknetChainId,
   tokenPricesData: TokenPricesData,
   market: Market,
-): MarketPrice | undefined {
-  try {
-    const indexTokenPrice = tokenPricesData.get(market.indexTokenAddress)
-    const longTokenPrice = tokenPricesData.get(market.longTokenAddress)
-    const shortTokenPrice = tokenPricesData.get(market.shortTokenAddress)
+): MarketPrice {
+  const indexTokenPrice = tokenPricesData.get(market.indexTokenAddress)
+  const longTokenPrice = tokenPricesData.get(market.longTokenAddress)
+  const shortTokenPrice = tokenPricesData.get(market.shortTokenAddress)
 
-    const indexToken = getTokenMetadata(chainId, market.indexTokenAddress)
-    const longToken = getTokenMetadata(chainId, market.longTokenAddress)
-    const shortToken = getTokenMetadata(chainId, market.shortTokenAddress)
+  const indexToken = getTokenMetadata(chainId, market.indexTokenAddress)
+  const longToken = getTokenMetadata(chainId, market.longTokenAddress)
+  const shortToken = getTokenMetadata(chainId, market.shortTokenAddress)
 
-    invariant(indexTokenPrice && longTokenPrice && shortTokenPrice, 'Invalid prices')
-
-    return {
-      /* eslint-disable camelcase -- snake_case is used in the contract */
-      index_token_price: convertToContractTokenPrices(indexTokenPrice, indexToken.decimals),
-      long_token_price: convertToContractTokenPrices(longTokenPrice, longToken.decimals),
-      short_token_price: convertToContractTokenPrices(shortTokenPrice, shortToken.decimals),
-      /* eslint-enable camelcase */
-    }
-  } catch (error) {
-    logError(error)
-    return undefined
+  return {
+    /* eslint-disable camelcase -- snake_case is used in the contract */
+    index_token_price: indexTokenPrice
+      ? convertToContractTokenPrices(indexTokenPrice, indexToken.decimals)
+      : {min: 0n, max: 0n},
+    long_token_price: longTokenPrice
+      ? convertToContractTokenPrices(longTokenPrice, longToken.decimals)
+      : {min: 0n, max: 0n},
+    short_token_price: shortTokenPrice
+      ? convertToContractTokenPrices(shortTokenPrice, shortToken.decimals)
+      : {min: 0n, max: 0n},
+    /* eslint-enable camelcase */
   }
 }
 
@@ -160,7 +158,6 @@ export default async function fetchPositions(
 
   Array.from(marketsData.values()).forEach(market => {
     const marketPrice = getMarketPrice(chainId, tokenPricesData, market)
-    if (!marketPrice) return
 
     const collaterals = market.isSameCollaterals
       ? [market.longTokenAddress]
@@ -196,8 +193,16 @@ export default async function fetchPositions(
       UI_FEE_RECEIVER_ADDRESS,
     )
     .catch(error => {
-      logError(error, {positionHashes: positionHashes.map(toStarknetHexString), marketPrices})
-      return []
+      throw new ErrorWithMetadata(
+        'FetchError',
+        'Positions',
+        'Failed to fetch positions',
+        {
+          positionHashes: positionHashes.map(toStarknetHexString),
+          marketPrices,
+        },
+        {cause: error},
+      )
     })
 
   const positionsData = new Map<bigint, Position>()

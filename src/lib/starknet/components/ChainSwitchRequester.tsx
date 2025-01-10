@@ -20,7 +20,7 @@ export default memo(function ChainSwitchRequester() {
           // @ts-expect-error -- SN_KATANA is not an official chainId
           await thisWalletAccount.switchStarknetChain(chainId)
         }
-      } catch (_e: unknown) {
+      } catch {
         toast.error('Cannot switch chain, please switch manually in your wallet')
       }
     })()

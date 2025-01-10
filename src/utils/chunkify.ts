@@ -1,7 +1,7 @@
-const chunkify = function* <T extends unknown[]>(itr: T, size: number) {
+const chunkify = function* <T>(itr: T[], size: number) {
   let chunk: T[] = []
   for (const v of itr) {
-    chunk.push(v as T)
+    chunk.push(v)
     if (chunk.length === size) {
       yield chunk
       chunk = []

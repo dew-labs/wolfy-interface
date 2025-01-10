@@ -1,5 +1,5 @@
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import abs from '@/utils/numbers/bigint/abs'

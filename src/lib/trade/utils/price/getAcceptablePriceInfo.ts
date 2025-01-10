@@ -1,6 +1,6 @@
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
 import {BASIS_POINTS_DIVISOR_BIGINT} from '@/lib/trade/numbers/constants'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import getCappedPositionImpactUsd from '@/lib/trade/utils/fee/getCappedPositionImpactUsd'
 import shouldUseMaxPrice from '@/lib/trade/utils/price/shouldUseMaxPrice'

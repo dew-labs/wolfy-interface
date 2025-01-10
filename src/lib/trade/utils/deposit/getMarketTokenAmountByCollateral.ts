@@ -1,5 +1,5 @@
 import type {Token} from '@/constants/tokens'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import {applySwapImpactWithCap} from '@/lib/trade/utils/fee/applySwapImpactWithCap'

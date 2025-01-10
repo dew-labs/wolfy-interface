@@ -22,7 +22,7 @@ function createGetGasPriceQueryOptions(
           return await fetchGasPrice(wallet)
         }
       : skipToken,
-    placeholderData: previousData => previousData,
+    placeholderData: previousData => previousData ?? 0n,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000, // 1 minute
     refetchOnWindowFocus: true,

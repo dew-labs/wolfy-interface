@@ -1,4 +1,4 @@
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 
 /**
  * Apart from usual cases, returns `long` for single token backed markets.

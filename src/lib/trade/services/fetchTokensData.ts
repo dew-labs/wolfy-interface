@@ -1,35 +1,63 @@
-import {Contract} from 'starknet'
-import {cairoIntToBigInt, ERC20ABI, getProvider, ProviderType, StarknetChainId} from 'wolfy-sdk'
+import {createMulticallRequest, multicall} from 'starknet_multicall'
+import invariant from 'tiny-invariant'
+import {
+  cairoIntToBigInt,
+  ERC20ABI,
+  getProvider,
+  getWolfyContractAddress,
+  ProviderType,
+  type StarknetChainId,
+  WolfyContract,
+} from 'wolfy-sdk'
+
+import chunkify from '@/utils/chunkify'
 
 interface TokenData {
-  balance: bigint
   totalSupply: bigint
   decimals: number
 }
 
+export type TokensData = Map<string, TokenData>
+
 export async function fetchTokensData(
   chainId: StarknetChainId,
-  accountAddress: string | undefined,
   tokenAddresses: string[],
-) {
+): Promise<TokensData> {
   const dataMap = new Map<string, TokenData>()
 
-  const provider = getProvider(ProviderType.HTTP, chainId)
+  const tokenAddressChunks = Array.from(chunkify(tokenAddresses, 50))
 
   await Promise.allSettled(
-    tokenAddresses.map(async address => {
-      const contract = new Contract(ERC20ABI, address, provider).typedv2(ERC20ABI)
-      const [balance, totalSupply, decimals] = await Promise.all([
-        accountAddress ? contract.balance_of(accountAddress) : Promise.resolve(0n),
-        contract.total_supply(),
-        contract.decimals(),
-      ])
+    tokenAddressChunks.map(async addresses => {
+      const totalSupplyCalls = addresses.map(address =>
+        createMulticallRequest(address, ERC20ABI, 'total_supply'),
+      )
 
-      dataMap.set(address, {
-        balance: cairoIntToBigInt(balance),
-        totalSupply: cairoIntToBigInt(totalSupply),
-        decimals: Number(cairoIntToBigInt(decimals)),
+      const decimalsCalls = addresses.map(address =>
+        createMulticallRequest(address, ERC20ABI, 'decimals'),
+      )
+
+      const results = await multicall(
+        [...totalSupplyCalls, ...decimalsCalls],
+        getWolfyContractAddress(chainId, WolfyContract.Multicall),
+        getProvider(ProviderType.HTTP, chainId),
+      )
+
+      const totalSupplies = results.slice(0, addresses.length)
+      const decimals = results.slice(addresses.length)
+
+      addresses.forEach((address, index) => {
+        invariant(address)
+        invariant(totalSupplies[index])
+        invariant(decimals[index])
+
+        dataMap.set(address, {
+          totalSupply: cairoIntToBigInt(totalSupplies[index]),
+          decimals: Number(cairoIntToBigInt(decimals[index])),
+        })
       })
     }),
   )
+
+  return dataMap
 }

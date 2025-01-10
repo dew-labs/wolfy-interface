@@ -42,7 +42,7 @@ export function createQueryClient() {
         },
       },
       mutations: {
-        throwOnError: false,
+        throwOnError: true,
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
@@ -79,6 +79,7 @@ export function createQueryClient() {
 }
 
 export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions, 'queryClient'> {
+  // TODo: persist to indexedDb instead of localStorage
   const persister = createSyncStoragePersister({
     storage: window.localStorage,
     serialize: data => compressString(stringify(data)),

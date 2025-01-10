@@ -1,5 +1,5 @@
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals from '@/utils/numbers/expandDecimals'
