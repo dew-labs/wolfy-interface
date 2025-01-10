@@ -63,32 +63,32 @@ export interface PositionsInfoData {
 
 export default function getPositionsInfo(
   chainId: StarknetChainId,
-  marketsData: MarketsData,
-  tokenPricesData: TokenPricesData,
-  positionsData: PositionsData,
-  positionConstants: PositionConstants,
-  uiFeeFactor: bigint,
-  showPnlInLeverage: boolean,
+  marketsData?: MarketsData,
+  tokenPricesData?: TokenPricesData,
+  positionsData?: PositionsData,
+  positionConstants?: PositionConstants,
+  uiFeeFactor?: bigint,
+  showPnlInLeverage?: boolean,
   referralInfo?: ReferralInfo | null,
 ): PositionsInfoData {
-  const {minCollateralUsd} = positionConstants
+  const {minCollateralUsd} = positionConstants ?? {}
   const tokensMetadata = getTokensMetadata(chainId)
 
   const positionsInfo = new Map<bigint, PositionInfo>()
   const positionsInfoViaStringRepresentation = new Map<string, PositionInfo>()
 
-  positionsData.positionsData.forEach((position, positionKey) => {
-    const marketData = marketsData.get(position.marketAddress)
+  positionsData?.positionsData.forEach((position, positionKey) => {
+    const marketData = marketsData?.get(position.marketAddress)
     const indexToken = marketData?.indexToken
     const pnlToken = position.isLong ? marketData?.longToken : marketData?.shortToken
     const collateralToken = tokensMetadata.get(position.collateralTokenAddress)
 
     if (!marketData || !indexToken || !pnlToken || !collateralToken) return
 
-    const indexTokenPrice = tokenPricesData.get(marketData.indexToken.address)
-    const collateralTokenPrice = tokenPricesData.get(collateralToken.address)
-    const longTokenPrice = tokenPricesData.get(marketData.longToken.address)
-    const shortTokenPrice = tokenPricesData.get(marketData.shortToken.address)
+    const indexTokenPrice = tokenPricesData?.get(marketData.indexToken.address)
+    const collateralTokenPrice = tokenPricesData?.get(collateralToken.address)
+    const longTokenPrice = tokenPricesData?.get(marketData.longToken.address)
+    const shortTokenPrice = tokenPricesData?.get(marketData.shortToken.address)
 
     if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) return
 
@@ -161,14 +161,16 @@ export default function getPositionsInfo(
       collateralMinPrice,
     )
 
-    const pnl = getPositionPnlUsd({
-      marketInfo: marketData,
-      tokenPricesData,
-      sizeInUsd: position.sizeInUsd,
-      sizeInTokens: position.sizeInTokens,
-      markPrice,
-      isLong: position.isLong,
-    })
+    const pnl = tokenPricesData
+      ? getPositionPnlUsd({
+          marketInfo: marketData,
+          tokenPricesData,
+          sizeInUsd: position.sizeInUsd,
+          sizeInTokens: position.sizeInTokens,
+          markPrice,
+          isLong: position.isLong,
+        })
+      : 0n
 
     const pnlPercentage = collateralUsd === 0n ? 0n : getBasisPoints(pnl, collateralUsd)
 
@@ -218,7 +220,7 @@ export default function getPositionsInfo(
       collateralUsd,
       collateralAmount: position.collateralAmount,
       referralInfo,
-      minCollateralUsd,
+      minCollateralUsd: minCollateralUsd ?? 0n,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
       pendingFundingFeesUsd,
       isLong: position.isLong,

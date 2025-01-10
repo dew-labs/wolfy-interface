@@ -30,9 +30,6 @@ export default function usePositionsInfoData<T = PositionsInfoData>(
   return usePositionsData(
     useCallback(
       (positionsData: PositionsData) => {
-        if (!marketsData || !tokenPricesData || !positionConstants || uiFeeFactor === undefined)
-          return undefined
-
         const data = getPositionsInfo(
           chainId,
           marketsData,
