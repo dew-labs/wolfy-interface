@@ -9,7 +9,6 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import * as React from 'react'
 import {memo, type MemoizedCallback, useCallback, useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
 import {useLatest} from 'react-use'
@@ -268,7 +267,16 @@ export default memo(function WithdrawModal({
             }
 
             const result = await sendWithdrawal(wallet, withdrawalParams, feeToken)
-            await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
+
+            await Promise.allSettled([
+              queryClient.invalidateQueries({
+                queryKey: ['marketTokenBalances', latestChainId.current],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: ['marketTokensData', latestChainId.current],
+              }),
+            ])
+
             onClose()
             return result
           } finally {

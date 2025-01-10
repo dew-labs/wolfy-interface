@@ -9,7 +9,6 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
-import * as React from 'react'
 import {
   type ChangeEventHandler,
   memo,
@@ -352,7 +351,16 @@ export default memo(function DepositModal({
             }
 
             const result = await sendDeposit(wallet, depositParams, feeToken)
-            await queryClient.invalidateQueries({queryKey: ['marketTokenBalances']})
+
+            await Promise.allSettled([
+              queryClient.invalidateQueries({
+                queryKey: ['marketTokenBalances', latestChainId.current],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: ['marketTokensData', latestChainId.current],
+              }),
+            ])
+
             onClose()
             return result
           } finally {
