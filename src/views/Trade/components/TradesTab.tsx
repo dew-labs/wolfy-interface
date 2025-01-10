@@ -219,7 +219,7 @@ export default memo(function TradesTab() {
     isFetching,
   } = useTradeHistory(selectedActions, selectedMarkets, selectedDirection, currentPage, 10)
   const totalPages = tradeHistory?.totalPages ?? 0
-  const tradeHistoryItems = tradeHistory?.data ?? []
+  const tradeHistoryItems = useMemo(() => tradeHistory?.data ?? [], [tradeHistory?.data])
 
   const refetchTradeHistory = useCallback(() => {
     void refetch()
@@ -245,6 +245,48 @@ export default memo(function TradesTab() {
     setSelectedMarkets(selectedMarkets)
     setSelectedDirection(selectedDirections)
   }, [])
+
+  const extendedTradeHistoryItems = useMemo(() => {
+    return tradeHistoryItems
+      .map(item => {
+        const market = marketsData.get(item.market)
+        if (!market) return false
+
+        const poolName = getMarketPoolName(market)
+
+        const executionFee = item.fee ? shrinkDecimals(item.fee, feeToken.decimals) : '0'
+
+        const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
+          fractionDigits: 6,
+        })} ${feeToken.symbol}`
+
+        const executionFeeUsd = shrinkDecimals(
+          expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
+          USD_DECIMALS + feeToken.decimals,
+        )
+
+        const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
+
+        const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
+
+        return {
+          ...item,
+          market,
+          poolName,
+          executionFeeText,
+          executionFeeUsdText,
+          txnUrl,
+        }
+      })
+      .filter(Boolean)
+  }, [
+    chainId,
+    feeToken.decimals,
+    feeToken.symbol,
+    feeTokenPrice.max,
+    marketsData,
+    tradeHistoryItems,
+  ])
 
   return (
     <div className='relative'>
@@ -329,33 +371,12 @@ export default memo(function TradesTab() {
           <TableColumn>{t('Time')}</TableColumn>
         </TableHeader>
         <TableBody
-          items={tradeHistoryItems}
+          items={extendedTradeHistoryItems}
           emptyContent={'No trade.'}
           isLoading={isLoading}
           loadingContent={<Spinner className='mt-4' />}
         >
           {item => {
-            const market = marketsData.get(item.market)
-            // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
-            if (!market) return <></>
-
-            const poolName = getMarketPoolName(market)
-
-            const executionFee = item.fee ? shrinkDecimals(item.fee, feeToken.decimals) : '0'
-
-            const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
-              fractionDigits: 6,
-            })} ${feeToken.symbol}`
-
-            const executionFeeUsd = shrinkDecimals(
-              expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
-              USD_DECIMALS + feeToken.decimals,
-            )
-
-            const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
-
-            const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
-
             return (
               <TableRow key={item.id}>
                 <TableCell>
@@ -394,34 +415,36 @@ export default memo(function TradesTab() {
                       variant='light'
                       className='flex inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
-                        setTokenAddress(market.indexTokenAddress)
+                        setTokenAddress(item.market.indexTokenAddress)
                       }}
                     >
                       <img
-                        src={market.indexToken.imageUrl}
-                        alt={market.indexToken.symbol}
+                        src={item.market.indexToken.imageUrl}
+                        alt={item.market.indexToken.symbol}
                         className='h-6 w-6 rounded'
                       />
                       <div className='flex flex-col'>
                         <div>
-                          {item.isLong ? 'Long' : 'Short'} {market.indexToken.symbol}
+                          {item.isLong ? 'Long' : 'Short'} {item.market.indexToken.symbol}
                         </div>
                         <div className='subtext whitespace-nowrap text-xs opacity-50'>
-                          [{poolName}]
+                          [{item.poolName}]
                         </div>
                       </div>
                     </Button>
                   </Tooltip>
                 </TableCell>
                 <TableCell>{formatUsd(item.size)}</TableCell>
-                <TableCell>{formatMarketUsd(item.price, item.market)}</TableCell>
+                <TableCell>{formatMarketUsd(item.price, item.market.marketTokenAddress)}</TableCell>
                 <TableCell>{formatUsd(item.rpnl)}</TableCell>
                 <TableCell>
-                  <div>{executionFeeUsdText}</div>
-                  <div className='whitespace-nowrap text-xs opacity-50'>{executionFeeText}</div>
+                  <div>{item.executionFeeUsdText}</div>
+                  <div className='whitespace-nowrap text-xs opacity-50'>
+                    {item.executionFeeText}
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
+                  <a href={item.txnUrl} target='_blank' rel='noopener noreferrer'>
                     {formatLocaleDateTime(item.createdAt * 1000)
                       .split(', ')
                       .map(time => (

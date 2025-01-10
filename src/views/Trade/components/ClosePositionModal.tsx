@@ -180,6 +180,7 @@ export default memo(function ClosePositionModal() {
   const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimits()
   const {data: uiFeeFactor = 0n} = useUiFeeFactor()
   const {data: referralInfo} = useReferralInfo()
+  //TODO: optimize, do not subscribe to entire token prices
   const {data: tokenPricesData = new Map()} = useTokenPrices()
 
   const {

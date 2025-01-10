@@ -12,7 +12,7 @@ import {
 } from '@nextui-org/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
-import {memo, useCallback} from 'react'
+import {memo, useCallback, useMemo} from 'react'
 import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
@@ -96,6 +96,92 @@ export default memo(function OrdersTab() {
     [queryClient],
   )
 
+  const extendedOrders = useMemo(() => {
+    return orders
+      .map(order => {
+        const indexTokenPrice = order.indexTokenPrice
+        if (!indexTokenPrice) return false
+
+        const indexName = getMarketIndexName(order.marketData)
+        const poolName = getMarketPoolName(order.marketData)
+
+        const initialCollateralToken = order.initialCollateralToken
+        const targetCollateralToken = order.targetCollateralToken
+
+        const initialCollateralTokenPrice = order.initialCollateralTokenPrice
+        const targetCollateralTokenPrice = order.targetCollateralTokenPrice
+
+        const collateralUsd = convertTokenAmountToUsd(
+          order.initialCollateralDeltaAmount,
+          initialCollateralToken.decimals,
+          initialCollateralTokenPrice?.min,
+        )
+
+        const collateralUdsShrinked = formatNumber(
+          shrinkDecimals(collateralUsd, USD_DECIMALS),
+          Format.USD,
+          {
+            exactFractionDigits: true,
+          },
+        )
+
+        const collateralText = (() => {
+          if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
+
+          const targetCollateralAmount = convertUsdToTokenAmount(
+            collateralUsd,
+            targetCollateralToken.decimals,
+            targetCollateralTokenPrice.min,
+          )
+
+          const tokenAmountFractionDigits = calculateTokenFractionDigits(
+            targetCollateralTokenPrice.min,
+          )
+
+          const tokenAmountText = formatNumber(
+            shrinkDecimals(targetCollateralAmount, targetCollateralToken.decimals),
+            Format.PLAIN,
+            {exactFractionDigits: true, fractionDigits: tokenAmountFractionDigits},
+          )
+
+          return `${tokenAmountText} ${targetCollateralToken.symbol}`
+        })()
+
+        const triggerPriceText = `${order.triggerThresholdType} ${formatNumber(
+          shrinkDecimals(order.triggerPrice, USD_DECIMALS),
+          Format.USD,
+          {exactFractionDigits: true},
+        )}`
+
+        const markPrice = getMarkPrice({
+          price: indexTokenPrice,
+          isIncrease: isIncreaseOrderType(order.orderType),
+          isLong: order.isLong,
+        })
+
+        const markPriceText = formatNumber(shrinkDecimals(markPrice, USD_DECIMALS), Format.USD, {
+          exactFractionDigits: true,
+        })
+        const sizeText = formatNumber(
+          shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
+          Format.USD,
+          {exactFractionDigits: true},
+        )
+
+        return {
+          ...order,
+          sizeText,
+          collateralUdsShrinked,
+          collateralText,
+          triggerPriceText,
+          markPriceText,
+          indexName,
+          poolName,
+        }
+      })
+      .filter(Boolean)
+  }, [orders])
+
   return (
     <div className='relative'>
       <Button
@@ -120,85 +206,11 @@ export default memo(function OrdersTab() {
         </TableHeader>
         <TableBody
           emptyContent={'No order.'}
-          items={orders}
+          items={extendedOrders}
           isLoading={isLoading}
           loadingContent={<Spinner className='mt-4' />}
         >
           {order => {
-            const indexTokenPrice = order.indexTokenPrice
-            // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
-            if (!indexTokenPrice) return <></>
-
-            const indexName = getMarketIndexName(order.marketData)
-            const poolName = getMarketPoolName(order.marketData)
-
-            const initialCollateralToken = order.initialCollateralToken
-            const targetCollateralToken = order.targetCollateralToken
-
-            const initialCollateralTokenPrice = order.initialCollateralTokenPrice
-            const targetCollateralTokenPrice = order.targetCollateralTokenPrice
-
-            const collateralUsd = convertTokenAmountToUsd(
-              order.initialCollateralDeltaAmount,
-              initialCollateralToken.decimals,
-              initialCollateralTokenPrice?.min,
-            )
-
-            const collateralUdsShrinked = formatNumber(
-              shrinkDecimals(collateralUsd, USD_DECIMALS),
-              Format.USD,
-              {
-                exactFractionDigits: true,
-              },
-            )
-
-            const collateralText = (() => {
-              if (!initialCollateralTokenPrice || !targetCollateralTokenPrice) return ''
-
-              const targetCollateralAmount = convertUsdToTokenAmount(
-                collateralUsd,
-                targetCollateralToken.decimals,
-                targetCollateralTokenPrice.min,
-              )
-
-              const tokenAmountFractionDigits = calculateTokenFractionDigits(
-                targetCollateralTokenPrice.min,
-              )
-
-              const tokenAmountText = formatNumber(
-                shrinkDecimals(targetCollateralAmount, targetCollateralToken.decimals),
-                Format.PLAIN,
-                {exactFractionDigits: true, fractionDigits: tokenAmountFractionDigits},
-              )
-
-              return `${tokenAmountText} ${targetCollateralToken.symbol}`
-            })()
-
-            const triggerPriceText = `${order.triggerThresholdType} ${formatNumber(
-              shrinkDecimals(order.triggerPrice, USD_DECIMALS),
-              Format.USD,
-              {exactFractionDigits: true},
-            )}`
-
-            const markPrice = getMarkPrice({
-              price: indexTokenPrice,
-              isIncrease: isIncreaseOrderType(order.orderType),
-              isLong: order.isLong,
-            })
-
-            const markPriceText = formatNumber(
-              shrinkDecimals(markPrice, USD_DECIMALS),
-              Format.USD,
-              {
-                exactFractionDigits: true,
-              },
-            )
-            const sizeText = formatNumber(
-              shrinkDecimals(order.sizeDeltaUsd, USD_DECIMALS),
-              Format.USD,
-              {exactFractionDigits: true},
-            )
-
             return (
               <TableRow key={order.key}>
                 <TableCell>
@@ -224,28 +236,28 @@ export default memo(function OrdersTab() {
                     >
                       <img
                         src={order.marketData.indexToken.imageUrl}
-                        alt={indexName}
+                        alt={order.indexName}
                         className='h-6 w-6 rounded'
                       />
                       <div className='flex flex-col'>
-                        <div>{indexName}</div>
+                        <div>{order.indexName}</div>
                         <div className='subtext whitespace-nowrap text-xs opacity-50'>
-                          [{poolName}]
+                          [{order.poolName}]
                         </div>
                       </div>
                     </Button>
                   </Tooltip>
                 </TableCell>
-                <TableCell>{sizeText}</TableCell>
+                <TableCell>{order.sizeText}</TableCell>
                 <TableCell>
-                  <div className='text-nowrap'>{collateralUdsShrinked}</div>
-                  <div className='text-nowrap text-xs opacity-50'>{collateralText}</div>
+                  <div className='text-nowrap'>{order.collateralUdsShrinked}</div>
+                  <div className='text-nowrap text-xs opacity-50'>{order.collateralText}</div>
                 </TableCell>
                 <TableCell>
-                  <span>{triggerPriceText}</span>
+                  <span>{order.triggerPriceText}</span>
                 </TableCell>
                 <TableCell>
-                  <span>{markPriceText}</span>
+                  <span>{order.markPriceText}</span>
                 </TableCell>
                 <TableCell>
                   <Button

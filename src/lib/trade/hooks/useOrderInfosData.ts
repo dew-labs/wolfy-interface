@@ -17,6 +17,7 @@ export default function useOrdersInfosData<T = OrderInfosData>(
 ) {
   const [chainId] = useChainId()
   const {data: marketsData} = useMarketsData()
+  //TODO: optimize, do not subscribe to entire token prices
   const {data: tokenPricesData} = useTokenPrices()
 
   return useOrdersData(

@@ -172,6 +172,88 @@ export default memo(function DepositWithdrawalHistory() {
     setSelectedMarkets(Array.from(selection) as string[])
   }, [])
 
+  const extendedHistoryItems = useMemo(() => {
+    return historyItems
+      .map(item => {
+        const market = marketsData.get(item.market)
+        const marketTokenData = marketTokensData.get(item.market)
+
+        if (!market) return false
+
+        const marketTokenAmount = item.marketTokenAmount
+          ? shrinkDecimals(item.marketTokenAmount, marketTokenData?.decimals ?? 0)
+          : '0'
+
+        const marketTokenPrice = shortlistedTokenPrices.get(market.marketTokenAddress)
+        const marketTokenFractionDigits = calculateTokenFractionDigits(marketTokenPrice?.max)
+
+        const marketTokenAmountText = formatNumber(marketTokenAmount, Format.READABLE, {
+          fractionDigits: marketTokenFractionDigits,
+        })
+
+        const longTokenAmount = item.longTokenAmount
+          ? shrinkDecimals(item.longTokenAmount, market.longToken.decimals)
+          : '0'
+
+        const longTokenPrice = shortlistedTokenPrices.get(market.longToken.address)
+        const longTokenFractionDigits = calculateTokenFractionDigits(longTokenPrice?.max)
+
+        const longTokenAmountText = formatNumber(longTokenAmount, Format.READABLE, {
+          fractionDigits: longTokenFractionDigits,
+        })
+
+        const shortTokenAmount = item.shortTokenAmount
+          ? shrinkDecimals(item.shortTokenAmount, market.shortToken.decimals)
+          : '0'
+
+        const shortTokenPrice = shortlistedTokenPrices.get(market.shortToken.address)
+
+        const shortTokenFractionDigits = calculateTokenFractionDigits(shortTokenPrice?.max)
+
+        const shortTokenAmountText = formatNumber(shortTokenAmount, Format.READABLE, {
+          fractionDigits: shortTokenFractionDigits,
+        })
+
+        const executionFee = item.executionFee
+          ? shrinkDecimals(item.executionFee, feeToken.decimals)
+          : '0'
+
+        const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
+          fractionDigits: 6,
+        })} ${feeToken.symbol}`
+
+        const executionFeeUsd = shrinkDecimals(
+          expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
+          USD_DECIMALS + feeToken.decimals,
+        )
+
+        const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
+
+        const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
+
+        return {
+          ...item,
+          market,
+          marketTokenAmountText,
+          longTokenAmountText,
+          shortTokenAmountText,
+          executionFeeUsdText,
+          executionFeeText,
+          txnUrl,
+        }
+      })
+      .filter(Boolean)
+  }, [
+    chainId,
+    feeToken.decimals,
+    feeToken.symbol,
+    feeTokenPrice.max,
+    historyItems,
+    marketTokensData,
+    marketsData,
+    shortlistedTokenPrices,
+  ])
+
   return (
     <>
       <h2 className='mt-4 text-lg font-bold text-default-900'>Deposit/Withdrawal History</h2>
@@ -244,68 +326,12 @@ export default memo(function DepositWithdrawalHistory() {
             <TableColumn>{t('Time')}</TableColumn>
           </TableHeader>
           <TableBody
-            items={historyItems}
+            items={extendedHistoryItems}
             emptyContent={'No deposit/withdrawal history.'}
             isLoading={isLoading}
             loadingContent={<Spinner className='mt-4' />}
           >
             {item => {
-              const market = marketsData.get(item.market)
-              const marketTokenData = marketTokensData.get(item.market)
-              // eslint-disable-next-line @eslint-react/no-useless-fragment -- escape
-              if (!market) return <></>
-
-              const marketTokenAmount = item.marketTokenAmount
-                ? shrinkDecimals(item.marketTokenAmount, marketTokenData?.decimals ?? 0)
-                : '0'
-
-              const marketTokenPrice = shortlistedTokenPrices.get(market.marketTokenAddress)
-              const marketTokenFractionDigits = calculateTokenFractionDigits(marketTokenPrice?.max)
-
-              const marketTokenAmountText = formatNumber(marketTokenAmount, Format.READABLE, {
-                fractionDigits: marketTokenFractionDigits,
-              })
-
-              const longTokenAmount = item.longTokenAmount
-                ? shrinkDecimals(item.longTokenAmount, market.longToken.decimals)
-                : '0'
-
-              const longTokenPrice = shortlistedTokenPrices.get(market.longToken.address)
-              const longTokenFractionDigits = calculateTokenFractionDigits(longTokenPrice?.max)
-
-              const longTokenAmountText = formatNumber(longTokenAmount, Format.READABLE, {
-                fractionDigits: longTokenFractionDigits,
-              })
-
-              const shortTokenAmount = item.shortTokenAmount
-                ? shrinkDecimals(item.shortTokenAmount, market.shortToken.decimals)
-                : '0'
-
-              const shortTokenPrice = shortlistedTokenPrices.get(market.shortToken.address)
-
-              const shortTokenFractionDigits = calculateTokenFractionDigits(shortTokenPrice?.max)
-
-              const shortTokenAmountText = formatNumber(shortTokenAmount, Format.READABLE, {
-                fractionDigits: shortTokenFractionDigits,
-              })
-
-              const executionFee = item.executionFee
-                ? shrinkDecimals(item.executionFee, feeToken.decimals)
-                : '0'
-
-              const executionFeeText = `${formatNumber(executionFee, Format.READABLE, {
-                fractionDigits: 6,
-              })} ${feeToken.symbol}`
-
-              const executionFeeUsd = shrinkDecimals(
-                expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
-                USD_DECIMALS + feeToken.decimals,
-              )
-
-              const executionFeeUsdText = formatNumber(executionFeeUsd, Format.USD)
-
-              const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
-
               return (
                 <TableRow key={item.id}>
                   <TableCell>
@@ -327,31 +353,33 @@ export default memo(function DepositWithdrawalHistory() {
                   <TableCell>
                     <div className='flex items-center gap-2'>
                       <img
-                        src={market.indexToken.imageUrl}
-                        alt={market.indexToken.symbol}
+                        src={item.market.indexToken.imageUrl}
+                        alt={item.market.indexToken.symbol}
                         className='h-6 w-6 rounded'
                       />
                       <div className='flex flex-col'>
-                        <div>{market.indexToken.symbol}</div>
+                        <div>{item.market.indexToken.symbol}</div>
                         <div className='subtext whitespace-nowrap text-xs opacity-50'>
-                          {getMarketPoolName(market)}
+                          {getMarketPoolName(item.market)}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{marketTokenAmountText} WM</TableCell>
+                  <TableCell>{item.marketTokenAmountText} WM</TableCell>
                   <TableCell>
-                    {longTokenAmountText} {market.longToken.symbol}
+                    {item.longTokenAmountText} {item.market.longToken.symbol}
                   </TableCell>
                   <TableCell>
-                    {shortTokenAmountText} {market.shortToken.symbol}
+                    {item.shortTokenAmountText} {item.market.shortToken.symbol}
                   </TableCell>
                   <TableCell>
-                    <div>{executionFeeUsdText}</div>
-                    <div className='whitespace-nowrap text-xs opacity-50'>{executionFeeText}</div>
+                    <div>{item.executionFeeUsdText}</div>
+                    <div className='whitespace-nowrap text-xs opacity-50'>
+                      {item.executionFeeText}
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <a href={txnUrl} target='_blank' rel='noopener noreferrer'>
+                    <a href={item.txnUrl} target='_blank' rel='noopener noreferrer'>
                       {formatLocaleDateTime(item.createdAt * 1000)
                         .split(', ')
                         .map(time => (
