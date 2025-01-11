@@ -12,17 +12,17 @@ export default async function fetchMarketsData(
   markets: Market[],
   tokenPriceData: TokenPricesData,
 ): Promise<MarketsData> {
-  const results = await Promise.allSettled(
+  // TODO: the calculation is heavy, should split to multiple requests and use together with useQueries to have fine-grain retry for each market instead of all at once
+  const results = await Promise.all(
     markets.map(async market => {
-      return fetchMarketData(chainId, market, tokenPriceData)
+      return await fetchMarketData(chainId, market, tokenPriceData)
     }),
   )
 
   const marketMap = new Map<string, MarketData>()
 
   results.forEach(result => {
-    if (result.status !== 'fulfilled') return
-    marketMap.set(result.value.marketTokenAddress, result.value)
+    marketMap.set(result.marketTokenAddress, result)
   })
 
   return marketMap

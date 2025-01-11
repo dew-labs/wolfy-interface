@@ -1,35 +1,47 @@
-import {useQuery, type UseQueryResult} from '@tanstack/react-query'
-import type {MemoizedCallback} from 'react'
+import {useQueries, type UseQueryResult} from '@tanstack/react-query'
+import {type MemoizedCallback, useMemo} from 'react'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {FundingFeeData} from '@/lib/trade/services/fetchFundingFee'
-import fetchFundingFees, {type FundingFeesData} from '@/lib/trade/services/fetchFundingFees'
+import fetchFundingFee from '@/lib/trade/services/fetchFundingFee'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarkets from './useMarkets'
 
-export default function useFundingFees(): UseQueryResult<FundingFeesData>
-export default function useFundingFees<T = FundingFeesData>(
-  selector: MemoizedCallback<(data: FundingFeesData) => T>,
-): UseQueryResult<T>
+export default function useFundingFees(): UseQueryResult<FundingFeeData>[]
+export default function useFundingFees<T = FundingFeeData>(
+  selector: MemoizedCallback<(data: FundingFeeData) => T>,
+): UseQueryResult<T>[]
 export default function useFundingFees() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
   const {data: markets} = useMarkets()
 
-  return useQuery({
-    queryKey: ['fundingFees', chainId, accountAddress, markets],
-    queryFn: async () => {
-      if (!markets || !accountAddress) {
-        return new Map<string, FundingFeeData>()
-      }
+  const queries = useMemo(() => {
+    return (
+      markets?.map(market => ({
+        queryKey: ['fundingFee', chainId, accountAddress, market],
+        queryFn: async () => fetchFundingFee(chainId, market, accountAddress),
+        ...NO_REFETCH_OPTIONS,
+        refetchInterval: 60000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      })) ?? []
+    )
+  }, [markets, chainId, accountAddress])
 
-      return fetchFundingFees(chainId, markets, accountAddress)
-    },
-    ...NO_REFETCH_OPTIONS,
-    refetchInterval: 60000,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+  return useQueries({
+    queries,
+    // combine(results) {
+    //   const marketMap: FundingFeesData = new Map<string, FundingFeeData>()
+
+    //   results.forEach(result => {
+    //     if (!result.data) return
+    //     marketMap.set(result.data.market, result.data)
+    //   })
+
+    //   return marketMap
+    // },
   })
 }

@@ -352,7 +352,7 @@ export default memo(function DepositModal({
 
             const result = await sendDeposit(wallet, depositParams, feeToken)
 
-            await Promise.allSettled([
+            await Promise.all([
               queryClient.invalidateQueries({
                 queryKey: ['marketTokenBalances', latestChainId.current],
               }),

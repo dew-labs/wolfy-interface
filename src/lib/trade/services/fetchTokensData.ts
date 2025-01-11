@@ -27,7 +27,7 @@ export async function fetchTokensData(
 
   const tokenAddressChunks = Array.from(chunkify(tokenAddresses, 50))
 
-  await Promise.allSettled(
+  const results = await Promise.all(
     tokenAddressChunks.map(async addresses => {
       const totalSupplyCalls = addresses.map(address =>
         createMulticallRequest(address, ERC20ABI, 'total_supply'),
@@ -46,18 +46,26 @@ export async function fetchTokensData(
       const totalSupplies = results.slice(0, addresses.length)
       const decimals = results.slice(addresses.length)
 
-      addresses.forEach((address, index) => {
-        invariant(address)
-        invariant(totalSupplies[index])
-        invariant(decimals[index])
-
-        dataMap.set(address, {
-          totalSupply: cairoIntToBigInt(totalSupplies[index]),
-          decimals: Number(cairoIntToBigInt(decimals[index])),
-        })
-      })
+      return {
+        addresses,
+        totalSupplies,
+        decimals,
+      }
     }),
   )
+
+  results.forEach(({addresses, totalSupplies, decimals}) => {
+    addresses.forEach((address, index) => {
+      invariant(address)
+      invariant(totalSupplies[index])
+      invariant(decimals[index])
+
+      dataMap.set(address, {
+        totalSupply: cairoIntToBigInt(totalSupplies[index]),
+        decimals: Number(cairoIntToBigInt(decimals[index])),
+      })
+    })
+  })
 
   return dataMap
 }

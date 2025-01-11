@@ -27,7 +27,7 @@ export default async function getTokenBalances(
 
   const tokenChunks = Array.from(chunkify(tokens, 50))
 
-  await Promise.allSettled(
+  const results = await Promise.all(
     tokenChunks.map(async tokens => {
       const calls = tokens.map(token =>
         createMulticallRequest(token.address, ERC20ABI, 'balance_of', [accountAddress]),
@@ -39,12 +39,19 @@ export default async function getTokenBalances(
         getProvider(ProviderType.HTTP, chainId),
       )
 
-      balances.forEach((balance, index) => {
-        invariant(tokens[index])
-        balanceMap.set(tokens[index].address, cairoIntToBigInt(balance))
-      })
+      return {
+        balances,
+        tokens,
+      }
     }),
   )
+
+  results.forEach(({balances, tokens}) => {
+    balances.forEach((balance, index) => {
+      invariant(tokens[index])
+      balanceMap.set(tokens[index].address, cairoIntToBigInt(balance))
+    })
+  })
 
   return balanceMap
 }

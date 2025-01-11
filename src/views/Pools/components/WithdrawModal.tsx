@@ -268,7 +268,7 @@ export default memo(function WithdrawModal({
 
             const result = await sendWithdrawal(wallet, withdrawalParams, feeToken)
 
-            await Promise.allSettled([
+            await Promise.all([
               queryClient.invalidateQueries({
                 queryKey: ['marketTokenBalances', latestChainId.current],
               }),

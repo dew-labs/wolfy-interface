@@ -23,11 +23,9 @@ export async function fetchMarketTokensData(
   chainId: StarknetChainId,
   marketTokenAddresses: string[],
 ): Promise<MarketTokensData> {
-  const dataMap = new Map<string, MarketTokenData>()
-
   const marketTokenAddressChunks = Array.from(chunkify(marketTokenAddresses, 50))
 
-  await Promise.allSettled(
+  const results = await Promise.all(
     marketTokenAddressChunks.map(async addresses => {
       const totalSupplyCalls = addresses.map(address =>
         createMulticallRequest(address, ERC20ABI, 'total_supply'),
@@ -46,17 +44,27 @@ export async function fetchMarketTokensData(
       const totalSupplies = results.slice(0, results.length / 2)
       const decimals = results.slice(results.length / 2)
 
-      totalSupplies.forEach((totalSupply, index) => {
-        invariant(addresses[index])
-        invariant(decimals[index])
-
-        dataMap.set(addresses[index], {
-          totalSupply: cairoIntToBigInt(totalSupply),
-          decimals: Number(cairoIntToBigInt(decimals[index])),
-        })
-      })
+      return {
+        totalSupplies,
+        decimals,
+        addresses,
+      }
     }),
   )
+
+  const dataMap = new Map<string, MarketTokenData>()
+
+  results.forEach(({totalSupplies, decimals, addresses}) => {
+    totalSupplies.forEach((totalSupply, index) => {
+      invariant(addresses[index])
+      invariant(decimals[index])
+
+      dataMap.set(addresses[index], {
+        totalSupply: cairoIntToBigInt(totalSupply),
+        decimals: Number(cairoIntToBigInt(decimals[index])),
+      })
+    })
+  })
 
   return dataMap
 }

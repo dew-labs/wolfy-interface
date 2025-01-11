@@ -1,6 +1,6 @@
 import {PriceServiceConnection} from '@pythnetwork/price-service-client'
 import {useQueryClient} from '@tanstack/react-query'
-import {klona} from 'klona'
+import {create} from 'mutative'
 import {memo, useEffect} from 'react'
 
 import {getTokensMetadata} from '@/constants/tokens'
@@ -39,14 +39,12 @@ export default memo(function TokenPricesUpdater() {
                 const existingPrice = prevData.get(token.address)
                 if (existingPrice && existingPrice.min === price) return prevData
 
-                const newData = klona(prevData)
-
-                newData.set(token.address, {
-                  min: price,
-                  max: price,
+                return create(prevData, draft => {
+                  draft.set(token.address, {
+                    min: price,
+                    max: price,
+                  })
                 })
-
-                return newData
               })
             }
           })
