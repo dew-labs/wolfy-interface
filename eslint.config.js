@@ -1,3 +1,4 @@
+// TODO: using .ts config file https://eslint.org/docs/head/use/configure/configuration-files#typescript-configuration-files
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 

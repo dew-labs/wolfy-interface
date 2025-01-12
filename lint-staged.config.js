@@ -26,7 +26,7 @@ const settings = [
     ],
   },
   {
-    glob: globs.TYPESCRIPT,
+    glob: [...globs.TYPESCRIPT, '**/package.json'], // NOTE: upgrade package versions or remove packages can lead to type errors
     script: [() => 'tsc'],
   },
   {

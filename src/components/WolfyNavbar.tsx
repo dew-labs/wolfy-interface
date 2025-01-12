@@ -45,26 +45,31 @@ const menuItems = [
     label: 'Trade',
     to: TradeRoute.fullPath,
     target: '_self',
+    external: false,
   },
   {
     label: 'Pools',
     to: PoolsRoute.fullPath,
     target: '_self',
+    external: false,
   },
   {
     label: 'Referrals',
     to: '',
     target: '_self',
+    external: true,
   },
   {
     label: 'Leaderboard',
     to: '',
     target: '_self',
+    external: true,
   },
   {
     label: 'Docs',
     to: 'https://docs.wolfy.trade/',
     target: '_blank',
+    external: true,
   },
 ] as const
 
@@ -131,9 +136,15 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
           {menuItems.map(item => {
             return (
               <NavbarItem key={item.label}>
-                <Link className='mt-2 text-sm text-default-500' to={item.to} target={item.target}>
-                  {t(item.label)}
-                </Link>
+                {item.external ? (
+                  <a className='mt-2 text-sm text-default-500' href={item.to} target={item.target}>
+                    {t(item.label)}
+                  </a>
+                ) : (
+                  <Link className='mt-2 text-sm text-default-500' to={item.to} target={item.target}>
+                    {t(item.label)}
+                  </Link>
+                )}
               </NavbarItem>
             )
           })}
@@ -218,9 +229,19 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         >
           {menuItems.map((item, index) => (
             <NavbarMenuItem key={`${item.label}-${index}`}>
-              <Link className='text-d mb-2 flex w-full text-default-500' to={item.to}>
-                {t(item.label)}
-              </Link>
+              {item.external ? (
+                <a
+                  className='text-d mb-2 flex w-full text-default-500'
+                  href={item.to}
+                  target={item.target}
+                >
+                  {t(item.label)}
+                </a>
+              ) : (
+                <Link className='text-d mb-2 flex w-full text-default-500' to={item.to}>
+                  {t(item.label)}
+                </Link>
+              )}
               {index < menuItems.length - 1 && <Divider className='opacity-50' />}
             </NavbarMenuItem>
           ))}

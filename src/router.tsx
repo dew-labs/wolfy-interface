@@ -1,14 +1,14 @@
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter} from '@tanstack/react-router'
-import {parse, stringify} from 'devalue'
 
+// import {parse, stringify} from 'devalue'
 import {routeTree} from './routeTree.gen'
 import RouterErrorComponent from './views/Error/RouterErrorComponent'
 import NotFound from './views/NotFound/NotFound'
 
 export function createRouter({queryClient}: {queryClient: QueryClient}) {
   return createReactRouter({
-    transformer: {stringify, parse},
+    // transformer: {stringify, parse}, // NOTE: new encode/decode prop introduced but no proper docs https://github.com/TanStack/router/pull/3037 https://tanstack.com/router/latest/docs/framework/react/guide/ssr https://tanstack.com/router/latest/docs/framework/react/api/router/RouterOptionsType#transformer-property
     routeTree,
     context: {
       queryClient,
