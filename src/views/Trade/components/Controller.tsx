@@ -237,7 +237,14 @@ const Controller = createResetableComponent(({reset}) => {
     handleLeverageChange,
     maxLeverage,
     maxLeverageNumber,
-  } = usePayToken(tradeMode, tokenAddress, tokenPrice, tokenAmountUsd, setTokenAmountUsd)
+  } = usePayToken(
+    tradeMode,
+    tokenAddress,
+    tokenPrice,
+    tokenAmountUsd,
+    setTokenAmountUsd,
+    marketData?.minCollateralFactor,
+  )
 
   // TODO: drop this behavior in the future when we support pay token other than collateral token
   ;(function syncPayTokenAddressWithCollateralTokenAddress() {

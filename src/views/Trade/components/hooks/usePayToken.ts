@@ -5,6 +5,7 @@ import {LEVERAGE_DECIMALS, LEVERAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -14,8 +15,7 @@ function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   if (tokenAmountUsd <= 0 || payTokenAmountUsd <= 0) return 0n
   return (tokenAmountUsd * LEVERAGE_PRECISION) / payTokenAmountUsd
 }
-// TODO: read from contract dataStoreKeys.minCollateralFactorKey(marketTokenAddress)
-export const MAX_LEVERAGE = 100
+export const DEFAULT_MAX_LEVERAGE = 100
 
 export default function usePayToken(
   tradeMode: TradeMode,
@@ -23,9 +23,17 @@ export default function usePayToken(
   tokenPrice: bigint | undefined,
   tokenAmountUsd: bigint,
   setTokenAmountUsd: Dispatch<SetStateAction<bigint>>,
+  minCollateralFactor: bigint | undefined,
 ) {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
+
+  const maxLeverage =
+    BigInt(
+      minCollateralFactor
+        ? 1 / Number(shrinkDecimals(minCollateralFactor, USD_DECIMALS))
+        : DEFAULT_MAX_LEVERAGE,
+    ) * LEVERAGE_PRECISION
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
@@ -73,7 +81,6 @@ export default function usePayToken(
 
   // ------------------------------------------------------------------------------------------------------------------
 
-  const [maxLeverage] = useState(() => BigInt(MAX_LEVERAGE) * LEVERAGE_PRECISION)
   const maxLeverageNumber = Number(shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS))
   const latestMaxLeverage = useLatest(maxLeverage)
 
