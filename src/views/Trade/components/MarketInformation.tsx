@@ -41,6 +41,8 @@ interface TokenOption {
   shortLiquidity: bigint
   marketTokenAddress: string
   indexTokenAddress: string
+  longInterestUsd: bigint
+  shortInterestUsd: bigint
 }
 
 function use1DMarketInformation(symbol: string | undefined) {
@@ -150,6 +152,8 @@ export default memo(function MarketInformation() {
         shortLiquidity: shortLiquidity > 0n ? shortLiquidity : 0n,
         marketTokenAddress: marketInfo.marketTokenAddress,
         indexTokenAddress: marketInfo.indexTokenAddress,
+        longInterestUsd: marketInfo.longInterestUsd,
+        shortInterestUsd: marketInfo.shortInterestUsd,
       }
     })
     const indexes: Record<string, TokenOption[]> = groupBy(
@@ -172,6 +176,8 @@ export default memo(function MarketInformation() {
         maxShortLiquidityString: string
         price: number
         priceString: string
+        longInterestPercentage: number
+        shortInterestPercentage: number
       }
     >()
 
@@ -181,6 +187,15 @@ export default memo(function MarketInformation() {
 
       const selectedLongLiquid = max(...longLiquids)
       const selectedShortLiquid = max(...shortLiquids)
+
+      const longInterestUsd = markets.map(data => data.longInterestUsd).reduce((a, b) => a + b, 0n)
+      const shortInterestUsd = markets
+        .map(data => data.shortInterestUsd)
+        .reduce((a, b) => a + b, 0n)
+      const totalInterestUsd = longInterestUsd + shortInterestUsd
+
+      const longInterestPercentage = Number((longInterestUsd * 100n) / (totalInterestUsd || 1n))
+      const shortInterestPercentage = Number((shortInterestUsd * 100n) / (totalInterestUsd || 1n))
 
       const price = tokenPricesData.get(token)?.max ?? 0n
       const priceFractionDigits = calculatePriceFractionDigits(price)
@@ -205,6 +220,8 @@ export default memo(function MarketInformation() {
           exactFractionDigits: true,
           fractionDigits: priceFractionDigits,
         }),
+        longInterestPercentage,
+        shortInterestPercentage,
       })
     })
 
@@ -356,6 +373,12 @@ export default memo(function MarketInformation() {
     return tokenAddress ? [tokenAddress] : []
   }, [tokenAddress])
 
+  const selectedMarket = tokenAddress
+    ? indexTokensWithLiquidityInformation.get(tokenAddress)
+    : undefined
+  const longInterestPercentage = selectedMarket?.longInterestPercentage ?? 0
+  const shortInterestPercentage = selectedMarket?.shortInterestPercentage ?? 0
+
   return (
     <>
       {tokenMetadata?.symbol && priceIndexText && (
@@ -472,8 +495,8 @@ export default memo(function MarketInformation() {
             <div className='flex flex-col items-start justify-center'>
               <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
               <div className='mt-0.5 flex overflow-hidden text-xs'>
-                <div className='bg-success px-1 py-0.5 text-white'>51.45%</div>
-                <div className='bg-danger px-1 py-0.5 text-white'>48.55%</div>
+                <div className='bg-success px-1 py-0.5 text-white'>{longInterestPercentage}%</div>
+                <div className='bg-danger px-1 py-0.5 text-white'>{shortInterestPercentage}%</div>
               </div>
             </div>
           </div>
