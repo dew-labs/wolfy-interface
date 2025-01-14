@@ -14,8 +14,8 @@ function calculateLeverage(tokenAmountUsd: bigint, payTokenAmountUsd: bigint) {
   if (tokenAmountUsd <= 0 || payTokenAmountUsd <= 0) return 0n
   return (tokenAmountUsd * LEVERAGE_PRECISION) / payTokenAmountUsd
 }
-
-export const MAX_LEVERAGE = 1000
+// TODO: read from contract dataStoreKeys.minCollateralFactorKey(marketTokenAddress)
+export const MAX_LEVERAGE = 100
 
 export default function usePayToken(
   tradeMode: TradeMode,
