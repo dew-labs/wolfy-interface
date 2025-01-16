@@ -194,8 +194,15 @@ export default memo(function MarketInformation() {
         .reduce((a, b) => a + b, 0n)
       const totalInterestUsd = longInterestUsd + shortInterestUsd
 
-      const longInterestPercentage = Number((longInterestUsd * 100n) / (totalInterestUsd || 1n))
-      const shortInterestPercentage = Number((shortInterestUsd * 100n) / (totalInterestUsd || 1n))
+      let longInterestPercentage = Number((longInterestUsd * 100n) / (totalInterestUsd || 1n))
+      let shortInterestPercentage = Number((shortInterestUsd * 100n) / (totalInterestUsd || 1n))
+      const totalPercentage = longInterestPercentage + shortInterestPercentage
+
+      if (totalPercentage < 100) {
+        const leftOver = 100 - totalPercentage
+        longInterestPercentage += leftOver / 2
+        shortInterestPercentage += leftOver / 2
+      }
 
       const price = tokenPricesData.get(token)?.max ?? 0n
       const priceFractionDigits = calculatePriceFractionDigits(price)
