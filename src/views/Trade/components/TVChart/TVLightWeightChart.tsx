@@ -21,7 +21,6 @@ import {
   useRef,
 } from 'react'
 import {useLatest} from 'react-use'
-import {debounce} from 'remeda'
 import invariant from 'tiny-invariant'
 import type {PartialDeep} from 'type-fest'
 
@@ -36,6 +35,7 @@ import {
 } from '@/lib/tvchart/constants.ts'
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
+import debounce from '@/utils/debounce'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 const CHART_HEIGHT = 300

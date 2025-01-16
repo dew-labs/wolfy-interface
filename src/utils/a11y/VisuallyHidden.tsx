@@ -19,7 +19,6 @@ function VisuallyHidden<
       isNotHiddenAnymore?: boolean
       // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
     } & React.ComponentProps<T>): React.JSX.Element {
-  // eslint-disable-next-line no-useless-assignment -- this is a bug https://github.com/typescript-eslint/typescript-eslint/issues/10219
   const Tag = (as ?? 'span') as React.JSX.ElementType
 
   const classNames = []

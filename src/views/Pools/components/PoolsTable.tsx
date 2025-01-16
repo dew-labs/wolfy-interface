@@ -298,7 +298,7 @@ export default memo(function PoolsTable() {
     if (['market'].includes(key)) {
       return (
         <div className='flex items-center gap-2'>
-          <img src={market.imageUrl} alt={market.market} className='h-6 w-6' />
+          <img src={market.imageUrl} alt={market.market} className='size-6' />
           <span className='text-nowrap'>{market.market}</span>
         </div>
       )

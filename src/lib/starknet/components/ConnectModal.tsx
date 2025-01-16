@@ -93,7 +93,7 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
         className='align-center justify-content-center w-full'
       >
         <CardBody className='align-center flex flex-row justify-center gap-2 p-2'>
-          <Image shadow='none' radius='none' alt='' className='h-[24px] w-[24px]' src={icon} />
+          <Image shadow='none' radius='none' alt='' className='size-[24px]' src={icon} />
           <div className='flex flex-row gap-2'>
             <div>
               <b>{props.wallet.name}</b>

@@ -20,10 +20,10 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
   }, [reset])
 
   return (
-    <div className='absolute left-0 top-0 h-full w-full bg-background' style={{zIndex: 1000}}>
+    <div className='absolute left-0 top-0 size-full bg-background' style={{zIndex: 1000}}>
       <WolfyBackground />
       <HeadTags title='Error' />
-      <main className='relative flex h-[100dvh] w-full flex-col items-center justify-center gap-2 p-4'>
+      <main className='relative flex h-dvh w-full flex-col items-center justify-center gap-2 p-4'>
         <FocusScope contain restoreFocus>
           <h1 className='text-center text-4xl font-bold' tabIndex={-1}>
             We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}

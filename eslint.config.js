@@ -31,6 +31,7 @@ import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
+import pluginTailwindCss from 'eslint-plugin-tailwindcss'
 // import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: investigate why this cause errors
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
@@ -83,6 +84,7 @@ function createApplyTo(include, exclude = []) {
 const applyTo = {
   all: createApplyTo(globs.SCRIPT_AND_JSONS),
   script: createApplyTo(globs.SCRIPT),
+  scriptNotTest: createApplyTo(globs.SCRIPT, globs.TEST),
   json: createApplyTo(globs.JSON, globs.NOT_JSON),
   jsonc: createApplyTo(globs.JSONC, globs.NOT_JSONC),
   json5: createApplyTo(globs.JSON5, globs.NOT_JSON5),
@@ -339,6 +341,28 @@ function getI18nextConfigs() {
       },
       rules: {
         'i18next/no-literal-string': 1,
+      },
+    }),
+  ]
+}
+
+function getTailwindCssConfigs() {
+  return [
+    ...applyTo.scriptNotTest('tailwindcss', pluginTailwindCss.configs['flat/recommended']),
+    ...applyTo.scriptNotTest('tailwindcss/custom', {
+      settings: {
+        tailwindcss: {
+          // These are the default values but feel free to customize
+          callees: ['classnames', 'clsx', 'ctl', 'cva', 'tw', 'cn'],
+          config: 'tailwind.config.js', // returned from `loadConfig()` utility if not provided
+          cssFiles: ['**/*.css', '!**/node_modules', '!**/.*', '!**/dist', '!**/build'],
+          cssFilesRefreshRate: 5_000,
+          removeDuplicates: true,
+          skipClassAttribute: false,
+          whitelist: [],
+          tags: [], // can be set to e.g. ['tw'] for use in tw`bg-blue`
+          classRegex: '^class(Name)?$', // can be modified to support custom attributes. E.g. "^tw$" for `twin.macro`
+        },
       },
     }),
   ]
@@ -684,6 +708,7 @@ export default tsEslint.config(
   ...getJsonConfigs(),
   ...getCssModuleConfigs(),
   ...getI18nextConfigs(),
+  ...getTailwindCssConfigs(),
   ...getTypescriptConfigs(),
   ...getReactConfigs(),
   ...getReactNativeConfigs(),

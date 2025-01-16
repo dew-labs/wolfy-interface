@@ -309,7 +309,7 @@ export default memo(function TokenInputs({
           endContent={
             <div className='pointer-events-none flex h-full min-w-max items-center justify-center'>
               <span className='mr-1 whitespace-nowrap text-lg text-default-400'>per</span>
-              <img src={tokenData?.imageUrl} alt='' className='h-6 w-6' />
+              <img src={tokenData?.imageUrl} alt='' className='size-6' />
               <span className='whitespace-nowrap text-lg text-default-400'>
                 {tokenData?.symbol}
               </span>
@@ -448,7 +448,7 @@ export default memo(function TokenInputs({
             {tokenInputMode === InputMode.Usd && (
               <span className='whitespace-nowrap text-lg text-default-400'>in</span>
             )}
-            <img src={tokenData?.imageUrl} alt='' className='h-6 w-6' />
+            <img src={tokenData?.imageUrl} alt='' className='size-6' />
             <span className='whitespace-nowrap text-lg text-default-400'>{tokenData?.symbol}</span>
           </div>
         }

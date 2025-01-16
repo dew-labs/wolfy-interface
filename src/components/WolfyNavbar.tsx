@@ -125,7 +125,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
       >
         <NavbarMenuToggle className='mb-1 text-default-400 md:hidden' />
         {/* Left Content */}
-        <NavbarBrand className='flex flex-grow-0'>
+        <NavbarBrand className='flex grow-0'>
           <div className='mb-1 w-20 md:w-24'>
             <img src={logoSvg} alt='Wolfy Trade ' />
           </div>
@@ -195,7 +195,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             {isConnected && accountAddress && (
               <Dropdown placement='bottom-end'>
                 <DropdownTrigger>
-                  <button className='mt-1 h-8 w-8 transition-transform'>
+                  <button className='mt-1 size-8 transition-transform'>
                     <Badge color='success' content='' placement='bottom-right' shape='circle'>
                       {!!accountAddress && (
                         <BoringAvatar size='32px' variant='beam' name={accountAddress} />

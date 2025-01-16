@@ -969,7 +969,7 @@ const Controller = createResetableComponent(({reset}) => {
               <DropdownTrigger>
                 <Button variant='flat' className='flex items-center gap-2'>
                   {collateralTokenData?.imageUrl && (
-                    <img src={collateralTokenData.imageUrl} alt='' className='h-6 w-6' />
+                    <img src={collateralTokenData.imageUrl} alt='' className='size-6' />
                   )}
                   {collateralTokenData?.symbol}
                 </Button>
@@ -981,7 +981,7 @@ const Controller = createResetableComponent(({reset}) => {
                   return (
                     <DropdownItem key={tokenAddress}>
                       <div className='flex items-center gap-2'>
-                        <img src={token?.imageUrl} alt='' className='h-6 w-6' />
+                        <img src={token?.imageUrl} alt='' className='size-6' />
                         {token?.symbol}
                       </div>
                     </DropdownItem>

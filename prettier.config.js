@@ -13,8 +13,6 @@ export default {
   plugins: [
     // 'some-other-plugin',
     '@svgr/plugin-prettier',
-    'prettier-plugin-tailwindcss', // tailwindcss plugin must be loaded last
+    // NOTE: consider using `prettier-plugin-merge` if there are multiple plugins that use the Prettier API (which can only use by one plugin at a time)
   ],
-  tailwindConfig: './tailwind.config.js',
-  tailwindFunctions: ['clsx', 'cva', 'tw', 'cn'],
 }

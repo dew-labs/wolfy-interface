@@ -434,11 +434,7 @@ export default memo(function MarketInformation() {
                       <TableRow key={item.address} className='cursor-pointer'>
                         <TableCell>
                           <div className='flex min-w-max items-center gap-2 text-nowrap'>
-                            <img
-                              src={item.imageUrl}
-                              alt={item.symbol}
-                              className='h-6 w-6 rounded'
-                            />
+                            <img src={item.imageUrl} alt={item.symbol} className='size-6 rounded' />
                             <span>{`${item.symbol}/USD`}</span>
                           </div>
                         </TableCell>

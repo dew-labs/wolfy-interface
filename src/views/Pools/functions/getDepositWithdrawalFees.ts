@@ -1,9 +1,8 @@
 import {getFeeItem} from '@/lib/trade/utils/fee/getFeeItem'
 import {getTotalFeeItem} from '@/lib/trade/utils/fee/getTotalFeeItem'
+import type {DepositWithdrawalAmounts} from '@/views/Pools/hooks/useDepositWithdrawalAmounts'
 
-import type {DepositWithdrawalAmounts} from './useDepositWithdrawalAmounts'
-
-export default function useDepositWithdrawalFees({
+export default function getDepositWithdrawalFees({
   isDeposit,
   amounts,
 }: {
