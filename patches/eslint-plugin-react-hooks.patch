@@ -1,0 +1,101 @@
+diff --git a/cjs/eslint-plugin-react-hooks.development.js b/cjs/eslint-plugin-react-hooks.development.js
+index fba645bf013677183e3d08351da6b4242ab2a927..fe7d4904dab2b34e7a9dc7ea62cc54f77893a69e 100644
+--- a/cjs/eslint-plugin-react-hooks.development.js
++++ b/cjs/eslint-plugin-react-hooks.development.js
+@@ -9,6 +9,9 @@
+  */
+ 
+ "use strict";
++
++const { type } = require("os");
++
+ "production" !== process.env.NODE_ENV &&
+   (function () {
+     function _unsupportedIterableToArray(o, minLen) {
+@@ -952,7 +955,29 @@
+                 additionalHooks: { type: "string" },
+                 enableDangerousAutofixThisMayCauseInfiniteLoops: {
+                   type: "boolean"
+-                }
++                },
++                staticHooks: {
++                  type: 'object',
++                  additionalProperties: {
++                    oneOf: [
++                      {
++                        type: 'boolean',
++                      },
++                      {
++                        type: 'array',
++                        items: {
++                          type: 'boolean',
++                        },
++                      },
++                      {
++                        type: 'object',
++                        additionalProperties: {
++                          type: 'boolean',
++                        },
++                      },
++                    ],
++                  },
++                },
+               }
+             }
+           ]
+@@ -1221,8 +1246,36 @@
+                     2 === def.elements.length &&
+                     Array.isArray(resolved.identifiers) &&
+                     def.elements[1] === resolved.identifiers[0]
+-                  )
++                  ) {
+                     return !0;
++                  } else if (options.staticHooks[init]) {
++                    const staticParts = options.staticHooks[init];
++                    if (staticParts === true) {
++                      // entire return value is static
++                      return true;
++                    } else if (Array.isArray(staticParts)) {
++                      // destructured tuple return where some elements are static
++                      if (
++                        def.type === 'ArrayPattern' &&
++                        def.elements.length <= staticParts.length &&
++                        Array.isArray(resolved.identifiers)
++                      ) {
++                        // find index of the resolved ident in the array pattern
++                        const idx = def.elements.findIndex(
++                          ident => ident === resolved.identifiers[0],
++                        );
++                        if (idx >= 0) {
++                          return staticParts[idx];
++                        }
++                      }
++                    } else if (typeof staticParts === 'object' && def.type === 'ObjectPattern') {
++                      // destructured object return where some properties are static
++                      const property = def.properties.find(p => p.key === resolved.identifiers[0])
++                      if (property) {
++                        return staticParts[property.key.name]
++                      }
++                    }
++                  }
+                   return !1;
+                 }, stableKnownValueCache),
+                 memoizedIsFunctionWithoutCapturedValues = memoizeWithWeakMap(
+@@ -1870,6 +1923,7 @@
+                 context.options[0]
+                   .enableDangerousAutofixThisMayCauseInfiniteLoops) ||
+               !1,
++            staticHooks = (context.options && context.options[0] && context.options[0].staticHooks) || {},
+             options = {
+               additionalHooks:
+                 context.options &&
+@@ -1878,7 +1932,8 @@
+                   ? new RegExp(context.options[0].additionalHooks)
+                   : void 0,
+               enableDangerousAutofixThisMayCauseInfiniteLoops:
+-                enableDangerousAutofixThisMayCauseInfiniteLoops
++                enableDangerousAutofixThisMayCauseInfiniteLoops,
++              staticHooks: staticHooks
+             },
+             getSource =
+               "function" === typeof context.getSource

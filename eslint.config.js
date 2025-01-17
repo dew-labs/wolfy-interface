@@ -462,8 +462,7 @@ function getReactConfigs() {
           'error',
           {
             staticHooks: {
-              useState: [false, true, true], // means [unstable, stable, stable]
-              useAtom: [false, true],
+              useAtom: [false, true], // means [unstable, stable]
               useSetAtom: true,
               useMutative: [false, true],
               useMutativeReducer: [false, true],
