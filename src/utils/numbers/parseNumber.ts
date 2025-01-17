@@ -1,8 +1,9 @@
 export default function parseNumber(n: string, locale: Intl.LocalesArgument = 'en-US') {
   const parts = new Intl.NumberFormat(locale).formatToParts(12345.6)
-  const numerals = [
-    ...new Intl.NumberFormat(locale, {useGrouping: false}).format(9876543210),
-  ].reverse()
+  const numerals = new Intl.NumberFormat(locale, {useGrouping: false})
+    .format(9876543210)
+    .split('')
+    .reverse()
   const index = new Map(numerals.map((d, i) => [d, String(i)]))
   const group = new RegExp(`[${parts.find(d => d.type === 'group')?.value}]`, 'g')
   const decimal = new RegExp(`[${parts.find(d => d.type === 'decimal')?.value}]`)

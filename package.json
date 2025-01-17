@@ -138,7 +138,7 @@
     "@types/eslint__js": "^8.42.3",
     "@types/gtag.js": "^0.0.20",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "^20.17.14",
+    "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "@types/react-lines-ellipsis": "^0.15.6",
@@ -241,7 +241,7 @@
     "vitest": "^3.0.1"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "pnpm": {
     "patchedDependencies": {

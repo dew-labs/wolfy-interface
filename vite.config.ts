@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import {vite as millionLintVite} from '@million/lint'
 import {partytownVite} from '@qwik.dev/partytown/utils'
-import optimizeLocales from '@react-aria/optimize-locales-plugin'
+import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
@@ -71,13 +71,20 @@ export default defineConfig(({mode}) => {
   const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
+  const optimizeLocales = pluginOptimizeLocales.vite({
+    locales: ['en-US'],
+  })
+
+  if (Array.isArray(optimizeLocales)) {
+    optimizeLocales.forEach(plugin => {
+      plugin.enforce = 'pre' as const
+    })
+  } else {
+    optimizeLocales.enforce = 'pre' as const
+  }
+
   const plugins = [
-    {
-      ...optimizeLocales.vite({
-        locales: ['en-US'],
-      }),
-      enforce: 'pre' as const,
-    },
+    optimizeLocales,
     lqip(), // switch o blurhash?
     dynamicImport(),
     preload(),
