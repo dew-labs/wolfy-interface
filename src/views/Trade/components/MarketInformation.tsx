@@ -11,7 +11,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from '@nextui-org/react'
+} from '@heroui/react'
 import NumberFlow from '@number-flow/react'
 import type {Selection, SortDescriptor} from '@react-types/shared'
 import {memo, useCallback, useEffect, useMemo, useState} from 'react'

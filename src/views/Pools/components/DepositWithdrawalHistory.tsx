@@ -1,4 +1,3 @@
-import {Icon} from '@iconify/react'
 import {
   Button,
   Pagination,
@@ -13,7 +12,8 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from '@nextui-org/react'
+} from '@heroui/react'
+import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 import {create} from 'mutative'
 import type * as React from 'react'

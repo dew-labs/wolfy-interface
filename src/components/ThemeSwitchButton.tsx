@@ -1,5 +1,5 @@
+import {Button} from '@heroui/react'
 import {Icon} from '@iconify/react'
-import {Button} from '@nextui-org/react'
 import {memo, useCallback} from 'react'
 import {useLatest} from 'react-use'
 

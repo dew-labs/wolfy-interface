@@ -7,7 +7,7 @@ import 'lazysizes/plugins/attrchange/ls.attrchange'
 import './setupSchema'
 import './i18n/setup'
 
-import {NextUIProvider} from '@nextui-org/react'
+import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
 import {announce} from '@react-aria/live-announcer'
 import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/react'
@@ -93,7 +93,7 @@ function App() {
   }, [])
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <ErrorBoundary fallback={null}>
         <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
       </ErrorBoundary>
@@ -118,7 +118,7 @@ function App() {
           <ReactQueryDevtools initialIsOpen={false} />
         </PersistQueryClientProvider>
       </ErrorBoundary>
-    </NextUIProvider>
+    </HeroUIProvider>
   )
 }
 

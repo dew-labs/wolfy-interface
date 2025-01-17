@@ -33,11 +33,11 @@ $Viewport-Width-4: 26.5rem; // 0 -> 424 (xs)
   block-size: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  border: 0 !important;
 
   white-space: nowrap !important;
 
   clip: rect(0 0 0 0) !important;
-  border: 0 !important;
 }
 @mixin auto-hide-scroll-bar {
   &::-webkit-scrollbar-track {

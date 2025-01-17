@@ -1,4 +1,3 @@
-import {Icon} from '@iconify/react'
 import {
   Button,
   Input,
@@ -9,7 +8,8 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from '@nextui-org/react'
+} from '@heroui/react'
+import {Icon} from '@iconify/react'
 import type {SortDescriptor} from '@react-types/shared'
 import {create} from 'mutative'
 import * as React from 'react'

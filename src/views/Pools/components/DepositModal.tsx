@@ -6,7 +6,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-} from '@nextui-org/react'
+} from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
 import clsx from 'clsx'
 import {

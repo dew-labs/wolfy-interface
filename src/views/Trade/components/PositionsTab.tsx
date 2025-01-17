@@ -1,4 +1,3 @@
-import {Icon} from '@iconify/react'
 import {
   Button,
   Spinner,
@@ -9,7 +8,8 @@ import {
   TableHeader,
   TableRow,
   Tooltip,
-} from '@nextui-org/react'
+} from '@heroui/react'
+import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 import {memo, useCallback, useState} from 'react'
 

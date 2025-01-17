@@ -1,4 +1,4 @@
-import {Select, SelectItem, type SharedSelection} from '@nextui-org/react'
+import {Select, SelectItem, type SharedSelection} from '@heroui/react'
 import {memo, useCallback, useMemo} from 'react'
 
 import {isChainIdSupported, SUPPORTED_CHAINS} from '@/constants/chains'

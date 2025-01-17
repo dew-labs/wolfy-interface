@@ -35,6 +35,6 @@ export default {
   TAILWIND_CONTENT: [
     './index.{htm,html}',
     './src/**/*.{?(c|m)[jt]s?(x),vue,svelte}',
-    './node_modules/@nextui-org/theme/dist/**/*.?(c|m)[jt]s?(x)',
+    './node_modules/@heroui/theme/dist/**/*.?(c|m)[jt]s?(x)',
   ],
 }

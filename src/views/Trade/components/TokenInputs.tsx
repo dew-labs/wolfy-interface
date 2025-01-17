@@ -5,7 +5,7 @@ import {
   SelectItem,
   type SharedSelection,
   Tooltip,
-} from '@nextui-org/react'
+} from '@heroui/react'
 import clsx from 'clsx'
 import {memo, type MemoizedCallbackOrDispatch, useCallback, useMemo} from 'react'
 import {useLatest} from 'react-use'

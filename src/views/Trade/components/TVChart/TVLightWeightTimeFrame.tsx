@@ -1,4 +1,4 @@
-import {Tab, Tabs} from '@nextui-org/react'
+import {Tab, Tabs} from '@heroui/react'
 import {memo, type MemoizedCallbackOrDispatch} from 'react'
 import type {Key} from 'react-aria-components'
 

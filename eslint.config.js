@@ -556,28 +556,28 @@ function getReactConfigs() {
           'error',
           {
             nativeAllowList: 'all',
-            ignoreSources: ['@nextui-org/react'],
+            ignoreSources: ['@heroui/react'],
           },
         ],
         'react-perf/jsx-no-new-array-as-prop': [
           'error',
           {
             nativeAllowList: 'all',
-            ignoreSources: ['@nextui-org/react'],
+            ignoreSources: ['@heroui/react'],
           },
         ],
         'react-perf/jsx-no-new-function-as-prop': [
           'error',
           {
             nativeAllowList: 'all',
-            ignoreSources: ['@nextui-org/react'],
+            ignoreSources: ['@heroui/react'],
           },
         ],
         'react-perf/jsx-no-jsx-as-prop': [
           'error',
           {
             nativeAllowList: 'all',
-            ignoreSources: ['@nextui-org/react'],
+            ignoreSources: ['@heroui/react'],
           },
         ],
       },

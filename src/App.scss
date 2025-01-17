@@ -25,20 +25,20 @@ body {
 /* END fix */
 
 /* stylelint-disable custom-property-pattern */
-$nextUiPrimary: hsl(var(--nextui-primary) / var(--nextui-primary-opacity, var(--tw-bg-opacity)));
-$nextUiPrimaryHover: hsl(var(--nextui-primary) / var(--nextui-hover-opacity, var(--tw-bg-opacity)));
-$nextUiBackground: hsl(
-  var(--nextui-background) / var(--nextui-background-opacity, var(--tw-bg-opacity))
+$heroUiPrimary: hsl(var(--heroui-primary) / var(--heroui-primary-opacity, var(--tw-bg-opacity)));
+$heroUiPrimaryHover: hsl(var(--heroui-primary) / var(--heroui-hover-opacity, var(--tw-bg-opacity)));
+$heroUiBackground: hsl(
+  var(--heroui-background) / var(--heroui-background-opacity, var(--tw-bg-opacity))
 );
 /* stylelint-disable scss/operator-no-newline-after */
-$nextUiForeground: hsl(
-  var(--nextui-primary-foreground) /
-    var(--nextui-primary-foreground-opacity, var(--tw-text-opacity))
+$heroUiForeground: hsl(
+  var(--heroui-primary-foreground) /
+    var(--heroui-primary-foreground-opacity, var(--tw-text-opacity))
 );
 /* stylelint-enable custom-property-pattern */
 
 * {
-  outline-color: $nextUiPrimary;
+  outline-color: $heroUiPrimary;
 }
 
 .visually-hidden:not(:focus, :active, :focus-within),
@@ -55,13 +55,13 @@ $nextUiForeground: hsl(
 
   padding-block: 0.5rem;
   padding-inline: 1rem;
-
-  color: $nextUiForeground;
-  text-decoration: none;
-
-  background-color: $nextUiPrimary;
   border-end-start-radius: 0.5rem;
   border-end-end-radius: 0.5rem;
+
+  color: $heroUiForeground;
+  text-decoration: none;
+
+  background-color: $heroUiPrimary;
 }
 
 @layer utilities {

@@ -1,4 +1,4 @@
-import {Card} from '@nextui-org/react'
+import {Card} from '@heroui/react'
 import {LineStyle} from 'lightweight-charts'
 import {memo, useCallback, useState} from 'react'
 import type {Key} from 'react-aria-components'

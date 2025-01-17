@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 
-import {nextui} from '@nextui-org/react'
+import {heroui} from '@heroui/react'
 
 import globs from './globs.js'
 
@@ -17,7 +17,7 @@ export default {
   },
   darkMode: 'class',
   plugins: [
-    nextui({
+    heroui({
       themes: {
         dark: {
           layout: {

@@ -1,4 +1,4 @@
-import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@nextui-org/react'
+import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@heroui/react'
 import {memo} from 'react'
 import type {Key} from 'react-aria-components'
 

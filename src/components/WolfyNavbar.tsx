@@ -1,5 +1,4 @@
-import {Icon} from '@iconify/react'
-import type {NavbarProps} from '@nextui-org/react'
+import type {NavbarProps} from '@heroui/react'
 import {
   Badge,
   Button,
@@ -16,7 +15,8 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
-} from '@nextui-org/react'
+} from '@heroui/react'
+import {Icon} from '@iconify/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
 import {memo, useCallback, useMemo, useState} from 'react'
