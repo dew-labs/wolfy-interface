@@ -624,6 +624,11 @@ function getReactTypescriptConfigs() {
     ...applyTo.typescriptReact('react/x-typescript', {
       ...pluginReact.configs['recommended-type-checked'],
     }),
+    ...applyTo.typescriptReact('react/x-typescript-custom', {
+      rules: {
+        '@eslint-react/prefer-read-only-props': 'warn',
+      },
+    }),
     ...applyTo.typescriptReact('react/typescript', {
       rules: {
         // https://github.com/orgs/react-hook-form/discussions/8020
