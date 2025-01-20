@@ -4,15 +4,19 @@ export default memo(function UpdateMousePosition() {
   useLayoutEffect(() => {
     const root = document.documentElement
 
-    const eventListener = (e: MouseEvent) => {
-      root.style.setProperty('--mouse-x', `${e.clientX}px`)
-      root.style.setProperty('--mouse-y', `${e.clientY}px`)
-    }
+    const abortController = new AbortController()
 
-    root.addEventListener('mousemove', eventListener)
+    root.addEventListener(
+      'mousemove',
+      (e: MouseEvent) => {
+        root.style.setProperty('--mouse-x', `${e.clientX}px`)
+        root.style.setProperty('--mouse-y', `${e.clientY}px`)
+      },
+      {signal: abortController.signal},
+    )
 
     return () => {
-      root.removeEventListener('mousemove', eventListener)
+      abortController.abort()
     }
   }, [])
 

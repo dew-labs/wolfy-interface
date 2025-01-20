@@ -38,14 +38,18 @@ export default function useWindowSize() {
   const [windowSize, setWindowSize] = useState(sizes)
 
   useLayoutEffect(() => {
-    const handleWindowResize = () => {
-      setWindowSize([window.innerWidth, window.innerHeight])
-    }
+    const abortController = new AbortController()
 
-    window.addEventListener('resize', handleWindowResize)
+    window.addEventListener(
+      'resize',
+      () => {
+        setWindowSize([window.innerWidth, window.innerHeight])
+      },
+      {signal: abortController.signal},
+    )
 
     return () => {
-      window.removeEventListener('resize', handleWindowResize)
+      abortController.abort()
     }
   }, [])
 

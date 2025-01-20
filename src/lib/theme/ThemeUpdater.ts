@@ -27,13 +27,18 @@ export default memo(function ThemeUpdater() {
 
     const query = window.matchMedia('(prefers-color-scheme: dark)')
 
-    const mediaQueryListener: (evt: MediaQueryListEvent) => void = event => {
-      setCurrentTheme(event.matches ? Theme.Dark : Theme.Light)
-    }
+    const abortController = new AbortController()
 
-    query.addEventListener('change', mediaQueryListener)
+    query.addEventListener(
+      'change',
+      event => {
+        setCurrentTheme(event.matches ? Theme.Dark : Theme.Light)
+      },
+      {signal: abortController.signal},
+    )
+
     return () => {
-      query.removeEventListener('change', mediaQueryListener)
+      abortController.abort()
     }
   }, [theme])
 

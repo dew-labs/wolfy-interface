@@ -64,27 +64,31 @@ function use1DMarketInformation(symbol: string | undefined) {
     const wssUrl = getChartWssUrl(asset, ChartInterval['1d'])
     const chartDataWS = new WebSocket(wssUrl)
 
-    const eventHandler = (event: MessageEvent<unknown>) => {
-      if (typeof event.data !== 'string') {
-        return
-      }
+    const abortController = new AbortController()
 
-      const rawData = JSON.parse(event.data)
-      const data = parseChartData(rawData, ChartInterval['1d'])
+    chartDataWS.addEventListener(
+      'message',
+      event => {
+        if (typeof event.data !== 'string') {
+          return
+        }
 
-      if (data) {
-        setOpen(data.open)
-        setClose(data.close)
-        setHigh(data.high)
-        setLow(data.low)
-        setVolume(data.volume ?? 0)
-      }
-    }
+        const rawData = JSON.parse(event.data)
+        const data = parseChartData(rawData, ChartInterval['1d'])
 
-    chartDataWS.addEventListener('message', eventHandler)
+        if (data) {
+          setOpen(data.open)
+          setClose(data.close)
+          setHigh(data.high)
+          setLow(data.low)
+          setVolume(data.volume ?? 0)
+        }
+      },
+      {signal: abortController.signal},
+    )
 
     return () => {
-      chartDataWS.removeEventListener('message', eventHandler)
+      abortController.abort()
       chartDataWS.close()
     }
   }, [symbol])

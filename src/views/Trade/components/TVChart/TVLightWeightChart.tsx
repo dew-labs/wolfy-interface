@@ -195,25 +195,29 @@ export default memo(function TVLightWeightChart({
       const wssUrl = getChartWssUrl(asset, interval)
       const chartDataWS = new WebSocket(wssUrl)
 
-      const eventHandler = (event: MessageEvent<unknown>) => {
-        if (!chartMainCandlestickSeries.current) return
+      const abortController = new AbortController()
 
-        if (typeof event.data !== 'string') {
-          return
-        }
+      chartDataWS.addEventListener(
+        'message',
+        event => {
+          if (!chartMainCandlestickSeries.current) return
 
-        const rawData = JSON.parse(event.data)
-        const data = parseChartData(rawData, interval)
+          if (typeof event.data !== 'string') {
+            return
+          }
 
-        if (data) {
-          chartMainCandlestickSeries.current.update(data)
-        }
-      }
+          const rawData = JSON.parse(event.data)
+          const data = parseChartData(rawData, interval)
 
-      chartDataWS.addEventListener('message', eventHandler)
+          if (data) {
+            chartMainCandlestickSeries.current.update(data)
+          }
+        },
+        {signal: abortController.signal},
+      )
 
       return () => {
-        chartDataWS.removeEventListener('message', eventHandler)
+        abortController.abort()
         chartDataWS.close()
       }
     },
@@ -232,11 +236,13 @@ export default memo(function TVLightWeightChart({
       },
     )
 
-    window.addEventListener('resize', handleResize.call)
+    const abortController = new AbortController()
+
+    window.addEventListener('resize', handleResize.call, {signal: abortController.signal})
 
     return () => {
       handleResize.cancel()
-      window.removeEventListener('resize', handleResize.call)
+      abortController.abort()
     }
   }, [])
 
