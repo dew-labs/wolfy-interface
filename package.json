@@ -107,7 +107,6 @@
     "unhead": "^1.11.18",
     "universal-cookie": "^7.2.2",
     "use-mutative": "^1.2.0",
-    "usehooks-ts": "^3.1.0",
     "vite-plugin-mkcert": "^1.17.6",
     "wolfy-sdk": "^1.4.3"
   },
