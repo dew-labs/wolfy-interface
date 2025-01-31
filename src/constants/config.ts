@@ -1,6 +1,7 @@
 import {BASIS_POINTS_DECIMALS} from '@/lib/trade/numbers/constants'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
+// TODO: use t3-env (@t3-oss/env-core) + TypeMap (typemap)
 // NOTE: remember to update vite-env.d.ts
 export const APP_NAME = import.meta.env.VITE_APP_NAME
 export const API_URL = import.meta.env.VITE_API_URL
