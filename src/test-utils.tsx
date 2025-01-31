@@ -1,6 +1,6 @@
+/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {Window} from 'happy-dom'
-import type {ReactNode} from 'react'
-import {act} from 'react'
+import {act, type ReactNode} from 'react'
 import {hydrateRoot} from 'react-dom/client'
 import {renderToString} from 'react-dom/server'
 import {vi} from 'vitest'
@@ -67,3 +67,4 @@ export const renderHookServer = <Hook extends () => unknown>(
 }
 
 export type RenderHookServer = typeof renderHookServer
+/* eslint-enable @eslint-react/naming-convention/filename */

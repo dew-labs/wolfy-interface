@@ -1,4 +1,4 @@
-export default {
+const globs = {
   // Add vue, svelte,... if using them
   SCRIPT_AND_JSONS: ['**/*.{?(c|m)[jt]s?(x),json?(c|5)}'],
   // Add vue, svelte,... if using them
@@ -12,9 +12,12 @@ export default {
   JSONC5: ['**/*.json?(c|5)'],
   // Add vue, svelte,... if using them
   TYPESCRIPT: ['**/*.?(c|m)ts?(x)'],
+  REACT_COMPONENTS: ['**/*.?(c|m)[jt]sx'],
+  REACT_HOOKS: ['**/use*.?(c|m)[jt]s?(x)'],
   REACT: ['**/*.?(c|m)[jt]sx', '**/use*.?(c|m)[jt]s?(x)'],
   REACT_JAVASCRIPT: ['**/*.?(c|m)tsx', '**/use*.?(c|m)js?(x)'],
   REACT_TYPESCRIPT: ['**/*.?(c|m)tsx', '**/use*.?(c|m)ts?(x)'],
+  ROUTES: ['src/routes/**/*'],
   TEST: ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)'],
   TEST_SSR: ['**/*.ssr.{test,spec}?(-d).?(c|m)[jt]s?(x)', '**/__tests__/**/*.ssr.?(c|m)[jt]s?(x)'],
   TEST_TYPE: ['**/*.test-d.?(c|m)ts?(x)'],
@@ -38,3 +41,5 @@ export default {
     './node_modules/@heroui/theme/dist/**/*.?(c|m)[jt]s?(x)',
   ],
 }
+
+export default globs

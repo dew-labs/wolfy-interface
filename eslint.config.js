@@ -91,6 +91,9 @@ const applyTo = {
   jsonC5: createApplyTo(globs.JSONC5),
   typescript: createApplyTo(globs.TYPESCRIPT),
   react: createApplyTo(globs.REACT),
+  reactHooks: createApplyTo(globs.REACT_HOOKS, globs.ROUTES),
+  reactComponents: createApplyTo(globs.REACT_COMPONENTS, globs.ROUTES),
+  routes: createApplyTo(globs.ROUTES),
   javascriptReact: createApplyTo(globs.REACT_JAVASCRIPT),
   typescriptReact: createApplyTo(globs.REACT_TYPESCRIPT),
   test: createApplyTo(globs.TEST, globs.TEST_2E2),
@@ -227,6 +230,15 @@ function getCoreConfigs() {
         ],
       },
     }),
+    {
+      name: 'core/eslint-comments/special',
+      rules: {
+        '@eslint-community/eslint-comments/disable-enable-pair': 'off',
+        '@eslint-community/eslint-comments/no-unlimited-disable': 'off',
+        '@eslint-community/eslint-comments/require-description': 'off',
+      },
+      files: ['auto-imports.d.ts'],
+    },
     ...applyTo.all('core/regexp', pluginRegexp.configs['flat/recommended']),
     ...applyTo.all(
       'core/ssr-friendly',
@@ -501,6 +513,33 @@ function getReactConfigs() {
         '@eslint-react/no-missing-component-display-name': 'error',
         '@eslint-react/no-useless-fragment': 'error',
         '@eslint-react/prefer-react-namespace-import': 'error',
+        '@eslint-react/no-complex-conditional-rendering': 'error',
+        '@eslint-react/prefer-destructuring-assignment': 'error',
+        '@eslint-react/dom/no-unknown-property': [
+          'error',
+          {requireDataLowercase: true, ignore: []},
+        ],
+      },
+    }),
+    ...applyTo.react('react/naming-convention', {
+      rules: {
+        '@eslint-react/naming-convention/component-name': ['error', 'PascalCase'],
+        '@eslint-react/naming-convention/use-state': 'error',
+      },
+    }),
+    ...applyTo.reactComponents('react/naming-convention/components', {
+      rules: {
+        '@eslint-react/naming-convention/filename': ['error', 'PascalCase'],
+      },
+    }),
+    ...applyTo.reactHooks('react/naming-convention/hooks', {
+      rules: {
+        '@eslint-react/naming-convention/filename': ['error', 'camelCase'],
+      },
+    }),
+    ...applyTo.routes('react/naming-convention/routes', {
+      rules: {
+        '@eslint-react/naming-convention/filename': ['error', 'kebab-case'],
       },
     }),
     ...applyTo.react('react/x/hooks', {
@@ -512,7 +551,7 @@ function getReactConfigs() {
         '@eslint-react/hooks-extra/no-unnecessary-use-callback': 'error',
         '@eslint-react/hooks-extra/no-unnecessary-use-memo': 'error',
         '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'error',
-        '@eslint-react/hooks-extra/no-redundant-custom-hook': 'error',
+        '@eslint-react/hooks-extra/no-useless-custom-hooks': 'error',
       },
     }),
     ...applyTo.react('react/x-settings', {

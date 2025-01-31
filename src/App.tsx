@@ -14,7 +14,6 @@ import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/r
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
-import {lazy, Suspense, useEffect, useState} from 'react'
 // import {Inspector} from 'react-dev-inspector'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 

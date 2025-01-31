@@ -15,9 +15,12 @@ import react from '@vitejs/plugin-react-swc'
 // import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {obfuscator} from 'rollup-obfuscator'
+import AutoImport from 'unplugin-auto-import/vite'
 import Unfonts from 'unplugin-fonts/vite'
 import turboConsole from 'unplugin-turbo-console/vite'
-import {defineConfig, loadEnv} from 'vite'
+// import OptimizeExclude from 'vite-plugin-optimize-exclude'
+// import ViteRestart from 'vite-plugin-restart'
+import {defineConfig, loadEnv, type PluginOption} from 'vite'
 // import pluginChecker from 'vite-plugin-checker'
 import {compression} from 'vite-plugin-compression2'
 import dynamicImport from 'vite-plugin-dynamic-import'
@@ -30,6 +33,8 @@ import preload from 'vite-plugin-preload'
 import {robots} from 'vite-plugin-robots'
 import svgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
+
+import globs from './globs.js'
 
 // import packageJson from './package.json'
 
@@ -84,6 +89,34 @@ export default defineConfig(({mode}) => {
   }
 
   const plugins = [
+    AutoImport({
+      include: [...globs.SCRIPT],
+      ignore: [],
+      imports: [
+        'react',
+        'jotai',
+        'react-i18next',
+        {
+          clsx: ['clsx'],
+        },
+        {
+          'react-use': ['useLatest'],
+        },
+        {
+          react: ['Suspense', 'createContext'],
+        },
+        {
+          from: 'react',
+          imports: [
+            'PropsWithChildren',
+            'ChangeEventHandler',
+            'MemoizedCallback',
+            'MemoizedCallbackOrDispatch',
+          ],
+          type: true,
+        },
+      ],
+    }) as PluginOption,
     optimizeLocales,
     lqip(), // switch o blurhash?
     dynamicImport(),
@@ -300,7 +333,6 @@ export default defineConfig(({mode}) => {
     }
 
     plugins.push(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- some how typescript unable to infer the type correctly
       sentryVitePlugin({
         // release: '',
         applicationKey: process.env.VITE_APP_NAME,
@@ -314,7 +346,7 @@ export default defineConfig(({mode}) => {
         _experiments: {
           injectBuildInformation: true,
         },
-      }),
+      }) as PluginOption,
     )
   }
 
