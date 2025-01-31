@@ -1,5 +1,3 @@
-import {useCallback} from 'react'
-
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 
 export default function useAvailableMarketsForIndexToken(indexTokenAddress: string | undefined) {

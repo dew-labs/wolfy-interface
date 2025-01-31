@@ -6,9 +6,6 @@ import {
   type SharedSelection,
   Tooltip,
 } from '@heroui/react'
-import clsx from 'clsx'
-import {memo, type MemoizedCallbackOrDispatch, useCallback, useMemo} from 'react'
-import {useLatest} from 'react-use'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'

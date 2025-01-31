@@ -1,4 +1,4 @@
-import {atom, type SetStateAction} from 'jotai'
+import type {SetStateAction} from 'react'
 
 export function atomWithBroadcast<Value>(key: string, initialValue: Value) {
   const baseAtom = atom(initialValue)

@@ -1,5 +1,4 @@
 import type {AccountChangeEventHandler, NetworkChangeEventHandler} from 'get-starknet-core'
-import {memo, useEffect} from 'react'
 import {toast} from 'sonner'
 
 import {isChainIdSupported} from '@/constants/chains'

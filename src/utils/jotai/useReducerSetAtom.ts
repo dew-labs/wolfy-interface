@@ -1,6 +1,4 @@
 import type {PrimitiveAtom} from 'jotai'
-import {useSetAtom} from 'jotai'
-import {useCallback} from 'react'
 
 export function useReducerSetAtom<Value, Action>(
   anAtom: PrimitiveAtom<Value>,

@@ -1,5 +1,3 @@
-import {memo, useLayoutEffect} from 'react'
-
 export default memo(function UpdateMousePosition() {
   useLayoutEffect(() => {
     const root = document.documentElement

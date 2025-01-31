@@ -8,17 +8,7 @@ import {
   ModalHeader,
 } from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
-import clsx from 'clsx'
-import {
-  type ChangeEventHandler,
-  memo,
-  type MemoizedCallback,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
 import type {PressEvent} from 'react-aria-components'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -39,7 +29,6 @@ import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import {useDepositWithdrawalAmounts} from '@/views/Pools/hooks/useDepositWithdrawalAmounts'
 import useDepositWithdrawalExecutionFee from '@/views/Pools/hooks/useDepositWithdrawalExecutionFee'
-
 interface DepositModalProps {
   isOpen: boolean
   onClose: MemoizedCallback<() => void>

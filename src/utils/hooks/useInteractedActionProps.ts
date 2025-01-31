@@ -1,5 +1,3 @@
-import {type MemoizedCallback, useCallback, useRef} from 'react'
-
 export default function useInteractedActionProps(
   action: MemoizedCallback<() => void>,
   delay = 200,

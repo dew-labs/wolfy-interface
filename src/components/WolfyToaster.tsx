@@ -1,4 +1,3 @@
-import {memo} from 'react'
 import {Toaster} from 'sonner'
 
 import {Theme} from '@/lib/theme/theme'

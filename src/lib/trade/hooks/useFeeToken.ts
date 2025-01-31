@@ -1,4 +1,3 @@
-import {useCallback} from 'react'
 import invariant from 'tiny-invariant'
 
 import {FEE_TOKEN_ADDRESS, getTokenMetadata} from '@/constants/tokens'

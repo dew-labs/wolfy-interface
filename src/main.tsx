@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import './instrument'
 
 import {StrictMode} from 'react'
@@ -16,3 +17,4 @@ function render() {
 }
 
 render()
+/* eslint-enable @eslint-react/naming-convention/filename */

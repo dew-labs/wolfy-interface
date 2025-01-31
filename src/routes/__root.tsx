@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/naming-convention/filename -- library convention*/
 import type {QueryClient} from '@tanstack/react-query'
 import {
   createRootRouteWithContext,
@@ -5,7 +6,6 @@ import {
   ScrollRestoration,
   useRouter,
 } from '@tanstack/react-router'
-import {lazy, Suspense, useCallback} from 'react'
 import {RouterProvider} from 'react-aria-components'
 
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
@@ -45,3 +45,4 @@ export const Route = createRootRouteWithContext<{
 }>()({
   component: RootRoute,
 })
+/* eslint-enable @eslint-react/naming-convention/filename */

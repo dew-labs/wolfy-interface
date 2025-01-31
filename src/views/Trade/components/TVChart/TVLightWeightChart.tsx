@@ -9,18 +9,7 @@ import {
   type ISeriesApi,
   LineStyle,
 } from 'lightweight-charts'
-import {
-  createContext,
-  memo,
-  type PropsWithChildren,
-  type ReactElement,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from 'react'
-import {useLatest} from 'react-use'
+import {type ReactElement} from 'react'
 import invariant from 'tiny-invariant'
 import type {PartialDeep} from 'type-fest'
 
@@ -50,8 +39,8 @@ function useChartHistoryData(asset: string, interval: ChartInterval) {
 }
 
 interface ChartContextValue {
-  createPriceLine: ((options: CreatePriceLineOptions) => IPriceLine) | null
-  removePriceLine: ((line: IPriceLine) => void) | null
+  createPriceLine: MemoizedCallback<(options: CreatePriceLineOptions) => IPriceLine> | null
+  removePriceLine: MemoizedCallbackOrDispatch<IPriceLine> | null
 }
 
 const ChartContext = createContext<ChartContextValue>({
@@ -246,17 +235,21 @@ export default memo(function TVLightWeightChart({
     }
   }, [])
 
+  const createPriceLine = useCallback((options: CreatePriceLineOptions) => {
+    invariant(chartMainCandlestickSeries.current, 'Chart series not initialized')
+    return chartMainCandlestickSeries.current.createPriceLine(options)
+  }, [])
+
+  const removePriceLine = useCallback((line: IPriceLine) => {
+    chartMainCandlestickSeries.current?.removePriceLine(line)
+  }, [])
+
   const contextValue = useMemo<ChartContextValue>(
     () => ({
-      createPriceLine: options => {
-        invariant(chartMainCandlestickSeries.current, 'Chart series not initialized')
-        return chartMainCandlestickSeries.current.createPriceLine(options)
-      },
-      removePriceLine: line => {
-        chartMainCandlestickSeries.current?.removePriceLine(line)
-      },
+      createPriceLine,
+      removePriceLine,
     }),
-    [],
+    [createPriceLine, removePriceLine],
   )
 
   return (

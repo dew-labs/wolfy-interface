@@ -14,7 +14,6 @@ import {
 } from '@heroui/react'
 import NumberFlow from '@number-flow/react'
 import type {Selection, SortDescriptor} from '@react-types/shared'
-import {memo, useCallback, useEffect, useMemo, useState} from 'react'
 import {groupBy} from 'remeda'
 
 import {getTokenMetadata, getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'

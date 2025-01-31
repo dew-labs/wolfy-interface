@@ -1,4 +1,4 @@
-import {type DependencyList, useMemo} from 'react'
+import type {DependencyList} from 'react'
 
 export default function useIsChanged(...deps: DependencyList) {
   const newValue = {} // New object created everytime

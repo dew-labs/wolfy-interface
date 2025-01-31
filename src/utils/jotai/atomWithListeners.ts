@@ -1,5 +1,5 @@
-import {atom, type Getter, type SetStateAction, type Setter, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import type {Getter, Setter} from 'jotai'
+import type {SetStateAction} from 'react'
 
 type Callback<Value> = (get: Getter, set: Setter, newVal: Value, prevVal: Value) => void
 

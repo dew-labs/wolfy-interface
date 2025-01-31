@@ -1,4 +1,3 @@
-import {memo} from 'react'
 import {useSeoMeta} from 'unhead'
 
 import {TITLE} from '@/constants/config'

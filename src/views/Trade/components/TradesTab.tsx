@@ -16,8 +16,6 @@ import {
 } from '@heroui/react'
 import {Icon} from '@iconify/react'
 import {t} from 'i18next'
-import type * as React from 'react'
-import {memo, useCallback, useMemo, useState} from 'react'
 import {cairoIntToBigInt} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'

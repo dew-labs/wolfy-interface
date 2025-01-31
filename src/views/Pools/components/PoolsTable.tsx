@@ -12,9 +12,6 @@ import {
 import {Icon} from '@iconify/react'
 import type {SortDescriptor} from '@react-types/shared'
 import {create} from 'mutative'
-import * as React from 'react'
-import {memo, useCallback, useMemo, useState} from 'react'
-import {useLatest} from 'react-use'
 
 import {getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'

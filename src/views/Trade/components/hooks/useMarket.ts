@@ -1,6 +1,3 @@
-import {useCallback, useMemo, useState} from 'react'
-import {useLatest} from 'react-use'
-
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'

@@ -1,6 +1,3 @@
-import {type MemoizedCallbackOrDispatch, useCallback, useState} from 'react'
-import {useLatest} from 'react-use'
-
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {Price} from '@/lib/trade/services/fetchTokenPrices'
 import {cleanNumberString} from '@/utils/numberInputs'

@@ -1,6 +1,5 @@
 import {InferSeoMetaPlugin} from '@unhead/addons'
 import {renderDOMHead} from '@unhead/dom'
-import {memo, useEffect} from 'react'
 import {CapoPlugin, createHead} from 'unhead'
 
 import {TITLE} from '@/constants/config'

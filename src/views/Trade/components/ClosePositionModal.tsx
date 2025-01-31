@@ -1,8 +1,5 @@
 import {Button, Input, Modal, ModalBody, ModalContent, ModalHeader} from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
-import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {memo, useCallback, useMemo, useState} from 'react'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
@@ -105,8 +102,8 @@ export default memo(function ClosePositionModal() {
     maximumCollateralTokenToDecrease,
   )
   const latestCollateralTokenAmountToDecrease = useLatest(collateralTokenAmountToDecrease)
-  const [collaterTokenAmountToDecreaseInput, setCollateralTokenAmountToDecreaseInput] = useState(
-    () => shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
+  const [collaterTokenAmountToDecreaseInput, setCollaterTokenAmountToDecreaseInput] = useState(() =>
+    shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
   )
 
   const handleTokenAmountInputChange = useCallback(
@@ -115,7 +112,7 @@ export default memo(function ClosePositionModal() {
       const valueInput = cleanNumberString(value)
       const valueBigint = expandDecimals(valueInput, collateralTokenDecimals)
 
-      setCollateralTokenAmountToDecreaseInput(valueInput)
+      setCollaterTokenAmountToDecreaseInput(valueInput)
       setCollateralTokenAmountToDecrease(valueBigint)
     },
     [collateralTokenDecimals],

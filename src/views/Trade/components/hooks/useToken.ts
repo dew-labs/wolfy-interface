@@ -1,6 +1,3 @@
-import {useCallback, useMemo, useState} from 'react'
-import {useLatest} from 'react-use'
-
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'

@@ -1,5 +1,3 @@
-import {atom, useAtomValue} from 'jotai'
-
 import {chainIdAtom, walletChainIdAtom} from '@/lib/starknet/atoms'
 
 const chainIdIsSupportedMatchedAtom = atom(get => {

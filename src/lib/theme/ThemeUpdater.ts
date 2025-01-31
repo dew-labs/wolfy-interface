@@ -1,5 +1,3 @@
-import {memo, useLayoutEffect} from 'react'
-
 import getPreferColorScheme from './getPreferColorScheme'
 import {Theme} from './theme'
 import {useHydrateCurrentTheme, useSetCurrentTheme} from './useCurrentTheme'

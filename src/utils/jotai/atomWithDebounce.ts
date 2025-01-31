@@ -1,4 +1,4 @@
-import {atom, type SetStateAction} from 'jotai'
+import type {SetStateAction} from 'react'
 
 export default function atomWithDebounce<T>(
   initialValue: T,

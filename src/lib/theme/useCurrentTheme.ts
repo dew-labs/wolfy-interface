@@ -1,4 +1,3 @@
-import {atom, useAtom, useSetAtom} from 'jotai'
 import {useHydrateAtoms} from 'jotai/utils'
 
 import getPreferColorScheme from './getPreferColorScheme'

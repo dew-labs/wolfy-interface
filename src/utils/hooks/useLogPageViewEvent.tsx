@@ -1,5 +1,3 @@
-import {useEffect} from 'react'
-
 import {logEvent} from '@/utils/logger'
 
 export default function useLogPageViewEvent(event: readonly [string, Record<string, unknown>]) {

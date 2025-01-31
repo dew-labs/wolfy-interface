@@ -1,5 +1,3 @@
-import {memo} from 'react'
-
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 

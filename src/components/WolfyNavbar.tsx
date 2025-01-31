@@ -19,8 +19,6 @@ import {
 import {Icon} from '@iconify/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
-import {memo, useCallback, useMemo, useState} from 'react'
-import {useTranslation} from 'react-i18next'
 
 import wolfyLogoDarkSvg from '@/assets/icons/wolfy-text-dark.svg'
 import wolfyLogoLightSvg from '@/assets/icons/wolfy-text-light.svg'

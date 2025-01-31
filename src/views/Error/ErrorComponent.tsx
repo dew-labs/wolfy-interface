@@ -1,4 +1,3 @@
-import {useCallback} from 'react'
 import {FocusScope} from 'react-aria'
 
 import WolfyBackground from '@/components/WolfyBackground'

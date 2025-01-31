@@ -1,4 +1,3 @@
-import {atom} from 'jotai'
 import {atomWithStorage} from 'jotai/utils'
 import type {WalletAccount} from 'starknet'
 

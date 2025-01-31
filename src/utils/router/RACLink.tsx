@@ -1,6 +1,5 @@
 import {createLink, type LinkComponent} from '@tanstack/react-router'
 import type {AnchorHTMLAttributes} from 'react'
-import * as React from 'react'
 import type {AriaLinkOptions} from 'react-aria'
 import {mergeProps, useFocusRing, useHover, useLink, useObjectRef} from 'react-aria'
 

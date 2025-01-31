@@ -8,10 +8,7 @@ import {
   ModalHeader,
 } from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
-import clsx from 'clsx'
-import {memo, type MemoizedCallback, useCallback, useMemo, useState} from 'react'
 import type {PressEvent} from 'react-aria-components'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'

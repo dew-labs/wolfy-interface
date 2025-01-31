@@ -1,6 +1,3 @@
-import {useState} from 'react'
-import {useLatest} from 'react-use'
-
 import {getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 

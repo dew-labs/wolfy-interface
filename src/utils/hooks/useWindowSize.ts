@@ -1,5 +1,4 @@
 // // TODO: Investigate why we cannot test useSyncExternalStore
-// import {useMemo, useSyncExternalStore} from 'react'
 
 // const MOBILE_BREAKPOINT = 1023
 
@@ -23,8 +22,6 @@
 //     )
 //   })
 // }
-
-import {useLayoutEffect, useState} from 'react'
 
 import useClientValue from './useClientValue'
 

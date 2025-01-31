@@ -12,8 +12,6 @@ import {
 import {Icon} from '@iconify/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
-import {memo, useCallback, useMemo} from 'react'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'

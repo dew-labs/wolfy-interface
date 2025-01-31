@@ -1,4 +1,3 @@
-import {useAtom, useSetAtom} from 'jotai'
 import {atomWithStorage} from 'jotai/utils'
 
 export enum TradeMode {

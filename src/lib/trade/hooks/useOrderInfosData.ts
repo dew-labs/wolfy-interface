@@ -1,5 +1,4 @@
 import {type UseQueryResult} from '@tanstack/react-query'
-import {type MemoizedCallback, useCallback} from 'react'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getOrdersInfo, {type OrderInfosData} from '@/lib/trade/utils/order/getOrdersInfo'

@@ -1,5 +1,3 @@
-import {memo} from 'react'
-
 interface SkipLinkProps {
   title: string
   to: `#${string}`

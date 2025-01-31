@@ -1,4 +1,3 @@
-import {memo, useEffect} from 'react'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'

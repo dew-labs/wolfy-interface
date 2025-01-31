@@ -1,5 +1,4 @@
 import {queryOptions, useQuery, type UseQueryResult} from '@tanstack/react-query'
-import type {MemoizedCallback} from 'react'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'

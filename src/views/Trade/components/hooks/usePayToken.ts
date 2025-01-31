@@ -1,6 +1,3 @@
-import {type Dispatch, type SetStateAction, useCallback, useEffect, useMemo, useState} from 'react'
-import {useLatest} from 'react-use'
-
 import {LEVERAGE_DECIMALS, LEVERAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -22,7 +19,7 @@ export default function usePayToken(
   tokenAddress: string | undefined,
   tokenPrice: bigint | undefined,
   tokenAmountUsd: bigint,
-  setTokenAmountUsd: Dispatch<SetStateAction<bigint>>,
+  setTokenAmountUsd: MemoizedCallbackOrDispatch<bigint>,
   minCollateralFactor: bigint | undefined,
 ) {
   const [chainId] = useChainId()

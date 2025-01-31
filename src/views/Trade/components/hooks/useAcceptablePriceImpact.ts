@@ -1,6 +1,3 @@
-import {useCallback, useState} from 'react'
-import {useLatest} from 'react-use'
-
 import {BASIS_POINTS_DECIMALS} from '@/lib/trade/numbers/constants'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals from '@/utils/numbers/expandDecimals'

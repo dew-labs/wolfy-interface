@@ -1,5 +1,4 @@
 import {Select, SelectItem, type SharedSelection} from '@heroui/react'
-import {memo, useCallback, useMemo} from 'react'
 
 import {isChainIdSupported, SUPPORTED_CHAINS} from '@/constants/chains'
 import useChainId from '@/lib/starknet/hooks/useChainId'

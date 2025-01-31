@@ -1,7 +1,5 @@
 import {Button} from '@heroui/react'
 import {Icon} from '@iconify/react'
-import {memo, useCallback} from 'react'
-import {useLatest} from 'react-use'
 
 import {Theme} from '@/lib/theme/theme'
 import useTheme from '@/lib/theme/useTheme'

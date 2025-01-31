@@ -13,9 +13,6 @@ import getStarknetCore, {
   type StarknetWindowObject,
   type WalletProvider,
 } from 'get-starknet-core'
-import {useAtom} from 'jotai'
-import {memo, type MemoizedCallback, useCallback, useEffect, useRef, useState} from 'react'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
 import {UAParser} from 'ua-parser-js'
@@ -42,6 +39,7 @@ interface UnavailableWalletProps {
   isNotAvailable?: boolean
 }
 
+/* eslint-disable @eslint-react/prefer-destructuring-assignment -- conditional props*/
 const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWalletProps) {
   const [theme] = useCurrentTheme()
 
@@ -256,3 +254,4 @@ export default memo(function ConnectModal() {
     </Modal>
   )
 })
+/* eslint-enable @eslint-react/prefer-destructuring-assignment */

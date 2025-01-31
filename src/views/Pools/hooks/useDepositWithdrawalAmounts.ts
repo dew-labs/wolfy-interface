@@ -1,5 +1,3 @@
-import {useCallback, useMemo} from 'react'
-
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'

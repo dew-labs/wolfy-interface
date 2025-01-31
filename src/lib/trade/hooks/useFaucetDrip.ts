@@ -1,5 +1,3 @@
-import {useCallback, useState} from 'react'
-import {useLatest} from 'react-use'
 import {toast} from 'sonner'
 
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'

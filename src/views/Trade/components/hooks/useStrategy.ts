@@ -1,6 +1,3 @@
-import {useState} from 'react'
-import {useLatest} from 'react-use'
-
 export type Strategy = 'leverageByCollateral' | 'leverageBySize' | 'independent'
 
 export default function useStrategy() {

@@ -1,4 +1,5 @@
-import {memo, type MemoizedCallback, type NamedExoticComponent} from 'react'
+/* eslint-disable @eslint-react/naming-convention/filename -- this is a utility file */
+import type {NamedExoticComponent} from 'react'
 
 import {useResetComponent} from './useResetComponent'
 
@@ -18,5 +19,11 @@ export default function createResetableComponent<
     writable: false,
   })
 
+  Object.defineProperty(ResettableComponent, 'displayName', {
+    value: Component.displayName,
+    writable: false,
+  })
+
   return memo(ResettableComponent)
 }
+/* eslint-enable @eslint-react/naming-convention/filename */

@@ -1,5 +1,3 @@
-import {memo} from 'react'
-
 function VisuallyHidden<
   T extends keyof React.JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
 >({

@@ -1,7 +1,6 @@
 import {PriceServiceConnection} from '@pythnetwork/price-service-client'
 import {useQueryClient} from '@tanstack/react-query'
 import {create} from 'mutative'
-import {memo, useEffect} from 'react'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'

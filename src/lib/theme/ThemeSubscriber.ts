@@ -1,5 +1,3 @@
-import {memo, useLayoutEffect} from 'react'
-
 import {logError} from '@/utils/logger'
 
 import {Theme} from './theme'

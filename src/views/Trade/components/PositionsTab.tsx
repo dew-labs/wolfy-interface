@@ -11,7 +11,6 @@ import {
 } from '@heroui/react'
 import {Icon} from '@iconify/react'
 import {t} from 'i18next'
-import {memo, useCallback, useState} from 'react'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'

@@ -16,8 +16,6 @@ import {
 import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 import {create} from 'mutative'
-import type * as React from 'react'
-import {memo, useCallback, useMemo, useState} from 'react'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
