@@ -15,6 +15,7 @@ declare global {
   const lazy: typeof import('react')['lazy']
   const memo: typeof import('react')['memo']
   const startTransition: typeof import('react')['startTransition']
+  const use: typeof import('react')['use']
   const useAtom: typeof import('jotai')['useAtom']
   const useAtomValue: typeof import('jotai')['useAtomValue']
   const useCallback: typeof import('react')['useCallback']

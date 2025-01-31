@@ -103,7 +103,7 @@ export default defineConfig(({mode}) => {
           'react-use': ['useLatest'],
         },
         {
-          react: ['Suspense', 'createContext'],
+          react: ['Suspense', 'createContext', 'use'],
         },
         {
           from: 'react',

@@ -1,5 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {
+  CandlestickSeries,
   type ChartOptions,
   ColorType,
   createChart,
@@ -53,7 +54,7 @@ interface LineProps {
 }
 
 export const Line = memo(function Line({options}: LineProps) {
-  const {createPriceLine, removePriceLine} = useContext(ChartContext)
+  const {createPriceLine, removePriceLine} = use(ChartContext)
 
   useEffect(() => {
     if (!createPriceLine || !removePriceLine) return
@@ -131,7 +132,7 @@ export default memo(function TVLightWeightChart({
 
     chartRef.current = chart
 
-    chartMainCandlestickSeries.current = chartRef.current.addCandlestickSeries({
+    chartMainCandlestickSeries.current = chartRef.current.addSeries(CandlestickSeries, {
       upColor: CANDLE_STICK_SERIES.UP_COLOR,
       downColor: CANDLE_STICK_SERIES.DOWN_COLOR,
       borderVisible: CANDLE_STICK_SERIES.BORDER_VISIBLE,
