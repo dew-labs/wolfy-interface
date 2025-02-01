@@ -163,7 +163,6 @@ export default function usePayToken(
     setLeverageInput,
     handleLeverageChange,
     handleLeverageChangeEnd,
-    leverageInputIsFocused,
     setLeverageInputFocused,
   }
 }

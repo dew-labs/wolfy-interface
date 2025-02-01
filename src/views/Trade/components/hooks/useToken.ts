@@ -34,7 +34,7 @@ export default function useToken(tradeMode: TradeMode) {
 
   const tokenAmount = useMemo(() => {
     if (!derivedTokenPrice) return 0n
-    return convertUsdToTokenAmount(tokenAmountUsd, tokenDecimals, latestDerivedTokenPrice.current)
+    return convertUsdToTokenAmount(tokenAmountUsd, tokenDecimals, derivedTokenPrice)
   }, [derivedTokenPrice, tokenAmountUsd, tokenDecimals])
 
   const setTokenAmount = useCallback(

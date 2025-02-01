@@ -15,6 +15,7 @@ import getStarknetCore, {
 } from 'get-starknet-core'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
+import type {ReadonlyDeep} from 'type-fest'
 import {UAParser} from 'ua-parser-js'
 import {getProvider, ProviderType, type StarknetChainId} from 'wolfy-sdk'
 

@@ -17,6 +17,7 @@ import {DEFAULT_PRICE} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import {TradeType} from '@/lib/trade/states/useTradeType'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
+import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -42,7 +43,6 @@ interface Props {
   setPayTokenAddress: MemoizedCallbackOrDispatch<string | undefined>
   payTokenAmount: bigint
   setPayTokenAmount: MemoizedCallbackOrDispatch<bigint>
-  sync: boolean
 }
 
 const SIZE_CLASS_NAMES = {
@@ -84,7 +84,6 @@ export default memo(function TokenInputs({
   setTokenPrice,
   tokenAmount,
   setTokenAmount,
-  sync,
 }: Readonly<Props>) {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
@@ -153,13 +152,10 @@ export default memo(function TokenInputs({
 
   const {
     mode: payTokenInputMode,
-    input: payTokenAmountInput,
-    usdInput: payTokenAmountUsdInput,
-    handleInputFocusChange: handlePayTokenInputFocusChange,
-    handleInputChange: handlePayTokenAmountInputChange,
-    handleUsdInputChange: handlePayTokenUsdInputChange,
-    handleUsdInputFocusChange: handlePayTokenUsdInputFocusChange,
+    input: payTokenInput,
     setMode: setPayTokenInputMode,
+    setInput: setPayTokenInput,
+    setIsFocused: setPayTokenIsFocused,
   } = useTokenInput(
     payTokenDecimals,
     payTokenAmount,
@@ -167,18 +163,29 @@ export default memo(function TokenInputs({
     derivedPayTokenPrice ?? DEFAULT_PRICE,
   )
 
-  const payTokenUsdText = payTokenAmountUsdInput
-    ? formatNumber(payTokenAmountUsdInput, Format.USD)
-    : '$0'
+  const handlePayTokenInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPayTokenInput(e.target.value)
+    },
+    [setPayTokenInput],
+  )
 
-  const payTokenAmountText = `${
-    payTokenAmountInput
-      ? formatNumber(payTokenAmountInput, Format.READABLE, {
-          exactFractionDigits: true,
-          fractionDigits: payTokenDisplayDecimals,
-        })
-      : `0`
-  } ${payTokenData?.symbol}`
+  const payTokenText = (() => {
+    if (payTokenInputMode === InputMode.Token) {
+      return formatNumber(
+        shrinkDecimals(
+          convertTokenAmountToUsd(payTokenAmount, payTokenDecimals, derivedPayTokenPrice?.max),
+          USD_DECIMALS,
+        ),
+        Format.USD,
+      )
+    }
+
+    return `${formatNumber(shrinkDecimals(payTokenAmount, payTokenDecimals), Format.READABLE, {
+      exactFractionDigits: true,
+      fractionDigits: payTokenDisplayDecimals,
+    })} ${payTokenData?.symbol}`
+  })()
 
   const togglePayTokenInputMode = useCallback(() => {
     setPayTokenInputMode(prev => (prev === InputMode.Token ? InputMode.Usd : InputMode.Token))
@@ -192,41 +199,43 @@ export default memo(function TokenInputs({
 
   const {
     mode: tokenInputMode,
-    input: tokenAmountInput,
-    usdInput: tokenAmountUsdInput,
-    handleInputFocusChange: handleTokenInputFocusChange,
-    handleInputChange: handleTokenAmountInputChange,
-    handleUsdInputChange: handleTokenUsdInputChange,
-    handleUsdInputFocusChange: handleTokenUsdInputFocusChange,
+    input: tokenInput,
     setMode: setTokenInputMode,
-  } = useTokenInput(
-    tokenDecimals,
-    tokenAmount,
-    setTokenAmount,
-    derivedTokenPrice ?? DEFAULT_PRICE,
-    {
-      sync,
+    setInput: setTokenInput,
+    setIsFocused: setTokenIsFocused,
+  } = useTokenInput(tokenDecimals, tokenAmount, setTokenAmount, derivedTokenPrice ?? DEFAULT_PRICE)
+
+  const handleTokenInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTokenInput(e.target.value)
     },
+    [setTokenInput],
   )
 
   const toggleTokenInputMode = useCallback(() => {
     setTokenInputMode(prev => (prev === InputMode.Token ? InputMode.Usd : InputMode.Token))
   }, [setTokenInputMode])
 
-  const tokenUsdText = tokenAmountUsdInput ? formatNumber(tokenAmountUsdInput, Format.USD) : '$0'
+  const tokenText = (() => {
+    if (tokenInputMode === InputMode.Token) {
+      return formatNumber(
+        shrinkDecimals(
+          convertTokenAmountToUsd(tokenAmount, tokenDecimals, derivedTokenPrice?.max),
+          USD_DECIMALS,
+        ),
+        Format.USD,
+      )
+    }
 
-  const tokenAmountText = `${
-    tokenAmountInput
-      ? formatNumber(tokenAmountInput, Format.READABLE, {
-          exactFractionDigits: true,
-          fractionDigits: tokenDisplayDecimals,
-        })
-      : `0`
-  } ${tokenData?.symbol}`
+    return `${formatNumber(shrinkDecimals(tokenAmount, tokenDecimals), Format.READABLE, {
+      exactFractionDigits: true,
+      fractionDigits: tokenDisplayDecimals,
+    })} ${tokenData?.symbol}`
+  })()
 
   // -------------------------------------------------------------------------------------------------------------------
 
-  const {input: tokenPriceInput, handleInputChange: handleTokenPriceInputChange} = useTokenInput(
+  const {input: tokenPriceInput, setInput: setTokenPriceInput} = useTokenInput(
     USD_DECIMALS,
     tokenPrice,
     setTokenPrice,
@@ -234,10 +243,14 @@ export default memo(function TokenInputs({
       min: 1000000000000000000000000000000n,
       max: 1000000000000000000000000000000n,
     },
-    {
-      mode: InputMode.Token,
-      lockMode: true,
+    InputMode.Token,
+  )
+
+  const handleTokenPriceInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTokenPriceInput(e.target.value)
     },
+    [setTokenPriceInput],
   )
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -304,7 +317,7 @@ export default memo(function TokenInputs({
             </div>
           }
           endContent={
-            <div className='pointer-events-none flex h-full min-w-max items-center justify-center'>
+            <div className='pointer-events-none flex h-full min-w-max items-center justify-center gap-2'>
               <span className='mr-1 whitespace-nowrap text-lg text-default-400'>per</span>
               <img src={tokenData?.imageUrl} alt='' className='size-6' />
               <span className='whitespace-nowrap text-lg text-default-400'>
@@ -329,21 +342,18 @@ export default memo(function TokenInputs({
               className={clsx('absolute bottom-0 whitespace-nowrap p-0')}
               onClick={togglePayTokenInputMode}
             >
-              Pay: {payTokenInputMode === InputMode.Token ? payTokenUsdText : payTokenAmountText}
+              Pay: {payTokenText}
             </button>
           </Tooltip>
         }
-        value={payTokenInputMode === InputMode.Token ? payTokenAmountInput : payTokenAmountUsdInput}
-        onChange={
-          payTokenInputMode === InputMode.Token
-            ? handlePayTokenAmountInputChange
-            : handlePayTokenUsdInputChange
-        }
-        onFocusChange={
-          payTokenInputMode === InputMode.Token
-            ? handlePayTokenInputFocusChange
-            : handlePayTokenUsdInputFocusChange
-        }
+        value={payTokenInput}
+        onChange={handlePayTokenInputChange}
+        onFocus={() => {
+          setPayTokenIsFocused(true)
+        }}
+        onBlur={() => {
+          setPayTokenIsFocused(false)
+        }}
         placeholder='0.0'
         classNames={TOKEN_AMOUNT_INPUT_CLASS_NAMES}
         startContent={
@@ -413,24 +423,20 @@ export default memo(function TokenInputs({
               className={clsx('absolute bottom-0 whitespace-nowrap p-0')}
               onClick={toggleTokenInputMode}
             >
-              {INPUT_2_LABEL[tradeType]}:{' '}
-              {tokenInputMode === InputMode.Token ? tokenUsdText : tokenAmountText}
+              {INPUT_2_LABEL[tradeType]}: {tokenText}
             </button>
           </Tooltip>
         }
         placeholder='0.0'
         classNames={SIZE_CLASS_NAMES}
-        value={tokenInputMode === InputMode.Token ? tokenAmountInput : tokenAmountUsdInput}
-        onChange={
-          tokenInputMode === InputMode.Token
-            ? handleTokenAmountInputChange
-            : handleTokenUsdInputChange
-        }
-        onFocusChange={
-          tokenInputMode === InputMode.Token
-            ? handleTokenInputFocusChange
-            : handleTokenUsdInputFocusChange
-        }
+        value={tokenInput}
+        onChange={handleTokenInputChange}
+        onFocus={() => {
+          setTokenIsFocused(true)
+        }}
+        onBlur={() => {
+          setTokenIsFocused(false)
+        }}
         startContent={
           tokenInputMode === InputMode.Usd ? (
             <div className='pointer-events-none mb-[2px] flex items-center'>

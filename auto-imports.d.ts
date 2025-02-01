@@ -6,7 +6,6 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const ReadonlyDeep: typeof import('react-use')['ReadonlyDeep']
   const Suspense: typeof import('react')['Suspense']
   const atom: typeof import('jotai')['atom']
   const clsx: typeof import('clsx')['clsx']
@@ -43,7 +42,4 @@ declare global {
   // @ts-ignore
   export type { PropsWithChildren, ChangeEventHandler, MemoizedCallback, MemoizedCallbackOrDispatch } from 'react'
   import('react')
-  // @ts-ignore
-  export type { ReadonlyDeep } from 'type-fest'
-  import('type-fest')
 }

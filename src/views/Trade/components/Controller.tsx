@@ -218,7 +218,6 @@ const Controller = createResetableComponent(({reset}) => {
     payTokenAmountUsd,
     leverageInput,
     latestLeverageInput,
-    leverageInputIsFocused,
     handleLeverageChangeEnd,
     setLeverageInput,
     setLeverageInputFocused,
@@ -905,7 +904,6 @@ const Controller = createResetableComponent(({reset}) => {
               tokenAmountUsd={tokenAmountUsd}
               tokenPrice={tokenPrice}
               setTokenPrice={setTokenPrice}
-              sync={!leverageInputIsFocused}
             />
           )}
           <Slider

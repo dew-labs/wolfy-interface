@@ -16,6 +16,7 @@ import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
 // import {Inspector} from 'react-dev-inspector'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
+import type {ReadonlyDeep} from 'type-fest'
 
 import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
 import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'

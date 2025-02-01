@@ -1,3 +1,5 @@
+import type {ReadonlyDeep} from 'type-fest'
+
 interface SkipLinkProps {
   title: string
   to: `#${string}`
