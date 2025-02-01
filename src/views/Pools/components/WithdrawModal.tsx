@@ -40,7 +40,7 @@ export default memo(function WithdrawModal({
   isOpen,
   onClose,
   marketTokenAddress,
-}: WithdrawModalProps) {
+}: Readonly<WithdrawModalProps>) {
   const latestMarketTokenAddress = useLatest(marketTokenAddress)
 
   const [wmAmount, setWmAmount] = useState('')

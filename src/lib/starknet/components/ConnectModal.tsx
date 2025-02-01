@@ -40,7 +40,9 @@ interface UnavailableWalletProps {
 }
 
 /* eslint-disable @eslint-react/prefer-destructuring-assignment -- conditional props*/
-const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWalletProps) {
+const Wallet = memo(function Wallet(
+  props: ReadonlyDeep<UnavailableWalletProps | AvailableWalletProps>,
+) {
   const [theme] = useCurrentTheme()
 
   const icon = (() => {
@@ -84,13 +86,8 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
 
   return (
     <li>
-      <Card
-        shadow='sm'
-        isPressable
-        onPress={handlePress}
-        className='align-center justify-content-center w-full'
-      >
-        <CardBody className='align-center flex flex-row justify-center gap-2 p-2'>
+      <Card shadow='sm' isPressable onPress={handlePress} className='w-full'>
+        <CardBody className='flex flex-row justify-center gap-2 p-2'>
           <Image shadow='none' radius='none' alt='' className='size-[24px]' src={icon} />
           <div className='flex flex-row gap-2'>
             <div>

@@ -41,7 +41,7 @@ const JotaiDevTools = import.meta.env.PROD
 
 const PARTYTOWN_FORWARD = ['dataLayer.push']
 
-function ErrorBoundaryFallbackRender({error}: FallbackProps) {
+function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
   logError(error)
 
   const errorMessage = (() => {

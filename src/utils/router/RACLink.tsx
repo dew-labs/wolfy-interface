@@ -13,10 +13,12 @@ interface RACLinkProps extends Omit<AriaLinkOptions, 'href'> {
 const RACLinkComponent = ({
   ref: forwardedRef,
   ...props
-}: RACLinkProps &
-  AnchorHTMLAttributes<HTMLAnchorElement> & {href?: string} & {
-    ref: React.RefObject<HTMLAnchorElement>
-  }) => {
+}: Readonly<
+  RACLinkProps &
+    AnchorHTMLAttributes<HTMLAnchorElement> & {href?: string} & {
+      ref: React.RefObject<HTMLAnchorElement>
+    }
+>) => {
   const ref = useObjectRef(forwardedRef)
   const {isPressed, linkProps} = useLink(props, ref)
   const {isHovered, hoverProps} = useHover(props)

@@ -1,20 +1,24 @@
 import {renderHookServer} from '@testing-library/react'
-import {expect, test} from 'vitest'
+import {expect} from 'vitest'
 
 import useClientValue from './useClientValue'
 
 const DEFAULT_VALUE = 'defaultValue'
 
-test('useClientValue on server side', () => {
-  const {result, hydrate} = renderHookServer(() =>
-    useClientValue(() => window.innerHeight, DEFAULT_VALUE),
-  )
+describe('useClientValue on server side', () => {
+  it('should return default value', () => {
+    expect.assertions(3)
 
-  expect(() => window).toThrow('window is not defined')
+    const {result, hydrate} = renderHookServer(() =>
+      useClientValue(() => window.innerHeight, DEFAULT_VALUE),
+    )
 
-  expect(result.current).toBe(DEFAULT_VALUE)
+    expect(() => window).toThrow('window is not defined')
 
-  hydrate()
+    expect(result.current).toBe(DEFAULT_VALUE)
 
-  expect(result.current).toBe(window.innerHeight)
+    hydrate()
+
+    expect(result.current).toBe(window.innerHeight)
+  })
 })

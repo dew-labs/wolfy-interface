@@ -81,7 +81,7 @@ const NAVBAR_MENU_MOTION_PROPS = {
   },
 }
 
-export default memo(function WolfyNavbar(props: NavbarProps) {
+export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   const {t} = useTranslation()
   const [theme] = useCurrentTheme()
   const logoSvg = theme === Theme.Dark ? wolfyLogoDarkSvg : wolfyLogoLightSvg
@@ -130,7 +130,7 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
         </NavbarBrand>
 
         {/* Center Content */}
-        <NavbarContent justify='start' className='align-center hidden md:flex'>
+        <NavbarContent justify='start' className='hidden md:flex'>
           {menuItems.map(item => {
             return (
               <NavbarItem key={item.label}>
@@ -229,14 +229,14 @@ export default memo(function WolfyNavbar(props: NavbarProps) {
             <NavbarMenuItem key={`${item.label}-${index}`}>
               {item.external ? (
                 <a
-                  className='text-d mb-2 flex w-full text-default-500'
+                  className='mb-2 flex w-full text-default-500'
                   href={item.to}
                   target={item.target}
                 >
                   {t(item.label)}
                 </a>
               ) : (
-                <Link className='text-d mb-2 flex w-full text-default-500' to={item.to}>
+                <Link className='mb-2 flex w-full text-default-500' to={item.to}>
                   {t(item.label)}
                 </Link>
               )}

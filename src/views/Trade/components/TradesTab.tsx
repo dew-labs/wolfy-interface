@@ -425,7 +425,7 @@ export default memo(function TradesTab() {
                         <div>
                           {item.isLong ? 'Long' : 'Short'} {item.market.indexToken.symbol}
                         </div>
-                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                        <div className='whitespace-nowrap text-xs opacity-50'>
                           [{item.poolName}]
                         </div>
                       </div>

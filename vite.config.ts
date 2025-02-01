@@ -115,6 +115,11 @@ export default defineConfig(({mode}) => {
           ],
           type: true,
         },
+        {
+          from: 'type-fest',
+          imports: ['ReadonlyDeep'],
+          type: true,
+        },
       ],
     }) as PluginOption,
     optimizeLocales,

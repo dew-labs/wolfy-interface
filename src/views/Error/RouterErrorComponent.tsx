@@ -5,7 +5,11 @@ import {logError} from '@/utils/logger'
 
 import ErrorComponent from './ErrorComponent'
 
-export default memo(function RouterErrorComponent({error, info, reset}: ErrorComponentProps) {
+export default memo(function RouterErrorComponent({
+  error,
+  info,
+  reset,
+}: Readonly<ErrorComponentProps>) {
   const router = useRouter()
   const {reset: resetQueryErrorBoundary} = useQueryErrorResetBoundary()
 

@@ -139,9 +139,7 @@ export default memo(function PositionTab() {
                             {position.isLong ? t('Long') : t('Short')}{' '}
                             {position.marketData.indexToken.symbol}
                           </div>
-                          <div className='subtext whitespace-nowrap text-xs opacity-50'>
-                            [{poolName}]
-                          </div>
+                          <div className='whitespace-nowrap text-xs opacity-50'>[{poolName}]</div>
                         </div>
                       </Button>
                     </Tooltip>

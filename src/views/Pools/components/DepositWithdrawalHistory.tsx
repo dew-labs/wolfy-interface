@@ -357,7 +357,7 @@ export default memo(function DepositWithdrawalHistory() {
                       />
                       <div className='flex flex-col'>
                         <div>{item.market.indexToken.symbol}</div>
-                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                        <div className='whitespace-nowrap text-xs opacity-50'>
                           {getMarketPoolName(item.market)}
                         </div>
                       </div>

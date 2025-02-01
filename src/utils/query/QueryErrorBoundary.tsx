@@ -3,7 +3,7 @@ import {ErrorBoundary} from 'react-error-boundary'
 
 import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
-export function QueryErrorBoundary({children}: PropsWithChildren) {
+export function QueryErrorBoundary({children}: Readonly<PropsWithChildren>) {
   return (
     <QueryErrorResetBoundary>
       {({reset}) => (

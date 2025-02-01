@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter} from '@tanstack/react-router'
 
@@ -24,6 +25,7 @@ export function createRouter({queryClient}: {queryClient: QueryClient}) {
     hydrate: dehydrated => {
       hydrate(queryClient, dehydrated.queryClientState)
     },
+    scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadDelay: 50,
     defaultPreloadStaleTime: 0, // leverage cache control of react-query instead: we don't want loader calls to ever be stale as this will ensure that the loader is always called when the route is preloaded or visited
@@ -41,3 +43,4 @@ declare module '@tanstack/react-router' {
     router: Router
   }
 }
+/* eslint-enable @eslint-react/naming-convention/filename */

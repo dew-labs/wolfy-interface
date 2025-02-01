@@ -4,8 +4,8 @@ import {logError} from '@/utils/logger'
 
 import ErrorComponent from './ErrorComponent'
 
-export default function QueryErrorComponent(props: FallbackProps) {
-  logError(props.error)
+export default function QueryErrorComponent({error, resetErrorBoundary}: Readonly<FallbackProps>) {
+  logError(error)
 
-  return <ErrorComponent reset={props.resetErrorBoundary} />
+  return <ErrorComponent reset={resetErrorBoundary} />
 }

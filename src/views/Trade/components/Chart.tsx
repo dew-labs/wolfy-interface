@@ -42,7 +42,7 @@ function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
   )
 }
 
-function OrderLine({orderKey}: {orderKey: string}) {
+function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
   const {data: order} = useOrderInfosData(useCallback(data => data.get(orderKey), [orderKey]))
   const {data: initialCollateralTokenPrice} = useTokenPrices(
     useCallback(
@@ -90,7 +90,7 @@ function OrderLine({orderKey}: {orderKey: string}) {
   )
 }
 
-function PositionLine({positionKey}: {positionKey: bigint}) {
+function PositionLine({positionKey}: Readonly<{positionKey: bigint}>) {
   const {data: position} = usePositionsInfoData(
     useCallback(data => data.positionsInfo.get(positionKey), [positionKey]),
   )

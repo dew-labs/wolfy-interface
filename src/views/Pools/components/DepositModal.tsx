@@ -41,7 +41,7 @@ export default memo(function DepositModal({
   onClose,
   marketTokenAddress,
   orderType,
-}: DepositModalProps) {
+}: Readonly<DepositModalProps>) {
   const [chainId] = useChainId()
 
   const queryClient = useQueryClient()

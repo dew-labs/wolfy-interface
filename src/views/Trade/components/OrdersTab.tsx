@@ -239,7 +239,7 @@ export default memo(function OrdersTab() {
                       />
                       <div className='flex flex-col'>
                         <div>{order.indexName}</div>
-                        <div className='subtext whitespace-nowrap text-xs opacity-50'>
+                        <div className='whitespace-nowrap text-xs opacity-50'>
                           [{order.poolName}]
                         </div>
                       </div>

@@ -1,11 +1,6 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- library convention*/
 import type {QueryClient} from '@tanstack/react-query'
-import {
-  createRootRouteWithContext,
-  Outlet,
-  ScrollRestoration,
-  useRouter,
-} from '@tanstack/react-router'
+import {createRootRouteWithContext, Outlet, useRouter} from '@tanstack/react-router'
 import {RouterProvider} from 'react-aria-components'
 
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
@@ -28,7 +23,6 @@ function RootRoute() {
 
   return (
     <>
-      <ScrollRestoration />
       <RouteAnnouncer />
       <RouterProvider navigate={navigate}>
         <Outlet />
