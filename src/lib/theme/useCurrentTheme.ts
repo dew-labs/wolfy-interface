@@ -4,7 +4,7 @@ import getPreferColorScheme from './getPreferColorScheme'
 import {Theme} from './theme'
 import useTheme from './useTheme'
 
-const currentThemeAtom = atom<Theme.Dark | Theme.Light>(Theme.Dark)
+export const currentThemeAtom = atom<Theme.Dark | Theme.Light>(Theme.Dark)
 
 export function useCurrentTheme() {
   return useAtom(currentThemeAtom)

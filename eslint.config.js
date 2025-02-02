@@ -710,15 +710,7 @@ function getVitestConfigs() {
         },
       },
       languageOptions: {
-        globals: {
-          ...pluginVitest.environments.env.globals,
-          // pluginVitest.environments.env.globals lack some of the globals, see https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/constants.ts
-          chai: true,
-          expectTypeOf: true,
-          assertType: true,
-          onTestFinished: true,
-          onTestFailed: true,
-        },
+        globals: pluginVitest.environments.env.globals,
       },
     }),
     ...applyTo.test(

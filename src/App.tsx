@@ -14,12 +14,11 @@ import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/r
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {RouterProvider} from '@tanstack/react-router'
+import {createStore, Provider} from 'jotai'
 // import {Inspector} from 'react-dev-inspector'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import type {ReadonlyDeep} from 'type-fest'
 
-import ChainSwitchRequester from '@/lib/starknet/components/ChainSwitchRequester'
-import ChainSwitchSubscriber from '@/lib/starknet/components/ChainSwitchSubscriber'
 import {logError} from '@/utils/logger'
 
 import UpdateMousePosition from './components/UpdateMousePosition'
@@ -27,8 +26,8 @@ import WolfyBackground from './components/WolfyBackground'
 import WolfyToaster from './components/WolfyToaster'
 import {DEBUG} from './constants/config'
 import Head from './lib/head/Head'
-import ThemeSubscriber from './lib/theme/ThemeSubscriber'
-import ThemeUpdater from './lib/theme/ThemeUpdater'
+import ChainEffects from './lib/starknet/components/ChainEffects'
+import ThemeEffects from './lib/theme/ThemeEffects'
 import TokenPricesUpdater from './lib/trade/components/TokenPricesUpdater'
 import {createQueryClient, createQueryPersistOptions} from './queries/queries'
 import {createRouter} from './router'
@@ -77,6 +76,8 @@ function App() {
 
   const [router] = useState(() => createRouter({queryClient}))
 
+  const [store] = useState(() => createStore())
+
   addIntegration(tanstackRouterBrowserTracingIntegration(router))
 
   useEffect(function initLiveAnnouncer() {
@@ -93,32 +94,32 @@ function App() {
   }, [])
 
   return (
-    <HeroUIProvider>
-      <ErrorBoundary fallback={null}>
-        <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
-      </ErrorBoundary>
-      <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
-        <WolfyBackground />
-        {/* <Inspector /> */}
-        <Suspense>
-          <JotaiDevTools />
-        </Suspense>
-        <Head />
-        <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-          <QueryErrorBoundary>
-            <UpdateMousePosition />
-            <WolfyToaster />
-            <ThemeUpdater />
-            <ThemeSubscriber />
-            <ChainSwitchRequester />
-            <ChainSwitchSubscriber />
-            <TokenPricesUpdater />
-            <RouterProvider router={router} />
-          </QueryErrorBoundary>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </PersistQueryClientProvider>
-      </ErrorBoundary>
-    </HeroUIProvider>
+    <Provider store={store}>
+      <HeroUIProvider>
+        <ErrorBoundary fallback={null}>
+          <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
+          <WolfyBackground />
+          {/* <Inspector /> */}
+          <Suspense>
+            <JotaiDevTools />
+          </Suspense>
+          <Head />
+          <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+            <QueryErrorBoundary>
+              <UpdateMousePosition />
+              <WolfyToaster />
+              <ChainEffects />
+              <ThemeEffects />
+              <TokenPricesUpdater />
+              <RouterProvider router={router} />
+            </QueryErrorBoundary>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </PersistQueryClientProvider>
+        </ErrorBoundary>
+      </HeroUIProvider>
+    </Provider>
   )
 }
 

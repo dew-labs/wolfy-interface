@@ -16,10 +16,11 @@ import NumberFlow from '@number-flow/react'
 import type {Selection, SortDescriptor} from '@react-types/shared'
 import {groupBy} from 'remeda'
 
-import {getTokenMetadata, getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
+import {getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
 import HeadTags from '@/lib/head/HeadTags'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useOHLCV from '@/lib/trade/hooks/useOHLCV'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
@@ -27,9 +28,6 @@ import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
 import getAvailableTokens from '@/lib/trade/utils/market/getAvailableTokens'
 import {getAvailableUsdLiquidityForPosition} from '@/lib/trade/utils/market/getAvailableUsdLiquidityForPosition'
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
-import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
-import {getChartWssUrl} from '@/lib/tvchart/constants'
-import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData'
 import max from '@/utils/numbers/bigint/max'
 import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
@@ -45,52 +43,16 @@ interface TokenOption {
 }
 
 function use1DMarketInformation(symbol: string | undefined) {
-  const [open, setOpen] = useState(0)
-  const [close, setClose] = useState(0)
+  const {data: ohlcvData} = useOHLCV(symbol)
+
+  const open = ohlcvData?.open ?? 0
+  const close = ohlcvData?.close ?? 0
+  const high = ohlcvData?.high ?? 0
+  const low = ohlcvData?.low ?? 0
+  const volume = ohlcvData?.volume ?? 0
+
   const change = close - open
   const changePercent = change / open || 0
-  const [high, setHigh] = useState(0)
-  const [low, setLow] = useState(0)
-  const [volume, setVolume] = useState(0)
-
-  useEffect(() => {
-    if (!symbol) return
-
-    const asset = MOCK_SYMBOL_MAP[symbol]
-
-    if (!asset) return
-
-    const wssUrl = getChartWssUrl(asset, ChartInterval['1d'])
-    const chartDataWS = new WebSocket(wssUrl)
-
-    const abortController = new AbortController()
-
-    chartDataWS.addEventListener(
-      'message',
-      event => {
-        if (typeof event.data !== 'string') {
-          return
-        }
-
-        const rawData = JSON.parse(event.data)
-        const data = parseChartData(rawData, ChartInterval['1d'])
-
-        if (!data) return
-
-        setOpen(data.open)
-        setClose(data.close)
-        setHigh(data.high)
-        setLow(data.low)
-        setVolume(data.volume ?? 0)
-      },
-      {signal: abortController.signal},
-    )
-
-    return () => {
-      abortController.abort()
-      chartDataWS.close()
-    }
-  }, [symbol])
 
   return {
     open,

@@ -24,6 +24,7 @@ import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
+import useWallets from '@/lib/starknet/hooks/useWallets'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import UnexpectedError from '@/utils/api/UnexpectedError'
@@ -107,28 +108,21 @@ const Wallet = memo(function Wallet(
   )
 })
 
-export default memo(function ConnectModal() {
-  const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
-
+function useConnect({
+  onConnected,
+  onCancel,
+}: {
+  onConnected?: MemoizedCallback<() => void>
+  onCancel?: MemoizedCallback<() => void>
+}) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
   const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
-
-  const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
-  const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
-  const [unavailableWallets, setUnavailableWallets] = useState<WalletProvider[]>([])
-  const isWalletConnected = useIsWalletConnected()
-  const latestIsWalletConnected = useLatest(isWalletConnected)
+  const isConnected = useIsWalletConnected()
 
   const [isConnecting, setIsConnecting] = useState(false)
   const latestIsConnecting = useLatest(isConnecting)
   const isCancelled = useRef(false)
-
-  const handleClose = useCallback(() => {
-    if (latestIsConnecting.current) isCancelled.current = true
-    setIsConnecting(false)
-    setIsOpen(false)
-  }, [])
 
   const shouldStopConnectingOrContinue = useCallback(() => {
     if (isCancelled.current) {
@@ -136,32 +130,6 @@ export default memo(function ConnectModal() {
       throw new Error('Connection cancelled')
     }
   }, [])
-
-  useEffect(
-    function loadWallets() {
-      void (async () => {
-        // TODO:retry
-        const [newWallets, discoveryWallets, newLastConnectedWallet] = await Promise.all([
-          getStarknetCore.getAvailableWallets(),
-          getStarknetCore.getDiscoveryWallets(),
-          getStarknetCore.getLastConnectedWallet(),
-        ])
-
-        setLastConnectedWallet(newLastConnectedWallet ?? undefined)
-
-        const lowerPriorityWallets = newWallets.filter(wallet =>
-          newLastConnectedWallet?.id ? wallet.id !== newLastConnectedWallet.id : true,
-        )
-        setWallets(lowerPriorityWallets)
-
-        const newUnavailableWallets = discoveryWallets.filter(
-          wallet => !newWallets.some(w => w.name === wallet.name),
-        )
-        setUnavailableWallets(newUnavailableWallets)
-      })()
-    },
-    [isOpen],
-  )
 
   const connect = useCallback(
     async (wallet: StarknetWindowObject) => {
@@ -185,6 +153,7 @@ export default memo(function ConnectModal() {
           type: 'wallet_getPermissions',
         })) as Permission[]
         shouldStopConnectingOrContinue()
+
         if (!permissions.includes(Permission.ACCOUNTS)) {
           throw new Error('The connected wallet does not have the required permissions')
         }
@@ -193,6 +162,7 @@ export default memo(function ConnectModal() {
           type: 'wallet_requestAccounts',
         })
         shouldStopConnectingOrContinue()
+
         if (accounts.length === 0) {
           throw new Error('The connected wallet does not have any accounts')
         }
@@ -211,18 +181,62 @@ export default memo(function ConnectModal() {
       }
 
       setIsConnecting(false)
-      setIsOpen(false)
+      onConnected?.()
     },
-    [setShouldReconnect, setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
+    [
+      setShouldReconnect,
+      setWalletAccount,
+      setWalletChainId,
+      shouldStopConnectingOrContinue,
+      onConnected,
+    ],
   )
 
-  useEffect(() => {
-    if (!lastConnectedWallet) return
-    if (!shouldReconnect) return
-    if (latestIsWalletConnected.current) return
+  const cancel = useCallback(() => {
+    if (latestIsConnecting.current) isCancelled.current = true
+    setIsConnecting(false)
+    onCancel?.()
+  }, [onCancel])
 
-    void connect(lastConnectedWallet)
-  }, [connect, shouldReconnect, lastConnectedWallet])
+  return {
+    shouldReconnect,
+    isConnected,
+    isConnecting,
+    connect,
+    cancel,
+  }
+}
+
+export default memo(function ConnectModal() {
+  const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
+
+  const {isConnecting, isConnected, connect, shouldReconnect, cancel} = useConnect({
+    onConnected: useCallback(() => {
+      setIsOpen(false)
+    }, []),
+    onCancel: useCallback(() => {
+      setIsOpen(false)
+    }, []),
+  })
+
+  const latestIsWalletConnected = useLatest(isConnected)
+
+  const handleClose = useCallback(() => {
+    cancel()
+  }, [cancel])
+
+  const {data: wallets} = useWallets()
+
+  useEffect(
+    function connectToLastConnectedWallet() {
+      if (!wallets?.lastConnectedWallet) return
+      if (!shouldReconnect) return
+      if (latestIsWalletConnected.current) return
+
+      void connect(wallets.lastConnectedWallet)
+    },
+    [connect, shouldReconnect, wallets?.lastConnectedWallet],
+  )
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
@@ -236,16 +250,17 @@ export default memo(function ConnectModal() {
           )}
           {!isConnecting && (
             <ul className='flex flex-col gap-3'>
-              {lastConnectedWallet && (
-                <Wallet wallet={lastConnectedWallet} connect={connect} isLastConnected />
+              {wallets?.lastConnectedWallet && (
+                <Wallet wallet={wallets.lastConnectedWallet} connect={connect} isLastConnected />
               )}
-              {wallets.map(wallet => (
+              {wallets?.lowerPriorityWallets.map(wallet => (
                 <Wallet key={wallet.id} wallet={wallet} connect={connect} />
               ))}
-              {unavailableWallets.map(wallet => (
+              {wallets?.unavailableWallets.map(wallet => (
                 <Wallet key={wallet.id} wallet={wallet} isNotAvailable />
               ))}
             </ul>
+            // TODO: Add a switch to let user choose to reconnect to the last connected wallet in the next time
           )}
         </ModalBody>
       </ModalContent>
