@@ -75,13 +75,13 @@ function use1DMarketInformation(symbol: string | undefined) {
         const rawData = JSON.parse(event.data)
         const data = parseChartData(rawData, ChartInterval['1d'])
 
-        if (data) {
-          setOpen(data.open)
-          setClose(data.close)
-          setHigh(data.high)
-          setLow(data.low)
-          setVolume(data.volume ?? 0)
-        }
+        if (!data) return
+
+        setOpen(data.open)
+        setClose(data.close)
+        setHigh(data.high)
+        setLow(data.low)
+        setVolume(data.volume ?? 0)
       },
       {signal: abortController.signal},
     )
@@ -297,14 +297,17 @@ export default memo(function MarketInformation() {
     [indexTokensWithLiquidityInformationList],
   )
 
-  useEffect(() => {
-    if (
-      (!tokenAddress || !indexTokenAddressList.includes(tokenAddress)) &&
-      indexTokenAddressList[0]
-    ) {
-      setTokenAddress(indexTokenAddressList[0])
-    }
-  }, [indexTokenAddressList, setTokenAddress, tokenAddress])
+  useEffect(
+    function setDefaultTokenAddress() {
+      if (
+        (!tokenAddress || !indexTokenAddressList.includes(tokenAddress)) &&
+        indexTokenAddressList[0]
+      ) {
+        setTokenAddress(indexTokenAddressList[0])
+      }
+    },
+    [indexTokenAddressList, setTokenAddress, tokenAddress],
+  )
 
   const tokenMetadata = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
 

@@ -79,8 +79,8 @@ function App() {
 
   addIntegration(tanstackRouterBrowserTracingIntegration(router))
 
-  useEffect(() => {
-    // Init the live announcer, fixes for https://github.com/adobe/react-spectrum/issues/5191
+  useEffect(function initLiveAnnouncer() {
+    // fixes for https://github.com/adobe/react-spectrum/issues/5191
     announce(' ', 'polite', 0)
   }, [])
 
