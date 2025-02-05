@@ -1,9 +1,7 @@
-import type {BigNumberish} from 'starknet'
-
-import {roundToNDecimal} from './roundToNDecimals'
+import roundToNDecimal from './roundToNDecimals'
 
 export default function expandDecimals(
-  value: BigNumberish | undefined,
+  value: string | number | bigint | undefined,
   decimals: number | bigint,
 ): bigint {
   if (!value) return 0n
@@ -27,7 +25,7 @@ export default function expandDecimals(
 }
 
 export function shrinkDecimals(
-  value: BigNumberish | undefined,
+  value: string | number | bigint | undefined,
   decimals: number | bigint,
   roundToDecimal?: number,
 ): string {
@@ -46,11 +44,15 @@ export function shrinkDecimals(
   display = display.padStart(decimals, '0')
 
   const integer = display.slice(0, display.length - decimals)
-
   let fraction = display.slice(display.length - decimals)
-  fraction = fraction.replace(/0+$/, '')
+  // Remove trailing zeros
+  while (fraction.endsWith('0')) {
+    fraction = fraction.slice(0, -1)
+  }
 
-  const result = `${negative ? '-' : ''}${integer || '0'}${fraction ? `.${fraction}` : ''}`
+  let result = negative ? '-' : '' // Negative sign
+  result += integer || '0' // Integer part
+  result += fraction ? `.${fraction}` : '' // Fraction part
 
   if (roundToDecimal === undefined) return result
   return String(roundToNDecimal(result, roundToDecimal))

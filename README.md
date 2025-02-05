@@ -1,4 +1,4 @@
-# Ready2React
+# Wolfy Interface
 
 Setup
 ```sh

@@ -1,8 +1,7 @@
-/* eslint-disable @eslint-react/naming-convention/filename -- library convention*/
-import type {QueryClient} from '@tanstack/react-query'
 import {createRootRouteWithContext, Outlet, useRouter} from '@tanstack/react-router'
 import {RouterProvider} from 'react-aria-components'
 
+import type {RouterContext} from '@/router'
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
 
 const TanStackRouterDevtools = import.meta.env.PROD
@@ -34,9 +33,6 @@ function RootRoute() {
   )
 }
 
-export const Route = createRootRouteWithContext<{
-  queryClient: QueryClient
-}>()({
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootRoute,
 })
-/* eslint-enable @eslint-react/naming-convention/filename */

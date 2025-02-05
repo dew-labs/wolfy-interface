@@ -17,12 +17,7 @@ export function useSetCurrentTheme() {
 export function useHydrateCurrentTheme() {
   const [theme] = useTheme()
 
-  let currentTheme: Theme.Light | Theme.Dark
-  if (theme === Theme.System) {
-    currentTheme = getPreferColorScheme()
-  } else {
-    currentTheme = theme
-  }
+  const currentTheme = theme === Theme.System ? getPreferColorScheme() : theme
 
   useHydrateAtoms([[currentThemeAtom, currentTheme]])
 }

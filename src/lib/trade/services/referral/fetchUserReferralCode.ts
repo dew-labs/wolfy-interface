@@ -41,7 +41,6 @@ export default async function fetchUserReferralCode(
     userReferralCode = onChainCode
     userReferralCodeString = decodeReferralCode(onChainCode)
   } else if (localStorageCodeOwner && !isRepresentZero(localStorageCodeOwner)) {
-    attachedOnChain = false
     userReferralCode = localStorageCode
     userReferralCodeString = decodeReferralCode(localStorageCode)
     referralCodeForTxn = localStorageCode

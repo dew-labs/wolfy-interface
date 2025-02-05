@@ -1,4 +1,6 @@
-import type {Format as NumberFlowFormat} from '@number-flow/react'
+type IntlFormat = Omit<Intl.NumberFormatOptions, 'notation'> & {
+  notation?: Exclude<Intl.NumberFormatOptions['notation'], 'scientific' | 'engineering'>
+}
 
 import formatLocaleNumber from './formatLocaleNumber'
 
@@ -17,10 +19,7 @@ export interface FormatOptions {
   exactFractionDigits?: boolean
 }
 
-export function getIntlNumberFormatOptions(
-  format: Format,
-  options?: FormatOptions,
-): NumberFlowFormat {
+export function getIntlNumberFormatOptions(format: Format, options?: FormatOptions): IntlFormat {
   switch (format) {
     case Format.PLAIN:
       return {

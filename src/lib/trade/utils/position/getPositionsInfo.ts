@@ -26,7 +26,7 @@ export function getEntryPrice(p: {sizeInUsd: bigint; sizeInTokens: bigint; index
   const {sizeInUsd, sizeInTokens, indexToken} = p
 
   if (sizeInTokens <= 0) {
-    return undefined
+    return
   }
 
   return (sizeInUsd * expandDecimals(1, indexToken.decimals)) / sizeInTokens
@@ -78,20 +78,20 @@ export default function getPositionsInfo(
   const positionsInfo = new Map<bigint, PositionInfo>()
   const positionsInfoViaStringRepresentation = new Map<string, PositionInfo>()
 
-  positionsData?.positionsData.forEach((position, positionKey) => {
+  for (const [positionKey, position] of positionsData?.positionsData.entries() ?? []) {
     const marketData = marketsData?.get(position.marketAddress)
     const indexToken = marketData?.indexToken
     const pnlToken = position.isLong ? marketData?.longToken : marketData?.shortToken
     const collateralToken = tokensMetadata.get(position.collateralTokenAddress)
 
-    if (!marketData || !indexToken || !pnlToken || !collateralToken) return
+    if (!marketData || !indexToken || !pnlToken || !collateralToken) continue
 
     const indexTokenPrice = tokenPricesData?.get(marketData.indexToken.address)
     const collateralTokenPrice = tokenPricesData?.get(collateralToken.address)
     const longTokenPrice = tokenPricesData?.get(marketData.longToken.address)
     const shortTokenPrice = tokenPricesData?.get(marketData.shortToken.address)
 
-    if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) return
+    if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) continue
 
     const markPrice = getMarkPrice({
       price: indexTokenPrice,
@@ -185,7 +185,7 @@ export default function getPositionsInfo(
     })
 
     // Liquidated positions, don't need to show them
-    if (netValue <= 0n) return
+    if (netValue <= 0n) continue
 
     const pnlAfterFees = pnl - totalPendingFeesUsd - closingFeeUsd - uiFeeUsd
     const pnlAfterFeesPercentage =
@@ -255,7 +255,7 @@ export default function getPositionsInfo(
 
     positionsInfo.set(positionKey, data)
     positionsInfoViaStringRepresentation.set(position.stringRepresentation, data)
-  })
+  }
 
   return {
     positionsInfo,

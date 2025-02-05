@@ -13,7 +13,7 @@ export const padDecimals = (amount: BigNumberish, minDecimals: number) => {
       amountStr = amountStr.padEnd(amountStr.length + (minDecimals - decimals), '0')
     }
   } else {
-    amountStr = `${amountStr}.${new Array(minDecimals).fill('0').join('')}`
+    amountStr = `${amountStr}.${Array.from({length: minDecimals}).fill('0').join('')}`
   }
   return amountStr
 }

@@ -55,12 +55,17 @@ export default function debounce<F extends (...args: unknown[]) => unknown>(
       reducer: (_, ...args: Parameters<F>) => args,
       minQuietPeriodMs: waitMs ?? maxWaitMs ?? 0,
       ...(maxWaitMs !== undefined && {maxBurstDurationMs: maxWaitMs}),
-      // eslint-disable-next-line no-nested-ternary -- it's fine
-      ...(timing === 'leading'
-        ? {triggerAt: 'start'}
-        : timing === 'both'
-          ? {triggerAt: 'both'}
-          : {triggerAt: 'end'}),
+      ...(() => {
+        switch (timing) {
+          case 'leading':
+            return {triggerAt: 'start'}
+          case 'both':
+            return {triggerAt: 'both'}
+          case 'trailing':
+          case undefined:
+            return {triggerAt: 'end'}
+        }
+      })(),
     },
   )
 

@@ -348,7 +348,7 @@ export default memo(function PoolsTable() {
       )
     }
 
-    return market[key]
+    return <>{market[key]}</>
   }, [])
 
   const onSearchChange = useCallback((value: string) => {

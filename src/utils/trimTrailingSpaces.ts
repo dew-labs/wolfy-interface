@@ -1,4 +1,5 @@
 export default function trimTrailingSpaces(str: string) {
-  // Remove trailing spaces from the start and end of the string
-  return str.replace(/^\s+|\s+$/g, '')
+  // Remove extra whitespace from the entire string, including middle spaces
+  // Convert multiple spaces to single space and trim ends
+  return str.replace(/\s+/g, ' ').trim()
 }

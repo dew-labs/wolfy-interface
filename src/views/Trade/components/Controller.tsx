@@ -417,7 +417,7 @@ const Controller = createResetableComponent(({reset}) => {
 
     const findSwapPath = createFindSwapPath(
       payTokenAddress,
-      tradeFlags.isPosition ? collateralTokenAddress : collateralTokenAddress,
+      tradeFlags.isPosition ? collateralTokenAddress : tokenAddress,
       marketsData,
       tokenPricesData,
     )

@@ -1,8 +1,5 @@
 /**
  * Pub/Sub across multiple browser tabs
- *
- * @export
- * @class PubSubChannel
  */
 export default class PubSubChannel<M = unknown> {
   private readonly publisher: BroadcastChannel

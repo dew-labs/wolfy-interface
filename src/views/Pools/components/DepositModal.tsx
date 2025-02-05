@@ -63,11 +63,11 @@ export default memo(function DepositModal({
   )
 
   const longTokenAmount = marketData
-    ? expandDecimals(parseFloat(longTokenAmountInput) || 0, marketData.longToken.decimals)
+    ? expandDecimals(Number.parseFloat(longTokenAmountInput) || 0, marketData.longToken.decimals)
     : 0n
   const latestLongTokenAmount = useLatest(longTokenAmount)
   const shortTokenAmount = marketData
-    ? expandDecimals(parseFloat(shortTokenAmountInput) || 0, marketData.shortToken.decimals)
+    ? expandDecimals(Number.parseFloat(shortTokenAmountInput) || 0, marketData.shortToken.decimals)
     : 0n
   const latestShortTokenAmount = useLatest(shortTokenAmount)
   const marketTokenData = useMemo(
@@ -175,9 +175,9 @@ export default memo(function DepositModal({
 
   const handleLongTokenAmountChange = useCallback((value: string) => {
     setLongTokenAmountInput(() => {
-      const newValue = value.replace(/[^0-9.]/g, '')
-      const numValue = parseFloat(newValue)
-      if (isNaN(numValue)) return ''
+      const newValue = value.replaceAll(/[^\d.]/g, '')
+      const numValue = Number.parseFloat(newValue)
+      if (Number.isNaN(numValue)) return ''
       return numValue > latestMaxLongToken.current
         ? latestMaxLongToken.current.toString()
         : newValue
@@ -202,9 +202,9 @@ export default memo(function DepositModal({
 
   const handleShortTokenAmountChange = useCallback((value: string) => {
     setShortTokenAmountInput(() => {
-      const newValue = value.replace(/[^0-9.]/g, '')
-      const numValue = parseFloat(newValue)
-      if (isNaN(numValue)) return ''
+      const newValue = value.replaceAll(/[^\d.]/g, '')
+      const numValue = Number.parseFloat(newValue)
+      if (Number.isNaN(numValue)) return ''
       return numValue > latestMaxShortToken.current
         ? latestMaxShortToken.current.toString()
         : newValue
@@ -287,8 +287,8 @@ export default memo(function DepositModal({
   // -------------------------------------------------------------------------------------------------------------------
 
   const isInputValid = useMemo(() => {
-    const longAmount = parseFloat(longTokenAmountInput) || 0
-    const shortAmount = parseFloat(shortTokenAmountInput) || 0
+    const longAmount = Number.parseFloat(longTokenAmountInput) || 0
+    const shortAmount = Number.parseFloat(shortTokenAmountInput) || 0
     return (
       (longAmount > 0 || shortAmount > 0) &&
       longAmount <= maxLongToken &&
@@ -412,7 +412,7 @@ export default memo(function DepositModal({
               <button
                 className={clsx(
                   'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
-                  parseFloat(longTokenAmountInput.replace(/,/g, '')) > maxLongToken &&
+                  Number.parseFloat(longTokenAmountInput.replaceAll(',', '')) > maxLongToken &&
                     'text-danger-500',
                 )}
                 onClick={handleLongTokenSetToMax}
@@ -431,7 +431,7 @@ export default memo(function DepositModal({
               <button
                 className={clsx(
                   'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
-                  parseFloat(shortTokenAmountInput.replace(/,/g, '')) > maxShortToken &&
+                  Number.parseFloat(shortTokenAmountInput.replaceAll(',', '')) > maxShortToken &&
                     'text-danger-500',
                 )}
                 onClick={handleShortTokenSetToMax}

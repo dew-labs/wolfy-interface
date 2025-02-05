@@ -9,7 +9,7 @@ export default function calculatePriceFractionDigits(
   if (price === 0n) return 2
   const priceNumber = Number(price.toString()) / 10 ** decimals
 
-  if (isNaN(priceNumber)) return 2
+  if (Number.isNaN(priceNumber)) return 2
   if (priceNumber >= 10) return 2
   if (priceNumber >= 1) return 3
   if (priceNumber >= 0.1) return 4

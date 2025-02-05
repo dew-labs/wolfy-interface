@@ -119,7 +119,8 @@ export default memo(function WithdrawModal({
   })
 
   const wmAmountBigInt = useMemo(
-    () => (wmAmount ? expandDecimals(parseFloat(wmAmount), marketTokenData?.decimals ?? 18) : 0n),
+    () =>
+      wmAmount ? expandDecimals(Number.parseFloat(wmAmount), marketTokenData?.decimals ?? 18) : 0n,
     [wmAmount, marketTokenData?.decimals],
   )
 
@@ -207,9 +208,9 @@ export default memo(function WithdrawModal({
 
   const handleWmAmountChange = useCallback((value: string) => {
     setWmAmount(() => {
-      const newValue = value.replace(/[^0-9.]/g, '')
-      const numValue = parseFloat(newValue)
-      if (isNaN(numValue)) return ''
+      const newValue = value.replaceAll(/[^\d.]/g, '')
+      const numValue = Number.parseFloat(newValue)
+      if (Number.isNaN(numValue)) return ''
       return numValue > latestUserBalance.current ? latestUserBalance.current.toString() : newValue
     })
   }, [])
@@ -219,8 +220,8 @@ export default memo(function WithdrawModal({
   }, [])
 
   const isInputValid = useMemo(() => {
-    const amount = parseFloat(wmAmount)
-    return !isNaN(amount) && amount > 0 && amount <= userBalance
+    const amount = Number.parseFloat(wmAmount)
+    return !Number.isNaN(amount) && amount > 0 && amount <= userBalance
   }, [wmAmount, userBalance])
   const latestIsInputValid = useLatest(isInputValid)
 
@@ -248,7 +249,7 @@ export default memo(function WithdrawModal({
         async () => {
           try {
             const wmAmountBigInt = expandDecimals(
-              parseFloat(latestWmAmount.current),
+              Number.parseFloat(latestWmAmount.current),
               marketTokenData.decimals,
             )
 
@@ -322,7 +323,8 @@ export default memo(function WithdrawModal({
               <button
                 className={clsx(
                   'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
-                  parseFloat(wmAmount.replace(/,/g, '')) > userBalance && 'text-danger-500',
+                  Number.parseFloat(wmAmount.replaceAll(',', '')) > userBalance &&
+                    'text-danger-500',
                 )}
                 onClick={handleWmAmountSetToMax}
                 type='button'

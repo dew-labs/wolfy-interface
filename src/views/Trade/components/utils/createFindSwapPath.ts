@@ -25,19 +25,15 @@ export default function createFindSwapPath(
       !fromTokenAddress ||
       !tokenPricesData
     ) {
-      return undefined
+      return
     }
 
-    let swapPath: string[] | undefined
-
-    if (opts.byLiquidity) {
-      swapPath = allPaths[0].path
-    } else {
-      swapPath = getBestSwapPath(allPaths, usdIn, estimator)
-    }
+    const swapPath = opts.byLiquidity
+      ? allPaths[0].path
+      : getBestSwapPath(allPaths, usdIn, estimator)
 
     if (!swapPath) {
-      return undefined
+      return
     }
 
     return getSwapPathStats({

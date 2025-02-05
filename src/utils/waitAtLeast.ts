@@ -1,7 +1,8 @@
 /**
  * This utility is use to avoid "flash of loading indicator"
- * @param promise
- * @param ms timeout in milliseconds
+ * @param promise - The promise to wait for
+ * @param ms - timeout in milliseconds
+ * @returns The result of the promise
  */
 async function waitAtLeast<T>(promise: Promise<T>, ms = 300): Promise<T> {
   const result = await Promise.allSettled([

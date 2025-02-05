@@ -16,13 +16,13 @@ const logError = function (
 
   console.error(error)
   if (extra) console.info('Extra:', extra)
-  if (hint)
-    console.info('Hint:', hint)
+  if (hint) console.info('Hint:', hint)
 
-    // Log metadata of the error
-  ;(function logMetadata() {
-    // @ts-expect-error error can be anything
-    if ('metadata' in error) {
+  // Log metadata of the error
+
+  // @ts-expect-error error can be anything
+  if ('metadata' in error) {
+    ;(function logMetadata() {
       const depthExceeded = isObjectDepthExceed(error.metadata, 3)
 
       if (!depthExceeded) {
@@ -53,8 +53,8 @@ const logError = function (
       }
 
       console.log('[metadata]', error.metadata)
-    }
-  })()
+    })()
+  }
 
   if (extra) setContext('extra', extra)
 

@@ -77,6 +77,12 @@ const config = {
             resolveNestedSelectors: true,
           },
         ],
+        'selector-id-pattern': [
+          new RegExp(PASCAL_CASE),
+          {
+            resolveNestedSelectors: true,
+          },
+        ],
       },
     },
   ],

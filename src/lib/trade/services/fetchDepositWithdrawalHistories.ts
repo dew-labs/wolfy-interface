@@ -62,10 +62,10 @@ export default async function fetchDepositWithdrawalHistories(
   })
 
   const query = params.toString()
+  const url = `/api/v1/accounts/${accountAddress}/deposit-withdrawal-history`
+  const endpoint = query ? `${url}?${query}` : url
 
-  const response = await call.get(
-    `/api/v1/accounts/${accountAddress}/deposit-withdrawal-history${query ? `?${query}` : ''}`,
-  )
+  const response = await call.get(endpoint)
 
   if (!isDepositWithdrawalHistoryData(response.data)) {
     throw new Error('Invalid deposit/withdrawal history data received from API')

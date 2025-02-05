@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 import globs from './globs.js'
 
@@ -8,21 +8,21 @@ const loadJSON = path => JSON.parse(fs.readFileSync(new URL(path, import.meta.ur
 const packageJson = loadJSON('./package.json')
 
 // Resolve conflict when filename have `$` in it
-function escape(filepath) {
-  return `'${filepath}'`
+function escape(filePath) {
+  return `'${filePath}'`
 }
 
 const settings = [
   {
     glob: globs.SCRIPT_AND_JSONS,
-    script: filenames => [
-      `${packageJson.scripts['base:lint:script']} --fix ${filenames.map(escape).join(' ')}`,
+    script: filePaths => [
+      `${packageJson.scripts['base:lint:script']} --fix ${filePaths.map(filePath => escape(filePath)).join(' ')}`,
     ],
   },
   {
     glob: [`(${globs.SCRIPT_AND_JSONS})`],
-    script: filenames => [
-      `${packageJson.scripts['test']} related --run ${filenames.map(escape).join(' ')}`,
+    script: filePaths => [
+      `${packageJson.scripts['test']} related --run ${filePaths.map(filePath => escape(filePath)).join(' ')}`,
     ],
   },
   {
@@ -31,8 +31,8 @@ const settings = [
   },
   {
     glob: globs.STYLE,
-    script: filenames => [
-      `${packageJson.scripts['base:lint:style']} --fix ${filenames.map(escape).join(' ')}`,
+    script: filePaths => [
+      `${packageJson.scripts['base:lint:style']} --fix ${filePaths.map(filePath => escape(filePath)).join(' ')}`,
     ],
   },
 ]

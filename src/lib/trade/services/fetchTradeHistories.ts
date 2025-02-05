@@ -135,10 +135,10 @@ export default async function fetchTradeHistories(
   })
 
   const query = params.toString()
+  const url = `/api/v1/accounts/${accountAddress}/trade-history`
+  const endpoint = query ? `${url}?${query}` : url
 
-  const response = await call.get(
-    `/api/v1/accounts/${accountAddress}/trade-history${query ? `?${query}` : ''}`,
-  )
+  const response = await call.get(endpoint)
 
   if (!isTradeData(response.data)) {
     throw new Error('Invalid trade data received from API')

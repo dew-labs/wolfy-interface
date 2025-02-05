@@ -39,6 +39,7 @@ import globs from './globs.js'
 // import packageJson from './package.json'
 
 const commitHash = JSON.stringify(
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- it's safe
   execSync('git rev-parse --short HEAD').toString().replaceAll('\n', ''),
 )
 
@@ -89,6 +90,7 @@ export default defineConfig(({mode}) => {
   }
 
   const plugins = [
+    optimizeLocales,
     AutoImport({
       include: [...globs.SCRIPT],
       ignore: [],
@@ -117,7 +119,6 @@ export default defineConfig(({mode}) => {
         },
       ],
     }) as PluginOption,
-    optimizeLocales,
     lqip(), // switch o blurhash?
     dynamicImport(),
     preload(),

@@ -23,6 +23,7 @@ SetErrorFunction(error => {
 // END custom error message support
 
 const Email =
+  // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/regex-complexity -- cannot fix
   /^[\w!#$%&'*+/=?^`{|}~-]+(?:\.[\w!#$%&'*+/=?^`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
 
 FormatRegistry.Set('email', value => {

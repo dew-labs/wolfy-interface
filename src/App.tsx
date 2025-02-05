@@ -74,9 +74,9 @@ function App() {
   const [queryClient] = useState(() => createQueryClient())
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
-  const [router] = useState(() => createRouter({queryClient}))
-
   const [store] = useState(() => createStore())
+
+  const [router] = useState(() => createRouter({queryClient, store}))
 
   addIntegration(tanstackRouterBrowserTracingIntegration(router))
 

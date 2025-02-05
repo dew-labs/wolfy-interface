@@ -8,7 +8,6 @@ import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
 import pluginReact from '@eslint-react/eslint-plugin'
 import pluginQuery from '@tanstack/eslint-plugin-query'
-// import pluginUnicorn from 'eslint-plugin-unicorn'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
@@ -17,7 +16,7 @@ import pluginDepend from 'eslint-plugin-depend'
 import pluginI18next from 'eslint-plugin-i18next'
 import pluginImportX from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
-// import pluginJsdoc from 'eslint-plugin-jsdoc'
+import pluginJsdoc from 'eslint-plugin-jsdoc'
 import pluginJsonc from 'eslint-plugin-jsonc'
 import pluginJsxA11y from 'eslint-plugin-jsx-a11y'
 import pluginNoBarrelFiles from 'eslint-plugin-no-barrel-files'
@@ -33,9 +32,11 @@ import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
+import pluginSonarjs from 'eslint-plugin-sonarjs'
 import pluginTailwindCss from 'eslint-plugin-tailwindcss'
-// import pluginSonarjs from 'eslint-plugin-sonarjs' // TODO: investigate why this cause errors
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
+import pluginTsDoc from 'eslint-plugin-tsdoc'
+// import pluginUnicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
 import tsEslint from 'typescript-eslint'
@@ -245,12 +246,130 @@ function getCoreConfigs() {
       fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
     ),
     ...applyTo.all('core/depend', pluginDepend.configs['flat/recommended']),
-    // ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
-    // ...applyTo.all('core/sonarjs/custom', {
-    //   rules: {
-    //     'sonarjs/no-duplicate-string': 'warn',
-    //   },
-    // }),
+    ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
+    ...applyTo.all('core/sonarjs/duplicated', {
+      rules: {
+        // From https://community.sonarsource.com/t/documenting-and-clarifying-duplicate-eslint-rules/129385
+
+        // Duplicates no-warning-comments
+        'sonarjs/todo-tag': 'off',
+        // Duplicates unicorn/prefer-string-starts-ends-with
+        'sonarjs/prefer-string-starts-ends-with': 'off',
+        // Duplicates no-nested-ternary and unicorn/no-nested-ternary
+        'sonarjs/no-nested-conditional': 'off',
+
+        // Base ESLint rules duplications (same names)
+
+        'sonarjs/default-param-last': 'off',
+        'sonarjs/no-delete-var': 'off',
+        'sonarjs/no-empty-function': 'off',
+        'sonarjs/no-extend-native': 'off',
+        'sonarjs/no-redeclare': 'off',
+        'sonarjs/no-unreachable': 'off',
+        'sonarjs/no-unused-expressions': 'off',
+        'sonarjs/no-unused-private-class-members': 'off',
+        'sonarjs/sonar-block-scoped-var': 'off',
+        'sonarjs/sonar-max-params': 'off',
+        'sonarjs/sonar-no-control-regex': 'off',
+        'sonarjs/sonar-no-dupe-keys': 'off',
+        'sonarjs/sonar-no-empty-character-class': 'off', // Also regexp/no-empty-character-class
+        'sonarjs/sonar-no-fallthrough': 'off',
+        'sonarjs/sonar-no-invalid-regexp': 'off', // Also regexp/no-invalid-regexp
+        'sonarjs/sonar-no-misleading-character-class': 'off',
+        'sonarjs/use-isnan': 'off',
+
+        // eslint-plugin-autofix rules duplications (same names)
+
+        'sonarjs/no-lonely-if': 'off', // Also unicorn/no-lonely-if
+        'sonarjs/no-throw-literal': 'off',
+        'sonarjs/no-useless-catch': 'off',
+        'sonarjs/no-var': 'off',
+        'sonarjs/prefer-object-spread': 'off',
+        'sonarjs/prefer-spread': 'off', // Also unicorn/prefer-spread
+        'sonarjs/sonar-no-regex-spaces': 'off', // Also regexp/prefer-quantifier
+        'sonarjs/sonar-no-unused-vars': 'off',
+
+        // Other regex-related duplications
+
+        // Duplicates regexp/prefer-d, regexp/no-obscure-range and regexp/no-dupe-characters-character-class
+        'sonarjs/duplicates-in-character-class': 'off',
+        // Duplicates regexp/prefer-w, regexp/prefer-d, regexp/match-any
+        'sonarjs/concise-regex': 'off',
+        // Duplicates regexp/no-empty-alternative, regexp/no-trivially-nested-quantifier, regexp/no-dupe-disjunctions and regexp/no-trivially-nested-quantifier
+        'sonarjs/empty-string-repetition': 'off',
+        // Duplicates regexp/no-useless-character-class
+        'sonarjs/single-char-in-character-classes': 'off',
+        // Duplicates unicorn/better-regex and regexp/prefer-character-class
+        'sonarjs/single-character-alternation': 'off',
+        // Duplicates regexp/no-super-linear-move
+        'sonarjs/slow-regex': 'off',
+        // Duplciates regexp/prefer-regexp-exec
+        'sonarjs/sonar-prefer-regexp-exec': 'off',
+        // Duplicates regexp/no-empty-alternative
+        'sonarjs/no-empty-alternatives': 'off',
+        // Duplicates regexp/no-useless-dollar-replacements + regexp/no-unused-capturing-group
+        'sonarjs/existing-groups': 'off',
+        // Duplicates regexp/no-empty-capturing-group and regexp/no-empty-group
+        'sonarjs/no-empty-group': 'off',
+
+        // React/JSX-related duplications
+
+        // Duplicates react/hook-use-state
+        'sonarjs/hook-use-state': 'off',
+        // Duplicates react/jsx-key
+        'sonarjs/jsx-key': 'off',
+        // Duplicated react/jsx-no-constructed-context-values
+        'sonarjs/jsx-no-constructed-context-values': 'off',
+        // Duplicates react/jsx-no-useless-fragment
+        'sonarjs/jsx-no-useless-fragment': 'off',
+        // Duplicates react/no-array-index-key
+        'sonarjs/no-array-index-key': 'off',
+        // Duplicates react/no-deprecated
+        'sonarjs/no-deprecated-react': 'off',
+        // Duplicates react/no-find-dom-node
+        'sonarjs/no-find-dom-node': 'off',
+        // Duplicates react/no-unknown-property
+        'sonarjs/no-unknown-property': 'off',
+        // Duplicates react/no-unsafe
+        'sonarjs/no-unsafe': 'off',
+        // Duplicates react/no-unstable-nested-components
+        'sonarjs/no-unstable-nested-components': 'off',
+        // Duplicates react-hooks/rules-of-hooks
+        'sonarjs/rules-of-hooks': 'off',
+        // Duplicates react/jsx-no-leaked-render
+        'sonarjs/sonar-jsx-no-leaked-render': 'off',
+        // Duplicates react/no-unused-class-component-methods
+        'sonarjs/sonar-no-unused-class-component-methods': 'off',
+        // Duplicates react/prefer-read-only-props
+        'sonarjs/sonar-prefer-read-only-props': 'off',
+
+        /*
+         * SonarJS rules obsoleted by TS rules of the same name
+         */
+        'sonarjs/no-misused-promises': 'off',
+        'sonarjs/no-redundant-type-constituents': 'off',
+        'sonarjs/prefer-enum-initializers': 'off',
+        'sonarjs/prefer-nullish-coalescing': 'off',
+        'sonarjs/sonar-prefer-optional-chain': 'off',
+
+        // Redundant in TypeScript
+        'sonarjs/function-return-type': 'off',
+
+        // [...]nobsoleted by @typescript-eslint/no-deprecated
+        'sonarjs/deprecation': 'off',
+      },
+    }),
+    ...applyTo.all('core/sonarjs/custom', {
+      rules: {
+        'sonarjs/no-duplicate-string': 'warn',
+        'sonarjs/no-nested-functions': 'warn',
+        'sonarjs/cognitive-complexity': 'warn',
+        'sonarjs/no-selector-parameter': 'off',
+        'sonarjs/prefer-read-only-props': 'off',
+        'sonarjs/no-useless-intersection': 'off',
+        'sonarjs/no-unused-vars': 'off',
+      },
+    }),
     ...applyTo.all('core/no-relative-import-paths', {
       plugins: {
         'no-relative-import-paths': pluginNoRelativeImportPaths,
@@ -294,6 +413,39 @@ function getCoreConfigs() {
         ],
       },
     }),
+    ...applyTo.script('core/jsdoc', pluginJsdoc.configs['flat/recommended-error']),
+    ...applyTo.script('core/jsdoc/custom', {
+      rules: {
+        // NOTE: remove this if you are authoring a library
+        'jsdoc/require-jsdoc': 'off',
+      },
+    }),
+    // TODO: enable for new projects
+    // ...applyTo.all('core/unicorn', pluginUnicorn.configs['flat/recommended']),
+    // ...applyTo.all('core/unicorn/custom', {
+    //   rules: {
+    //     'unicorn/better-regex': 'warn',
+    //     // 'unicorn/filename-case': [
+    //     //   'error',
+    //     //   {
+    //     //     cases: {
+    //     //       kebabCase: true,
+    //     //       pascalCase: true,
+    //     //       camelCase: true,
+    //     //     },
+    //     //   },
+    //     // ],
+    //     'unicorn/filename-case': 'off',
+    //     'unicorn/prefer-spread': 'off',
+    //     'unicorn/prevent-abbreviations': 'off',
+    //     'unicorn/no-null': 'off',
+    //     'unicorn/no-empty-file': 'off',
+    //     'unicorn/no-negated-condition': 'off',
+    //     'unicorn/no-array-push-push': 'warn',
+    //     'unicorn/no-array-reduce': 'warn',
+    //     'unicorn/prefer-math-min-max': 'off',
+    //   },
+    // }),
     // TODO: investigate why this is causing issues
     // ...applyTo.all('core/exception-handling', {
     //   plugins: {
@@ -303,23 +455,6 @@ function getCoreConfigs() {
     //     'exception-handling/no-unhandled': 'error',
     //     'exception-handling/might-throw': 'error',
     //     'exception-handling/use-error-cause': 'error',
-    //   },
-    // }),
-    // TODO: enable later
-    // ...applyTo.all('core/jsdoc', pluginJsdoc.configs['flat/recommended-typescript-error']),
-    // ...applyTo.all('core/unicorn', pluginUnicorn.configs['flat/recommended']),
-    // ...applyTo.all('core/unicorn/custom', {
-    //   rules: {
-    //     // 'unicorn/better-regex': 'warn',
-    //     // 'unicorn/filename-case': [
-    //     //   'error',
-    //     //   {
-    //     //     cases: {
-    //     //       kebabCase: true,
-    //     //       pascalCase: true,
-    //     //     }
-    //     //   }
-    //     // ],
     //   },
     // }),
   ]
@@ -368,7 +503,7 @@ function getTailwindCssConfigs() {
           callees: ['classnames', 'clsx', 'ctl', 'cva', 'tw', 'cn'],
           config: 'tailwind.config.js', // returned from `loadConfig()` utility if not provided
           cssFiles: ['**/*.css', '!**/node_modules', '!**/.*', '!**/dist', '!**/build'],
-          cssFilesRefreshRate: 5_000,
+          cssFilesRefreshRate: 5000,
           removeDuplicates: true,
           skipClassAttribute: false,
           whitelist: [],
@@ -446,9 +581,27 @@ function getTypescriptConfigs() {
           'error',
           {allowDefaultCaseForExhaustiveSwitch: false},
         ],
-        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'warn', // TODO: enable
+        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+        '@typescript-eslint/restrict-plus-operands': 'error',
         '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
-        '@typescript-eslint/restrict-plus-operands': 'warn', // TODO: enable
+      },
+    }),
+    ...applyTo.typescript('typescript/tsdoc', {
+      plugins: {
+        tsdoc: pluginTsDoc,
+      },
+      rules: {
+        'tsdoc/syntax': 'error',
+      },
+    }),
+    ...applyTo.typescript(
+      'typescript/jsdoc',
+      pluginJsdoc.configs['flat/recommended-typescript-error'],
+    ),
+    ...applyTo.script('typescript/jsdoc/custom', {
+      rules: {
+        // NOTE: remove this if you are authoring a library
+        'jsdoc/require-jsdoc': 'off',
       },
     }),
   ]
@@ -539,7 +692,7 @@ function getReactConfigs() {
     }),
     ...applyTo.routes('react/naming-convention/routes', {
       rules: {
-        '@eslint-react/naming-convention/filename': ['error', 'kebab-case'],
+        '@eslint-react/naming-convention/filename': 'off',
       },
     }),
     ...applyTo.react('react/x/hooks', {
@@ -703,7 +856,11 @@ function getVitestConfigs() {
       plugins: {
         vitest: pluginVitest,
       },
-      rules: pluginVitest.configs.all.rules,
+      rules: {
+        ...pluginVitest.configs.all.rules,
+        'vitest/no-hooks': 'off',
+        'vitest/max-expects': 'off',
+      },
       settings: {
         vitest: {
           typecheck: true,

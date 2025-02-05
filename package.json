@@ -1,5 +1,5 @@
 {
-  "name": "ready2react",
+  "name": "wolfy-interface",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,15 +21,15 @@
     "test:ui": "pnpm run test --ui",
     "test:bench": "pnpm run test bench",
     "test:update-snapshot": "pnpm run test -u",
-    "type-check": "tsc --pretty",
+    "typecheck": "tsc --pretty",
     "partytown": "partytown copylib public/~partytown",
-    "prebuild": "pnpm run type-check && pnpm run partytown",
+    "prebuild": "pnpm run typecheck && pnpm run partytown",
     "build": "vite build",
     "postbuild": "find dist/ -name \"*.map\" -type f -delete",
     "analyzebundle": "pnpm dlx vite-bundle-visualizer",
     "preview": "vite preview",
     "prepare": "husky",
-    "check": "rm -rf .eslintcache && rm -rf tsconfig.tsbuildinfo && CI=true pnpm run --parallel --aggregate-output --reporter-hide-prefix '/^(fix|type-check|test)$/'",
+    "check": "rm -rf .eslintcache && rm -rf tsconfig.tsbuildinfo && CI=true pnpm run --parallel --aggregate-output --reporter-hide-prefix '/^(fix|typecheck|test)$/'",
     "eslint:inspect": "pnpm dlx @eslint/config-inspector@latest",
     "lighthouse:stag": "pnpm dlx unlighthouse --site 'https://ready2.react/'",
     "lighthouse:prod": "pnpm dlx unlighthouse --site 'https://ready2.react/'",
@@ -96,6 +96,7 @@
     "starknet_multicall": "^1.0.5",
     "tailwind-merge": "^3.0.1",
     "tiny-invariant": "^1.3.3",
+    "ts-brand": "^0.2.0",
     "type-fest": "^4.33.0",
     "ua-parser-js": "^2.0.0",
     "unhead": "^1.11.18",
@@ -181,6 +182,7 @@
     "eslint-plugin-ssr-friendly": "^1.3.0",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "eslint-plugin-testing-library": "^7.1.1",
+    "eslint-plugin-tsdoc": "^0.4.0",
     "eslint-plugin-unicorn": "^56.0.1",
     "fontaine": "^0.5.0",
     "globals": "^15.14.0",
@@ -254,5 +256,5 @@
     "core-js",
     "javascript-obfuscator"
   ],
-  "packageManager": "pnpm@9.15.4"
+  "packageManager": "pnpm@10.2.0"
 }

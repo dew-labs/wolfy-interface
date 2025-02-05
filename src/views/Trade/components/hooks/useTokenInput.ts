@@ -45,12 +45,7 @@ export default function useTokenInput(
   const latestInput = useLatest(input)
 
   const setMode = useCallback((mode: InputMode | ((prevMode: InputMode) => InputMode)) => {
-    let nextMode: InputMode
-    if (typeof mode === 'function') {
-      nextMode = mode(latestMode.current)
-    } else {
-      nextMode = mode
-    }
+    const nextMode = typeof mode === 'function' ? mode(latestMode.current) : mode
 
     baseSetMode(nextMode)
 
@@ -89,9 +84,9 @@ export default function useTokenInput(
           expandDecimals(valueBigInt, latestDecimals.current) / latestPriceToUse.current
         latestSetAmount.current(amount)
       }
-    } catch (e) {
+    } catch (error) {
       logError(
-        e,
+        error,
         {
           value,
         },

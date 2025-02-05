@@ -6,7 +6,7 @@ import presetEnv from 'postcss-preset-env'
 import willChange from 'postcss-will-change'
 import tailwindCss from 'tailwindcss'
 
-export default () => {
+export default function postcssConfig() {
   return {
     plugins: [
       tailwindCss,

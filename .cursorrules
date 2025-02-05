@@ -29,7 +29,7 @@ Other Rules need to follow:
 - Separate concerns: presentational components, business logic, side effects
 - Prefer 'interface' for extendable object shapes
 - Use 'type' for unions, intersections, and primitive compositions
-- Document complex types with JSDoc
+- Document complex types, functions, and variables with TSDoc, JSDoc typescript-flavored
 - Avoid ambiguous union types, use discriminated unions when necessary
 - Avoid custom CSS unless absolutely necessary
 - Maintain consistent order of utility classes
