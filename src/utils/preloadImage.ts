@@ -1,6 +1,6 @@
 export default function preloadImage(
   url: string | string[],
-  priority = 'low',
+  priority: HTMLImageElement['fetchPriority'] = 'low',
   strategy: 'sequential' | 'parallel' = 'sequential',
   callback?: () => void,
 ) {

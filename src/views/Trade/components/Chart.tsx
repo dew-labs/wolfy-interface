@@ -171,7 +171,7 @@ const PositionLines = memo(function Lines() {
 export default memo(function Chart() {
   const [chainId] = useChainId()
   const chartConfigs = useChartConfig()
-  const [chartInterval, setChartInterval] = useState(ChartInterval['1h'])
+  const [chartInterval, setChartInterval] = useState<ChartInterval>(ChartInterval['1h'])
   const [tokenAddress] = useTokenAddress()
   const tokenSymbol = getTokensMetadata(chainId).get(tokenAddress ?? '')?.symbol
   const asset = tokenSymbol ? MOCK_SYMBOL_MAP[tokenSymbol] : undefined

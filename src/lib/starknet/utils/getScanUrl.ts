@@ -1,15 +1,16 @@
 import {StarknetChainId} from 'wolfy-sdk'
 
-export enum ScanType {
-  Block = 'Block',
-  Class = 'Class',
-  Contract = 'Contract',
-  Transaction = 'Transaction',
-}
+export const ScanType = {
+  Block: 'block',
+  Class: 'class',
+  Contract: 'contract',
+  Transaction: 'tx',
+} as const
+export type ScanType = (typeof ScanType)[keyof typeof ScanType]
 
 export default function getScanUrl(
   chainId: StarknetChainId,
-  type = ScanType.Transaction,
+  type: ScanType = ScanType.Transaction,
   address: string,
 ) {
   const baseUrl = (() => {

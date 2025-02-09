@@ -1,10 +1,11 @@
 import {atomWithStorage} from 'jotai/utils'
 
-export enum TradeMode {
-  Market = 'Market',
-  Limit = 'Limit',
-  Trigger = 'Trigger',
-}
+export const TradeMode = {
+  Market: 'Market',
+  Limit: 'Limit',
+  Trigger: 'Trigger',
+} as const
+export type TradeMode = (typeof TradeMode)[keyof typeof TradeMode]
 
 const tradeModeAtom = atomWithStorage<TradeMode>('executionType', TradeMode.Market)
 
@@ -16,7 +17,9 @@ export function useSetTradeMode() {
   return useSetAtom(tradeModeAtom)
 }
 
-export function isNotTrigger(mode: TradeMode): mode is TradeMode.Market | TradeMode.Limit {
+export function isNotTrigger(
+  mode: TradeMode,
+): mode is typeof TradeMode.Market | typeof TradeMode.Limit {
   return mode !== TradeMode.Trigger
 }
 

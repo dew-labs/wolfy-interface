@@ -17,6 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     // END Interop constraints
     // Type checking
     "strict": true,

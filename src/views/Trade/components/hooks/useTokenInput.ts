@@ -11,10 +11,11 @@ const ACCEPTABLE_DIFF = 1n
 const USD_DECIMALS_ROUND_TO = 2
 const ACCEPTABLE_DIFF_USD = expandDecimals(1n, USD_DECIMALS - USD_DECIMALS_ROUND_TO)
 
-export enum InputMode {
-  Usd = 'Usd', // In USD mode, the input is the USD amount and the token amount is calculated from the USD amount
-  Token = 'Token', // In TOKEN mode, the input is the token amount and the USD amount is calculated from the token amount
-}
+export const InputMode = {
+  Usd: 'usd', // In USD mode, the input is the USD amount and the token amount is calculated from the USD amount
+  Token: 'token', // In TOKEN mode, the input is the token amount and the USD amount is calculated from the token amount
+} as const
+export type InputMode = (typeof InputMode)[keyof typeof InputMode]
 
 /*
   There will be 2 modes: Usd and Token mode

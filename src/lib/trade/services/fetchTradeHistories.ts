@@ -4,75 +4,76 @@ import type {StarknetChainId} from 'wolfy-sdk'
 
 import call from '@/utils/api/call'
 
-export enum TradeHistoryAction {
+export const TradeHistoryAction = {
   // Market Order
   // Market Increase
-  RequestMarketIncrease,
-  MarketIncrease,
-  FailedMarketIncrease,
-  CancelMarketIncrease,
+  RequestMarketIncrease: 0,
+  MarketIncrease: 1,
+  FailedMarketIncrease: 2,
+  CancelMarketIncrease: 3,
 
   // Market Decrease
-  RequestMarketDecrease,
-  MarketDecrease,
-  FailedMarketDecrease,
-  CancelMarketDecrease,
+  RequestMarketDecrease: 4,
+  MarketDecrease: 5,
+  FailedMarketDecrease: 6,
+  CancelMarketDecrease: 7,
 
   // Trigger Order
   // Limit Order
-  CreateLimitOrder,
-  UpdateLimitOrder,
-  ExecuteLimitOrder,
-  FailedLimitOrder,
-  CancelLimitOrder,
+  CreateLimitOrder: 8,
+  UpdateLimitOrder: 9,
+  ExecuteLimitOrder: 10,
+  FailedLimitOrder: 11,
+  CancelLimitOrder: 12,
 
   // Take Profit Order
-  CreateTakeProfitOrder,
-  UpdateTakeProfitOrder,
-  ExecuteTakeProfitOrder,
-  FailedTakeProfitOrder,
-  CancelTakeProfitOrder,
+  CreateTakeProfitOrder: 13,
+  UpdateTakeProfitOrder: 14,
+  ExecuteTakeProfitOrder: 15,
+  FailedTakeProfitOrder: 16,
+  CancelTakeProfitOrder: 17,
 
   // Stop Loss Order
-  CreateStopLossOrder,
-  UpdateStopLossOrder,
-  ExecuteStopLossOrder,
-  FailedStopLossOrder,
-  CancelStopLossOrder,
+  CreateStopLossOrder: 18,
+  UpdateStopLossOrder: 19,
+  ExecuteStopLossOrder: 20,
+  FailedStopLossOrder: 21,
+  CancelStopLossOrder: 22,
 
   // Swap Order
   // Market Swap
-  RequestMarketSwap,
-  ExecuteMarketSwap,
-  FailedMarketSwap,
-  CancelMarketSwap,
+  RequestMarketSwap: 23,
+  ExecuteMarketSwap: 24,
+  FailedMarketSwap: 25,
+  CancelMarketSwap: 26,
 
   // Limit Swap
-  CreateLimitSwap,
-  UpdateLimitSwap,
-  ExecuteLimitSwap,
-  FailedLimitSwap,
-  CancelLimitSwap,
+  CreateLimitSwap: 27,
+  UpdateLimitSwap: 28,
+  ExecuteLimitSwap: 29,
+  FailedLimitSwap: 30,
+  CancelLimitSwap: 31,
 
   // Deposit
-  RequestDeposit,
-  Deposit,
-  FailedDeposit,
-  CancelDeposit,
+  RequestDeposit: 32,
+  Deposit: 33,
+  FailedDeposit: 34,
+  CancelDeposit: 35,
 
   // Withdrawal
-  RequestWithdraw,
-  Withdraw,
-  FailedWithdraw,
-  CancelWithdraw,
+  RequestWithdraw: 36,
+  Withdraw: 37,
+  FailedWithdraw: 38,
+  CancelWithdraw: 39,
 
   // Liquidation,
-  Liquidation,
+  Liquidation: 40,
 
   // Position
-  PositionIncrease,
-  PositionDecrease,
+  PositionIncrease: 41,
+  PositionDecrease: 42,
 }
+export type TradeHistoryAction = (typeof TradeHistoryAction)[keyof typeof TradeHistoryAction]
 
 function _isSupportedAction(action: unknown): action is TradeHistoryAction {
   return Object.values(TradeHistoryAction).includes(action as TradeHistoryAction)

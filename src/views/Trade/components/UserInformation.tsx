@@ -4,12 +4,13 @@ import OrdersTab from './OrdersTab'
 import PositionsTab from './PositionsTab'
 import TradesTab from './TradesTab'
 
-enum UserTabs {
-  Positions = 'Positions',
-  Orders = 'Orders',
-  Trades = 'Trades',
-  Claims = 'Claims',
-}
+export const UserTabs = {
+  Positions: 'positions',
+  Orders: 'orders',
+  Trades: 'trades',
+  Claims: 'claims',
+} as const
+export type UserTabs = (typeof UserTabs)[keyof typeof UserTabs]
 
 const AVAILABLE_TABS = [
   UserTabs.Positions,

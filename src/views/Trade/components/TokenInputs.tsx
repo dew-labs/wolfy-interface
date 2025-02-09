@@ -31,7 +31,7 @@ const INPUT_2_LABEL: Record<TradeType, string> = {
 
 interface Props {
   tradeType: TradeType
-  tradeMode: Exclude<TradeMode, TradeMode.Trigger>
+  tradeMode: Exclude<TradeMode, typeof TradeMode.Trigger>
   marketAddress: string | undefined
   tokenAmount: bigint
   setTokenAmount: MemoizedCallbackOrDispatch<bigint>

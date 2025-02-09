@@ -5,7 +5,7 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchDepositWithdrawalHistories, {
   type DepositWithdrawalHistoryData,
 } from '@/lib/trade/services/fetchDepositWithdrawalHistories'
-import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
+import type {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 
 export default function useDepositWithdrawalHistory(
   actions: TradeHistoryAction[],

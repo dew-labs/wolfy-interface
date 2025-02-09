@@ -4,15 +4,16 @@ type IntlFormat = Omit<Intl.NumberFormatOptions, 'notation'> & {
 
 import formatLocaleNumber from './formatLocaleNumber'
 
-export enum Format {
-  PLAIN,
-  READABLE,
-  USD,
-  USD_SIGNED,
-  USD_ABBREVIATED,
-  PERCENT,
-  PERCENT_SIGNED,
-}
+export const Format = {
+  PLAIN: 'plain',
+  READABLE: 'readable',
+  USD: 'usd',
+  USD_SIGNED: 'usd-signed',
+  USD_ABBREVIATED: 'usd-abbreviated',
+  PERCENT: 'percent',
+  PERCENT_SIGNED: 'percent-signed',
+} as const
+export type Format = (typeof Format)[keyof typeof Format]
 
 export interface FormatOptions {
   fractionDigits?: number | undefined
