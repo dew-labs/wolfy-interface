@@ -1,5 +1,4 @@
-import {type Static, Type} from '@sinclair/typebox'
-import {TypeCompiler} from '@sinclair/typebox/compiler'
+import {type} from 'arktype'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import call from '@/utils/api/call'
@@ -72,40 +71,39 @@ export const TradeHistoryAction = {
   // Position
   PositionIncrease: 41,
   PositionDecrease: 42,
-}
+} as const
 export type TradeHistoryAction = (typeof TradeHistoryAction)[keyof typeof TradeHistoryAction]
 
-function _isSupportedAction(action: unknown): action is TradeHistoryAction {
-  return Object.values(TradeHistoryAction).includes(action as TradeHistoryAction)
+export const tradeHistoryActionValues = Object.values(TradeHistoryAction)
+
+export function isSupportedAction(action: number): action is TradeHistoryAction {
+  return tradeHistoryActionValues.includes(action)
 }
 
-const tradeDataSchema = Type.Object({
-  page: Type.Number(),
-  limit: Type.Number(),
-  count: Type.Number(),
-  totalPages: Type.Number(),
-  data: Type.Array(
-    Type.Object({
-      id: Type.String(),
-      price: Type.String(),
-      size: Type.String(),
-      isLong: Type.Boolean(),
-      action: Type.Enum(TradeHistoryAction),
-      market: Type.String(),
-      fee: Type.Union([Type.String(), Type.Null()]),
-      rpnl: Type.Union([Type.String(), Type.Null()]),
-      createdAt: Type.Number(),
-      txHash: Type.String(),
-    }),
-  ),
+const tradeData = type({
+  id: 'string',
+  price: 'string',
+  size: 'string',
+  isLong: 'boolean',
+  action: type.enumerated(...tradeHistoryActionValues),
+  market: 'string',
+  fee: 'string | null',
+  rpnl: 'string | null',
+  createdAt: 'number',
+  txHash: 'string',
 })
 
-export type TradeData = Static<typeof tradeDataSchema>
-const tradeDataTypeCheck = TypeCompiler.Compile(tradeDataSchema)
+export type TradeData = typeof tradeData.infer
 
-export function isTradeData(data: unknown): data is TradeData {
-  return tradeDataTypeCheck.Check(data)
-}
+const tradeDataResponse = type({
+  page: 'number',
+  limit: 'number',
+  count: 'number',
+  totalPages: 'number',
+  data: tradeData.array(),
+})
+
+export type TradeDataResponse = typeof tradeDataResponse.infer
 
 export default async function fetchTradeHistories(
   chainId: StarknetChainId,
@@ -115,15 +113,12 @@ export default async function fetchTradeHistories(
   isLong: boolean[],
   page: number,
   limit: number,
-): Promise<TradeData> {
+): Promise<TradeDataResponse> {
   if (!accountAddress) {
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-  })
+  const params = new URLSearchParams({page: page.toString(), limit: limit.toString()})
 
   actions.forEach(action => {
     params.append('actions', action.toString())
@@ -141,11 +136,13 @@ export default async function fetchTradeHistories(
 
   const response = await call.get(endpoint)
 
-  if (!isTradeData(response.data)) {
+  const data = tradeDataResponse(response.data)
+
+  if (data instanceof type.errors) {
     throw new Error('Invalid trade data received from API')
   }
 
-  response.data.data.sort((a, b) => {
+  data.data.sort((a, b) => {
     const result = b.createdAt - a.createdAt
     if (result === 0) {
       return b.action - a.action
@@ -153,5 +150,5 @@ export default async function fetchTradeHistories(
     return result
   })
 
-  return response.data
+  return data
 }

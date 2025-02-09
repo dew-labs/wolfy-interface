@@ -4,7 +4,6 @@ import './App.scss'
 import 'lazysizes'
 import 'lazysizes/plugins/parent-fit/ls.parent-fit'
 import 'lazysizes/plugins/attrchange/ls.attrchange'
-import './setupSchema'
 import './i18n/setup'
 
 import {HeroUIProvider} from '@heroui/react'

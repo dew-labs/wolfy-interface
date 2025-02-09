@@ -1,41 +1,31 @@
-import {type Static, Type} from '@sinclair/typebox'
-import {TypeCompiler} from '@sinclair/typebox/compiler'
+import {type} from 'arktype'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import call from '@/utils/api/call'
 
-import {TradeHistoryAction} from './fetchTradeHistories'
+import {type TradeHistoryAction, tradeHistoryActionValues} from './fetchTradeHistories'
 
-const DepositWithdrawalHistorySchema = Type.Object({
-  id: Type.String(),
-  action: Type.Enum(TradeHistoryAction),
-  market: Type.String(),
-  marketTokenAmount: Type.Union([Type.String(), Type.Null()]),
-  longTokenAmount: Type.String(),
-  shortTokenAmount: Type.String(),
-  executionFee: Type.String(),
-  createdAt: Type.Number(),
-  txHash: Type.String(),
+const depositWithdrawalHistory = type({
+  id: 'string',
+  action: type.enumerated(...tradeHistoryActionValues),
+  market: 'string',
+  marketTokenAmount: 'string | null',
+  longTokenAmount: 'string',
+  shortTokenAmount: 'string',
+  executionFee: 'string',
+  createdAt: 'number',
+  txHash: 'string',
 })
 
-const DepositWithdrawalHistoryResponseSchema = Type.Object({
-  page: Type.Number(),
-  limit: Type.Number(),
-  count: Type.Number(),
-  totalPages: Type.Number(),
-  data: Type.Array(DepositWithdrawalHistorySchema),
+const depositWithdrawalHistoryResponse = type({
+  page: 'number',
+  limit: 'number',
+  count: 'number',
+  totalPages: 'number',
+  data: depositWithdrawalHistory.array(),
 })
 
-export type DepositWithdrawalHistoryData = Static<typeof DepositWithdrawalHistoryResponseSchema>
-const depositWithdrawalHistoryResponseCheck = TypeCompiler.Compile(
-  DepositWithdrawalHistoryResponseSchema,
-)
-
-export function isDepositWithdrawalHistoryData(
-  data: unknown,
-): data is DepositWithdrawalHistoryData {
-  return depositWithdrawalHistoryResponseCheck.Check(data)
-}
+export type DepositWithdrawalHistoryData = typeof depositWithdrawalHistoryResponse.infer
 
 export default async function fetchDepositWithdrawalHistories(
   chainId: StarknetChainId,
@@ -49,10 +39,7 @@ export default async function fetchDepositWithdrawalHistories(
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-  })
+  const params = new URLSearchParams({page: page.toString(), limit: limit.toString()})
 
   actions.forEach(action => {
     params.append('actions', action.toString())
@@ -67,11 +54,13 @@ export default async function fetchDepositWithdrawalHistories(
 
   const response = await call.get(endpoint)
 
-  if (!isDepositWithdrawalHistoryData(response.data)) {
+  const data = depositWithdrawalHistoryResponse(response.data)
+
+  if (data instanceof type.errors) {
     throw new Error('Invalid deposit/withdrawal history data received from API')
   }
 
-  response.data.data.sort((a, b) => {
+  data.data.sort((a, b) => {
     const result = b.createdAt - a.createdAt
     if (result === 0) {
       return b.action - a.action
@@ -79,5 +68,5 @@ export default async function fetchDepositWithdrawalHistories(
     return result
   })
 
-  return response.data
+  return data
 }

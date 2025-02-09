@@ -18,9 +18,7 @@ export default memo(function CorrectNetworkButton() {
     try {
       await latestWalletAccount.current.walletProvider.request({
         type: 'wallet_switchStarknetChain',
-        params: {
-          chainId: latestChainId.current,
-        },
+        params: {chainId: latestChainId.current},
       })
     } catch {
       toast.error('Cannot switch chain, please switch manually in your wallet')

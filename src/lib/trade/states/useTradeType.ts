@@ -2,11 +2,7 @@ import {atomWithStorage} from 'jotai/utils'
 
 import {isNotTrigger, TradeMode} from './useTradeMode'
 
-export const TradeType = {
-  Long: 'Long',
-  Short: 'Short',
-  Swap: 'Swap',
-} as const
+export const TradeType = {Long: 'Long', Short: 'Short', Swap: 'Swap'} as const
 export type TradeType = (typeof TradeType)[keyof typeof TradeType]
 
 const tradeTypeAtom = atomWithStorage<TradeType>('orderType', TradeType.Long)

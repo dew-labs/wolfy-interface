@@ -60,9 +60,7 @@ export interface ExtendedMarketData {
   actions?: React.ReactNode
 }
 
-const TABLE_CLASS_NAMES = {
-  th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider'],
-}
+const TABLE_CLASS_NAMES = {th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider']}
 
 const selectMarketTokenAddresses = markAsMemoized((data: MarketsData) => Array.from(data.values()))
 
@@ -179,9 +177,7 @@ export default memo(function PoolsTable() {
               marketTokenData.decimals + USD_DECIMALS,
             ),
             Format.USD,
-            {
-              fractionDigits: 0,
-            },
+            {fractionDigits: 0},
           )
 
           const valueNumber = Number(
@@ -194,9 +190,7 @@ export default memo(function PoolsTable() {
           const balanceString = formatNumber(
             shrinkDecimals(balance, marketTokenData.decimals),
             Format.READABLE,
-            {
-              fractionDigits: tokenFractionDigits,
-            },
+            {fractionDigits: tokenFractionDigits},
           )
 
           const balanceNumber = Number(shrinkDecimals(balance, marketTokenData.decimals))
@@ -204,10 +198,7 @@ export default memo(function PoolsTable() {
           const balanceValueString = formatNumber(
             shrinkDecimals(balance * price, marketTokenData.decimals + USD_DECIMALS),
             Format.READABLE,
-            {
-              fractionDigits: 2,
-              exactFractionDigits: true,
-            },
+            {fractionDigits: 2, exactFractionDigits: true},
           )
 
           const balanceValueNumber = Number(
@@ -217,10 +208,7 @@ export default memo(function PoolsTable() {
           const totalSupplyString = formatNumber(
             shrinkDecimals(marketTokenData.totalSupply, marketTokenData.decimals),
             Format.READABLE,
-            {
-              fractionDigits: 0,
-              exactFractionDigits: true,
-            },
+            {fractionDigits: 0, exactFractionDigits: true},
           )
 
           const totalSupplyNumber = Number(

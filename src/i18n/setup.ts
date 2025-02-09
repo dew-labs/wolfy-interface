@@ -26,9 +26,7 @@ void i18n
     debug: ['test', 'development'].includes(MODE),
     fallbackLng: DEFAULT_LOCALE,
     supportedLngs: availableLocales,
-    interpolation: {
-      escapeValue: false,
-    },
+    interpolation: {escapeValue: false},
     defaultNS: DEFAULT_NAMESPACE,
     load: 'languageOnly',
     backend: {
@@ -54,10 +52,7 @@ void i18n
           .catch((e: unknown) => {
             logError(e)
             setTimeout(() => {
-              callback(null, {
-                data: {},
-                status: 500,
-              })
+              callback(null, {data: {}, status: 500})
             }, 0)
           })
       },

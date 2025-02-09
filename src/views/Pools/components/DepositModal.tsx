@@ -167,10 +167,7 @@ export default memo(function DepositModal({
   const maxLongTokenString = formatNumber(
     shrinkDecimals(longTokenBalance, marketData?.longToken.decimals ?? 18),
     Format.READABLE,
-    {
-      exactFractionDigits: true,
-      fractionDigits: longTokenDisplayDecimals,
-    },
+    {exactFractionDigits: true, fractionDigits: longTokenDisplayDecimals},
   )
 
   const handleLongTokenAmountChange = useCallback((value: string) => {
@@ -194,10 +191,7 @@ export default memo(function DepositModal({
   const maxShortTokenString = formatNumber(
     shrinkDecimals(shortTokenBalance, marketData?.shortToken.decimals ?? 18),
     Format.READABLE,
-    {
-      exactFractionDigits: true,
-      fractionDigits: shortTokenDisplayDecimals,
-    },
+    {exactFractionDigits: true, fractionDigits: shortTokenDisplayDecimals},
   )
 
   const handleShortTokenAmountChange = useCallback((value: string) => {
@@ -229,19 +223,13 @@ export default memo(function DepositModal({
   const feeUsdText = formatNumber(
     shrinkDecimals(executionFee?.feeUsd ?? 0n, USD_DECIMALS),
     Format.USD,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   const feeTokenAmountText = formatNumber(
     shrinkDecimals(executionFee?.feeTokenAmount ?? 0n, executionFee?.feeToken.decimals ?? 18),
     Format.READABLE,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -251,14 +239,8 @@ export default memo(function DepositModal({
     isDeposit: true,
     marketInfo: marketData,
     marketToken: marketTokenData,
-    longTokenInputState: {
-      address: marketData?.longTokenAddress,
-      amount: longTokenAmount,
-    },
-    shortTokenInputState: {
-      address: marketData?.shortTokenAddress,
-      amount: shortTokenAmount,
-    },
+    longTokenInputState: {address: marketData?.longTokenAddress, amount: longTokenAmount},
+    shortTokenInputState: {address: marketData?.shortTokenAddress, amount: shortTokenAmount},
     marketTokenAmount: 0n,
     uiFeeFactor,
     focusedInput: 'longCollateral',
@@ -270,19 +252,13 @@ export default memo(function DepositModal({
   const feesAndPriceImpactText = formatNumber(
     shrinkDecimals(feesAndPriceImpact, USD_DECIMALS),
     Format.USD,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   const marketTokenAmountText = formatNumber(
     shrinkDecimals(amounts?.marketTokenAmount ?? 0n, marketTokenData?.decimals ?? 18),
     Format.READABLE,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
   // -------------------------------------------------------------------------------------------------------------------
 

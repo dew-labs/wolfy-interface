@@ -37,9 +37,4 @@ const settings = [
   },
 ]
 
-export default Object.assign(
-  {},
-  ...settings.map(setting => ({
-    [setting.glob]: setting.script,
-  })),
-)
+export default Object.assign({}, ...settings.map(setting => ({[setting.glob]: setting.script})))

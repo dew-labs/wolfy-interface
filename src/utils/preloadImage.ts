@@ -6,9 +6,7 @@ export default function preloadImage(
 ) {
   if (Array.isArray(url)) {
     if (strategy === 'parallel') {
-      const context = {
-        loadedCounter: 0,
-      }
+      const context = {loadedCounter: 0}
 
       for (const u of url) {
         preloadImage(u, priority, strategy, () => {

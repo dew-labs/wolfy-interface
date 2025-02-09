@@ -53,11 +53,7 @@ export default async function fetchFundingFees(
       const claimableFundingAmountLongs = results.slice(0, results.length / 2)
       const claimableFundingAmountShorts = results.slice(results.length / 2)
 
-      return {
-        markets,
-        claimableFundingAmountLongs,
-        claimableFundingAmountShorts,
-      }
+      return {markets, claimableFundingAmountLongs, claimableFundingAmountShorts}
     }),
   )
 

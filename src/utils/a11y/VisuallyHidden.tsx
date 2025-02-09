@@ -6,11 +6,7 @@ function VisuallyHidden<
   isNotHiddenAnymore,
   ...props
 }: T extends keyof React.JSX.IntrinsicElements
-  ? {
-      as?: T
-      strict?: boolean
-      isNotHiddenAnymore?: boolean
-    } & React.JSX.IntrinsicElements[T]
+  ? {as?: T; strict?: boolean; isNotHiddenAnymore?: boolean} & React.JSX.IntrinsicElements[T]
   : {
       as?: T
       strict?: boolean

@@ -1,10 +1,6 @@
 import {atomWithStorage} from 'jotai/utils'
 
-export const TradeMode = {
-  Market: 'Market',
-  Limit: 'Limit',
-  Trigger: 'Trigger',
-} as const
+export const TradeMode = {Market: 'Market', Limit: 'Limit', Trigger: 'Trigger'} as const
 export type TradeMode = (typeof TradeMode)[keyof typeof TradeMode]
 
 const tradeModeAtom = atomWithStorage<TradeMode>('executionType', TradeMode.Market)

@@ -17,10 +17,7 @@ export default function getLimitedDisplay(
   const absAmount = abs(amount)
 
   if (absAmount === 0n) {
-    return {
-      symbol: '',
-      value: absAmount,
-    }
+    return {symbol: '', value: absAmount}
   }
 
   const symbol = (() => {
@@ -35,8 +32,5 @@ export default function getLimitedDisplay(
     return absAmount
   })()
 
-  return {
-    symbol,
-    value,
-  }
+  return {symbol, value}
 }

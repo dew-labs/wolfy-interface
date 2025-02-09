@@ -39,46 +39,18 @@ import middleEllipsis from '@/utils/middleEllipsis'
 import ThemeSwitchButton from './ThemeSwitchButton'
 
 const menuItems = [
-  {
-    label: 'Trade',
-    to: TradeRoute.fullPath,
-    target: '_self',
-    external: false,
-  },
-  {
-    label: 'Pools',
-    to: PoolsRoute.fullPath,
-    target: '_self',
-    external: false,
-  },
-  {
-    label: 'Referrals',
-    to: '',
-    target: '_self',
-    external: true,
-  },
-  {
-    label: 'Leaderboard',
-    to: '',
-    target: '_self',
-    external: true,
-  },
-  {
-    label: 'Docs',
-    to: 'https://docs.wolfy.trade/',
-    target: '_blank',
-    external: true,
-  },
+  {label: 'Trade', to: TradeRoute.fullPath, target: '_self', external: false},
+  {label: 'Pools', to: PoolsRoute.fullPath, target: '_self', external: false},
+  {label: 'Referrals', to: '', target: '_self', external: true},
+  {label: 'Leaderboard', to: '', target: '_self', external: true},
+  {label: 'Docs', to: 'https://docs.wolfy.trade/', target: '_blank', external: true},
 ] as const
 
 const NAVBAR_MENU_MOTION_PROPS = {
   initial: {opacity: 0, y: -20},
   animate: {opacity: 1, y: 0},
   exit: {opacity: 0, y: -20},
-  transition: {
-    ease: 'easeInOut',
-    duration: 0.2,
-  },
+  transition: {ease: 'easeInOut', duration: 0.2},
 }
 
 export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {

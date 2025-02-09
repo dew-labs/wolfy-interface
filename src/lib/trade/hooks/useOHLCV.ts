@@ -68,8 +68,5 @@ export const OHLCVEffects = memo(function OHLCVEffects({symbol}: OHLCVEffectsPro
 })
 
 export default function useOHLCV(symbol: string | undefined) {
-  return useQuery({
-    queryKey: ['ohlcv', symbol],
-    enabled: false,
-  }) as UseQueryResult<OHLCV>
+  return useQuery({queryKey: ['ohlcv', symbol], enabled: false}) as UseQueryResult<OHLCV>
 }

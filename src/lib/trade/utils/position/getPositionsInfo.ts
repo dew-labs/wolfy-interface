@@ -257,8 +257,5 @@ export default function getPositionsInfo(
     positionsInfoViaStringRepresentation.set(position.stringRepresentation, data)
   }
 
-  return {
-    positionsInfo,
-    positionsInfoViaStringRepresentation,
-  }
+  return {positionsInfo, positionsInfoViaStringRepresentation}
 }

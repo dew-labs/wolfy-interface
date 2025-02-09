@@ -248,9 +248,7 @@ export async function fetchMarketData(
   ] = await wolfyMulticall(chainId, [
     // marketInfo
     createWolfyMulticallRequest(chainId, WolfyContract.Reader, ReaderABI, 'get_market_info', [
-      {
-        contract_address: dataStoreAddress,
-      },
+      {contract_address: dataStoreAddress},
       tokenPricesInMarket,
       market.marketTokenAddress,
     ]),
@@ -261,9 +259,7 @@ export async function fetchMarketData(
       ReaderABI,
       'get_market_token_price',
       [
-        {
-          contract_address: dataStoreAddress,
-        },
+        {contract_address: dataStoreAddress},
         marketProps,
         tokenPricesInMarket.index_token_price,
         tokenPricesInMarket.long_token_price,
@@ -279,9 +275,7 @@ export async function fetchMarketData(
       ReaderABI,
       'get_market_token_price',
       [
-        {
-          contract_address: dataStoreAddress,
-        },
+        {contract_address: dataStoreAddress},
         marketProps,
         tokenPricesInMarket.index_token_price,
         tokenPricesInMarket.long_token_price,

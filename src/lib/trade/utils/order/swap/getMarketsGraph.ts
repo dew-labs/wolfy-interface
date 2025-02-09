@@ -8,10 +8,7 @@ export interface MarketsGraph {
 }
 
 export default function getMarketsGraph(marketsData: MarketsData): MarketsGraph {
-  const graph: MarketsGraph = {
-    adjacencyList: {},
-    edges: [],
-  }
+  const graph: MarketsGraph = {adjacencyList: {}, edges: []}
 
   marketsData.forEach(market => {
     const {longTokenAddress, shortTokenAddress, marketTokenAddress, isSameCollaterals, isDisabled} =

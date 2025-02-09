@@ -115,9 +115,7 @@ export default async function sendOrder(
     console.log(receipt.events)
     const orderKey = receipt.events[1]?.data[0]
     console.log(orderKey)
-    return {
-      tx: receipt.transaction_hash,
-    }
+    return {tx: receipt.transaction_hash}
   }
   throw new Error('Cannot place order')
 }

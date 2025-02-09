@@ -127,15 +127,10 @@ const LIST_BOX_PROPS = {
 
 const POPOVER_PROPS = {
   offset: 10,
-  classNames: {
-    base: 'rounded-large',
-    content: 'p-1 bg-background min-w-max',
-  },
+  classNames: {base: 'rounded-large', content: 'p-1 bg-background min-w-max'},
 }
 
-const SCROLL_SHADOW_PROPS = {
-  isEnabled: false,
-}
+const SCROLL_SHADOW_PROPS = {isEnabled: false}
 
 export const formatLocaleDateTime = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString()
@@ -267,14 +262,7 @@ export default memo(function TradesTab() {
 
         const txnUrl = getScanUrl(chainId, ScanType.Transaction, item.txHash)
 
-        return {
-          ...item,
-          market,
-          poolName,
-          executionFeeText,
-          executionFeeUsdText,
-          txnUrl,
-        }
+        return {...item, market, poolName, executionFeeText, executionFeeUsdText, txnUrl}
       })
       .filter(Boolean)
   }, [
@@ -301,9 +289,7 @@ export default memo(function TradesTab() {
       <Table
         className='mt-2'
         aria-label='Trade History Table'
-        classNames={{
-          th: '!rounded-none font-serif',
-        }}
+        classNames={{th: '!rounded-none font-serif'}}
       >
         <TableHeader>
           <TableColumn>

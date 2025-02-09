@@ -68,10 +68,7 @@ function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
   const collateral = formatNumber(
     shrinkDecimals(order.initialCollateralDeltaAmount, order.initialCollateralToken.decimals),
     Format.PLAIN,
-    {
-      exactFractionDigits: true,
-      fractionDigits: collateralFractionDigits,
-    },
+    {exactFractionDigits: true, fractionDigits: collateralFractionDigits},
   )
   const collateralSymbol = order.initialCollateralToken.symbol
 
@@ -116,10 +113,7 @@ function PositionLine({positionKey}: Readonly<{positionKey: bigint}>) {
   const collateral = formatNumber(
     shrinkDecimals(position.collateralAmount, position.collateralToken.decimals),
     Format.PLAIN,
-    {
-      exactFractionDigits: true,
-      fractionDigits: collateralFractionDigits,
-    },
+    {exactFractionDigits: true, fractionDigits: collateralFractionDigits},
   )
 
   const collateralSymbol = position.collateralToken.symbol

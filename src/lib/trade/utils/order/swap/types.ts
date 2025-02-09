@@ -34,9 +34,4 @@ export interface SwapAmounts {
   uiFeeUsd?: bigint
 }
 
-export type SwapEstimator = (
-  e: MarketEdge,
-  usdIn: bigint,
-) => {
-  usdOut: bigint
-}
+export type SwapEstimator = (e: MarketEdge, usdIn: bigint) => {usdOut: bigint}

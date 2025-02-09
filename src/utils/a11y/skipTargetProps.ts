@@ -21,8 +21,5 @@
  * @returns Props object containing id and tabIndex
  */
 export default function skipTargetProps(id: string) {
-  return {
-    id,
-    tabIndex: -1,
-  }
+  return {id, tabIndex: -1}
 }

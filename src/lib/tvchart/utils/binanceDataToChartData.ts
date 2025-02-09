@@ -1,5 +1,4 @@
-import {type Static, Type} from '@sinclair/typebox'
-import {TypeCompiler} from '@sinclair/typebox/compiler'
+import {type} from 'arktype'
 import type {UTCTimestamp} from 'lightweight-charts'
 
 import type {ChartData, ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
@@ -30,34 +29,33 @@ import {correctTimezone} from '@/lib/tvchart/constants'
 //     "B": "123456"   // Ignore
 //   }
 // }
-const binanceChartDataSchema = Type.Object({
-  e: Type.String(),
-  E: Type.Number(),
-  s: Type.String(),
-  k: Type.Object({
-    t: Type.Number(),
-    T: Type.Number(),
-    s: Type.String(),
-    i: Type.String(),
-    f: Type.Number(),
-    L: Type.Number(),
-    o: Type.String(),
-    c: Type.String(),
-    h: Type.String(),
-    l: Type.String(),
-    v: Type.String(),
-    n: Type.Number(),
-    x: Type.Boolean(),
-    q: Type.String(),
-    V: Type.String(),
-    Q: Type.String(),
-    B: Type.String(),
+const binanceChartData = type({
+  e: 'string',
+  E: 'number',
+  s: 'string',
+  k: type({
+    t: 'number',
+    T: 'number',
+    s: 'string',
+    i: 'string',
+    f: 'number',
+    L: 'number',
+    o: 'string',
+    c: 'string',
+    h: 'string',
+    l: 'string',
+    v: 'string',
+    n: 'number',
+    x: 'boolean',
+    q: 'string',
+    V: 'string',
+    Q: 'string',
+    B: 'string',
   }),
 })
-export type BinanceChartData = Static<typeof binanceChartDataSchema>
-const binanceChartDataTypeCheck = TypeCompiler.Compile(binanceChartDataSchema)
+export type BinanceChartData = typeof binanceChartData.infer
 
-export function binanaceDataToChartData(
+export function binanceDataToChartData(
   binanceData: BinanceChartData,
   interval: ChartInterval,
 ): ChartData {
@@ -77,9 +75,10 @@ export function binanaceDataToChartData(
 }
 
 export function parseChartData(chartData: unknown, interval: ChartInterval): ChartData | undefined {
-  if (!binanceChartDataTypeCheck.Check(chartData)) {
+  const data = binanceChartData(chartData)
+  if (data instanceof type.errors) {
     return
   }
 
-  return binanaceDataToChartData(chartData, interval)
+  return binanceDataToChartData(data, interval)
 }

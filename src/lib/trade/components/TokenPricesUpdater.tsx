@@ -39,10 +39,7 @@ export default memo(function TokenPricesUpdater() {
                 if (existingPrice && existingPrice.min === price) return prevData
 
                 return create(prevData, draft => {
-                  draft.set(token.address, {
-                    min: price,
-                    max: price,
-                  })
+                  draft.set(token.address, {min: price, max: price})
                 })
               })
             }

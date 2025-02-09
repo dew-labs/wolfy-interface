@@ -24,10 +24,5 @@ export default function getNextOpenInterestForVirtualInventory(p: {
     currentShortUsd = currentShortUsd + offset
   }
 
-  return getNextOpenInterestParams({
-    currentLongUsd,
-    currentShortUsd,
-    usdDelta,
-    isLong,
-  })
+  return getNextOpenInterestParams({currentLongUsd, currentShortUsd, usdDelta, isLong})
 }

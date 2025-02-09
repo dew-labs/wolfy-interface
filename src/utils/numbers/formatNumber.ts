@@ -58,11 +58,7 @@ export function getIntlNumberFormatOptions(format: Format, options?: FormatOptio
         minimumFractionDigits: options?.exactFractionDigits ? options.fractionDigits : 2,
       }
     case Format.PERCENT:
-      return {
-        style: 'percent',
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2,
-      }
+      return {style: 'percent', maximumFractionDigits: 2, minimumFractionDigits: 2}
     case Format.PERCENT_SIGNED:
       return {
         style: 'percent',

@@ -31,9 +31,5 @@ export default function useDepositWithdrawalExecutionFee(
     executionFee = getExecutionFee(gasLimits, feeTokenPrice, estimatedGasLimit, gasPrice, feeToken)
   }
 
-  return {
-    ...executionFee,
-    feeToken,
-    feeTokenPrice,
-  }
+  return {...executionFee, feeToken, feeTokenPrice}
 }

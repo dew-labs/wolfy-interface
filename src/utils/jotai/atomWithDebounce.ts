@@ -50,10 +50,5 @@ export default function atomWithDebounce<T>(
     set(isDebouncingAtom, false)
   })
 
-  return {
-    currentValueAtom,
-    isDebouncingAtom,
-    clearTimeoutAtom,
-    debouncedValueAtom,
-  }
+  return {currentValueAtom, isDebouncingAtom, clearTimeoutAtom, debouncedValueAtom}
 }

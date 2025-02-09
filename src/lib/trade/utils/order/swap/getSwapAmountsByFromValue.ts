@@ -119,14 +119,5 @@ export function getSwapAmountsByFromValue(p: {
     minOutputAmount = 0n
   }
 
-  return {
-    amountIn,
-    usdIn,
-    amountOut,
-    usdOut,
-    priceIn,
-    priceOut,
-    minOutputAmount,
-    swapPathStats,
-  }
+  return {amountIn, usdIn, amountOut, usdOut, priceIn, priceOut, minOutputAmount, swapPathStats}
 }

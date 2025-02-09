@@ -44,11 +44,7 @@ export async function fetchMarketTokensData(
       const totalSupplies = results.slice(0, results.length / 2)
       const decimals = results.slice(results.length / 2)
 
-      return {
-        totalSupplies,
-        decimals,
-        addresses,
-      }
+      return {totalSupplies, decimals, addresses}
     }),
   )
 

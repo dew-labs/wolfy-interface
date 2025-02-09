@@ -46,9 +46,7 @@ const logError = function (
       }
 
       if (serializedMetadata) {
-        setContext('metadata', {
-          serializedMetadata,
-        })
+        setContext('metadata', {serializedMetadata})
         return
       }
 

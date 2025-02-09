@@ -81,19 +81,13 @@ export default memo(function ClosePositionModal() {
   const maximumCollateralTokenToDecreaseText = formatNumber(
     shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
     Format.READABLE,
-    {
-      exactFractionDigits: true,
-      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice),
-    },
+    {exactFractionDigits: true, fractionDigits: calculateTokenFractionDigits(collateralTokenPrice)},
   )
 
   const maximumSizeUsdToDecreaseText = formatNumber(
     shrinkDecimals(maximumSizeUsdToDecrease, USD_DECIMALS),
     Format.USD,
-    {
-      exactFractionDigits: true,
-      fractionDigits: 2,
-    },
+    {exactFractionDigits: true, fractionDigits: 2},
   )
 
   //----------------------------------------------------------------------------
@@ -166,10 +160,7 @@ export default memo(function ClosePositionModal() {
   )
 
   const inputSizeClassNames = useMemo(
-    () => ({
-      input: 'appearance-none',
-      label: !isValidSizeUsdToDecrease && '!text-danger-500',
-    }),
+    () => ({input: 'appearance-none', label: !isValidSizeUsdToDecrease && '!text-danger-500'}),
     [isValidSizeUsdToDecrease],
   )
 
@@ -292,9 +283,7 @@ export default memo(function ClosePositionModal() {
     ? `-${formatNumber(
         shrinkDecimals(executionFee.feeTokenAmount, feeToken.decimals),
         Format.READABLE,
-        {
-          fractionDigits: 8,
-        },
+        {fractionDigits: 8},
       )} ${feeToken.symbol}`
     : '-'
 

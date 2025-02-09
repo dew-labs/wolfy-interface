@@ -32,9 +32,7 @@ export default function debounce<F extends (...args: unknown[]) => unknown>(
     timing,
     waitMs,
     maxWaitMs,
-  }: DebounceOptions & {
-    readonly timing?: 'both' | 'leading' | 'trailing'
-  },
+  }: DebounceOptions & {readonly timing?: 'both' | 'leading' | 'trailing'},
 ) {
   if (maxWaitMs !== undefined && waitMs !== undefined && maxWaitMs < waitMs) {
     throw new Error(

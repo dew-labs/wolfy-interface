@@ -8,10 +8,7 @@ import {
 
 export default async function fetchTiers(chainId: StarknetChainId, tierLevel: bigint | undefined) {
   if (!tierLevel) {
-    return {
-      totalRebate: 0n,
-      discountShare: 0n,
-    }
+    return {totalRebate: 0n, discountShare: 0n}
   }
 
   const referralStorageContract = createWolfyContract(

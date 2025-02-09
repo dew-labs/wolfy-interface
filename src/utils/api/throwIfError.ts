@@ -31,12 +31,7 @@ export default function throwIfError(
     if (msgIfPossible && 'msg' in res.data && typeof res.data?.msg === 'string') {
       return res.data.msg as string
     }
-    throw new ReadableError(
-      res as AxiosResponse<{
-        code: string
-        msg?: unknown
-      }>,
-    )
+    throw new ReadableError(res as AxiosResponse<{code: string; msg?: unknown}>)
   }
   /* eslint-enable @typescript-eslint/no-unsafe-member-access -- enable for the disable above */
 }

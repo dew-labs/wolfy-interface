@@ -41,12 +41,7 @@ export default function getPositionPnlUsd(p: {
   const poolPnl = isLong ? p.marketInfo.pnlLongMax : p.marketInfo.pnlShortMax
   const poolUsd = getPoolUsdWithoutPnl(marketInfo, tokenPricesData, isLong, 'min')
 
-  const cappedPnl = getCappedPoolPnl({
-    marketInfo,
-    poolUsd,
-    isLong,
-    maximize: true,
-  })
+  const cappedPnl = getCappedPoolPnl({marketInfo, poolUsd, isLong, maximize: true})
 
   const WEI_PRECISION = expandDecimals(1, 18)
 

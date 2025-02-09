@@ -16,16 +16,10 @@ export default function getSwapPathOutputAddresses(p: {
       // Thus we do not need to check if initial collateral token is wrapped token to unwrap it.
       // So we can safely return initial collateral token address as out token address, when there is no swap path.
 
-      return {
-        outTokenAddress: initialCollateralAddress,
-        outMarketAddress: undefined,
-      }
+      return {outTokenAddress: initialCollateralAddress, outMarketAddress: undefined}
     }
 
-    return {
-      outTokenAddress: initialCollateralAddress,
-      outMarketAddress: undefined,
-    }
+    return {outTokenAddress: initialCollateralAddress, outMarketAddress: undefined}
   }
 
   const [firstMarketAddress, ...marketAddresses] = swapPath
@@ -34,10 +28,7 @@ export default function getSwapPathOutputAddresses(p: {
   let outMarket = marketsInfoData.get(firstMarketAddress!)
 
   if (!outMarket) {
-    return {
-      outTokenAddress: undefined,
-      outMarketAddress: undefined,
-    }
+    return {outTokenAddress: undefined, outMarketAddress: undefined}
   }
 
   let outTokenType = getTokenPoolType(outMarket, initialCollateralAddress)
@@ -47,18 +38,12 @@ export default function getSwapPathOutputAddresses(p: {
     outMarket = marketsInfoData.get(marketAddress)
 
     if (!outMarket) {
-      return {
-        outTokenAddress: undefined,
-        outMarketAddress: undefined,
-      }
+      return {outTokenAddress: undefined, outMarketAddress: undefined}
     }
 
     outTokenType = outMarket.longTokenAddress === outToken.address ? 'short' : 'long'
     outToken = outTokenType === 'long' ? outMarket.longToken : outMarket.shortToken
   }
 
-  return {
-    outTokenAddress: outToken.address,
-    outMarketAddress: outMarket.marketTokenAddress,
-  }
+  return {outTokenAddress: outToken.address, outMarketAddress: outMarket.marketTokenAddress}
 }

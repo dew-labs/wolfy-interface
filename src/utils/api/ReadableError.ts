@@ -3,18 +3,9 @@ import type {AxiosResponse} from 'axios'
 import ErrorWithMetadata from '@/utils/errors/ErrorWithMetadata'
 
 export default class ReadableError extends ErrorWithMetadata {
-  res: AxiosResponse<{
-    code: string
-    msg?: unknown
-    [key: string]: unknown
-  }>
+  res: AxiosResponse<{code: string; msg?: unknown; [key: string]: unknown}>
 
-  constructor(
-    response: AxiosResponse<{
-      code: string
-      msg?: unknown
-    }>,
-  ) {
+  constructor(response: AxiosResponse<{code: string; msg?: unknown}>) {
     super('ReadableError', response.data.code, String(response.data.msg), {data: response.data})
     this.res = response
   }

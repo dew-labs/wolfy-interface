@@ -7,6 +7,7 @@ export default {
   trailingComma: 'all',
   bracketSpacing: false,
   bracketSameLine: false,
+  objectWrap: 'collapse',
   arrowParens: 'avoid',
   proseWrap: 'preserve',
   htmlWhitespaceSensitivity: 'strict',

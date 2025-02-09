@@ -33,6 +33,4 @@ function RootRoute() {
   )
 }
 
-export const Route = createRootRouteWithContext<RouterContext>()({
-  component: RootRoute,
-})
+export const Route = createRootRouteWithContext<RouterContext>()({component: RootRoute})

@@ -40,10 +40,6 @@
     }
   ],
   "compounds": [
-    {
-      "name": "Debug App",
-      "configurations": ["Run development", "Launch Chrome"],
-      "stopAll": true
-    }
+    {"name": "Debug App", "configurations": ["Run development", "Launch Chrome"], "stopAll": true}
   ]
 }

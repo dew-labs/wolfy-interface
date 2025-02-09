@@ -7,10 +7,7 @@ import expandDecimals from '@/utils/numbers/expandDecimals'
 
 const ONE_USD = expandDecimals(1, USD_DECIMALS)
 
-const DEFAULT_PRICE = {
-  min: ONE_USD,
-  max: ONE_USD,
-}
+const DEFAULT_PRICE = {min: ONE_USD, max: ONE_USD}
 
 export default function calculateMarketPrice(
   market?: MarketData,

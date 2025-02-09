@@ -50,8 +50,5 @@ export default function useWindowSize() {
     }
   }, [])
 
-  return {
-    windowSize,
-    isMobile: windowSize[0] <= MOBILE_BREAKPOINT,
-  }
+  return {windowSize, isMobile: windowSize[0] <= MOBILE_BREAKPOINT}
 }

@@ -55,8 +55,5 @@ export default function getTradeRatios({
     smallestToken: markRatio.smallestToken,
   }
 
-  return {
-    markRatio,
-    triggerRatio,
-  }
+  return {markRatio, triggerRatio}
 }

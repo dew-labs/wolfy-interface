@@ -46,10 +46,5 @@ export default async function fetchUserReferralCode(
     referralCodeForTxn = localStorageCode
   }
 
-  return {
-    attachedOnChain,
-    userReferralCode,
-    userReferralCodeString,
-    referralCodeForTxn,
-  }
+  return {attachedOnChain, userReferralCode, userReferralCodeString, referralCodeForTxn}
 }

@@ -10,8 +10,5 @@ export default function useChartConfig(): ChartConfig {
   const [currentTheme] = useCurrentTheme()
   const isDark = currentTheme === Theme.Dark
 
-  return {
-    textColor: isDark ? 'white' : 'black',
-    gridColor: isDark ? '#ffffff1a' : '',
-  }
+  return {textColor: isDark ? 'white' : 'black', gridColor: isDark ? '#ffffff1a' : ''}
 }

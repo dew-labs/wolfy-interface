@@ -20,11 +20,7 @@ export default defineConfig(configEnv =>
         environment: 'happy-dom',
         environmentMatchGlobs: globs.TEST_SSR.map(path => [path, 'node']),
         setupFiles: 'src/setupTest.ts',
-        typecheck: {
-          enabled: true,
-          ignoreSourceErrors: true,
-          include: globs.TEST_TYPE,
-        },
+        typecheck: {enabled: true, ignoreSourceErrors: true, include: globs.TEST_TYPE},
         coverage: {
           enabled: false,
           // provider: 'istanbul', // Switch back to istanbul instead of native v8? https://www.thecandidstartup.org/2024/03/18/vitest-code-coverage.html

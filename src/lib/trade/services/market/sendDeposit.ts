@@ -136,9 +136,7 @@ export default async function sendDeposit(
     const depositKey = receipt.events[6]?.data[0]
     console.log(depositKey)
 
-    return {
-      tx: receipt.transaction_hash,
-    }
+    return {tx: receipt.transaction_hash}
   }
   throw new Error('Cannot deposit')
 }

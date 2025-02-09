@@ -12,11 +12,7 @@ export function getAcceptablePriceByPriceImpact(p: {
   const {indexPrice, sizeDeltaUsd, priceImpactDeltaUsd} = p
 
   if (sizeDeltaUsd <= 0 || indexPrice === 0n) {
-    return {
-      acceptablePrice: indexPrice,
-      acceptablePriceDeltaBps: 0n,
-      priceDelta: 0n,
-    }
+    return {acceptablePrice: indexPrice, acceptablePriceDeltaBps: 0n, priceDelta: 0n}
   }
 
   const shouldFlipPriceImpact = shouldUseMaxPrice(p.isIncrease, p.isLong)
@@ -30,9 +26,5 @@ export function getAcceptablePriceByPriceImpact(p: {
   const priceDelta = (indexPrice - acceptablePrice) * (shouldFlipPriceImpact ? 1n : -1n)
   const acceptablePriceDeltaBps = getBasisPoints(priceDelta, p.indexPrice)
 
-  return {
-    acceptablePrice,
-    acceptablePriceDeltaBps,
-    priceDelta,
-  }
+  return {acceptablePrice, acceptablePriceDeltaBps, priceDelta}
 }

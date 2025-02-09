@@ -3,7 +3,7 @@ import {useQuery, type UseQueryResult} from '@tanstack/react-query'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTradeHistories, {
-  type TradeData,
+  type TradeDataResponse,
   type TradeHistoryAction,
 } from '@/lib/trade/services/fetchTradeHistories'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
@@ -14,22 +14,22 @@ export default function useTradeHistory(
   isLong: boolean[],
   page: number,
   limit: number,
-): UseQueryResult<TradeData>
-export default function useTradeHistory<T = TradeData>(
+): UseQueryResult<TradeDataResponse>
+export default function useTradeHistory<T = TradeDataResponse>(
   actions: TradeHistoryAction[],
   markets: string[],
   isLong: boolean[],
   page: number,
   limit: number,
-  selector: MemoizedCallback<(data: TradeData) => T>,
+  selector: MemoizedCallback<(data: TradeDataResponse) => T>,
 ): UseQueryResult<T>
-export default function useTradeHistory<T = TradeData>(
+export default function useTradeHistory<T = TradeDataResponse>(
   actions: TradeHistoryAction[],
   markets: string[],
   isLong: boolean[],
   page: number,
   limit: number,
-  selector?: MemoizedCallback<(data: TradeData) => T>,
+  selector?: MemoizedCallback<(data: TradeDataResponse) => T>,
 ) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddress()
@@ -40,7 +40,7 @@ export default function useTradeHistory<T = TradeData>(
       fetchTradeHistories(chainId, accountAddress, actions, markets, isLong, page, limit),
     ...NO_REFETCH_OPTIONS,
     placeholderData: previousData => previousData,
-    select: selector as (data: TradeData) => T,
+    select: selector as (data: TradeDataResponse) => T,
     refetchInterval: 10000,
   })
 }

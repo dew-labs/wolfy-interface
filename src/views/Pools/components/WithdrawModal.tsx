@@ -106,9 +106,7 @@ export default memo(function WithdrawModal({
       marketTokenData?.decimals ?? 18,
     ),
     Format.PLAIN,
-    {
-      fractionDigits: userBalanceFractionDigits,
-    },
+    {fractionDigits: userBalanceFractionDigits},
   )
 
   const priceFractionDigits = calculatePriceFractionDigits(price)
@@ -132,33 +130,21 @@ export default memo(function WithdrawModal({
   const feeUsdText = formatNumber(
     shrinkDecimals(executionFee?.feeUsd ?? 0n, USD_DECIMALS),
     Format.USD,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   const feeTokenAmountText = formatNumber(
     shrinkDecimals(executionFee?.feeTokenAmount ?? 0n, executionFee?.feeToken.decimals ?? 18),
     Format.READABLE,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   const amounts = useDepositWithdrawalAmounts({
     isDeposit: false,
     marketInfo: marketData,
     marketToken: marketTokenData,
-    longTokenInputState: {
-      address: marketData?.longTokenAddress,
-      amount: 0n,
-    },
-    shortTokenInputState: {
-      address: marketData?.shortTokenAddress,
-      amount: 0n,
-    },
+    longTokenInputState: {address: marketData?.longTokenAddress, amount: 0n},
+    shortTokenInputState: {address: marketData?.shortTokenAddress, amount: 0n},
     marketTokenAmount: wmAmountBigInt,
     uiFeeFactor,
     focusedInput: 'market',
@@ -169,10 +155,7 @@ export default memo(function WithdrawModal({
   const feesAndPriceImpactText = formatNumber(
     shrinkDecimals(feesAndPriceImpact, USD_DECIMALS),
     Format.USD,
-    {
-      exactFractionDigits: false,
-      fractionDigits: 6,
-    },
+    {exactFractionDigits: false, fractionDigits: 6},
   )
 
   const {longTokenAmount, shortTokenAmount} = amounts ?? {}
@@ -187,18 +170,12 @@ export default memo(function WithdrawModal({
       longTokenAmountText: formatNumber(
         shrinkDecimals(amounts.longTokenAmount, marketData?.longToken.decimals ?? 18),
         Format.READABLE,
-        {
-          exactFractionDigits: false,
-          fractionDigits: longTokenFractionDigits,
-        },
+        {exactFractionDigits: false, fractionDigits: longTokenFractionDigits},
       ),
       shortTokenAmountText: formatNumber(
         shrinkDecimals(amounts.shortTokenAmount, marketData?.shortToken.decimals ?? 18),
         Format.READABLE,
-        {
-          exactFractionDigits: false,
-          fractionDigits: shortTokenFractionDigits,
-        },
+        {exactFractionDigits: false, fractionDigits: shortTokenFractionDigits},
       ),
     }
   }, [amounts, longTokenPrice?.max, shortTokenPrice?.max, marketData])

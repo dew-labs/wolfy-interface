@@ -77,15 +77,10 @@ const LIST_BOX_PROPS = {
 
 const POPOVER_PROPS = {
   offset: 10,
-  classNames: {
-    base: 'rounded-large',
-    content: 'p-1 bg-background min-w-max',
-  },
+  classNames: {base: 'rounded-large', content: 'p-1 bg-background min-w-max'},
 }
 
-const SCROLL_SHADOW_PROPS = {
-  isEnabled: false,
-}
+const SCROLL_SHADOW_PROPS = {isEnabled: false}
 
 const formatLocaleDateTime = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString()
@@ -269,9 +264,7 @@ export default memo(function DepositWithdrawalHistory() {
         <Table
           className='mt-2'
           aria-label='Deposit/Withdrawal History Table'
-          classNames={{
-            th: '!rounded-none font-serif',
-          }}
+          classNames={{th: '!rounded-none font-serif'}}
         >
           <TableHeader>
             <TableColumn>

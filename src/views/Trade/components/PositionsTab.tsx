@@ -28,9 +28,7 @@ import markAsMemoized from '@/utils/react/markAsMemoized'
 
 import ClosePositionModal, {useClosePosition} from './ClosePositionModal'
 
-const TABLE_CLASS_NAMES = {
-  th: '!rounded-none font-serif',
-}
+const TABLE_CLASS_NAMES = {th: '!rounded-none font-serif'}
 
 const selectSortedPositions = markAsMemoized((data: PositionsInfoData) => {
   return Array.from(data.positionsInfo.values()).sort((a, b) => {
@@ -193,9 +191,7 @@ export default memo(function PositionTab() {
                         : formatNumber(
                             shrinkDecimals(position.entryPrice, USD_DECIMALS),
                             Format.USD,
-                            {
-                              exactFractionDigits: true,
-                            },
+                            {exactFractionDigits: true},
                           )}
                     </span>
                   </TableCell>
@@ -211,9 +207,7 @@ export default memo(function PositionTab() {
                       {formatNumber(
                         shrinkDecimals(position.liquidationPrice, USD_DECIMALS),
                         Format.USD,
-                        {
-                          exactFractionDigits: true,
-                        },
+                        {exactFractionDigits: true},
                       )}
                     </span>
                   </TableCell>

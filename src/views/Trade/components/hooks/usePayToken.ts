@@ -107,10 +107,7 @@ export default function usePayToken(
       const newLeverageInput = formatNumber(
         shrinkDecimals(leverage, LEVERAGE_DECIMALS),
         Format.PLAIN,
-        {
-          exactFractionDigits: true,
-          fractionDigits: 2,
-        },
+        {exactFractionDigits: true, fractionDigits: 2},
       )
       setLeverageInput(newLeverageInput)
     },
@@ -127,10 +124,7 @@ export default function usePayToken(
       const newLeverageInput = formatNumber(
         shrinkDecimals(leverage, LEVERAGE_DECIMALS),
         Format.PLAIN,
-        {
-          exactFractionDigits: true,
-          fractionDigits: 2,
-        },
+        {exactFractionDigits: true, fractionDigits: 2},
       )
 
       if (newLeverageInput === '0') {

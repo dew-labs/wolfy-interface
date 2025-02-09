@@ -21,12 +21,5 @@ export default memo(function WolfyBackground() {
       ? 'radial-gradient(white .5px, transparent 0.5px)'
       : 'radial-gradient(black .5px, transparent 0.5px)'
 
-  return (
-    <div
-      style={{
-        ...BACKGROUND_STYLE,
-        backgroundImage,
-      }}
-    />
-  )
+  return <div style={{...BACKGROUND_STYLE, backgroundImage}} />
 })

@@ -13,9 +13,7 @@ export default function postcssConfig() {
       flexbugsFixes,
       focus,
       willChange,
-      presetEnv({
-        stage: 1,
-      }),
+      presetEnv({stage: 1}),
       autoprefixer,
       calc,
       // require('postcss-inline-svg') // Use svg in css instead of react component?

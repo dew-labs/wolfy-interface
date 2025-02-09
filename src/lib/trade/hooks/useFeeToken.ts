@@ -17,8 +17,5 @@ export default function useFeeToken() {
     useCallback(data => data.get(feeTokenAddress), [feeTokenAddress]),
   )
 
-  return {
-    feeToken,
-    feeTokenPrice,
-  }
+  return {feeToken, feeTokenPrice}
 }

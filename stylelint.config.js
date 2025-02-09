@@ -55,34 +55,20 @@ const config = {
     'plugin/declaration-block-no-ignored-properties': true,
     'css-modules/no-global-scoped-selector': [
       true,
-      {
-        fileExtensions: ['.module.css', '.module.scss'],
-      },
+      {fileExtensions: ['.module.css', '.module.scss']},
     ],
     'plugin/no-low-performance-animation-properties': true,
     'scss/at-rule-no-unknown': [
       true,
-      {
-        ignoreAtRules: ['apply', 'layer', 'responsive', 'screen', 'tailwind', 'variants'],
-      },
+      {ignoreAtRules: ['apply', 'layer', 'responsive', 'screen', 'tailwind', 'variants']},
     ],
   },
   overrides: [
     {
       files: ['*.module.scss', '**/*.module.scss'],
       rules: {
-        'selector-class-pattern': [
-          new RegExp(PASCAL_CASE),
-          {
-            resolveNestedSelectors: true,
-          },
-        ],
-        'selector-id-pattern': [
-          new RegExp(PASCAL_CASE),
-          {
-            resolveNestedSelectors: true,
-          },
-        ],
+        'selector-class-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
+        'selector-id-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
       },
     },
   ],

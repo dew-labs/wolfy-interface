@@ -77,9 +77,7 @@ export default defineConfig(({mode}) => {
   const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
-  const optimizeLocales = pluginOptimizeLocales.vite({
-    locales: ['en-US'],
-  })
+  const optimizeLocales = pluginOptimizeLocales.vite({locales: ['en-US']})
 
   if (Array.isArray(optimizeLocales)) {
     optimizeLocales.forEach(plugin => {
@@ -98,15 +96,9 @@ export default defineConfig(({mode}) => {
         'react',
         'jotai',
         'react-i18next',
-        {
-          clsx: ['clsx'],
-        },
-        {
-          'react-use': ['useLatest'],
-        },
-        {
-          react: ['Suspense', 'createContext', 'use'],
-        },
+        {clsx: ['clsx']},
+        {'react-use': ['useLatest']},
+        {react: ['Suspense', 'createContext', 'use']},
         {
           from: 'react',
           imports: [
@@ -134,9 +126,7 @@ export default defineConfig(({mode}) => {
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
     tsconfigPaths(),
-    partytownVite({
-      dest: path.join(__dirname, 'dist', '~partytown'),
-    }),
+    partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
     turboConsole({
       /* options here */
     }),
@@ -160,19 +150,11 @@ export default defineConfig(({mode}) => {
           /**
            * Inject <div id='root'/> to body of `index.html`
            */
-          {
-            injectTo: 'body-prepend',
-            tag: 'div',
-            attrs: {
-              id: 'root',
-            },
-          },
+          {injectTo: 'body-prepend', tag: 'div', attrs: {id: 'root'}},
         ],
       },
     }),
-    millionLintVite({
-      enabled: shouldEnableProfile,
-    }),
+    millionLintVite({enabled: shouldEnableProfile}),
     // SWC React
     react({
       plugins: [
@@ -228,20 +210,13 @@ export default defineConfig(({mode}) => {
     svgr({
       svgrOptions: {
         plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
-        svgoConfig: {
-          floatPrecision: 2,
-        },
+        svgoConfig: {floatPrecision: 2},
       },
     }),
-    ViteImageOptimizer({
-      cache: true,
-      cacheLocation: './.imageoptimizercache',
-    }),
+    ViteImageOptimizer({cache: true, cacheLocation: './.imageoptimizercache'}),
     TanStackRouterVite(),
     mkcert(),
-    obfuscator({
-      sourceMap: true,
-    }),
+    obfuscator({sourceMap: true}),
     inspectorServer(),
     compression(), // Useful when serve dist as static files (https://nginx.org/en/docs/http/ngx_http_gzip_static_module.html), but not when serve dist with a backend (since the backend should handle compression)
     optimizeCssModules(),
@@ -297,16 +272,8 @@ export default defineConfig(({mode}) => {
         display: 'block',
         injectTo: 'head',
         families: [
-          {
-            name: 'Pixelify Sans',
-            styles: 'wght@400..700',
-            defer: true,
-          },
-          {
-            name: 'Silkscreen',
-            styles: 'wght@400;700',
-            defer: true,
-          },
+          {name: 'Pixelify Sans', styles: 'wght@400..700', defer: true},
+          {name: 'Silkscreen', styles: 'wght@400;700', defer: true},
         ],
       },
     }),
@@ -340,73 +307,41 @@ export default defineConfig(({mode}) => {
         authToken: process.env.SENTRY_AUTH_TOKEN,
         org: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT,
-        reactComponentAnnotation: {
-          enabled: true,
-        },
+        reactComponentAnnotation: {enabled: true},
         telemetry: false,
-        _experiments: {
-          injectBuildInformation: true,
-        },
+        _experiments: {injectBuildInformation: true},
       }) as PluginOption,
     )
   }
 
   return {
-    define: {
-      __COMMIT_HASH__: commitHash,
-    },
+    define: {__COMMIT_HASH__: commitHash},
     build: {
       sourcemap: true,
       // manifest: true,
       // ssrManifest: true,
       // ssr: true,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            sentry: ['@sentry/react'],
-          },
-        },
-      },
+      rollupOptions: {output: {manualChunks: {sentry: ['@sentry/react']}}},
       target: 'esnext',
     },
     optimizeDeps: {
-      esbuildOptions: {
-        target: 'esnext',
-        define: {
-          global: 'globalThis',
-        },
-        supported: {
-          bigint: true,
-        },
-      },
+      esbuildOptions: {target: 'esnext', define: {global: 'globalThis'}, supported: {bigint: true}},
     },
     css: {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
       devSourcemap: true,
       preprocessorOptions: {
-        scss: {
-          api: 'modern-compiler',
-          sourceMap: true,
-          sourceMapIncludeSources: true,
-        },
+        scss: {api: 'modern-compiler', sourceMap: true, sourceMapIncludeSources: true},
       },
     },
-    json: {
-      stringify: true,
-    },
+    json: {stringify: true},
     plugins,
-    resolve: {
-      alias: [{find: '@', replacement: '/src'}],
-    },
+    resolve: {alias: [{find: '@', replacement: '/src'}]},
     server: {
       open: true,
       host: '0.0.0.0',
       proxy: {
-        '/api': {
-          target: process.env.VITE_API_URL,
-          changeOrigin: true,
-          cookieDomainRewrite: '',
-        },
+        '/api': {target: process.env.VITE_API_URL, changeOrigin: true, cookieDomainRewrite: ''},
       },
       cors: false,
     },

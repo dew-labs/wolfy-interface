@@ -98,18 +98,10 @@ export default memo(function TVLightWeightChart({
         fontFamily: 'Geist Mono',
       },
       grid: {
-        vertLines: {
-          color: gridColor,
-          style: LineStyle.Dashed,
-        },
-        horzLines: {
-          color: gridColor,
-          style: LineStyle.Dashed,
-        },
+        vertLines: {color: gridColor, style: LineStyle.Dashed},
+        horzLines: {color: gridColor, style: LineStyle.Dashed},
       },
-      rightPriceScale: {
-        borderVisible: false,
-      },
+      rightPriceScale: {borderVisible: false},
       timeScale: {
         borderVisible: false,
         timeVisible: isIntervalSmallerThan1D(interval),
@@ -157,9 +149,7 @@ export default memo(function TVLightWeightChart({
       chartMainCandlestickSeries.current.setData(historicalData)
 
       chartRef.current?.timeScale().scrollToPosition(CANDLE_STICKS_TO_RIGHT_BORDER, false)
-      chartMainCandlestickSeries.current.priceScale().applyOptions({
-        autoScale: true,
-      })
+      chartMainCandlestickSeries.current.priceScale().applyOptions({autoScale: true})
     },
     [historicalData],
   )
@@ -220,10 +210,7 @@ export default memo(function TVLightWeightChart({
         if (!chartContainerRef.current || !chartRef.current) return
         chartRef.current.applyOptions({width: chartContainerRef.current.clientWidth})
       },
-      {
-        waitMs: 100,
-        maxWaitMs: 200,
-      },
+      {waitMs: 100, maxWaitMs: 200},
     )
 
     const abortController = new AbortController()
@@ -246,10 +233,7 @@ export default memo(function TVLightWeightChart({
   }, [])
 
   const contextValue = useMemo<ChartContextValue>(
-    () => ({
-      createPriceLine,
-      removePriceLine,
-    }),
+    () => ({createPriceLine, removePriceLine}),
     [createPriceLine, removePriceLine],
   )
 

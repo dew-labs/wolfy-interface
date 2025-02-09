@@ -7,15 +7,8 @@ import {vi} from 'vitest'
 
 export const renderHookServer = <Hook extends () => unknown>(
   useHook: Hook,
-  {
-    wrapper: Wrapper,
-  }: {
-    wrapper?: ({children}: {children: ReactNode}) => React.ReactElement
-  } = {},
-): {
-  result: {current: ReturnType<Hook> | undefined}
-  hydrate: () => void
-} => {
+  {wrapper: Wrapper}: {wrapper?: ({children}: {children: ReactNode}) => React.ReactElement} = {},
+): {result: {current: ReturnType<Hook> | undefined}; hydrate: () => void} => {
   // Store hook return values
   const results: ReturnType<Hook>[] = []
 
@@ -60,10 +53,7 @@ export const renderHookServer = <Hook extends () => unknown>(
     })
   }
 
-  return {
-    result,
-    hydrate,
-  }
+  return {result, hydrate}
 }
 
 export type RenderHookServer = typeof renderHookServer

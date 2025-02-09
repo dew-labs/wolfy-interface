@@ -49,18 +49,9 @@ export function convertToContractTokenPrices(prices: Price, tokenDecimals: numbe
 }
 
 export interface MarketPrice {
-  index_token_price: {
-    min: bigint
-    max: bigint
-  }
-  long_token_price: {
-    min: bigint
-    max: bigint
-  }
-  short_token_price: {
-    min: bigint
-    max: bigint
-  }
+  index_token_price: {min: bigint; max: bigint}
+  long_token_price: {min: bigint; max: bigint}
+  short_token_price: {min: bigint; max: bigint}
 }
 
 export function getMarketPrice(
@@ -182,12 +173,8 @@ export default async function fetchPositions(
 
   const positionsInfo = await readerContract
     .get_account_position_info_list(
-      {
-        contract_address: dataStoreContract.address,
-      },
-      {
-        contract_address: referralStorageAddress,
-      },
+      {contract_address: dataStoreContract.address},
+      {contract_address: referralStorageAddress},
       positionHashes,
       marketPrices,
       UI_FEE_RECEIVER_ADDRESS,
@@ -197,10 +184,7 @@ export default async function fetchPositions(
         'FetchError',
         'Positions',
         'Failed to fetch positions',
-        {
-          positionHashes: positionHashes.map(toStarknetHexString),
-          marketPrices,
-        },
+        {positionHashes: positionHashes.map(toStarknetHexString), marketPrices},
         {cause: error},
       )
     })
@@ -262,8 +246,5 @@ export default async function fetchPositions(
     positionsData.set(key, pos)
   })
 
-  return {
-    positionsData,
-    positionsDataViaStringRepresentation,
-  }
+  return {positionsData, positionsDataViaStringRepresentation}
 }

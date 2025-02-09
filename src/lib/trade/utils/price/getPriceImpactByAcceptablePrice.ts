@@ -19,10 +19,5 @@ export default function getPriceImpactByAcceptablePrice(p: {
 
   const priceImpactDeltaAmount = markPrice === 0n ? 0n : priceImpactDeltaUsd / markPrice
 
-  return {
-    priceImpactDeltaUsd,
-    priceImpactDeltaAmount,
-    priceDelta,
-    acceptablePriceDeltaBps,
-  }
+  return {priceImpactDeltaUsd, priceImpactDeltaAmount, priceDelta, acceptablePriceDeltaBps}
 }

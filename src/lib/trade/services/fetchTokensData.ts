@@ -46,11 +46,7 @@ export async function fetchTokensData(
       const totalSupplies = results.slice(0, addresses.length)
       const decimals = results.slice(addresses.length)
 
-      return {
-        addresses,
-        totalSupplies,
-        decimals,
-      }
+      return {addresses, totalSupplies, decimals}
     }),
   )
 

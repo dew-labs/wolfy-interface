@@ -327,11 +327,7 @@ const Controller = createResetableComponent(({reset}) => {
 
   const executionPrice =
     tokenData &&
-    getEntryPrice({
-      sizeInUsd: tokenAmountUsd,
-      sizeInTokens: tokenAmount,
-      indexToken: tokenData,
-    })
+    getEntryPrice({sizeInUsd: tokenAmountUsd, sizeInTokens: tokenAmount, indexToken: tokenData})
 
   const executionPriceText = executionPrice
     ? formatNumber(shrinkDecimals(executionPrice, USD_DECIMALS), Format.USD, {
@@ -393,10 +389,7 @@ const Controller = createResetableComponent(({reset}) => {
       return `Leverage must be between 1 and ${formatNumber(
         shrinkDecimals(maxLeverage, LEVERAGE_DECIMALS),
         Format.PLAIN,
-        {
-          exactFractionDigits: true,
-          fractionDigits: 0,
-        },
+        {exactFractionDigits: true, fractionDigits: 0},
       )}`
     return ''
   })()
@@ -665,16 +658,12 @@ const Controller = createResetableComponent(({reset}) => {
   const executionFeeUsdText = `-${formatNumber(
     shrinkDecimals(executionFee?.feeUsd, USD_DECIMALS),
     Format.USD,
-    {
-      fractionDigits: 6,
-    },
+    {fractionDigits: 6},
   )}`
   const executionFeeText = `-${formatNumber(
     shrinkDecimals(executionFee?.feeTokenAmount, feeToken.decimals),
     Format.READABLE,
-    {
-      fractionDigits: 8,
-    },
+    {fractionDigits: 8},
   )} ${feeToken.symbol}`
   const latestExecutionFee = useLatest(executionFee)
 
@@ -861,9 +850,7 @@ const Controller = createResetableComponent(({reset}) => {
             selectedKey={tradeType}
             onSelectionChange={handleChangeTradeType}
             aria-label='Trade type'
-            classNames={{
-              tabList: 'gap-2 w-full relative',
-            }}
+            classNames={{tabList: 'gap-2 w-full relative'}}
             color={tradeType === TradeType.Long ? 'success' : 'danger'}
           >
             {SUPPORTED_TRADE_TYPES.map(type => (
@@ -925,30 +912,12 @@ const Controller = createResetableComponent(({reset}) => {
             onChangeEnd={handleLeverageChangeEnd}
             // TODO: generate marks based on maximum leverage
             marks={[
-              {
-                value: 1,
-                label: '1',
-              },
-              {
-                value: 10,
-                label: '10',
-              },
-              {
-                value: 25,
-                label: '25',
-              },
-              {
-                value: 50,
-                label: '50',
-              },
-              {
-                value: 75,
-                label: '75',
-              },
-              {
-                value: 100,
-                label: '100',
-              },
+              {value: 1, label: '1'},
+              {value: 10, label: '10'},
+              {value: 25, label: '25'},
+              {value: 50, label: '50'},
+              {value: 75, label: '75'},
+              {value: 100, label: '100'},
             ]}
           />
           <div className='mt-2 flex w-full justify-between'>

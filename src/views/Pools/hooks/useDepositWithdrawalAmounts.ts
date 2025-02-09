@@ -67,11 +67,7 @@ export function useDepositWithdrawalAmounts({
           longTokenPrice,
           shortTokenPrice,
         )
-        return {
-          longTokenPrice,
-          marketTokenPrice,
-          shortTokenPrice,
-        }
+        return {longTokenPrice, marketTokenPrice, shortTokenPrice}
       },
       [marketInfo, marketToken],
     ),

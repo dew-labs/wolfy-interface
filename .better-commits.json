@@ -70,10 +70,7 @@
         "emoji": "🗑️",
         "trailer": "Changelog: chore"
       },
-      {
-        "value": "",
-        "label": "none"
-      }
+      {"value": "", "label": "none"}
     ]
   },
   "commit_scope": {
@@ -81,26 +78,11 @@
     "custom_scope": false,
     "initial_value": "app",
     "options": [
-      {
-        "value": "app",
-        "label": "app"
-      },
-      {
-        "value": "shared",
-        "label": "shared"
-      },
-      {
-        "value": "server",
-        "label": "server"
-      },
-      {
-        "value": "tools",
-        "label": "tools"
-      },
-      {
-        "value": "",
-        "label": "none"
-      }
+      {"value": "app", "label": "app"},
+      {"value": "shared", "label": "shared"},
+      {"value": "server", "label": "server"},
+      {"value": "tools", "label": "tools"},
+      {"value": "", "label": "none"}
     ]
   },
   "check_ticket": {
@@ -111,21 +93,14 @@
     "surround": "",
     "title_position": "start"
   },
-  "commit_title": {
-    "max_size": 70
-  },
-  "commit_body": {
-    "enable": true,
-    "required": false
-  },
+  "commit_title": {"max_size": 70},
+  "commit_body": {"enable": true, "required": false},
   "commit_footer": {
     "enable": true,
     "initial_value": [],
     "options": ["closes", "trailer", "breaking-change", "deprecated", "custom"]
   },
-  "breaking_change": {
-    "add_exclamation_to_title": true
-  },
+  "breaking_change": {"add_exclamation_to_title": true},
   "confirm_commit": true,
   "confirm_with_editor": false,
   "print_commit_output": true,
@@ -133,33 +108,13 @@
   "branch_post_commands": [],
   "worktree_pre_commands": [],
   "worktree_post_commands": [],
-  "branch_user": {
-    "enable": true,
-    "required": false,
-    "separator": "/"
-  },
-  "branch_type": {
-    "enable": true,
-    "separator": "/"
-  },
-  "branch_version": {
-    "enable": false,
-    "required": false,
-    "separator": "/"
-  },
-  "branch_ticket": {
-    "enable": true,
-    "required": false,
-    "separator": "-"
-  },
-  "branch_description": {
-    "max_length": 70,
-    "separator": ""
-  },
+  "branch_user": {"enable": true, "required": false, "separator": "/"},
+  "branch_type": {"enable": true, "separator": "/"},
+  "branch_version": {"enable": false, "required": false, "separator": "/"},
+  "branch_ticket": {"enable": true, "required": false, "separator": "-"},
+  "branch_description": {"max_length": 70, "separator": ""},
   "branch_action_default": "branch",
   "branch_order": ["user", "version", "type", "ticket", "description"],
   "enable_worktrees": true,
-  "overrides": {
-    "shell": "/bin/sh"
-  }
+  "overrides": {"shell": "/bin/sh"}
 }

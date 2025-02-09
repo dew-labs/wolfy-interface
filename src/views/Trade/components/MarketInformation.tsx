@@ -54,15 +54,7 @@ function use1DMarketInformation(symbol: string | undefined) {
   const change = close - open
   const changePercent = change / open || 0
 
-  return {
-    open,
-    close,
-    change,
-    changePercent,
-    high,
-    low,
-    volume,
-  }
+  return {open, close, change, changePercent, high, low, volume}
 }
 
 const TABLE_CLASS_NAMES = {
@@ -71,9 +63,7 @@ const TABLE_CLASS_NAMES = {
   tbody: 'overflow-scroll',
 }
 
-const POPOVER_CLASS_NAMES = {
-  content: 'max-w-[90vw] overflow-auto',
-}
+const POPOVER_CLASS_NAMES = {content: 'max-w-[90vw] overflow-auto'}
 
 export default memo(function MarketInformation() {
   const [chainId] = useChainId()
@@ -214,11 +204,7 @@ export default memo(function MarketInformation() {
         const symbol = tokensMetadata.get(indexTokenAddress)?.symbol
 
         if (!symbol) return false
-        return {
-          symbol,
-          address: indexTokenAddress,
-          ...index,
-        }
+        return {symbol, address: indexTokenAddress, ...index}
       })
       .filter(Boolean)
 

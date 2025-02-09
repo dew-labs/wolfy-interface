@@ -158,9 +158,7 @@ function useConnect({
           throw new Error('The connected wallet does not have the required permissions')
         }
 
-        const accounts = await connectedWallet.request({
-          type: 'wallet_requestAccounts',
-        })
+        const accounts = await connectedWallet.request({type: 'wallet_requestAccounts'})
         shouldStopConnectingOrContinue()
 
         if (accounts.length === 0) {
@@ -198,13 +196,7 @@ function useConnect({
     onCancel?.()
   }, [onCancel])
 
-  return {
-    shouldReconnect,
-    isConnected,
-    isConnecting,
-    connect,
-    cancel,
-  }
+  return {shouldReconnect, isConnected, isConnecting, connect, cancel}
 }
 
 export default memo(function ConnectModal() {

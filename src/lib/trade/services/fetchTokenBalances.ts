@@ -39,10 +39,7 @@ export default async function getTokenBalances(
         getProvider(ProviderType.HTTP, chainId),
       )
 
-      return {
-        balances,
-        tokens,
-      }
+      return {balances, tokens}
     }),
   )
 

@@ -49,10 +49,5 @@ export default function getNextPoolAmountsParams(p: {
   const nextLongPoolUsd = longPoolUsd + longDeltaUsd + longPoolUsdAdjustment
   const nextShortPoolUsd = shortPoolUsd + shortDeltaUsd + shortPoolUsdAdjustment
 
-  return {
-    longPoolUsd,
-    shortPoolUsd,
-    nextLongPoolUsd,
-    nextShortPoolUsd,
-  }
+  return {longPoolUsd, shortPoolUsd, nextLongPoolUsd, nextShortPoolUsd}
 }

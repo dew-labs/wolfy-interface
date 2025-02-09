@@ -24,10 +24,5 @@ export function getPositionFee(
 
   positionFeeUsd = positionFeeUsd - discountUsd
 
-  return {
-    positionFeeUsd,
-    discountUsd,
-    totalRebateUsd,
-    uiFeeUsd,
-  }
+  return {positionFeeUsd, discountUsd, totalRebateUsd, uiFeeUsd}
 }

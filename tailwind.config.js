@@ -21,16 +21,8 @@ export default {
       themes: {
         dark: {
           layout: {
-            radius: {
-              small: '0',
-              medium: '0',
-              large: '0',
-            },
-            borderWidth: {
-              small: '2px',
-              medium: '3px',
-              large: '4px',
-            },
+            radius: {small: '0', medium: '0', large: '0'},
+            borderWidth: {small: '2px', medium: '3px', large: '4px'},
           },
           colors: {
             primary: {
@@ -44,16 +36,8 @@ export default {
         },
         light: {
           layout: {
-            radius: {
-              small: '0',
-              medium: '0',
-              large: '0',
-            },
-            borderWidth: {
-              small: '2px',
-              medium: '3px',
-              large: '4px',
-            },
+            radius: {small: '0', medium: '0', large: '0'},
+            borderWidth: {small: '2px', medium: '3px', large: '4px'},
           },
           colors: {
             primary: {

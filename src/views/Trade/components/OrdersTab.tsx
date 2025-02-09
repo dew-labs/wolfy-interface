@@ -36,9 +36,7 @@ import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import markAsMemoized from '@/utils/react/markAsMemoized'
 
-const TABLE_CLASS_NAMES = {
-  th: '!rounded-none font-serif',
-}
+const TABLE_CLASS_NAMES = {th: '!rounded-none font-serif'}
 
 const selectReversedPositionOrders = markAsMemoized((data: OrderInfosData) => {
   const orders = Array.from(data.values()).reverse()
@@ -118,9 +116,7 @@ export default memo(function OrdersTab() {
         const collateralUdsShrinked = formatNumber(
           shrinkDecimals(collateralUsd, USD_DECIMALS),
           Format.USD,
-          {
-            exactFractionDigits: true,
-          },
+          {exactFractionDigits: true},
         )
 
         const collateralText = (() => {

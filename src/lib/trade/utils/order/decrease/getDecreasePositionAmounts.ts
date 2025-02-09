@@ -554,10 +554,7 @@ export function estimateCollateralCost(
   )
   const usd = convertTokenAmountToUsd(amount, collateralToken.decimals, collateralPrice)
 
-  return {
-    amount,
-    usd,
-  }
+  return {amount, usd}
 }
 
 export function isFullClose(p: {

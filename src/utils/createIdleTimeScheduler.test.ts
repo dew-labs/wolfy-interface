@@ -104,10 +104,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
 
       if (callback) {
-        callback({
-          didTimeout: false,
-          timeRemaining: () => 100,
-        })
+        callback({didTimeout: false, timeRemaining: () => 100})
       }
 
       expect(scheduler.remaining()).toBe(0)
@@ -145,10 +142,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       expect(scheduler.isExecuted(id)).toBeTruthy()
       expect(scheduler.executed()).toBe(1)
@@ -179,10 +173,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       const errorCalls = mockConsoleError.mock.calls[0]
 
@@ -208,10 +199,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       // Run all timers to allow error to be logged
       vi.runAllTimers()
@@ -234,9 +222,7 @@ describe('createIdleTimeScheduler', () => {
       const error = new Error('AbortController failed')
       const mockPostTask = vi.fn().mockRejectedValue(error)
       // @ts-expect-error - mocking window method
-      window.scheduler = {
-        postTask: mockPostTask,
-      } as SchedulerAPI
+      window.scheduler = {postTask: mockPostTask} as SchedulerAPI
 
       const task = vi.fn()
       scheduler.schedule(task)
@@ -261,9 +247,7 @@ describe('createIdleTimeScheduler', () => {
 
       const mockPostTask = vi.fn().mockResolvedValue(undefined)
       // @ts-expect-error - mocking window method
-      window.scheduler = {
-        postTask: mockPostTask,
-      } as SchedulerAPI
+      window.scheduler = {postTask: mockPostTask} as SchedulerAPI
 
       const task = vi.fn()
       scheduler.schedule(task)
@@ -316,10 +300,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       expect(results).toHaveLength(3)
       expect(results[0]).toBe(3) // Last task executed first
@@ -343,10 +324,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       expect(results).toHaveLength(2)
       expect(results).toEqual([2, 1])
@@ -386,10 +364,7 @@ describe('createIdleTimeScheduler', () => {
         | undefined
       if (!callback2) return
 
-      callback2({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback2({didTimeout: false, timeRemaining: () => 100})
 
       expect(results).toHaveLength(3)
       expect(results).toEqual([3, 2, 1])
@@ -427,10 +402,7 @@ describe('createIdleTimeScheduler', () => {
         | undefined
       if (!callback1) return
 
-      callback1({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback1({didTimeout: false, timeRemaining: () => 100})
 
       // Execute newly scheduled task
       const callback2 = mockRequestIdleCallback.mock.calls[1]?.[0] as
@@ -438,10 +410,7 @@ describe('createIdleTimeScheduler', () => {
         | undefined
       if (!callback2) return
 
-      callback2({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback2({didTimeout: false, timeRemaining: () => 100})
 
       expect(results).toHaveLength(3)
       expect(results).toEqual([2, 1, 3])
@@ -466,10 +435,7 @@ describe('createIdleTimeScheduler', () => {
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (!callback) return
 
-      callback({
-        didTimeout: false,
-        timeRemaining: () => 100,
-      })
+      callback({didTimeout: false, timeRemaining: () => 100})
 
       expect(scheduler.scheduled()).toBe(3)
       expect(scheduler.executed()).toBe(2)
@@ -498,10 +464,7 @@ describe('createIdleTimeScheduler', () => {
       // Execute any remaining callbacks
       const callback = mockRequestIdleCallback.mock.calls[0]?.[0] as IdleRequestCallback | undefined
       if (callback) {
-        callback({
-          didTimeout: false,
-          timeRemaining: () => 100,
-        })
+        callback({didTimeout: false, timeRemaining: () => 100})
       }
 
       expect(scheduler.remaining()).toBe(0)

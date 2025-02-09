@@ -125,11 +125,6 @@ function clear(session?: boolean) {
   }
 }
 
-const simpleStorage = {
-  clear,
-  get,
-  set,
-  remove,
-}
+const simpleStorage = {clear, get, set, remove}
 
 export default simpleStorage

@@ -10,10 +10,7 @@ export interface Price {
   max: bigint
 }
 
-export const DEFAULT_PRICE = {
-  min: 0n,
-  max: 0n,
-}
+export const DEFAULT_PRICE = {min: 0n, max: 0n}
 
 export type TokenPricesData = Map<string, Price>
 
@@ -46,10 +43,7 @@ export default async function fetchTokenPrices(chainId: StarknetChainId) {
 
       if (!price) return
 
-      data.set(token.address, {
-        min: price,
-        max: price + 1n,
-      })
+      data.set(token.address, {min: price, max: price + 1n})
     })
 
     return data

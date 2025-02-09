@@ -77,9 +77,7 @@ export function getTradeFees(p: {
   const uiFeeUsd = applyFactor(sizeDeltaUsd, uiFeeFactor)
   const uiSwapFeeUsd = applyFactor(totalSwapVolumeUsd, uiFeeFactor)
 
-  const uiSwapFee = getFeeItem(uiSwapFeeUsd * -1n, totalSwapVolumeUsd, {
-    shouldRoundUp: true,
-  })
+  const uiSwapFee = getFeeItem(uiSwapFeeUsd * -1n, totalSwapVolumeUsd, {shouldRoundUp: true})
   const uiFee = getFeeItem(uiFeeUsd * -1n, sizeDeltaUsd, {shouldRoundUp: true})
 
   const swapProfitFee = getFeeItem(swapProfitFeeUsd * -1n, initialCollateralUsd)

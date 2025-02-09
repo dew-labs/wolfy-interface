@@ -24,8 +24,5 @@ export function getExecutionFee(
 
   const feeUsd = convertTokenAmountToUsd(feeTokenAmount, feeToken.decimals, feeTokenPrice.min)
 
-  return {
-    feeUsd,
-    feeTokenAmount,
-  }
+  return {feeUsd, feeTokenAmount}
 }

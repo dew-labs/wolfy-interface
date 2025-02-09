@@ -28,11 +28,7 @@ function getTotalFeesUsd(p: {
 
   const totalFeesUsd = totalPendingFeesUsd + closingFeeUsd
 
-  return {
-    closingFeeUsd,
-    totalPendingFeesUsd,
-    totalFeesUsd,
-  }
+  return {closingFeeUsd, totalPendingFeesUsd, totalFeesUsd}
 }
 
 function getPriceImpactDeltaUsd(p: {

@@ -146,10 +146,7 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
         throw error
       }
     } else {
-      tasks.push({
-        execute: modifiedTask,
-        id,
-      })
+      tasks.push({execute: modifiedTask, id})
 
       runScheduler()
     }

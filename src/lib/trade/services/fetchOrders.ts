@@ -54,9 +54,7 @@ export default async function fetchOrders(chainId: StarknetChainId, account: str
       [account, 0, orderCount],
     ),
     createWolfyMulticallRequest(chainId, WolfyContract.Reader, ReaderABI, 'get_account_orders', [
-      {
-        contract_address: dataStoreContract.address,
-      },
+      {contract_address: dataStoreContract.address},
       account,
       0,
       orderCount,

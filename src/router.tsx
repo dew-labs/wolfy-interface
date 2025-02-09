@@ -23,16 +23,10 @@ export function createRouter({
   return createReactRouter({
     // transformer: {stringify, parse}, // NOTE: new encode/decode prop introduced but no proper docs https://github.com/TanStack/router/pull/3037 https://tanstack.com/router/latest/docs/framework/react/guide/ssr https://tanstack.com/router/latest/docs/framework/react/api/router/RouterOptionsType#transformer-property
     routeTree,
-    context: {
-      queryClient,
-      store,
-    },
+    context: {queryClient, store},
     // On the server, dehydrate the loader client and return it
     // to the router to get injected into `<DehydrateRouter />`
-    dehydrate: () =>
-      ({
-        queryClientState: dehydrate(queryClient),
-      }) as Record<string, unknown>, // TODO: investigate type error
+    dehydrate: () => ({queryClientState: dehydrate(queryClient)}) as Record<string, unknown>, // TODO: investigate type error
     // On the client, hydrate the loader client with the data
     // we dehydrated on the server
     hydrate: dehydrated => {

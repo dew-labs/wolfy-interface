@@ -73,9 +73,7 @@ export default function getAcceptablePriceInfo(p: {
     isIncrease ? sizeDeltaUsd : sizeDeltaUsd * -1n,
     isLong,
     tokenPricesData,
-    {
-      fallbackToZero: !isIncrease,
-    },
+    {fallbackToZero: !isIncrease},
   )
 
   if (!isIncrease && values.priceImpactDeltaUsd < 0) {

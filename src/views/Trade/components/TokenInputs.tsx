@@ -65,11 +65,7 @@ const SELECT_CLASS_NAMES = {
   value: 'flex items-center gap-2 justify-center',
 }
 
-const SELECT_LISTBOX_PROPS = {
-  itemClasses: {
-    title: 'flex items-center gap-2',
-  },
-}
+const SELECT_LISTBOX_PROPS = {itemClasses: {title: 'flex items-center gap-2'}}
 
 export default memo(function TokenInputs({
   tradeType,
@@ -140,10 +136,7 @@ export default memo(function TokenInputs({
   const payTokenBalanceShrinked = formatNumber(
     shrinkDecimals(payTokenBalance, payTokenDecimals),
     Format.READABLE,
-    {
-      exactFractionDigits: true,
-      fractionDigits: payTokenDisplayDecimals,
-    },
+    {exactFractionDigits: true, fractionDigits: payTokenDisplayDecimals},
   )
 
   const handlePayTokenAmountSetToMax = useCallback(() => {
@@ -239,10 +232,7 @@ export default memo(function TokenInputs({
     USD_DECIMALS,
     tokenPrice,
     setTokenPrice,
-    {
-      min: 1000000000000000000000000000000n,
-      max: 1000000000000000000000000000000n,
-    },
+    {min: 1000000000000000000000000000000n, max: 1000000000000000000000000000000n},
     InputMode.Token,
   )
 
@@ -256,9 +246,7 @@ export default memo(function TokenInputs({
   // -------------------------------------------------------------------------------------------------------------------
 
   const availablePayTokenAddressesObject = useMemo(() => {
-    return availablePayTokenAddresses.map(address => ({
-      address,
-    }))
+    return availablePayTokenAddresses.map(address => ({address}))
   }, [availablePayTokenAddresses])
 
   const renderPayTokenSelectedValue = useCallback((items: SelectedItems) => {
@@ -305,10 +293,7 @@ export default memo(function TokenInputs({
           type='text'
           label={`At price:`}
           placeholder='0.0'
-          classNames={{
-            input: 'appearance-none',
-            inputWrapper: 'data-[hover=true]:bg-default-200',
-          }}
+          classNames={{input: 'appearance-none', inputWrapper: 'data-[hover=true]:bg-default-200'}}
           value={tokenPriceInput}
           onChange={handleTokenPriceInputChange}
           startContent={

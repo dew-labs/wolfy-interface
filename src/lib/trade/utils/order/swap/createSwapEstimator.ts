@@ -28,13 +28,9 @@ export default function createSwapEstimator(
     const usdOut = swapStats.usdOut
 
     if (isOutLiquidity) {
-      return {
-        usdOut: 0n,
-      }
+      return {usdOut: 0n}
     }
 
-    return {
-      usdOut,
-    }
+    return {usdOut}
   }
 }

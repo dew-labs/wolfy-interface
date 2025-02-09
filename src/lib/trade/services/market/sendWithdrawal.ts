@@ -110,9 +110,7 @@ export default async function sendWithdrawal(
     const depositKey = receipt.events[1]?.data[0]
     console.log(depositKey)
 
-    return {
-      tx: receipt.transaction_hash,
-    }
+    return {tx: receipt.transaction_hash}
   }
   throw new Error('Cannot withdrawal')
 }

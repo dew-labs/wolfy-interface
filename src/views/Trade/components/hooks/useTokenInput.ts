@@ -86,15 +86,7 @@ export default function useTokenInput(
         latestSetAmount.current(amount)
       }
     } catch (error) {
-      logError(
-        error,
-        {
-          value,
-        },
-        {
-          mode: latestMode.current,
-        },
-      )
+      logError(error, {value}, {mode: latestMode.current})
     }
   }, [])
 
@@ -116,12 +108,5 @@ export default function useTokenInput(
     }
   }, [amount, decimals])
 
-  return {
-    mode,
-    input,
-    setMode,
-    setInput,
-    isFocused,
-    setIsFocused,
-  }
+  return {mode, input, setMode, setInput, isFocused, setIsFocused}
 }
