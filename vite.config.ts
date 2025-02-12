@@ -99,6 +99,7 @@ export default defineConfig(({mode}) => {
         {clsx: ['clsx']},
         {'react-use': ['useLatest']},
         {react: ['Suspense', 'createContext', 'use']},
+        {'@iconify/react': ['Icon']},
         {
           from: 'react',
           imports: [

@@ -1,5 +1,4 @@
 import {Button, Tooltip} from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'

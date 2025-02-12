@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const Icon: typeof import('@iconify/react')['Icon']
   const Suspense: typeof import('react')['Suspense']
   const atom: typeof import('jotai')['atom']
   const clsx: typeof import('clsx')['clsx']

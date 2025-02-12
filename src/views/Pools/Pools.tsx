@@ -1,5 +1,4 @@
 import {Button} from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {ErrorBoundary} from 'react-error-boundary'
 
 import SkipLink from '@/components/SkipLink'

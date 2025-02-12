@@ -16,7 +16,6 @@ import {
   NavbarMenuItem,
   NavbarMenuToggle,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {Link} from '@tanstack/react-router'
 import BoringAvatar from 'boring-avatars'
 

@@ -9,7 +9,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {useQueryClient} from '@tanstack/react-query'
 import {t} from 'i18next'
 import {toast} from 'sonner'

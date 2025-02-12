@@ -14,7 +14,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 import {cairoIntToBigInt} from 'wolfy-sdk'
 

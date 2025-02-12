@@ -9,7 +9,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'

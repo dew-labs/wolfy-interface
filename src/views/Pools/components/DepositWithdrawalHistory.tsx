@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import {t} from 'i18next'
 import {create} from 'mutative'
 

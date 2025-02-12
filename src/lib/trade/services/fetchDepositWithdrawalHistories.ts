@@ -6,8 +6,8 @@ import call from '@/utils/api/call'
 import {type TradeHistoryAction, tradeHistoryActionValues} from './fetchTradeHistories'
 
 const depositWithdrawalHistory = type({
-  id: 'string',
-  action: type.enumerated(...tradeHistoryActionValues),
+  id: 'string#DepositWithdrawal',
+  action: type.enumerated(...tradeHistoryActionValues).brand('TradeHistoryAction'),
   market: 'string',
   marketTokenAmount: 'string | null',
   longTokenAmount: 'string',

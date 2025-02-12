@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react'
-import {Icon} from '@iconify/react'
 import type {SortDescriptor} from '@react-types/shared'
 import {create} from 'mutative'
 
