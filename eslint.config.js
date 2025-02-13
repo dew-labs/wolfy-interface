@@ -388,6 +388,7 @@ function getCoreConfigs() {
       rules: {
         // NOTE: remove this if you are authoring a library
         'jsdoc/require-jsdoc': 'off',
+        'jsdoc/tag-lines': ['error', 'any', {startLines: 1}],
       },
     }),
     // TODO: enable for new projects

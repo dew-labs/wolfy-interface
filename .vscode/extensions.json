@@ -40,6 +40,8 @@
     "christian-kohler.path-intellisense",
     "formulahendry.auto-rename-tag",
     "dbaeumer.vscode-eslint",
-    "davidlgoldberg.jumpy2"
+    "davidlgoldberg.jumpy2",
+    "inlang.vs-code-extension",
+    "crystal-spider.jsdoc-generator"
   ]
 }

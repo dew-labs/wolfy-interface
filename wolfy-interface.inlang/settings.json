@@ -1,0 +1,26 @@
+{
+  "$schema": "https://inlang.com/schema/project-settings",
+  "sourceLanguageTag": "en",
+  "languageTags": ["en"],
+  "baseLocale": "en",
+  "locales": ["en"],
+  "modules": [
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-snake-case-id@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
+    "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
+  ],
+  "telemetry": "off",
+  "plugin.inlang.i18next": {"pathPattern": "./src/i18n/locales/{languageTag}.json"},
+  "messageLintRuleLevels": {
+    "messageLintRule.inlang.emptyPattern": "error",
+    "messageLintRule.inlang.identicalPattern": "error",
+    "messageLintRule.inlang.messageWithoutSource": "error",
+    "messageLintRule.inlang.missingTranslation": "error",
+    "messageLintRule.inlang.snakeCaseId": "error",
+    "messageLintRule.inlang.validJsIdentifier": "error"
+  }
+}

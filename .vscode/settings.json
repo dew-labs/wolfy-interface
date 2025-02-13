@@ -79,6 +79,9 @@
     "env*": true,
     "**/routeTree.gen.ts": true
   },
+  "jsdoc-generator.includeTypes": false,
+  "jsdoc-generator.includeAsync": false,
+  "jsdoc-generator.includeExport": false,
   "files.watcherExclude": {"**/routeTree.gen.ts": true},
   "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locales"],
   "i18n-ally.keystyle": "nested",
@@ -87,5 +90,6 @@
   "editor.quickSuggestions": {"strings": "on"},
   // prioritize ArkType's "type" for autoimports
   "typescript.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
-  "mise.configureExtensionsAutomatically": false
+  "mise.configureExtensionsAutomatically": false,
+  "i18n-ally.disabled": true
 }
