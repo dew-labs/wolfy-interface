@@ -25,6 +25,7 @@ import ChainSelect from '@/lib/starknet/components/ChainSelect'
 import ConnectModal from '@/lib/starknet/components/ConnectModal'
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
+import useChainIdIsMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
@@ -60,6 +61,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const connect = useConnect()
   const isConnected = useIsWalletConnected()
+  const chainIdIsMatched = useChainIdIsMatched()
   const [, disconnect] = useWalletAccount()
   const accountAddress = useAccountAddress()
 
@@ -139,7 +141,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
                 </Button>
               </>
             )}
-            {isConnected && (
+            {isConnected && chainIdIsMatched && (
               <>
                 <Button
                   onPress={handleOnDrip}

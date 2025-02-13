@@ -2,11 +2,11 @@ import {Button, Tooltip} from '@heroui/react'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useChainIdIsSupportedMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
+import useChainIdIsMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 
 export default memo(function CorrectNetworkButton() {
-  const matched = useChainIdIsSupportedMatched()
+  const matched = useChainIdIsMatched()
   const [chainId] = useChainId()
   const latestChainId = useLatest(chainId)
   const [walletAccount] = useWalletAccount()
