@@ -2,6 +2,7 @@ import {execSync} from 'node:child_process'
 import dns from 'node:dns'
 import path from 'node:path'
 
+import {paraglideVitePlugin} from '@inlang/paraglide-js'
 import {vite as millionLintVite} from '@million/lint'
 import {partytownVite} from '@qwik.dev/partytown/utils'
 import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
@@ -89,13 +90,13 @@ export default defineConfig(({mode}) => {
 
   const plugins = [
     optimizeLocales,
+    paraglideVitePlugin({project: './project.inlang', outdir: './src/paraglide'}),
     AutoImport({
       include: [...globs.SCRIPT],
       ignore: [],
       imports: [
         'react',
         'jotai',
-        'react-i18next',
         {clsx: ['clsx']},
         {'react-use': ['useLatest']},
         {react: ['Suspense', 'createContext', 'use']},

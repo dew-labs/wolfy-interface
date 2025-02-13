@@ -10,7 +10,6 @@ import {
   Tooltip,
 } from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
-import {t} from 'i18next'
 import {toast} from 'sonner'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
@@ -31,6 +30,7 @@ import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateToken
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
 import {getMarkPrice} from '@/lib/trade/utils/price/getMarkPrice'
+import * as m from '@/paraglide/messages'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 import markAsMemoized from '@/utils/react/markAsMemoized'
@@ -211,7 +211,9 @@ export default memo(function OrdersTab() {
                     className={`!absolute -left-4 top-[10%] h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                   />
                   <div>
-                    {isDecreaseOrderType(order.orderType) ? t(`Trigger`) : t(`Limit`)}
+                    {isDecreaseOrderType(order.orderType)
+                      ? m.bad_muddy_florian_spark()
+                      : m.same_this_vole_sew()}
                     {` `}
                     {order.isLong ? 'Long' : 'Short'}
                   </div>

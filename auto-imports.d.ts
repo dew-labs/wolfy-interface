@@ -36,7 +36,6 @@ declare global {
   const useState: typeof import('react')['useState']
   const useSyncExternalStore: typeof import('react')['useSyncExternalStore']
   const useTransition: typeof import('react')['useTransition']
-  const useTranslation: typeof import('react-i18next')['useTranslation']
 }
 // for type re-export
 declare global {

@@ -33,6 +33,7 @@ import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import useDripFaucet from '@/lib/trade/hooks/useFaucetDrip'
+import * as m from '@/paraglide/messages'
 import {PoolsRoute, TradeRoute} from '@/routeRegistry'
 import middleEllipsis from '@/utils/middleEllipsis'
 
@@ -54,7 +55,6 @@ const NAVBAR_MENU_MOTION_PROPS = {
 }
 
 export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
-  const {t} = useTranslation()
   const [theme] = useCurrentTheme()
   const logoSvg = theme === Theme.Dark ? wolfyLogoDarkSvg : wolfyLogoLightSvg
 
@@ -109,11 +109,11 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
               <NavbarItem key={item.label}>
                 {item.external ? (
                   <a className='mt-2 text-sm text-default-500' href={item.to} target={item.target}>
-                    {t(item.label)}
+                    {item.label}
                   </a>
                 ) : (
                   <Link className='mt-2 text-sm text-default-500' to={item.to} target={item.target}>
-                    {t(item.label)}
+                    {item.label}
                   </Link>
                 )}
               </NavbarItem>
@@ -134,7 +134,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
                   endContent={<Icon icon='solar:alt-arrow-right-linear' />}
                   className={'hidden md:flex'}
                 >
-                  {t('Connect')}
+                  {m.brave_noble_meerkat_embrace()}
                 </Button>
                 <Button onPress={connect} color='primary' isIconOnly className={'md:hidden'}>
                   <Icon icon='lets-icons:sign-in-squre-fill' />
@@ -150,7 +150,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
                   className={'hidden md:flex'}
                   isLoading={isDripping}
                 >
-                  {isDripping ? t('Dripping...') : t('Faucet')}
+                  {isDripping ? m.chunky_plain_wallaby_enrich() : m.trick_good_lamb_ripple()}
                 </Button>
                 <Button
                   onPress={handleOnDrip}
@@ -185,9 +185,9 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
                       {!!accountAddress && middleEllipsis(accountAddress)}
                     </a>
                   </DropdownItem>
-                  <DropdownItem key='settings'>{t('Settings')}</DropdownItem>
+                  <DropdownItem key='settings'>{m.true_weird_ladybug_snap()}</DropdownItem>
                   <DropdownItem key='disconnect' color='danger' onPress={handleDisconnect}>
-                    {t('Disconnect')}
+                    {m.legal_bad_gopher_nudge()}
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -206,11 +206,11 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
                   href={item.to}
                   target={item.target}
                 >
-                  {t(item.label)}
+                  {item.label}
                 </a>
               ) : (
                 <Link className='mb-2 flex w-full text-default-500' to={item.to}>
-                  {t(item.label)}
+                  {item.label}
                 </Link>
               )}
               {index < menuItems.length - 1 && <Divider className='opacity-50' />}

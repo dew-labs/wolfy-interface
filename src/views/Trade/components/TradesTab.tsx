@@ -14,7 +14,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {t} from 'i18next'
 import {cairoIntToBigInt} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
@@ -27,6 +26,7 @@ import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
+import * as m from '@/paraglide/messages'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -294,7 +294,7 @@ export default memo(function TradesTab() {
           <TableColumn>
             <Select
               classNames={SELECT_CLASS_NAMES}
-              label={t('Action')}
+              label={m.fancy_full_pigeon_cherish()}
               selectionMode='multiple'
               onSelectionChange={onActionChange}
               listboxProps={LIST_BOX_PROPS}
@@ -320,7 +320,7 @@ export default memo(function TradesTab() {
           <TableColumn>
             <Select
               classNames={SELECT_CLASS_NAMES}
-              label={t('Market')}
+              label={m.plain_heroic_turtle_quell()}
               selectionMode='multiple'
               onSelectionChange={handleMarketAndDirectionChange}
               listboxProps={LIST_BOX_PROPS}
@@ -347,11 +347,11 @@ export default memo(function TradesTab() {
               )}
             </Select>
           </TableColumn>
-          <TableColumn>{t('Size')}</TableColumn>
-          <TableColumn>{t('Price')}</TableColumn>
-          <TableColumn>{t('RPnL')}</TableColumn>
-          <TableColumn>{t('Fee')}</TableColumn>
-          <TableColumn>{t('Time')}</TableColumn>
+          <TableColumn>{m.safe_swift_mammoth_relish()}</TableColumn>
+          <TableColumn>{m.light_factual_slug_walk()}</TableColumn>
+          <TableColumn>{m.civil_known_lizard_cry()}</TableColumn>
+          <TableColumn>{m.watery_proud_bird_attend()}</TableColumn>
+          <TableColumn>{m.kind_crazy_grebe_praise()}</TableColumn>
         </TableHeader>
         <TableBody
           items={extendedTradeHistoryItems}

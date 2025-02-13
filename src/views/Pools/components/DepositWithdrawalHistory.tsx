@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react'
-import {t} from 'i18next'
 import {create} from 'mutative'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
@@ -28,6 +27,7 @@ import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateTokenFractionDigits'
+import * as m from '@/paraglide/messages'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
@@ -269,7 +269,7 @@ export default memo(function DepositWithdrawalHistory() {
             <TableColumn>
               <Select
                 classNames={SELECT_CLASS_NAMES}
-                label={t('Action')}
+                label={m.fancy_full_pigeon_cherish()}
                 selectionMode='multiple'
                 onSelectionChange={onActionChange}
                 listboxProps={LIST_BOX_PROPS}
@@ -295,7 +295,7 @@ export default memo(function DepositWithdrawalHistory() {
             <TableColumn>
               <Select
                 classNames={SELECT_CLASS_NAMES}
-                label={t('Market')}
+                label={m.plain_heroic_turtle_quell()}
                 selectionMode='multiple'
                 onSelectionChange={onMarketChange}
                 listboxProps={LIST_BOX_PROPS}
@@ -309,11 +309,11 @@ export default memo(function DepositWithdrawalHistory() {
                 ))}
               </Select>
             </TableColumn>
-            <TableColumn>{t('Market Token')}</TableColumn>
-            <TableColumn>{t('Long Token')}</TableColumn>
-            <TableColumn>{t('Short Token')}</TableColumn>
-            <TableColumn>{t('Fee')}</TableColumn>
-            <TableColumn>{t('Time')}</TableColumn>
+            <TableColumn>{m.calm_blue_weasel_cry()}</TableColumn>
+            <TableColumn>{m.livid_polite_jackdaw_propel()}</TableColumn>
+            <TableColumn>{m.whole_plain_mantis_affirm()}</TableColumn>
+            <TableColumn>{m.sad_factual_hare_mop()}</TableColumn>
+            <TableColumn>{m.jumpy_round_koala_radiate()}</TableColumn>
           </TableHeader>
           <TableBody
             items={extendedHistoryItems}

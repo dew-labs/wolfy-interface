@@ -9,7 +9,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {t} from 'i18next'
 
 import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
 import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
@@ -20,6 +19,7 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 import formatLeverage from '@/lib/trade/utils/position/formatLeverage'
 import type {PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 import calculatePriceFractionDigits from '@/lib/trade/utils/price/calculatePriceFractionDigits'
+import * as m from '@/paraglide/messages'
 import max from '@/utils/numbers/bigint/max'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
@@ -133,7 +133,9 @@ export default memo(function PositionTab() {
                         />
                         <div className='flex flex-col'>
                           <div>
-                            {position.isLong ? t('Long') : t('Short')}{' '}
+                            {position.isLong
+                              ? m.helpful_witty_bison_scold()
+                              : m.zesty_bald_bullock_list()}{' '}
                             {position.marketData.indexToken.symbol}
                           </div>
                           <div className='whitespace-nowrap text-xs opacity-50'>[{poolName}]</div>
