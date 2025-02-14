@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@heroui/react'
 import type {SortDescriptor} from '@react-types/shared'
+import {matchSorter} from 'match-sorter'
 import {create} from 'mutative'
 
 import {getTokenMetadata} from '@/constants/tokens'
@@ -106,10 +107,7 @@ export default memo(function PoolsTable() {
   }, [isMarketsDataFetching, isMarketTokensDataFetching, isMarketTokensBalancesFetching])
 
   const filteredMarkets = useMemo(
-    () =>
-      marketsData
-        .filter(market => market.name.toLowerCase().includes(filterValue.toLowerCase()))
-        .slice(),
+    () => (filterValue ? matchSorter(marketsData, filterValue, {keys: ['name']}) : marketsData),
     [marketsData, filterValue],
   )
 
@@ -239,13 +237,10 @@ export default memo(function PoolsTable() {
   }, [marketTokensData, filteredMarkets, chainId, marketTokensBalances, shortlistedTokenPrices])
 
   const sortedMarkets = useMemo(() => {
+    const {column, direction} = sortDescriptor ?? {}
+    if (!column) return extendedMarkets
+
     return extendedMarkets.sort((a, b) => {
-      if (!sortDescriptor) return 0
-
-      const {column, direction} = sortDescriptor
-
-      if (!column) return 0
-
       const aValue = a[column as keyof ExtendedMarketData]
       const bValue = b[column as keyof ExtendedMarketData]
 
