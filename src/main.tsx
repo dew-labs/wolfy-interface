@@ -1,6 +1,4 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
-import './instrument'
-
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 

@@ -14,8 +14,10 @@ export default memo(function WolfyToaster() {
 
   return (
     <Toaster
+      expand
+      visibleToasts={10}
+      position='bottom-right'
       richColors
-      pauseWhenPageIsHidden
       closeButton
       theme={theme === Theme.Dark ? 'dark' : 'light'}
       toastOptions={TOASTER_OPTIONS}

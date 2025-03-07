@@ -1,36 +1,142 @@
-import {createRootRouteWithContext, Outlet, useRouter} from '@tanstack/react-router'
-import {RouterProvider} from 'react-aria-components'
+import '@/setup'
 
+import {HeroUIProvider} from '@heroui/react'
+import {Partytown} from '@qwik.dev/partytown/react'
+import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
+import {
+  createRootRouteWithContext,
+  Outlet,
+  useRouteContext,
+  useRouter,
+} from '@tanstack/react-router'
+import {Provider as JotaiProvider} from 'jotai'
+import type {PropsWithChildren} from 'react'
+import {RouterProvider as RACRouterProvider} from 'react-aria-components'
+import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
+import invariant from 'tiny-invariant'
+import type {ReadonlyDeep} from 'type-fest'
+
+import {DEBUG, ENABLE_DEVTOOLS} from '@/constants/config'
+import Global from '@/Global'
+import {createQueryPersistOptions} from '@/queries/queries'
 import type {RouterContext} from '@/router'
-import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
+import skipTargetProps from '@/utils/a11y/skipTargetProps'
+import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
+import {logError} from '@/utils/logger'
+import {QueryErrorBoundary} from '@/utils/query/QueryErrorBoundary'
+import ErrorComponent from '@/views/Error/ErrorComponent'
 
-const TanStackRouterDevtools = import.meta.env.PROD
-  ? () => null // Render nothing in production
-  : lazy(async () =>
-      // Lazy load in development
+const JotaiDevTools = ENABLE_DEVTOOLS
+  ? lazy(async () => import('@/utils/components/JotaiDevTools'))
+  : () => null
+
+const Inspector = ENABLE_DEVTOOLS
+  ? lazy(async () => import('react-dev-inspector').then(res => ({default: res.Inspector})))
+  : () => null
+
+const ReactQueryDevtools = ENABLE_DEVTOOLS
+  ? lazy(async () =>
+      import('@tanstack/react-query-devtools').then(res => ({default: res.ReactQueryDevtools})),
+    )
+  : () => null
+
+const TanStackRouterDevtools = ENABLE_DEVTOOLS
+  ? lazy(async () =>
       import('@tanstack/router-devtools').then(res => ({
         default: res.TanStackRouterDevtools,
         // For Embedded Mode
         // default: res.TanStackRouterDevtoolsPanel
       })),
     )
+  : () => null
 
-function RootRoute() {
+function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
+  logError(error)
+
+  const errorMessage = (() => {
+    if (typeof error !== 'object') return undefined
+    if (error === null) return undefined
+    if (!('message' in error)) return undefined
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
+    if (typeof error.message !== 'string') return undefined
+
+    return error.message as string
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  })()
+
+  const errorCode = (() => {
+    if (typeof error !== 'object') return undefined
+    if (error === null) return undefined
+    if (!('code' in error)) return undefined
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
+    if (typeof error.code !== 'string') return undefined
+
+    return error.code as string
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  })()
+
+  return <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} />
+}
+
+const DevTool = memo(function DevTool({children}: PropsWithChildren) {
+  if (!ENABLE_DEVTOOLS) return null
+
+  return (
+    <ErrorBoundary fallback={null}>
+      <Suspense>{children}</Suspense>
+    </ErrorBoundary>
+  )
+})
+
+const PARTYTOWN_FORWARD = ['dataLayer.push']
+
+const RootRoute = memo(function RootRoute() {
   const router = useRouter()
+  const {store, queryClient} = useRouteContext({
+    strict: false,
+  })
+
+  invariant(queryClient, 'queryClient is required')
+  invariant(store, 'store is required')
+
+  const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
 
   return (
     <>
-      <RouteAnnouncer />
-      <RouterProvider navigate={navigate}>
-        <Outlet />
-        <Suspense>
-          <TanStackRouterDevtools initialIsOpen={false} />
-        </Suspense>
-      </RouterProvider>
+      <ErrorBoundary fallback={null}>
+        <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
+      </ErrorBoundary>
+      <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
+        <JotaiProvider store={store}>
+          <HeroUIProvider>
+            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+              <QueryErrorBoundary>
+                <RACRouterProvider navigate={navigate}>
+                  <Global />
+                  <VisuallyHidden strict {...skipTargetProps('top')} />
+                  <Outlet />
+                  <DevTool>
+                    <Inspector />
+                  </DevTool>
+                </RACRouterProvider>
+              </QueryErrorBoundary>
+              <DevTool>
+                <ReactQueryDevtools initialIsOpen={false} />
+              </DevTool>
+            </PersistQueryClientProvider>
+          </HeroUIProvider>
+          <DevTool>
+            <JotaiDevTools />
+          </DevTool>
+        </JotaiProvider>
+      </ErrorBoundary>
+      <DevTool>
+        <TanStackRouterDevtools initialIsOpen={false} />
+      </DevTool>
     </>
   )
-}
+})
 
 export const Route = createRootRouteWithContext<RouterContext>()({component: RootRoute})

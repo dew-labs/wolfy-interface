@@ -1,6 +1,7 @@
 import {execSync} from 'node:child_process'
 import dns from 'node:dns'
 import path from 'node:path'
+import {fileURLToPath} from 'node:url'
 
 import {paraglideVitePlugin} from '@inlang/paraglide-js'
 import {vite as millionLintVite} from '@million/lint'
@@ -9,7 +10,7 @@ import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
-import {TanStackRouterVite} from '@tanstack/router-vite-plugin'
+import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 // import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
@@ -21,7 +22,7 @@ import Unfonts from 'unplugin-fonts/vite'
 import turboConsole from 'unplugin-turbo-console/vite'
 // import OptimizeExclude from 'vite-plugin-optimize-exclude'
 // import ViteRestart from 'vite-plugin-restart'
-import {defineConfig, loadEnv, type PluginOption} from 'vite'
+import {defineConfig, loadEnv, type PluginOption, type UserConfig} from 'vite'
 // import pluginChecker from 'vite-plugin-checker'
 import {compression} from 'vite-plugin-compression2'
 import dynamicImport from 'vite-plugin-dynamic-import'
@@ -39,6 +40,9 @@ import globs from './globs.js'
 
 // import packageJson from './package.json'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const commitHash = JSON.stringify(
   // eslint-disable-next-line sonarjs/no-os-command-from-path -- it's safe
   execSync('git rev-parse --short HEAD').toString().replaceAll('\n', ''),
@@ -53,7 +57,8 @@ const fontaineOptions = {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
+
+export function getConfig(mode: string): UserConfig {
   const dotEnv = loadEnv(mode, process.cwd(), '')
   process.env = {...process.env, ...dotEnv}
 
@@ -127,7 +132,9 @@ export default defineConfig(({mode}) => {
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
-    tsconfigPaths(),
+    tsconfigPaths({
+      projects: ['./tsconfig.json'],
+    }),
     partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
     turboConsole({
       /* options here */
@@ -216,7 +223,10 @@ export default defineConfig(({mode}) => {
       },
     }),
     ViteImageOptimizer({cache: true, cacheLocation: './.imageoptimizercache'}),
-    TanStackRouterVite(),
+    TanStackRouterVite({
+      target: 'react',
+      // autoCodeSplitting: true,
+    }),
     mkcert(),
     obfuscator({sourceMap: true}),
     inspectorServer(),
@@ -333,7 +343,8 @@ export default defineConfig(({mode}) => {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
       devSourcemap: true,
       preprocessorOptions: {
-        scss: {api: 'modern-compiler', sourceMap: true, sourceMapIncludeSources: true},
+        scss: {api: 'modern-compiler', sourceMapIncludeSources: true},
+        sass: {api: 'modern-compiler', sourceMapIncludeSources: true},
       },
     },
     json: {stringify: true},
@@ -349,4 +360,6 @@ export default defineConfig(({mode}) => {
     },
     assetsInclude: ['**/*.lottie'],
   }
-})
+}
+
+export default defineConfig(({mode}) => getConfig(mode))

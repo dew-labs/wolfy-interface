@@ -1,6 +1,6 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
-import {createRouter as createReactRouter} from '@tanstack/react-router'
+import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {type createStore} from 'jotai'
 
@@ -13,6 +13,36 @@ export interface RouterContext {
   store: ReturnType<typeof createStore>
 }
 
+// Tanstack's default parse behavior: just like JSON.parse, JSON.stringify => suport JSON types
+// - Support deeply parse objects (nested objects)
+// - Convert legit value to `number`, `boolean`, `null`, `object`, `array`
+// - Everything else is `string`
+// - `undefined` when parsing, meaning the key is not present in the search string; when stringifying, will be a string
+// `query-string` (the most popular library for parsing and stringifying search params) different from the default behavior of `tanstack`:
+// - Don't support nested objects,
+// - Have the options to convert value to `number`, `boolean`, `array` (customize syntax); `null`, `object` is not supported and will be a string;
+// - Can skip `null` and empty string when stringify;
+// const BASE_SEARCH_OPTIONS: SharedUnionFieldsDeep<
+//   queryString.ParseOptions | queryString.StringifyOptions
+// > = {
+//   arrayFormat: 'comma', // or none?
+// }
+
+// const PARSE_SEARCH_OPTIONS: queryString.ParseOptions = {
+//   ...BASE_SEARCH_OPTIONS,
+//   parseBooleans: true,
+//   parseNumbers: true,
+// }
+
+// const STRINGIFY_SEARCH_OPTIONS: queryString.StringifyOptions = {
+//   ...BASE_SEARCH_OPTIONS,
+//   skipNull: true,
+//   skipEmptyString: true,
+// }
+
+// const parseSearch = (search: string) => queryString.parse(search, PARSE_SEARCH_OPTIONS),
+// const stringifySearch = (search: Record<string, unknown>) => queryString.stringify(search, STRINGIFY_SEARCH_OPTIONS),
+
 export function createRouter({
   queryClient,
   store,
@@ -21,7 +51,16 @@ export function createRouter({
   store: ReturnType<typeof createStore>
 }) {
   return createReactRouter({
-    // transformer: {stringify, parse}, // NOTE: new encode/decode prop introduced but no proper docs https://github.com/TanStack/router/pull/3037 https://tanstack.com/router/latest/docs/framework/react/guide/ssr https://tanstack.com/router/latest/docs/framework/react/api/router/RouterOptionsType#transformer-property
+    // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
+    // Thinking about using jsurl2 for better readability, or zipson for shorter string,
+    stringifySearch: stringifySearchWith(value => {
+      // Default tanstack router's stringifier will wrap string with double quotes, which is not what we want https://github.com/TanStack/router/blob/1c71ab16c052e7514152481c1115c8928d4eca74/packages/router-core/src/searchParams.ts#L34
+      if (typeof value === 'object') {
+        return JSON.stringify(value)
+      }
+
+      return String(value)
+    }, JSON.parse),
     routeTree,
     context: {queryClient, store},
     // On the server, dehydrate the loader client and return it

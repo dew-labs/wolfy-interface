@@ -6,6 +6,7 @@
  * This function sets up the necessary attributes for the target element:
  * - Sets the element's ID for linking
  * - Makes the element focusable but not in the normal tab order
+ *
  * @example // In your main content area:
  * ```tsx
  * <main {...skipTargetProps('main-content')}>

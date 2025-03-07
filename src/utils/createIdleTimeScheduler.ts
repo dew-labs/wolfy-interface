@@ -1,29 +1,34 @@
 export interface IdleTimeScheduler {
   /**
    * Schedule a task to be executed in the idle time of the browser.
+   *
    * @param task - The task to be executed.
    * @returns The id of the scheduled task, this can be used to cancel the task later.
    */
   schedule: (task: () => void) => number
   /**
    * Clear (cancel all) scheduled tasks.
+   *
    * @returns The number of tasks that have been cleared.
    */
   clear: () => number
   /**
    * Cancel a scheduled task.
+   *
    * @param id - The id of the scheduled task to cancel.
    * @returns True if the task has been cancelled, false otherwise (e.g. the task has already been executed or cancelled, or the id is invalid).
    */
   cancel: (id: number) => boolean
   /**
    * Check if a task has been executed.
+   *
    * @param id - The id of the scheduled task to check.
    * @returns True if the task has been executed, false otherwise.
    */
   isExecuted: (id: number) => boolean
   /**
    * Check if a task has been cancelled.
+   *
    * @param id - The id of the scheduled task to check.
    * @returns True if the task has been cancelled, false otherwise.
    */
@@ -52,6 +57,7 @@ export interface IdleTimeScheduler {
 
 /**
  * Creates a scheduler that schedules tasks to be executed in the idle time of the browser.
+ *
  * @param timeout - The timeout for the scheduler. If the number of milliseconds represented by this parameter has elapsed and the callback has not already been called, then a task to execute the callback is queued in the event loop (even if doing so risks causing a negative performance impact)
  * @returns The scheduler instance
  */

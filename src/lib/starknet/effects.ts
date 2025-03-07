@@ -38,6 +38,8 @@ export const walletChainIdChangeEffect = atomEffect((get, set) => {
       console.log('Unsupported chain id', chainId)
       return
     }
+
+    // NOTE: instead of set the chain immediately, show a toast and ask user to switch manually
     set(chainIdAtom, chainId)
     toast.success('Chain switched successfully')
   }

@@ -12,12 +12,12 @@ import {
   removeOldestQuery,
 } from '@tanstack/react-query-persist-client'
 import {parse, stringify} from 'devalue'
-import {compress as compressString, decompress as decompressString} from 'lz-string'
+import {compress as compressString, decompress as decompressString} from 'smol-string'
 
 import {APP_NAME} from '@/constants/config'
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
-const RETRY_COUNT = 4
+const RETRY_COUNT = 3
 
 declare module '@tanstack/react-query' {
   interface Register {

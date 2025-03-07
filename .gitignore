@@ -36,3 +36,4 @@ vitest.config.ts.timestamp*
 .million
 
 tsconfig.vitest-temp.json
+src/paraglide

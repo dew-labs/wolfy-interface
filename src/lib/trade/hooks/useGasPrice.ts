@@ -19,7 +19,7 @@ function createGetGasPriceQueryOptions(
     queryKey: getGasPriceQueryKey(chainId, wallet),
     queryFn: wallet
       ? async () => {
-          return await fetchGasPrice(wallet)
+          return await fetchGasPrice(chainId, wallet)
         }
       : skipToken,
     placeholderData: previousData => previousData ?? 0n,
@@ -27,6 +27,7 @@ function createGetGasPriceQueryOptions(
     refetchInterval: 60000, // 1 minute
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    throwOnError: false,
   })
 }
 

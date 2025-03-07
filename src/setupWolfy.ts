@@ -37,7 +37,7 @@ function registerHttpProviders() {
       // -------------------------------------------------------------------------
       'https://g.w.lavanet.xyz:443/gateway/strk/rpc-http/2ca1d8a490566df47090a33ec1238e50',
       'https://api.zan.top/node/v1/starknet/mainnet/ad0e71cf58b14af0838cf9a75a531a0e',
-      'https://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
+      // 'https://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
       'https://starknet.w3node.com/4e6ef792fb835d49ba525d0dc7af601a1654b70a5975817933dff40d31307766/api',
       'https://starknet-mainnet.s.chainbase.online/v1/2jD7ZRD1QSIoX1ZpatymAwGaLoz',
       'https://go.getblock.io/64d2f958da07438f949471318e27a92d',
@@ -78,7 +78,7 @@ function registerHttpProviders() {
       'https://starknet-sepolia.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
-      'https://starknet-sepolia.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
+      // 'https://starknet-sepolia.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
       // 'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93', // Somehow cannot config cors
       // -------------------------------------------------------------------------
       // 'https://starknet-sepolia.drpc.org',
@@ -104,7 +104,7 @@ function registerWssProviders() {
       'wss://starknet-mainnet.core.chainstack.com/ws/eb9e6d5b7fd5aca63fc138fc3862fc2c',
       // 'wss://lb.drpc.org/ogws?network=starknet&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
       // -------------------------------------------------------------------------
-      'wss://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
+      // 'wss://starknet-mainnet.g.allthatnode.com/archive/json_rpc/dddb6fbb899443e9829053b0bc0d9f65',
       'wss://endpoints.omniatech.io/v1/ws/starknet/mainnet/5999c7a20d6c42a9b367e4ae85b7f65c',
       // -------------------------------------------------------------------------
       'wss://starknet-mainnet-rpc.dwellir.com',

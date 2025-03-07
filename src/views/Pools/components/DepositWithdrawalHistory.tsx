@@ -284,7 +284,7 @@ export default memo(function DepositWithdrawalHistory() {
                     classNames={SELECT_SECTION_CLASS_NAMES}
                   >
                     {actions.map(action => (
-                      <SelectItem key={action.value} value={action.value} className='text-nowrap'>
+                      <SelectItem key={action.value} className='text-nowrap'>
                         {action.label}
                       </SelectItem>
                     ))}
@@ -303,7 +303,7 @@ export default memo(function DepositWithdrawalHistory() {
                 scrollShadowProps={SCROLL_SHADOW_PROPS}
               >
                 {markets.map(market => (
-                  <SelectItem key={market.value} value={market.value} className='text-nowrap'>
+                  <SelectItem key={market.value} className='text-nowrap'>
                     {market.label}
                   </SelectItem>
                 ))}

@@ -50,6 +50,14 @@
     {
       "rule": "simple-import-sort/imports",
       "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+    },
+    {
+      "rule": "vitest/padding-*",
+      "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+    },
+    {
+      "rule": "jest-formatting/*",
+      "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
     }
   ],
   "eslint.runtime": "node", // Run eslint via our local node instead of vscode's node
@@ -83,7 +91,8 @@
   "jsdoc-generator.includeAsync": false,
   "jsdoc-generator.includeExport": false,
   "files.watcherExclude": {"**/routeTree.gen.ts": true},
-  "cSpell.words": ["heroui", "Numberish", "Wolfy"],
+  "files.readonlyInclude": {"**/routeTree.gen.ts": true},
+  "cSpell.words": ["heroui", "Numberish", "Wolfy", "lqip"],
   // allow autocomplete for ArkType expressions like "string | num"
   "editor.quickSuggestions": {"strings": "on"},
   // prioritize ArkType's "type" for autoimports

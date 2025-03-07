@@ -1,4 +1,4 @@
-import {useQuery, useQueryClient, type UseQueryResult} from '@tanstack/react-query'
+import {skipToken, useQuery, useQueryClient, type UseQueryResult} from '@tanstack/react-query'
 
 import {MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
@@ -68,5 +68,9 @@ export const OHLCVEffects = memo(function OHLCVEffects({symbol}: OHLCVEffectsPro
 })
 
 export default function useOHLCV(symbol: string | undefined) {
-  return useQuery({queryKey: ['ohlcv', symbol], enabled: false}) as UseQueryResult<OHLCV>
+  return useQuery({
+    queryKey: ['ohlcv', symbol],
+    queryFn: skipToken,
+    enabled: false,
+  }) as UseQueryResult<OHLCV>
 }

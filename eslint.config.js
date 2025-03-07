@@ -8,6 +8,7 @@ import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
 import pluginReact from '@eslint-react/eslint-plugin'
 import pluginQuery from '@tanstack/eslint-plugin-query'
+import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import pluginCssModules from 'eslint-plugin-css-modules'
@@ -78,8 +79,8 @@ const applyTo = {
   script: createApplyTo(globs.SCRIPT),
   scriptNotTest: createApplyTo(globs.SCRIPT, globs.TEST),
   json: createApplyTo(globs.JSON, globs.NOT_JSON),
-  jsonc: createApplyTo(globs.JSONC, globs.NOT_JSONC),
-  json5: createApplyTo(globs.JSON5, globs.NOT_JSON5),
+  jsonc: createApplyTo(globs.JSONC),
+  json5: createApplyTo(globs.JSON5),
   jsonC5: createApplyTo(globs.JSONC5),
   typescript: createApplyTo(globs.TYPESCRIPT),
   react: createApplyTo(globs.REACT),
@@ -89,6 +90,7 @@ const applyTo = {
   javascriptReact: createApplyTo(globs.REACT_JAVASCRIPT),
   typescriptReact: createApplyTo(globs.REACT_TYPESCRIPT),
   test: createApplyTo(globs.TEST, globs.TEST_2E2),
+  testType: createApplyTo(globs.TEST_TYPE),
   testNotReact: createApplyTo(globs.TEST_NOT_REACT, globs.TEST_2E2),
   testReact: createApplyTo(globs.TEST_REACT, globs.TEST_2E2),
   testE2E: createApplyTo(globs.TEST_2E2),
@@ -336,8 +338,9 @@ function getCoreConfigs() {
         // Redundant in TypeScript
         'sonarjs/function-return-type': 'off',
 
-        // [...]nobsoleted by @typescript-eslint/no-deprecated
+        // [...]nobsoleted by @typescript-eslint
         'sonarjs/deprecation': 'off',
+        'sonarjs/unused-import': 'off',
       },
     }),
     ...applyTo.all('core/sonarjs/custom', {
@@ -351,6 +354,7 @@ function getCoreConfigs() {
         'sonarjs/no-unused-vars': 'off',
       },
     }),
+    ...applyTo.all('core/sonarjs/lag', {rules: {'sonarjs/no-commented-code': 'off'}}),
     ...applyTo.all('core/no-relative-import-paths', {
       plugins: {'no-relative-import-paths': pluginNoRelativeImportPaths},
       rules: {
@@ -432,9 +436,12 @@ function getCoreConfigs() {
 }
 
 function getJsonConfigs() {
+  // TODO: make `eslint-plugin-jsonc` working with `@eslint/json` https://github.com/ota-meshi/eslint-plugin-jsonc#experimental-support-for-eslintjson
   return [
     ...applyTo.json('json/json', pluginJsonc.configs['flat/recommended-with-json']),
+    // JSONC is just JSON with comments
     ...applyTo.jsonc('json/jsonc', pluginJsonc.configs['flat/recommended-with-jsonc']),
+    // JSON5 is much more: comments, trailing commas, multi-line strings, single or double quotes, object keys without quotes, and other features borrowed from ECMAScript 5.1,...
     ...applyTo.json5('json/json5', pluginJsonc.configs['flat/recommended-with-json5']),
     ...applyTo.jsonC5('json', pluginJsonc.configs['flat/prettier']),
   ]
@@ -690,6 +697,7 @@ function getReactConfigs() {
       languageOptions: {globals: {React: true}, parserOptions: {ecmaFeatures: {jsx: true}}},
       rules: {'jsx-a11y/label-has-associated-control': ['error', {controlComponents: ['button']}]},
     }),
+    ...applyTo.react('react-router', pluginRouter.configs['flat/recommended']),
   ]
 }
 
@@ -753,6 +761,11 @@ function getVitestConfigs() {
       'testing/vitest/formatting',
       flatCompat.extends('plugin:jest-formatting/strict'),
     ),
+    ...applyTo.testType('testing/vitest/type', {
+      rules: {
+        'vitest/prefer-expect-assertions': 'off',
+      },
+    }),
   ]
 }
 

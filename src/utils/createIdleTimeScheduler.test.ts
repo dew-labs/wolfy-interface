@@ -119,8 +119,8 @@ describe('createIdleTimeScheduler', () => {
       const id = scheduler.schedule(task)
       const result = scheduler.cancel(id)
 
-      expect(result).toBeTruthy()
-      expect(scheduler.isCanceled(id)).toBeTruthy()
+      expect(result).toBe(true)
+      expect(scheduler.isCanceled(id)).toBe(true)
     })
 
     it('should return false when canceling non-existent task', () => {
@@ -128,7 +128,7 @@ describe('createIdleTimeScheduler', () => {
 
       const result = scheduler.cancel(999)
 
-      expect(result).toBeFalsy()
+      expect(result).toBe(false)
     })
   })
 
@@ -144,7 +144,7 @@ describe('createIdleTimeScheduler', () => {
 
       callback({didTimeout: false, timeRemaining: () => 100})
 
-      expect(scheduler.isExecuted(id)).toBeTruthy()
+      expect(scheduler.isExecuted(id)).toBe(true)
       expect(scheduler.executed()).toBe(1)
     })
 
@@ -155,7 +155,7 @@ describe('createIdleTimeScheduler', () => {
       const id = scheduler.schedule(task)
       scheduler.cancel(id)
 
-      expect(scheduler.isCanceled(id)).toBeTruthy()
+      expect(scheduler.isCanceled(id)).toBe(true)
       expect(scheduler.cancelled()).toBe(1)
     })
   })

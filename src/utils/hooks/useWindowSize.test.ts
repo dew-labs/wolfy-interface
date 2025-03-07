@@ -6,5 +6,5 @@ import useWindowSize from './useWindowSize'
 test('should return the right result', () => {
   const {result} = renderHook(() => useWindowSize())
 
-  expect(result.current.isMobile).toBeFalsy()
+  expect(result.current.isMobile).toBe(false)
 })

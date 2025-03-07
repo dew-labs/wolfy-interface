@@ -18,7 +18,11 @@
         // Silent the stylistic rules in you IDE, but still auto fix them
         {"rule": "prettier/prettier", "severity": "off"},
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "simple-import-sort/imports", "severity": "off"}
+        {"rule": "simple-import-sort/imports", "severity": "off"},
+        // Silent the stylistic rules in you IDE, but still auto fix them
+        {"rule": "vitest/padding-*", "severity": "off"},
+        // Silent the stylistic rules in you IDE, but still auto fix them
+        {"rule": "jest-formatting/*", "severity": "off"}
       ]
     }
   }

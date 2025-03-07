@@ -309,7 +309,7 @@ export default memo(function TradesTab() {
                   classNames={SELECT_SECTION_CLASS_NAMES}
                 >
                   {actions.map(action => (
-                    <SelectItem key={action.value} value={action.value} className='text-nowrap'>
+                    <SelectItem key={action.value} className='text-nowrap'>
                       {action.label}
                     </SelectItem>
                   ))}
@@ -335,11 +335,7 @@ export default memo(function TradesTab() {
                   classNames={SELECT_SECTION_CLASS_NAMES}
                 >
                   {markets.map(action => (
-                    <SelectItem
-                      key={String(action.value)}
-                      value={String(action.value)}
-                      className='text-nowrap'
-                    >
+                    <SelectItem key={String(action.value)} className='text-nowrap'>
                       {action.label}
                     </SelectItem>
                   ))}

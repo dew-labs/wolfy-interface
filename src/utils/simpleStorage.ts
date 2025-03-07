@@ -6,8 +6,9 @@ import errorMessageOrUndefined from './errors/errorMessageOrUndefined'
 import ErrorWithMetadata from './errors/ErrorWithMetadata'
 import type {ErrorMetadata} from './logger'
 
-const localStorage = globalThis.localStorage
-const sessionStorage = globalThis.sessionStorage
+// NOTE: storage can be unavailable in SSR
+const localStorage: Storage | undefined = globalThis.localStorage
+const sessionStorage: Storage | undefined = globalThis.sessionStorage
 
 class SimpleStorageError extends ErrorWithMetadata {
   constructor(name: string, message?: string, metadata?: ErrorMetadata, options?: ErrorOptions) {
@@ -27,9 +28,11 @@ export function isStorageEventOfKey(key: string, event: unknown): event is Stora
 function set<T>(key: string, value: T, session?: boolean) {
   const storage = session ? sessionStorage : localStorage
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this can sometimes run server side
   if (!storage) {
-    throw new SimpleStorageError('NotAvailable', 'local storage is not available')
+    throw new SimpleStorageError(
+      'NotAvailable',
+      `${session ? 'session' : 'local'} storage is not available`,
+    )
   }
 
   try {
@@ -40,11 +43,11 @@ function set<T>(key: string, value: T, session?: boolean) {
       key: k,
       newValue: rawValue,
       oldValue: storage.getItem(k),
-      url: globalThis.location.href,
+      url: window.location.href,
       storageArea: storage,
     })
     storage.setItem(k, rawValue)
-    globalThis.dispatchEvent(event)
+    window.dispatchEvent(event)
     return value
   } catch (error) {
     throw new SimpleStorageError('Set', errorMessageOrUndefined(error), {
@@ -58,9 +61,11 @@ function set<T>(key: string, value: T, session?: boolean) {
 function remove(key: string, session?: boolean) {
   const storage = session ? sessionStorage : localStorage
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this can sometimes run server side
   if (!storage) {
-    throw new SimpleStorageError('NotAvailable', 'local storage is not available')
+    throw new SimpleStorageError(
+      'NotAvailable',
+      `${session ? 'session' : 'local'} storage is not available`,
+    )
   }
 
   const k = generateKey(key)
@@ -68,55 +73,45 @@ function remove(key: string, session?: boolean) {
     key: k,
     newValue: null,
     oldValue: storage.getItem(k),
-    url: globalThis.location.href,
+    url: window.location.href,
     storageArea: storage,
   })
   storage.removeItem(k)
-  globalThis.dispatchEvent(event)
+  window.dispatchEvent(event)
 }
 
 function get(key: string, defaultValue?: unknown, session?: boolean): unknown {
   const storage = session ? sessionStorage : localStorage
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this can sometimes run server side
-  if (!storage) {
-    throw new SimpleStorageError('NotAvailable', 'local storage is not available')
-  }
-
-  const rawValue = storage.getItem(generateKey(key))
-  if (rawValue) {
-    try {
+  try {
+    const rawValue = storage?.getItem(generateKey(key))
+    if (rawValue) {
       return parse(rawValue)
-    } catch (error) {
-      throw new SimpleStorageError('Get', errorMessageOrUndefined(error), {
-        key,
-        error,
-        isSessionStorage: !!session,
-      })
     }
+  } catch {
+    return defaultValue
   }
-
-  return defaultValue
 }
 
 function clear(session?: boolean) {
   const storage = session ? sessionStorage : localStorage
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- this can sometimes run server side
   if (!storage) {
-    throw new SimpleStorageError('[simple storage] storage is not available')
+    throw new SimpleStorageError(
+      'NotAvailable',
+      `${session ? 'session' : 'local'} storage is not available`,
+    )
   }
-
   try {
     storage.clear()
     const event = new StorageEvent('simpleStorage', {
       key: null,
       newValue: null,
       oldValue: null,
-      url: globalThis.location.href,
+      url: window.location.href,
       storageArea: storage,
     })
-    globalThis.dispatchEvent(event)
+    window.dispatchEvent(event)
   } catch (error) {
     throw new SimpleStorageError('Clear', errorMessageOrUndefined(error), {
       error,
@@ -125,6 +120,11 @@ function clear(session?: boolean) {
   }
 }
 
-const simpleStorage = {clear, get, set, remove}
+const simpleStorage = {
+  clear,
+  get,
+  set,
+  remove,
+}
 
 export default simpleStorage

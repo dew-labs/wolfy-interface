@@ -21,7 +21,7 @@ const logError = function (
   // Log metadata of the error
 
   // @ts-expect-error error can be anything
-  if ('metadata' in error) {
+  if (typeof error === 'object' && 'metadata' in error) {
     ;(function logMetadata() {
       const depthExceeded = isObjectDepthExceed(error.metadata, 3)
 

@@ -16,7 +16,7 @@ export default defineConfig(configEnv =>
         passWithNoTests: true,
         globals: true,
         unstubGlobals: true,
-        include: globs.TEST,
+        include: globs.TEST_NOT_TYPE,
         environment: 'happy-dom',
         environmentMatchGlobs: globs.TEST_SSR.map(path => [path, 'node']),
         setupFiles: 'src/setupTest.ts',

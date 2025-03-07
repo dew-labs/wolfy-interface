@@ -64,12 +64,15 @@ const integrations: LazyloadableIntegration[] = [
   'browserProfilingIntegration',
   'contextLinesIntegration',
   'extraErrorDataIntegration',
-  'sessionTimingIntegration',
-  // debugIntegration
-  // reportingObserverIntegration
-  // rewriteFramesIntegration
-  // httpClientIntegration // Automatically capture all failed request
-  // captureConsoleIntegration // Automatically capture all console logs
+  'moduleMetadataIntegration',
+  'reportingObserverIntegration',
+  'rewriteFramesIntegration',
+  'httpClientIntegration', // Automatically capture all failed request
+  'captureConsoleIntegration', // Automatically capture all console logs
+  // feedbackIntegration
+  // feedbackModalIntegration
+  // feedbackScreenshotIntegration
+  // graphqlClientIntegration
 ]
 
 export function loadSentryIntegrations() {

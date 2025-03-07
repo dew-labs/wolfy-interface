@@ -1,7 +1,9 @@
 import {type} from 'arktype'
+import {isResponseError, isValidationError} from 'up-fetch'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import call from '@/utils/api/call'
+import tryCatch from '@/utils/tryCatch'
 
 export const TradeHistoryAction = {
   // Market Order
@@ -118,37 +120,34 @@ export default async function fetchTradeHistories(
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  const params = new URLSearchParams({page: page.toString(), limit: limit.toString()})
+  const {result, exception} = await tryCatch(
+    call(`/api/v1/accounts/${accountAddress}/trade-history`, {
+      params: {page, limit, actions, markets, isLong},
+      schema: tradeDataResponse,
+    }),
+  )
 
-  actions.forEach(action => {
-    params.append('actions', action.toString())
-  })
-  markets.forEach(market => {
-    params.append('markets', market)
-  })
-  isLong.forEach(long => {
-    params.append('isLong', long ? 'true' : 'false')
-  })
+  if (exception) {
+    const error = exception.getError()
 
-  const query = params.toString()
-  const url = `/api/v1/accounts/${accountAddress}/trade-history`
-  const endpoint = query ? `${url}?${query}` : url
+    if (isValidationError(error)) {
+      console.log(error.issues)
+    }
 
-  const response = await call.get(endpoint)
+    if (isResponseError(error)) {
+      console.log(error)
+    }
 
-  const data = tradeDataResponse(response.data)
-
-  if (data instanceof type.errors) {
     throw new Error('Invalid trade data received from API')
   }
 
-  data.data.sort((a, b) => {
-    const result = b.createdAt - a.createdAt
-    if (result === 0) {
+  result.data.sort((a, b) => {
+    const diff = b.createdAt - a.createdAt
+    if (diff === 0) {
       return b.action - a.action
     }
-    return result
+    return diff
   })
 
-  return data
+  return result
 }

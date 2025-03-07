@@ -1,6 +1,7 @@
 # Wolfy Interface
 
 Setup
+
 ```sh
 pnpm install
 ```
@@ -41,4 +42,5 @@ pnpm build
 ## Notes
 
 About `abi-wan-kanabi`:
+
 - Using version `2.2.3` will result in type errors, must pin at `2.2.2`

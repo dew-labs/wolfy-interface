@@ -4,11 +4,9 @@ const globs = {
   // Add vue, svelte,... if using them
   SCRIPT: ['**/*.?(c|m)[jt]s?(x)'],
   JSON: ['**/*.json'],
-  NOT_JSON: ['**/tsconfig.json', '.vscode/*.json', '.zed/*.json'],
-  JSONC: ['**/*.jsonc'],
-  NOT_JSONC: ['.vscode/*.json', '.zed/*.json'],
+  NOT_JSON: ['**/tsconfig.json', '.{vscode,zed}/*.json'],
+  JSONC: ['**/*.jsonc', '**/tsconfig.json', '.{vscode,zed}/*.json'],
   JSON5: ['**/*.json5'],
-  NOT_JSON5: ['**/tsconfig.json'],
   JSONC5: ['**/*.json?(c|5)'],
   // Add vue, svelte,... if using them
   TYPESCRIPT: ['**/*.?(c|m)ts?(x)'],
@@ -19,8 +17,9 @@ const globs = {
   REACT_TYPESCRIPT: ['**/*.?(c|m)tsx', '**/use*.?(c|m)ts?(x)'],
   ROUTES: ['src/routes/**/*'],
   TEST: ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)'],
+  TEST_NOT_TYPE: ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
   TEST_SSR: ['**/*.ssr.{test,spec}?(-d).?(c|m)[jt]s?(x)', '**/__tests__/**/*.ssr.?(c|m)[jt]s?(x)'],
-  TEST_TYPE: ['**/*.test-d.?(c|m)ts?(x)'],
+  TEST_TYPE: ['**/*.{test,spec}-d.?(c|m)ts?(x)'],
   TEST_NOT_REACT: [
     '**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)',
     '**/!(use)*.{test,spec}?(-d).?(c|m)[jt]s!(x)',
@@ -34,12 +33,13 @@ const globs = {
   ],
   TEST_2E2: ['**/cypress/**/*'],
   // Add less, stylus,... if using them
-  STYLE: ['*.{s[ca]ss,?(p)css}'],
+  STYLE: ['**/*.{s[ca]ss,?(p)css}'],
   TAILWIND_CONTENT: [
     './index.{htm,html}',
     './src/**/*.{?(c|m)[jt]s?(x),vue,svelte}',
     './node_modules/@heroui/theme/dist/**/*.?(c|m)[jt]s?(x)',
   ],
+  MARKDOWN: ['**/*.{md,markdown,mdx,mdc}'],
 }
 
 export default globs

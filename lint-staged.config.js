@@ -35,6 +35,12 @@ const settings = [
       `${packageJson.scripts['base:lint:style']} --fix ${filePaths.map(filePath => escape(filePath)).join(' ')}`,
     ],
   },
+  {
+    glob: globs.MARKDOWN,
+    script: filenames => [
+      `${packageJson.scripts['base:lint:markdown']} --no-globs --fix ${filenames.map(escape).join(' ')}`,
+    ],
+  },
 ]
 
 export default Object.assign({}, ...settings.map(setting => ({[setting.glob]: setting.script})))

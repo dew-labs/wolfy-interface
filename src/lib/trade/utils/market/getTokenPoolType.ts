@@ -2,6 +2,7 @@ import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 
 /**
  * Apart from usual cases, returns `long` for single token backed markets.
+ *
  * @param marketInfo - The market information
  * @param tokenAddress - The token address
  * @returns The token pool type

@@ -6,7 +6,6 @@
     "pomber.git-file-history",
     "jasonlhy.hungry-delete",
     "yatki.vscode-surround",
-    "planbcoding.vscode-react-refactor",
     "stkb.rewrap",
     "sburg.vscode-javascript-booster",
     "yoavbls.pretty-ts-errors",
@@ -42,6 +41,8 @@
     "dbaeumer.vscode-eslint",
     "davidlgoldberg.jumpy2",
     "inlang.vs-code-extension",
-    "crystal-spider.jsdoc-generator"
+    "crystal-spider.jsdoc-generator",
+    "burkeholland.simple-react-snippets",
+    "dsznajder.es7-react-js-snippets"
   ]
 }

@@ -1,5 +1,6 @@
 /**
  * This utility is use to avoid "flash of loading indicator"
+ *
  * @param promise - The promise to wait for
  * @param ms - timeout in milliseconds
  * @returns The result of the promise

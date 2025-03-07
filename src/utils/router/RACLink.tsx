@@ -3,10 +3,6 @@ import type {AnchorHTMLAttributes} from 'react'
 import type {AriaLinkOptions} from 'react-aria'
 import {mergeProps, useFocusRing, useHover, useLink, useObjectRef} from 'react-aria'
 
-/*
- * RACLink is a combination of the @tanstack/react-router's Link and react-aria's Link component.
- */
-
 interface RACLinkProps extends Omit<AriaLinkOptions, 'href'> {
   children?: React.ReactNode
 }
@@ -43,6 +39,10 @@ const RACLinkComponent = ({
 RACLinkComponent.displayName = 'RACLinkComponent'
 
 const CreatedLinkComponent = createLink(RACLinkComponent)
+
+/*
+ * RACLink is a combination of the @tanstack/react-router's Link and react-aria's Link component.
+ */
 export const RACLink: LinkComponent<typeof RACLinkComponent> = props => {
   return <CreatedLinkComponent preload={'intent'} {...props} />
 }
