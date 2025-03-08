@@ -10,6 +10,7 @@ import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
+import pluginTailwindCss from "@tailwindcss/vite";
 import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 // import legacy from '@vitejs/plugin-legacy'
@@ -296,6 +297,7 @@ export function getConfig(mode: string): UserConfig {
     //   // `terser` package must be available in the dependencies
     //   targets: ['defaults', 'not IE 11'],
     // }),
+    pluginTailwindCss(),
   ]
 
   // Put the Sentry vite plugin after all other plugins
