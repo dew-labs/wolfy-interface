@@ -56,6 +56,17 @@
       "vitest/globals",
       "gtag.js",
       "unplugin-fonts/client"
+    ],
+    "plugins": [
+      {
+        "name": "ts-plugin-sort-import-suggestions",
+        "moveUpPatterns": ["@/", "\\.{1,2}/"],
+        "moveDownPatterns": ["dist"]
+      }
+      // Cause performance issues, so disabled for now
+      // {
+      //   "name": "ts-plugin-type-coverage"
+      // }
     ]
   },
   "exclude": ["vitest.config.ts.timestamp*"],

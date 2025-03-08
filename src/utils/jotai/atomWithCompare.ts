@@ -1,5 +1,3 @@
-import {atomWithReducer} from 'jotai/utils'
-
 export function atomWithCompare<Value>(
   initialValue: Value,
   areEqual: (prev: Value, next: Value) => boolean,

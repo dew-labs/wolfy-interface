@@ -1,8 +1,7 @@
-import {type ArkErrors, type Type, type} from 'arktype'
+import {type ArkErrors, type Traversal, type Type, type} from 'arktype'
 import type {Out} from 'arktype/internal/attributes.ts'
-import type {ChainedPipe} from 'arktype/internal/methods/base.ts'
+// import type {ChainedPipe} from 'arktype/internal/methods/base.ts'
 
-type Traversal = Parameters<Parameters<ChainedPipe<unknown, unknown>>[0]>[1]
 /**
  * An arktype utility type to create an array that filtered out invalid values and retain valid values instead of throw/return an error. This ensure no error occur.
  * Limitation: cannot use `.moreThanLength`, `.atLeastLength`, `.lessThanLength`, `.atMostLength` on the array
@@ -36,7 +35,8 @@ export default function filteredArray<T extends Type>(
         t.assert(item)
         newItems.push(t(item))
       } catch (e) {
-        errorHandler?.(e as ArkErrors, ctx)
+        if (errorHandler) errorHandler(e as ArkErrors, ctx)
+        else console.error(e)
       }
     }
 

@@ -1,5 +1,3 @@
-import {atomWithStorage} from 'jotai/utils'
-
 export const TradeMode = {Market: 'Market', Limit: 'Limit', Trigger: 'Trigger'} as const
 export type TradeMode = (typeof TradeMode)[keyof typeof TradeMode]
 

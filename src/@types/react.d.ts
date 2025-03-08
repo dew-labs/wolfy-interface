@@ -1,5 +1,7 @@
 import 'react'
 
+import {type useSetAtom} from 'jotai'
+
 declare module 'react' {
   /* eslint-disable @typescript-eslint/no-explicit-any -- its intentional */
   /*
@@ -20,6 +22,7 @@ declare module 'react' {
   type MemoizedCallbackOrDispatch<T> =
     | MemoizedCallback<(arg: T) => void>
     | Dispatch<SetStateAction<T>>
+    | ReturnType<typeof useSetAtom<T, unknown[], void>>
 
   function useCallback<T extends (...args: any[]) => any>(
     callback: T,

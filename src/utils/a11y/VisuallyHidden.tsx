@@ -1,16 +1,16 @@
-function VisuallyHidden<
+export default function VisuallyHidden<
   T extends keyof React.JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
 >({
   as,
   strict,
-  isNotHiddenAnymore,
+  isVisible,
   ...props
 }: T extends keyof React.JSX.IntrinsicElements
-  ? {as?: T; strict?: boolean; isNotHiddenAnymore?: boolean} & React.JSX.IntrinsicElements[T]
+  ? {as?: T; strict?: boolean; isVisible?: boolean} & React.JSX.IntrinsicElements[T]
   : {
       as?: T
       strict?: boolean
-      isNotHiddenAnymore?: boolean
+      isVisible?: boolean
       // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
     } & React.ComponentProps<T>): React.JSX.Element {
   const Tag = (as ?? 'span') as React.JSX.ElementType
@@ -19,12 +19,10 @@ function VisuallyHidden<
   if ('className' in props && typeof props.className === 'string') {
     classNames.push(props.className)
   }
-  if (!isNotHiddenAnymore) classNames.push(`${strict ? 'strict-' : ''}visually-hidden`)
+  if (!isVisible) classNames.push(`${strict ? 'strict-' : ''}visually-hidden`)
 
   return <Tag {...props} className={classNames.join(' ')} />
 }
-
-export default memo(VisuallyHidden) as unknown as typeof VisuallyHidden // Somehow wrap in memo changes the type of the component
 
 // -----------------------------------------------------------------------------
 

@@ -1,5 +1,4 @@
 import {PriceServiceConnection} from '@pythnetwork/price-service-client'
-import {useQueryClient} from '@tanstack/react-query'
 import {create} from 'mutative'
 
 import {getTokensMetadata} from '@/constants/tokens'

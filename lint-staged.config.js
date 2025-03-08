@@ -1,5 +1,8 @@
 import fs from 'node:fs'
 
+import micromatch from 'micromatch'
+import {packageDirectorySync} from 'pkg-dir'
+
 import globs from './globs.js'
 
 // This is because the node version of lint-staged dont support import json file directly, have to use `with { type: "json" }`
@@ -11,6 +14,8 @@ const packageJson = loadJSON('./package.json')
 function escape(filePath) {
   return `'${filePath}'`
 }
+
+const projectRoot = packageDirectorySync()
 
 const settings = [
   {
@@ -26,8 +31,22 @@ const settings = [
     ],
   },
   {
-    glob: [...globs.TYPESCRIPT, '**/package.json'], // NOTE: upgrade package versions or remove packages can lead to type errors
+    // Upgrade package versions or remove packages can lead to runtime errors
+    glob: ['**/package.json'],
+    script: [() => `${packageJson.scripts['test']} run`],
+  },
+  {
+    // Upgrade package versions or remove packages can lead to type errors
+    glob: [...globs.TYPESCRIPT, '**/package.json'],
     script: [() => 'tsc'],
+  },
+  {
+    // Upgrade package versions or remove packages can lead to type errors
+    glob: globs.TYPESCRIPT,
+    script: filenames => {
+      const match = micromatch.not(filenames, globs.TEST)
+      return `${packageJson.scripts['type:coverage']} -- ${match.map(value => value.replace(`${projectRoot}/`, '')).join(' ')}`
+    },
   },
   {
     glob: globs.STYLE,

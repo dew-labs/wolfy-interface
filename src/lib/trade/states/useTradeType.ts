@@ -1,5 +1,3 @@
-import {atomWithStorage} from 'jotai/utils'
-
 import {isNotTrigger, TradeMode} from './useTradeMode'
 
 export const TradeType = {Long: 'Long', Short: 'Short', Swap: 'Swap'} as const

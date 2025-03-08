@@ -36,3 +36,6 @@ vitest.config.ts.timestamp*
 .million
 
 tsconfig.vitest-temp.json
+
+coverage-ts
+.type-coverage

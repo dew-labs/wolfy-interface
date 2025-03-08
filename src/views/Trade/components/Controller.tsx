@@ -13,9 +13,8 @@ import {
   Tabs,
   Tooltip,
 } from '@heroui/react'
-import {useQueryClient} from '@tanstack/react-query'
+import {type Key} from '@react-types/shared'
 import {type DOMAttributes, type KeyboardEventHandler} from 'react'
-import type {Key} from 'react-aria-components'
 import {toast} from 'sonner'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
@@ -814,7 +813,9 @@ const Controller = createResetableComponent(({reset}) => {
         >
           <input
             className={clsx(
-              'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+              `w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small
+              font-medium text-default-700 outline-none transition-colors hover:border-primary
+              focus:border-primary`,
               leverage > 0n && !isValidLeverage ? 'border-danger-500' : 'border-transparent',
             )}
             type='text'
@@ -977,7 +978,10 @@ const Controller = createResetableComponent(({reset}) => {
             </div>
             <div className='mt-2 flex w-full justify-between'>
               <div className='flex items-center'>Liquidation Price</div>
-              <div className='flex items-center underline decoration-pink-600 decoration-wavy decoration-1 underline-offset-4'>
+              <div
+                className='flex items-center underline decoration-pink-600 decoration-wavy
+                  decoration-1 underline-offset-4'
+              >
                 {liquidationPriceText}
               </div>
             </div>

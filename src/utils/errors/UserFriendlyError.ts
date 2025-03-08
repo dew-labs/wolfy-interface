@@ -1,4 +1,4 @@
-import MaybePermanentError from './MaybePermanentError'
+import MaybePermanentError, {isPermanentError} from './MaybePermanentError'
 
 /**
  * Rethrow the error, with a user-friendly message.
@@ -10,6 +10,7 @@ export default class UserFriendlyError extends MaybePermanentError {
   constructor(message: string, cause?: unknown) {
     super(message, {cause})
     this.name = 'UserFriendlyError'
+    this.isPermanent = isPermanentError(cause)
   }
 }
 

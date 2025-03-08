@@ -1,6 +1,6 @@
 import {Card} from '@heroui/react'
+import {type Key} from '@react-types/shared'
 import {LineStyle} from 'lightweight-charts'
-import type {Key} from 'react-aria-components'
 
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'

@@ -1,5 +1,4 @@
-import {useQueryErrorResetBoundary} from '@tanstack/react-query'
-import {type ErrorComponentProps, useRouter} from '@tanstack/react-router'
+import {type ErrorComponentProps} from '@tanstack/react-router'
 
 import {logError} from '@/utils/logger'
 

@@ -92,7 +92,7 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
     isRequestIdleCallbackScheduled = false
 
     // If there is no deadline, just run as long as necessary.
-    // This will be the case if requestIdleCallback doesn’t exist.
+    // This will be the case if requestIdleCallback doesn't exist.
     if (deadline === undefined)
       deadline = {
         didTimeout: false,
@@ -153,7 +153,6 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
       }
     } else {
       tasks.push({execute: modifiedTask, id})
-
       runScheduler()
     }
     return id

@@ -9,7 +9,6 @@ import {
   TableRow,
   Tooltip,
 } from '@heroui/react'
-import {useQueryClient} from '@tanstack/react-query'
 import {toast} from 'sonner'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'

@@ -1,17 +1,10 @@
-import '@/setup'
-
 import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
+import type {Href} from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
-import {
-  createRootRouteWithContext,
-  Outlet,
-  useRouteContext,
-  useRouter,
-} from '@tanstack/react-router'
+import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
 import {Provider as JotaiProvider} from 'jotai'
 import type {PropsWithChildren} from 'react'
-import {RouterProvider as RACRouterProvider} from 'react-aria-components'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import invariant from 'tiny-invariant'
 import type {ReadonlyDeep} from 'type-fest'
@@ -99,10 +92,11 @@ const RootRoute = memo(function RootRoute() {
   invariant(queryClient, 'queryClient is required')
   invariant(store, 'store is required')
 
+  // eslint-disable-next-line @eslint-react/naming-convention/use-state -- not needed
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
-
+  const useHref = useCallback((to: Href) => router.buildLocation({to}).href, [router])
   return (
     <>
       <ErrorBoundary fallback={null}>
@@ -110,17 +104,16 @@ const RootRoute = memo(function RootRoute() {
       </ErrorBoundary>
       <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
         <JotaiProvider store={store}>
-          <HeroUIProvider>
+          <HeroUIProvider navigate={navigate} useHref={useHref}>
             <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
               <QueryErrorBoundary>
-                <RACRouterProvider navigate={navigate}>
-                  <Global />
-                  <VisuallyHidden strict {...skipTargetProps('top')} />
-                  <Outlet />
-                  <DevTool>
-                    <Inspector />
-                  </DevTool>
-                </RACRouterProvider>
+                <Global />
+                <VisuallyHidden strict {...skipTargetProps('top')} />
+                <HeadContent />
+                <Outlet />
+                <DevTool>
+                  <Inspector />
+                </DevTool>
               </QueryErrorBoundary>
               <DevTool>
                 <ReactQueryDevtools initialIsOpen={false} />

@@ -1,54 +1,88 @@
-// // TODO: Investigate why we cannot test useSyncExternalStore
+function subscribeToResize(callback: (this: Window, ev: UIEvent) => void) {
+  const abortController = new AbortController()
+  globalThis.addEventListener('resize', callback, {signal: abortController.signal})
 
-// const MOBILE_BREAKPOINT = 1023
-
-// function subscribe(callback: (this: Window, ev: UIEvent) => void) {
-//   window.addEventListener('resize', callback)
-
-//   return () => {
-//     window.removeEventListener('resize', callback)
-//   }
-// }
-
-// export default function useWindowSize() {
-//   return useSyncExternalStore(subscribe, () => {
-//     const windowSize = [window.innerWidth, window.innerHeight]
-//     return useMemo(
-//       () => ({
-//         windowSize,
-//         isMobile: windowSize[0] <= MOBILE_BREAKPOINT,
-//       }),
-//       windowSize,
-//     )
-//   })
-// }
-
-import useClientValue from './useClientValue'
+  return () => {
+    abortController.abort()
+  }
+}
 
 const MOBILE_BREAKPOINT = 1023
+const DEFAULT_WIDTH = 0
+const DEFAULT_HEIGHT = 0
+const DEFAULT_IS_MOBILE = false
+
+function getWidthSnapshot() {
+  if (!globalThis.innerWidth) return DEFAULT_WIDTH
+
+  return globalThis.innerWidth
+}
+
+function getHeightSnapshot() {
+  if (!globalThis.innerHeight) return DEFAULT_HEIGHT
+
+  return globalThis.innerHeight
+}
+
+function getIsMobileSnapshot() {
+  if (!globalThis.innerWidth) return DEFAULT_IS_MOBILE
+
+  return globalThis.innerWidth <= MOBILE_BREAKPOINT
+}
+
+export function useIsMobile() {
+  return useSyncExternalStore(subscribeToResize, getIsMobileSnapshot)
+}
+
+/**
+ * If you have some deterministic logic that depend solely on width and height of window, use this.
+ * Be careful and remember to return cached value or referential-safe value like string, number
+ *
+ * @param reducer - a function that can take the width and height of window when it changed and produce a result
+ * @returns result of reducer
+ */
+export function useWindowSizeReducer<T>(reducer: (width: number, height: number) => T) {
+  return useSyncExternalStore(subscribeToResize, () =>
+    reducer(getWidthSnapshot(), getHeightSnapshot()),
+  )
+}
 
 export default function useWindowSize() {
-  const sizes = useClientValue<[number, number], [number, number]>(
-    () => [window.innerWidth, window.innerHeight],
-    [0, 0], // This is depending on want server side rendering out put is for mobile or desktop
-  )
-  const [windowSize, setWindowSize] = useState(sizes)
+  // NOTE: we prefer `useState` over `useRef` because it come with purity check in <StrictMode>
+  // eslint-disable-next-line @eslint-react/naming-convention/use-state -- don't need to
+  const [isSubscribedTo] = useState({
+    width: false,
+    height: false,
+    isMobile: false,
+  })
 
-  useLayoutEffect(() => {
-    const abortController = new AbortController()
+  const width = useSyncExternalStore(subscribeToResize, () => {
+    if (!isSubscribedTo.width) return DEFAULT_WIDTH
+    return getWidthSnapshot()
+  })
 
-    window.addEventListener(
-      'resize',
-      () => {
-        setWindowSize([window.innerWidth, window.innerHeight])
-      },
-      {signal: abortController.signal},
-    )
+  const height = useSyncExternalStore(subscribeToResize, () => {
+    if (!isSubscribedTo.height) return DEFAULT_HEIGHT
+    return getHeightSnapshot()
+  })
 
-    return () => {
-      abortController.abort()
-    }
-  }, [])
+  const isMobile = useSyncExternalStore(subscribeToResize, () => {
+    if (!isSubscribedTo.isMobile) return DEFAULT_IS_MOBILE
+    return getIsMobileSnapshot()
+  })
 
-  return {windowSize, isMobile: windowSize[0] <= MOBILE_BREAKPOINT}
+  const target = {
+    width,
+    height,
+    isMobile,
+  } as const
+
+  return new Proxy(target, {
+    get(target, prop, receiver) {
+      // eslint-disable-next-line react-compiler/react-compiler -- it's okay
+      isSubscribedTo[prop as keyof typeof target] = true
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- it's safe
+      return Reflect.get(target, prop, receiver)
+    },
+  })
 }

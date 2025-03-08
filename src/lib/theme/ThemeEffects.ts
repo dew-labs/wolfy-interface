@@ -1,6 +1,3 @@
-import {useAtom} from 'jotai'
-import {memo} from 'react'
-
 import {currentThemeEffect, themeEffect} from './effects'
 import {useHydrateCurrentTheme} from './useCurrentTheme'
 

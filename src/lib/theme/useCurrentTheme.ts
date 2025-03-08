@@ -1,5 +1,3 @@
-import {useHydrateAtoms} from 'jotai/utils'
-
 import getPreferColorScheme from './getPreferColorScheme'
 import {Theme} from './theme'
 import useTheme from './useTheme'

@@ -1,5 +1,3 @@
-import {atomEffect} from 'jotai-effect'
-
 import {logError} from '@/utils/logger'
 
 import getPreferColorScheme from './getPreferColorScheme'

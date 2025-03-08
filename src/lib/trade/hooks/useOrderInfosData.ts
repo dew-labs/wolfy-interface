@@ -1,5 +1,3 @@
-import {type UseQueryResult} from '@tanstack/react-query'
-
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getOrdersInfo, {type OrderInfosData} from '@/lib/trade/utils/order/getOrdersInfo'
 

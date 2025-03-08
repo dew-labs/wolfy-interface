@@ -1,5 +1,3 @@
-// import {useAtomValue} from 'jotai/react'
-// import {atomEffect} from 'jotai-effect'
 // import {useMemoOne as useStableMemo} from 'use-memo-one'
 
 // type EffectFn = Parameters<typeof atomEffect>[0]

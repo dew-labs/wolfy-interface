@@ -1,4 +1,3 @@
-import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import type {WalletAccount} from 'starknet'
 import {type StarknetChainId} from 'wolfy-sdk'
 

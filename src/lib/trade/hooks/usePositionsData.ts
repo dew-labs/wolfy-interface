@@ -1,5 +1,3 @@
-import type {UseQueryResult} from '@tanstack/react-query'
-import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
 import type {StarknetChainId} from 'wolfy-sdk'
 
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'

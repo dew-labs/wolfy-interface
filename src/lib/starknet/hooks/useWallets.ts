@@ -1,4 +1,3 @@
-import {useQuery} from '@tanstack/react-query'
 import getStarknetCore from 'get-starknet-core'
 
 const loadWallets = async () => {

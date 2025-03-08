@@ -13,7 +13,12 @@ export default {
   htmlWhitespaceSensitivity: 'strict',
   plugins: [
     // 'some-other-plugin',
+    'prettier-plugin-classnames',
     '@svgr/plugin-prettier',
-    // NOTE: consider using `prettier-plugin-merge` if there are multiple plugins that use the Prettier API (which can only use by one plugin at a time)
+    'prettier-plugin-merge',
   ],
+  customFunctions: ['cn', 'tw', 'classNames', 'clsx', 'twMerge'],
+  endingPosition: 'absolute-with-indent',
+  experimentalOptimization: true,
+  syntaxTransformation: false,
 }

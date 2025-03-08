@@ -1,5 +1,3 @@
-import {useQuery, type UseQueryResult} from '@tanstack/react-query'
-
 import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTradeHistories, {

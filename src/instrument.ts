@@ -9,31 +9,32 @@ import {
   thirdPartyErrorFilterIntegration,
 } from '@sentry/react'
 
-import {APP_NAME, DEBUG, MODE, SENTRY_DSN} from './constants/config'
+import {APP_NAME, COMMIT_HASH, DEBUG, MODE, SENTRY_DSN} from './constants/config'
 
 // TODO: Shared Environment implementation
 if (!DEBUG) {
   init({
     environment: MODE,
     debug: MODE !== 'production',
-    // release: '1.0.0', // TODO: config release
+    // TODO: config release based on package.json version
+    release: `${APP_NAME}-web@${COMMIT_HASH}`, // NOTE: have to follow `sentryVitePlugin`
     dsn: SENTRY_DSN,
     integrations(integrations) {
-      const filteredIntergrations = integrations.filter(integration => {
+      const filteredIntegrations = integrations.filter(integration => {
         return !['LinkedErrors'].includes(integration.name) // lazyload it later
       })
 
-      filteredIntergrations.push(
+      filteredIntegrations.push(
         ...[
           thirdPartyErrorFilterIntegration({
             filterKeys: [APP_NAME],
-            behaviour: 'drop-error-if-contains-third-party-frames',
+            behaviour: 'apply-tag-if-contains-third-party-frames',
           }),
           browserTracingIntegration(),
           moduleMetadataIntegration(),
         ],
       )
-      return filteredIntergrations
+      return filteredIntegrations
     },
     sendClientReports: false, // TODO: Enable this?
     // Performance Monitoring
@@ -66,13 +67,14 @@ const integrations: LazyloadableIntegration[] = [
   'extraErrorDataIntegration',
   'moduleMetadataIntegration',
   'reportingObserverIntegration',
-  'rewriteFramesIntegration',
-  'httpClientIntegration', // Automatically capture all failed request
-  'captureConsoleIntegration', // Automatically capture all console logs
-  // feedbackIntegration
-  // feedbackModalIntegration
-  // feedbackScreenshotIntegration
-  // graphqlClientIntegration
+  // 'graphqlClientIntegration',
+  // 'httpClientIntegration', // Automatically capture all failed request
+  // 'captureConsoleIntegration', // Automatically capture all console logs
+  // 'debugIntegration', // Not available anymore
+  // 'rewriteFramesIntegration',
+  // 'feedbackIntegration',
+  // 'feedbackModalIntegration',
+  // 'feedbackScreenshotIntegration',
 ]
 
 export function loadSentryIntegrations() {

@@ -14,7 +14,7 @@ import {
 import {parse, stringify} from 'devalue'
 import {compress as compressString, decompress as decompressString} from 'smol-string'
 
-import {APP_NAME} from '@/constants/config'
+import {APP_NAME, COMMIT_HASH} from '@/constants/config'
 import {isPermanentError} from '@/utils/errors/MaybePermanentError'
 
 const RETRY_COUNT = 3
@@ -81,7 +81,7 @@ export function createQueryClient() {
 export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions, 'queryClient'> {
   // TODo: persist to indexedDb instead of localStorage
   const persister = createSyncStoragePersister({
-    storage: window.localStorage,
+    storage: globalThis.localStorage,
     serialize: data => compressString(stringify(data)),
     deserialize: data => parse(decompressString(data)) as PersistedClient,
     retry: removeOldestQuery,
@@ -102,6 +102,6 @@ export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions
         return !!meta.persist
       },
     },
-    buster: __COMMIT_HASH__,
+    buster: COMMIT_HASH,
   }
 }

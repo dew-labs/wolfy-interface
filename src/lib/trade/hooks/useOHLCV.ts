@@ -1,5 +1,3 @@
-import {skipToken, useQuery, useQueryClient, type UseQueryResult} from '@tanstack/react-query'
-
 import {MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
 import {getChartWssUrl} from '@/lib/tvchart/constants'

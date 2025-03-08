@@ -1,5 +1,3 @@
-import {atomWithStorage} from 'jotai/utils'
-
 const tokenAddressAtom = atomWithStorage<string | undefined>('tokenAddress', undefined)
 
 export default function useTokenAddress() {

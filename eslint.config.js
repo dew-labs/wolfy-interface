@@ -11,11 +11,12 @@ import pluginQuery from '@tanstack/eslint-plugin-query'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginGitignore from 'eslint-config-flat-gitignore'
+import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
 import pluginI18next from 'eslint-plugin-i18next'
-import pluginImportX from 'eslint-plugin-import-x'
+import pluginImportX, {createNodeResolver} from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
 import pluginJsdoc from 'eslint-plugin-jsdoc'
 import pluginJsonc from 'eslint-plugin-jsonc'
@@ -25,6 +26,7 @@ import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
+import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
 import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
 import pluginReactCompiler from 'eslint-plugin-react-compiler'
@@ -42,10 +44,15 @@ import globals from 'globals'
 // eslint-disable-next-line import-x/no-unresolved -- import-x error
 import tsEslint from 'typescript-eslint'
 
+// eslint-plugin-unused-imports
 import globs from './globs.js'
 import {CAMEL_CASE} from './regexes.js'
 
 const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
+
+//------------------------------------------------------------------------------
+
+const REACT_NATIVE = false
 
 //------------------------------------------------------------------------------
 
@@ -101,7 +108,7 @@ const applyTo = {
 function getIgnoreConfigs() {
   return [
     pluginGitignore({root: true, files: ['.gitignore'], strict: false}),
-    {ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*']},
+    {ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*', 'src/paraglide/**/*']},
   ]
 }
 
@@ -194,10 +201,29 @@ function getCoreConfigs() {
     }),
     ...applyTo.all('core/import-x', pluginImportX.flatConfigs.recommended),
     ...applyTo.all('core/import-x/custom', {
+      settings: {
+        'import-x/extensions': ['.js', '.jsx', '.cjs', '.mjs'],
+        'import-x/external-module-folders': ['node_modules', 'node_modules/@types'],
+        'import/resolver-next': [
+          createNodeResolver({
+            extensions: ['.js', ...(REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : [])],
+          }),
+        ],
+        'import-x/cache': {
+          lifetime: Number.POSITIVE_INFINITY,
+        },
+      },
       rules: {
         'import-x/no-unresolved': 'error',
         'import-x/order': 'off',
         'import-x/namespace': 'off',
+        'import-x/no-mutable-exports': 'error',
+        'import-x/no-cycle': [
+          'warn',
+          {
+            ignoreExternal: true,
+          },
+        ],
       },
     }),
     ...applyTo.all('core/no-use-extend-native', pluginNoUseExtendNative.configs.recommended),
@@ -341,6 +367,9 @@ function getCoreConfigs() {
         // [...]nobsoleted by @typescript-eslint
         'sonarjs/deprecation': 'off',
         'sonarjs/unused-import': 'off',
+
+        // Redundant by some other rules
+        'sonarjs/assertions-in-tests': 'off',
       },
     }),
     ...applyTo.all('core/sonarjs/custom', {
@@ -489,18 +518,25 @@ function getTailwindCssConfigs() {
 
 function getTypescriptConfigs() {
   return [
-    ...applyTo.typescript('typescript/import-x', {
-      ...pluginImportX.flatConfigs.typescript,
+    ...applyTo.typescript('typescript/import-x', pluginImportX.flatConfigs.typescript),
+    ...applyTo.typescript('typescript/import-x/custom', {
       settings: {
         'import-x/parsers': {
           '@typescript-eslint/parser': ['.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx'],
         },
-        'import-x/resolver': {typescript: {alwaysTryTypes: true}, node: true},
+        'import/resolver-next': [
+          createTypeScriptImportResolver({
+            alwaysTryTypes: true,
+            // bun: true,
+            extensions: [...defaultExtensions, '.mts', '.cts', '.d.mts', '.d.cts', '.mjs', '.cjs'],
+          }),
+          createNodeResolver({
+            extensions: ['.js', ...(REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : [])],
+          }),
+        ],
       },
-    }),
-    // Turn off rules that typescript already provides https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import
-    ...applyTo.typescript('typescript/import-x/custom', {
       rules: {
+        // Turn off rules that typescript already provides https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import
         'import-x/named': 'off',
         'import-x/namespace': 'off',
         'import-x/default': 'off',
@@ -512,7 +548,11 @@ function getTypescriptConfigs() {
     ...applyTo.typescript('typescript/stylistic', tsEslint.configs.stylisticTypeChecked),
     ...applyTo.typescript('typescript', {
       languageOptions: {
-        parserOptions: {projectService: true, tsconfigRootDir: import.meta.dirname},
+        parserOptions: {
+          parser: tsEslint.parser,
+          projectService: true,
+          tsconfigRootDir: import.meta.dirname,
+        },
       },
       rules: {
         // Our own rules set
@@ -818,5 +858,8 @@ export default tsEslint.config(
       },
     },
   }),
+  // NOTE: enable this when using pnpm workspaces & catalogs
+  // ...pluginPnpmConfigs.json,
+  // ...pluginPnpmConfigs.yaml,
   ...applyTo.all('prettier', pluginPrettierRecommended), // always the last
 )
