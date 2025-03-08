@@ -13,9 +13,9 @@ import {
   Tabs,
   Tooltip,
 } from '@heroui/react'
+import {type Key} from '@react-types/shared'
 import {useQueryClient} from '@tanstack/react-query'
 import {type DOMAttributes, type KeyboardEventHandler} from 'react'
-import type {Key} from 'react-aria-components'
 import {toast} from 'sonner'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
@@ -807,14 +807,14 @@ const Controller = createResetableComponent(({reset}) => {
       <output {...props}>
         {'x '}
         <Tooltip
-          className='rounded-md text-tiny text-default-500'
+          className='rounded-md text-default-500 text-tiny'
           content='Press Enter to confirm'
           showArrow
           placement='left'
         >
           <input
             className={clsx(
-              'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small font-medium text-default-700 outline-none transition-colors hover:border-primary focus:border-primary',
+              'w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right font-medium text-default-700 outline-none transition-colors text-small hover:border-primary focus:border-primary',
               leverage > 0n && !isValidLeverage ? 'border-danger-500' : 'border-transparent',
             )}
             type='text'

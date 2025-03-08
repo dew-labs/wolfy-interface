@@ -1,5 +1,5 @@
 import {Tab, Tabs} from '@heroui/react'
-import type {Key} from 'react-aria-components'
+import {type Key} from '@react-types/shared'
 
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 

@@ -101,7 +101,7 @@ const applyTo = {
 function getIgnoreConfigs() {
   return [
     pluginGitignore({root: true, files: ['.gitignore'], strict: false}),
-    {ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*']},
+    {ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*', 'src/paraglide/**/*']},
   ]
 }
 

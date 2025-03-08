@@ -1,4 +1,4 @@
-import {FocusScope} from 'react-aria'
+import {FocusScope} from '@react-aria/focus'
 
 import WolfyBackground from '@/components/WolfyBackground'
 import HeadTags from '@/lib/head/HeadTags'

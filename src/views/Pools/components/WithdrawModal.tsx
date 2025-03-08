@@ -6,9 +6,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  type PressEvent
 } from '@heroui/react'
 import {useQueryClient} from '@tanstack/react-query'
-import type {PressEvent} from 'react-aria-components'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'

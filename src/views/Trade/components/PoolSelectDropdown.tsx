@@ -1,5 +1,5 @@
 import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@heroui/react'
-import type {Key} from 'react-aria-components'
+import {type Key} from '@react-types/shared'
 
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'

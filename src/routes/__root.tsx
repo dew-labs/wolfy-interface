@@ -2,6 +2,7 @@ import '@/setup'
 
 import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
+import type { Href } from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {
   createRootRouteWithContext,
@@ -11,7 +12,6 @@ import {
 } from '@tanstack/react-router'
 import {Provider as JotaiProvider} from 'jotai'
 import type {PropsWithChildren} from 'react'
-import {RouterProvider as RACRouterProvider} from 'react-aria-components'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import invariant from 'tiny-invariant'
 import type {ReadonlyDeep} from 'type-fest'
@@ -102,7 +102,7 @@ const RootRoute = memo(function RootRoute() {
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
-
+  const useHref = useCallback((to: Href) => router.buildLocation({to}).href, [router])
   return (
     <>
       <ErrorBoundary fallback={null}>
@@ -110,17 +110,15 @@ const RootRoute = memo(function RootRoute() {
       </ErrorBoundary>
       <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
         <JotaiProvider store={store}>
-          <HeroUIProvider>
+          <HeroUIProvider navigate={navigate} useHref={useHref}>
             <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
               <QueryErrorBoundary>
-                <RACRouterProvider navigate={navigate}>
-                  <Global />
-                  <VisuallyHidden strict {...skipTargetProps('top')} />
-                  <Outlet />
-                  <DevTool>
-                    <Inspector />
-                  </DevTool>
-                </RACRouterProvider>
+                <Global />
+                <VisuallyHidden strict {...skipTargetProps('top')} />
+                <Outlet />
+                <DevTool>
+                  <Inspector />
+                </DevTool>
               </QueryErrorBoundary>
               <DevTool>
                 <ReactQueryDevtools initialIsOpen={false} />
