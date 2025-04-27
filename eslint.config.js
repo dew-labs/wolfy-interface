@@ -26,10 +26,11 @@ import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
-import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
+// import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
 import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
 import pluginReactCompiler from 'eslint-plugin-react-compiler'
+import * as pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
 import * as pluginRegexp from 'eslint-plugin-regexp'
@@ -615,10 +616,7 @@ function getReactConfigs() {
   const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
 
   return [
-    ...applyTo.react(
-      'react/hooks',
-      fixupConfigRules(flatCompat.extends('plugin:react-hooks/recommended')),
-    ),
+    ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
     ...applyTo.react('react/hooks/custom', {
       rules: {
         'react-hooks/exhaustive-deps': [
@@ -708,10 +706,7 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/compiler', {
-      plugins: {'react-compiler': pluginReactCompiler},
-      rules: {'react-compiler/react-compiler': 'error'},
-    }),
+    ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended),
     ...applyTo.react('react/perf', pluginReactPerf.configs.flat.all),
     ...applyTo.react('react/perf-custom', {
       rules: {

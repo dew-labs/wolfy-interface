@@ -188,8 +188,8 @@
     "eslint-plugin-pnpm": "^0.3.1",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-promise": "^7.2.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-e1e972c-20250221",
-    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-compiler": "19.1.0-rc.1",
+    "eslint-plugin-react-hooks": "6.0.0-rc.1",
     "eslint-plugin-react-perf": "3.3.3",
     "eslint-plugin-react-refresh": "^0.4.20",
     "eslint-plugin-regexp": "^2.7.0",
@@ -279,7 +279,7 @@
     },
     "patchedDependencies": {
       "eslint-plugin-react-perf@3.3.3": "patches/eslint-plugin-react-perf@3.3.3.patch",
-      "eslint-plugin-react-hooks@5.2.0": "patches/eslint-plugin-react-hooks@5.2.0.patch",
+      "eslint-plugin-react-hooks@6.0.0-rc.1": "patches/eslint-plugin-react-hooks@6.0.0-rc.1.patch",
       "typed-scss-modules@8.1.1": "patches/typed-scss-modules@8.1.1.patch"
     },
     "onlyBuiltDependencies": [
