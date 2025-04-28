@@ -53,12 +53,16 @@ export function createRouter({
   return createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
     // Thinking about using jsurl2 for better readability, or zipson for shorter string,
+    // type-coverage:ignore-next-line
     stringifySearch: stringifySearchWith(value => {
       // Default tanstack router's stringifier will wrap string with double quotes, which is not what we want https://github.com/TanStack/router/blob/1c71ab16c052e7514152481c1115c8928d4eca74/packages/router-core/src/searchParams.ts#L34
+      // type-coverage:ignore-next-line
       if (typeof value === 'object') {
+        // type-coverage:ignore-next-line
         return JSON.stringify(value)
       }
 
+      // type-coverage:ignore-next-line
       return String(value)
     }, JSON.parse),
     routeTree,
@@ -79,6 +83,9 @@ export function createRouter({
     defaultStructuralSharing: true,
     scrollRestoration: true,
     // defaultPendingComponent
+    defaultViewTransition: {
+      types: ['slow-fade'],
+    },
   })
 }
 
