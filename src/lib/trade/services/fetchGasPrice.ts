@@ -13,6 +13,10 @@ const FEE_BUFFER_BPS = roundToNDecimal((Number.parseFloat('30.0') * BASIS_POINTS
 export default async function fetchGasPrice(chainId: StarknetChainId, wallet: WalletAccount) {
   const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
   dataStoreContract.connect(wallet)
+
+  const currentChainId = await wallet.channel.getChainId()
+  if (currentChainId !== chainId) throw new Error('Wrong wallet chain')
+
   let {gas_price: gasPrice} = (await dataStoreContract.estimateFee.set_u256?.(0, 1)) as {
     gas_price: bigint
   }
