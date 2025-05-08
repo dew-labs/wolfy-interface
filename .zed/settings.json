@@ -3,26 +3,50 @@
 // For a full list of overridable settings, and general information on folder-specific settings,
 // see the documentation: https://zed.dev/docs/configuring-zed#folder-specific-settings
 {
-  "file_types": {"JSONC": ["**/.vscode/*.json"]},
+  "file_types": {
+    "JSONC": ["**/.vscode/*.json"]
+  },
   "languages": {
     "JavaScript": {
       "formatter": "language_server",
-      "code_actions_on_format": {"source.fixAll.eslint": true, "source.organizeImports": false}
+      "code_actions_on_format": {
+        "source.organizeImports": false
+      }
+    },
+    "TypeScript": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.organizeImports": false
+      }
     }
   },
   "lsp": {
     "eslint": {
-      "settings": {"nodePath": "node"},
-      "problems": {"shortenToSingleLine": true},
+      "settings": {
+        "nodePath": "node"
+      },
+      "problems": {
+        "shortenToSingleLine": true
+      },
       "rulesCustomizations": [
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "prettier/prettier", "severity": "off"},
+        {
+          "rule": "prettier/prettier",
+          "severity": "off"
+        },
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "simple-import-sort/imports", "severity": "off"},
-        // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "vitest/padding-*", "severity": "off"},
-        // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "jest-formatting/*", "severity": "off"}
+        {
+          "rule": "simple-import-sort/imports",
+          "severity": "off"
+        },
+        {
+          "rule": "vitest/padding-*",
+          "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+        },
+        {
+          "rule": "jest-formatting/*",
+          "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+        }
       ]
     }
   }

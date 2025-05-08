@@ -1,4 +1,7 @@
-import type {AccountChangeEventHandler, NetworkChangeEventHandler} from 'get-starknet-core'
+import type {
+  AccountChangeEventHandler,
+  NetworkChangeEventHandler,
+} from '@starknet-io/get-starknet-core'
 import {toast} from 'sonner'
 
 import {isChainIdSupported} from '@/constants/chains'

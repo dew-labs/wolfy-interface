@@ -120,16 +120,14 @@ export default async function fetchTradeHistories(
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  const {result, exception} = await tryCatch(
+  const [result, error] = await tryCatch(
     call(`/api/v1/accounts/${accountAddress}/trade-history`, {
       params: {page, limit, actions, markets, isLong},
       schema: tradeDataResponse,
     }),
   )
 
-  if (exception) {
-    const error = exception.getError()
-
+  if (error) {
     if (isValidationError(error)) {
       console.log(error.issues)
     }

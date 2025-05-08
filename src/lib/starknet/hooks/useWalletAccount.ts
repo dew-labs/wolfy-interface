@@ -1,4 +1,4 @@
-import getStarknetCore from 'get-starknet-core'
+import getStarknetCore from '@starknet-io/get-starknet-core'
 import type {WalletAccount} from 'starknet'
 
 import {walletAccountAtom} from '@/lib/starknet/atoms'

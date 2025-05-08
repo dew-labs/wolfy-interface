@@ -69,7 +69,7 @@ export function createRouter({
     context: {queryClient, store},
     // On the server, dehydrate the loader client and return it
     // to the router to get injected into `<DehydrateRouter />`
-    dehydrate: () => ({queryClientState: dehydrate(queryClient)}) as Record<string, unknown>, // TODO: investigate type error
+    dehydrate: () => ({queryClientState: dehydrate(queryClient)}),
     // On the client, hydrate the loader client with the data
     // we dehydrated on the server
     hydrate: dehydrated => {

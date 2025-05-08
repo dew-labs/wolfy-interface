@@ -93,13 +93,12 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
 
     // If there is no deadline, just run as long as necessary.
     // This will be the case if requestIdleCallback doesn't exist.
-    if (deadline === undefined)
-      deadline = {
-        didTimeout: false,
-        timeRemaining() {
-          return Number.MAX_VALUE
-        },
-      }
+    deadline ??= {
+      didTimeout: false,
+      timeRemaining() {
+        return Number.MAX_VALUE
+      },
+    }
 
     // Go for as long as there is time remaining and work to do.
     while (deadline.timeRemaining() > 0 && tasks.length > 0) {

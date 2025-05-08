@@ -35,6 +35,7 @@ declare global {
   const freezeAtom: typeof import('jotai/utils')['freezeAtom']
   const freezeAtomCreator: typeof import('jotai/utils')['freezeAtomCreator']
   const infiniteQueryOptions: typeof import('@tanstack/react-query')['infiniteQueryOptions']
+  const invariant: typeof import('tiny-invariant')['default']
   const lazy: typeof import('react')['lazy']
   const loadable: typeof import('jotai/utils')['loadable']
   const memo: typeof import('react')['memo']

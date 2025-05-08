@@ -519,9 +519,7 @@ function applyAcceptablePrice(p: {
           acceptablePriceImpactBuffer ?? DEFAULT_ACCEPTABLE_PRICE_IMPACT_BUFFER,
       })
 
-      if (maxNegativePriceImpactBps === undefined) {
-        maxNegativePriceImpactBps = values.recommendedAcceptablePriceDeltaBps
-      }
+      maxNegativePriceImpactBps ??= values.recommendedAcceptablePriceDeltaBps
 
       const triggerAcceptablePriceInfo = getAcceptablePriceInfo({
         marketInfo,

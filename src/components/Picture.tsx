@@ -105,7 +105,7 @@ export default memo(function Picture({src, sizes, preload = false, ...rest}: Pic
             fetchPriority: rest.fetchPriority ?? 'auto',
             imageSrcSet: srcSet,
             imageSizes: sizes,
-            // media, // Not supported, considering contribute to react-dom?
+            media: src.media,
           })
           break
         }

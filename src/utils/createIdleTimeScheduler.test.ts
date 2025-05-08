@@ -22,7 +22,6 @@ describe(createIdleTimeScheduler, () => {
     window.requestIdleCallback = mockRequestIdleCallback as typeof window.requestIdleCallback
     vi.spyOn(window, 'setTimeout').mockImplementation(mockSetTimeout)
     vi.spyOn(console, 'error').mockImplementation(mockConsoleError)
-    // @ts-expect-error - removing window method for testing
     delete window.scheduler
     scheduler = createIdleTimeScheduler(1000)
   })
@@ -211,7 +210,6 @@ describe(createIdleTimeScheduler, () => {
       // Mock window.scheduler to simulate AbortController failure
       const error = new Error('AbortController failed')
       const mockPostTask = vi.fn().mockRejectedValue(error)
-      // @ts-expect-error - mocking window method
       window.scheduler = {postTask: mockPostTask} as SchedulerAPI
 
       const task = vi.fn()
@@ -230,7 +228,6 @@ describe(createIdleTimeScheduler, () => {
       expect.assertions(1)
 
       const mockPostTask = vi.fn().mockResolvedValue(undefined)
-      // @ts-expect-error - mocking window method
       window.scheduler = {postTask: mockPostTask} as SchedulerAPI
 
       const task = vi.fn()

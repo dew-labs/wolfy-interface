@@ -1,4 +1,4 @@
-import getStarknetCore from 'get-starknet-core'
+import getStarknetCore from '@starknet-io/get-starknet-core'
 
 const loadWallets = async () => {
   const [newWallets, discoveryWallets, lastConnectedWallet] = await Promise.all([

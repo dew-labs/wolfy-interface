@@ -9,10 +9,10 @@ import {
   ModalHeader,
 } from '@heroui/react'
 import getStarknetCore, {
-  Permission,
   type StarknetWindowObject,
   type WalletProvider,
-} from 'get-starknet-core'
+} from '@starknet-io/get-starknet-core'
+import {Permission} from '@starknet-io/types-js'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
 import type {ReadonlyDeep} from 'type-fest'

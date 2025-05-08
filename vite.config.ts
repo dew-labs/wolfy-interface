@@ -121,6 +121,9 @@ export function getConfig(mode: string): UserConfig {
       include: [...globs.SCRIPT],
       ignore: [],
       imports: [
+        {
+          'tiny-invariant': [['default', 'invariant']],
+        },
         'react',
         {
           react: ['Suspense', 'createContext', 'use', 'Fragment'],

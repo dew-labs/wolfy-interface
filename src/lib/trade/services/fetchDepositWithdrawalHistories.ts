@@ -41,16 +41,14 @@ export default async function fetchDepositWithdrawalHistories(
     return {page, limit, count: 0, totalPages: 0, data: []}
   }
 
-  const {result, exception} = await tryCatch(
+  const [result, error] = await tryCatch(
     call(`/api/v1/accounts/${accountAddress}/deposit-withdrawal-history`, {
       params: {page, limit, actions, markets},
       schema: depositWithdrawalHistoryResponse,
     }),
   )
 
-  if (exception) {
-    const error = exception.getError()
-
+  if (error) {
     if (isValidationError(error)) {
       console.log(error.issues)
     }
