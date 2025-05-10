@@ -367,9 +367,10 @@ export default memo(function ClosePositionModal() {
           finally: () => {
             setIsClosing(false)
           },
-          error: error => {
-            return <div>{errorMessageOrUndefined(error) ?? 'Cancel order failed.'}</div>
-          },
+          error: error => ({
+            message: errorMessageOrUndefined(error) ?? 'Place order failed.',
+            description: '',
+          }),
         },
       )
     },

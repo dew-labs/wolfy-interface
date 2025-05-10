@@ -757,9 +757,10 @@ const Controller = createResetableComponent(({reset}) => {
         finally: () => {
           setIsPlacing(false)
         },
-        error: error => {
-          return <div>{errorMessageOrUndefined(error) ?? 'Place order failed.'}</div>
-        },
+        error: error => ({
+          message: errorMessageOrUndefined(error) ?? 'Place order failed.',
+          description: '',
+        }),
       },
     )
   }, [
