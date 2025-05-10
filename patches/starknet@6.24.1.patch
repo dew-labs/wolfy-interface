@@ -1,0 +1,39 @@
+diff --git a/dist/index.global.js b/dist/index.global.js
+index 168d05c3023b3030d1b0b5d5a2d33f23834203a9..5c2f7140b89aeaa142c318831855a23f0495e699 100644
+--- a/dist/index.global.js
++++ b/dist/index.global.js
+@@ -4785,7 +4785,7 @@ ${indent}}` : "}";
+       }
+       const results = await this.batchPromises[requestId];
+       delete this.batchPromises[requestId];
+-      const result = results.find((res) => res.id === requestId);
++      const result = Array.isArray(results) ? results.find((res) => res.id === requestId) : undefined;
+       if (!result) throw new Error(`Couldn't find the result for the request. Method: ${method}`);
+       return result;
+     }
+diff --git a/dist/index.js b/dist/index.js
+index 8d9c925bf0755cbef5a6f8ea698e514927de350f..b13d5fd913087dc91b81cf388ee0fa9692d52c64 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -753,7 +753,7 @@ var BatchClient = class {
+     }
+     const results = await this.batchPromises[requestId];
+     delete this.batchPromises[requestId];
+-    const result = results.find((res) => res.id === requestId);
++    const result = Array.isArray(results) ? results.find((res) => res.id === requestId) : undefined;
+     if (!result) throw new Error(`Couldn't find the result for the request. Method: ${method}`);
+     return result;
+   }
+diff --git a/dist/index.mjs b/dist/index.mjs
+index f4ff7d31deb94306dbcd8bab2d85f9eb49721c32..c90352c8af8cb5d07d42c8d868268c0e058d7199 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -631,7 +631,7 @@ var BatchClient = class {
+     }
+     const results = await this.batchPromises[requestId];
+     delete this.batchPromises[requestId];
+-    const result = results.find((res) => res.id === requestId);
++    const result = Array.isArray(results) ? results.find((res) => res.id === requestId) : undefined;
+     if (!result) throw new Error(`Couldn't find the result for the request. Method: ${method}`);
+     return result;
+   }
