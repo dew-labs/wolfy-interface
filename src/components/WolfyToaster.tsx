@@ -4,8 +4,7 @@ import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 
 const TOASTER_OPTIONS = {
-  className: 'rounded-none font-sans',
-  // important: true,
+  className: '!rounded-none font-sans',
   duration: 10000,
 }
 

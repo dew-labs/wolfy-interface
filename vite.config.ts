@@ -11,6 +11,7 @@ import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
+import tailwindcss from '@tailwindcss/vite'
 import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
@@ -448,6 +449,7 @@ export function getConfig(mode: string): UserConfig {
       },
     }),
     FontaineTransform.vite(fontaineOptions),
+    tailwindcss(),
     // NOTE: enable this if you need support for legacy browsers
     // Legacy plugin need extra setup for CSP (Content Security Policy)
     legacy({

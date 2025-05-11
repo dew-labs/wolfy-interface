@@ -60,7 +60,39 @@ const config = {
     'plugin/no-low-performance-animation-properties': true,
     'scss/at-rule-no-unknown': [
       true,
-      {ignoreAtRules: ['apply', 'layer', 'responsive', 'screen', 'tailwind', 'variants']},
+      {
+        ignoreAtRules: [
+          'apply',
+          'layer',
+          'responsive',
+          'screen',
+          'tailwind',
+          'variants',
+          'config',
+          'custom-variant',
+        ],
+      },
+    ],
+    'at-rule-no-unknown': [
+      true,
+      {
+        ignoreAtRules: [
+          'apply',
+          'layer',
+          'responsive',
+          'screen',
+          'tailwind',
+          'variants',
+          'config',
+          'custom-variant',
+        ],
+      },
+    ],
+    'at-rule-no-deprecated': [
+      true,
+      {
+        ignoreAtRules: ['apply'],
+      },
     ],
   },
   overrides: [
@@ -69,6 +101,12 @@ const config = {
       rules: {
         'selector-class-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
         'selector-id-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
+      },
+    },
+    {
+      files: ['*.scss'],
+      rules: {
+        'at-rule-no-unknown': [null],
       },
     },
   ],

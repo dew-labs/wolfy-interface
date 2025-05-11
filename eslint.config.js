@@ -37,7 +37,7 @@ import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
-import pluginTailwindCss from 'eslint-plugin-tailwindcss'
+// import pluginTailwindCss from 'eslint-plugin-tailwindcss'
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
 import pluginTsDoc from 'eslint-plugin-tsdoc'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
@@ -495,27 +495,27 @@ function getI18nextConfigs() {
   ]
 }
 
-function getTailwindCssConfigs() {
-  return [
-    ...applyTo.scriptNotTest('tailwindcss', pluginTailwindCss.configs['flat/recommended']),
-    ...applyTo.scriptNotTest('tailwindcss/custom', {
-      settings: {
-        tailwindcss: {
-          // These are the default values but feel free to customize
-          callees: ['classnames', 'clsx', 'ctl', 'cva', 'tw', 'cn'],
-          config: 'tailwind.config.js', // returned from `loadConfig()` utility if not provided
-          cssFiles: ['**/*.css', '!**/node_modules', '!**/.*', '!**/dist', '!**/build'],
-          cssFilesRefreshRate: 5000,
-          removeDuplicates: true,
-          skipClassAttribute: false,
-          whitelist: [],
-          tags: [], // can be set to e.g. ['tw'] for use in tw`bg-blue`
-          classRegex: '^class(Name)?$', // can be modified to support custom attributes. E.g. "^tw$" for `twin.macro`
-        },
-      },
-    }),
-  ]
-}
+// function getTailwindCssConfigs() {
+//   return [
+//     ...applyTo.scriptNotTest('tailwindcss', pluginTailwindCss.configs['flat/recommended']),
+//     ...applyTo.scriptNotTest('tailwindcss/custom', {
+//       settings: {
+//         tailwindcss: {
+//           // These are the default values but feel free to customize
+//           callees: ['classnames', 'clsx', 'ctl', 'cva', 'tw', 'cn'],
+//           config: 'tailwind.config.js', // returned from `loadConfig()` utility if not provided
+//           cssFiles: ['**/*.css', '!**/node_modules', '!**/.*', '!**/dist', '!**/build'],
+//           cssFilesRefreshRate: 5000,
+//           removeDuplicates: true,
+//           skipClassAttribute: false,
+//           whitelist: [],
+//           tags: [], // can be set to e.g. ['tw'] for use in tw`bg-blue`
+//           classRegex: '^class(Name)?$', // can be modified to support custom attributes. E.g. "^tw$" for `twin.macro`
+//         },
+//       },
+//     }),
+//   ]
+// }
 
 function getTypescriptConfigs() {
   return [
@@ -827,7 +827,7 @@ export default tsEslint.config(
   ...getJsonConfigs(),
   ...getCssModuleConfigs(),
   ...getI18nextConfigs(),
-  ...getTailwindCssConfigs(),
+  // ...getTailwindCssConfigs(), // TODO: enable when this plugin support tailwind v4
   ...getTypescriptConfigs(),
   ...getReactConfigs(),
   ...getReactNativeConfigs(),
