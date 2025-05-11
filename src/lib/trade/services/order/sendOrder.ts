@@ -7,8 +7,10 @@ import {
   ExchangeRouterABI,
   getWolfyContractAddress,
   type OrderType,
+  parseWolfyEvent,
   toCairoCustomEnum,
   WolfyContract,
+  WolfyEvent,
 } from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
@@ -113,12 +115,10 @@ export default async function sendOrder(
 
   if (receipt.isSuccess()) {
     console.log(receipt.value.events)
+    const orderCreatedEvent = parseWolfyEvent(WolfyEvent.OrderCreated, receipt.value.events)
+    console.log(orderCreatedEvent)
 
-    // TODO: parse and get the right key
-    const orderKey = receipt.value.events[1]?.data[0]
-    console.log(orderKey)
-
-    return {tx: receipt.value.transaction_hash, orderKey}
+    return {tx: receipt.value.transaction_hash, orderKey: orderCreatedEvent?.key}
   }
   throw new Error('Cannot place order')
 }

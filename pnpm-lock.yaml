@@ -227,8 +227,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1(@types/react@19.1.3)(mutative@1.1.0)(react@0.0.0-experimental-143d3e1b-20250425)
       wolfy-sdk:
-        specifier: ^2.1.0
-        version: 2.1.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b))(starknet_multicall@2.0.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b)))(typescript@5.8.3)
+        specifier: ^2.1.1
+        version: 2.1.1(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b))(starknet_multicall@2.0.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b)))(typescript@5.8.3)
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.8.1
@@ -11592,8 +11592,8 @@ packages:
     resolution: {integrity: sha512-NsmoXalsWVDMGupxZ5R08ka9flZjjiLvHVAWYOKtiKM8ujtZWr9cRffak+uSE48+Ob8ObalXpwyeUiyDD6QFgg==}
     engines: {node: '>=8'}
 
-  wolfy-sdk@2.1.0:
-    resolution: {integrity: sha512-ndTgn7bzBM67rPt2BPpIvWXQQorncw+RvqMsoau/CGw7b1Y1Kr5PclCEYmSK5GfBpQf593P2JoQYcOSKUqZHWg==}
+  wolfy-sdk@2.1.1:
+    resolution: {integrity: sha512-+cuEkCYfazyXW+1LTMqjJiEjAtGwZEJi/PnBmFoLvJC+3m1uDJ9vlp3etxlbwTsSj5axLtz8JQK9h0uQXtojeQ==}
     peerDependencies:
       abi-wan-kanabi: 2.2.2
       starknet: ^7.2.0
@@ -24555,10 +24555,11 @@ snapshots:
     dependencies:
       string-width: 4.2.3
 
-  wolfy-sdk@2.1.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b))(starknet_multicall@2.0.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b)))(typescript@5.8.3):
+  wolfy-sdk@2.1.1(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b))(starknet_multicall@2.0.0(abi-wan-kanabi@2.2.2)(starknet@7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b)))(typescript@5.8.3):
     dependencies:
       abi-wan-kanabi: 2.2.2
       just-random: 3.2.0
+      klona: 2.0.6
       p-retry: 6.2.1
       p-timeout: 6.1.4
       starknet: 7.2.0(patch_hash=4980cf44587f621f6d3e890fe957354d6127225f174c305d3f3ef059c63afa9b)

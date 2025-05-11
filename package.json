@@ -117,7 +117,7 @@
     "universal-cookie": "^8.0.1",
     "up-fetch": "^2.1.2",
     "use-mutative": "^1.2.1",
-    "wolfy-sdk": "^2.1.0"
+    "wolfy-sdk": "^2.1.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

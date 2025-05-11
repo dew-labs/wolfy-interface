@@ -4,9 +4,11 @@ import {
   createTokenContract,
   createWolfyContract,
   ExchangeRouterABI,
+  parseWolfyEvent,
   toStarknetHexString,
   WithdrawalVaultABI,
   WolfyContract,
+  WolfyEvent,
 } from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
@@ -107,12 +109,13 @@ export default async function sendWithdrawal(
 
   if (receipt.isSuccess()) {
     console.log(receipt.value.events)
+    const withdrawalCreatedEvent = parseWolfyEvent(
+      WolfyEvent.WithdrawalCreated,
+      receipt.value.events,
+    )
+    console.log(withdrawalCreatedEvent)
 
-    // TODO: parse and get the right key
-    const withdrawalKey = receipt.value.events[1]?.data[0]
-    console.log(withdrawalKey)
-
-    return {tx: receipt.value.transaction_hash, withdrawalKey}
+    return {tx: receipt.value.transaction_hash, withdrawalKey: withdrawalCreatedEvent?.key}
   }
   throw new Error('Cannot withdrawal')
 }

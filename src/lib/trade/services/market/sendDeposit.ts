@@ -5,7 +5,9 @@ import {
   createWolfyContract,
   DepositVaultABI,
   ExchangeRouterABI,
+  parseWolfyEvent,
   WolfyContract,
+  WolfyEvent,
 } from 'wolfy-sdk'
 
 import {UI_FEE_RECEIVER_ADDRESS} from '@/constants/config'
@@ -133,12 +135,10 @@ export default async function sendDeposit(
 
   if (receipt.isSuccess()) {
     console.log(receipt.value.events)
+    const depositCreatedEvent = parseWolfyEvent(WolfyEvent.DepositCreated, receipt.value.events)
+    console.log(depositCreatedEvent)
 
-    // TODO: parse and get the right key
-    const depositKey = receipt.value.events[6]?.data[0]
-    console.log(depositKey)
-
-    return {tx: receipt.value.transaction_hash, depositKey}
+    return {tx: receipt.value.transaction_hash, depositKey: depositCreatedEvent?.key}
   }
   throw new Error('Cannot deposit')
 }
