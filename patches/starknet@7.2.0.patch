@@ -1,8 +1,8 @@
 diff --git a/dist/index.global.js b/dist/index.global.js
-index 168d05c3023b3030d1b0b5d5a2d33f23834203a9..5c2f7140b89aeaa142c318831855a23f0495e699 100644
+index c1f6536031ea32c3210a213fd670a2d3c94055d5..030db9b024c07e77f16954be95c749cee727ac55 100644
 --- a/dist/index.global.js
 +++ b/dist/index.global.js
-@@ -4785,7 +4785,7 @@ ${indent}}` : "}";
+@@ -1902,7 +1902,7 @@ ${indent}}` : "}";
        }
        const results = await this.batchPromises[requestId];
        delete this.batchPromises[requestId];
@@ -12,10 +12,10 @@ index 168d05c3023b3030d1b0b5d5a2d33f23834203a9..5c2f7140b89aeaa142c318831855a23f
        return result;
      }
 diff --git a/dist/index.js b/dist/index.js
-index 8d9c925bf0755cbef5a6f8ea698e514927de350f..b13d5fd913087dc91b81cf388ee0fa9692d52c64 100644
+index 84f8784cfda82964f3bf10df2da3fa38819d5e7a..8c87e0650df1e865350949d1a0aa2d6c843b22b9 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -753,7 +753,7 @@ var BatchClient = class {
+@@ -817,7 +817,7 @@ var BatchClient = class {
      }
      const results = await this.batchPromises[requestId];
      delete this.batchPromises[requestId];
@@ -25,10 +25,10 @@ index 8d9c925bf0755cbef5a6f8ea698e514927de350f..b13d5fd913087dc91b81cf388ee0fa96
      return result;
    }
 diff --git a/dist/index.mjs b/dist/index.mjs
-index f4ff7d31deb94306dbcd8bab2d85f9eb49721c32..c90352c8af8cb5d07d42c8d868268c0e058d7199 100644
+index 83423c451ef5a4f1c5fa2471c4b4e6785db7ebba..b6e6dae28959a370f81e4113a81c3e6bd30f3205 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -631,7 +631,7 @@ var BatchClient = class {
+@@ -679,7 +679,7 @@ var BatchClient = class {
      }
      const results = await this.batchPromises[requestId];
      delete this.batchPromises[requestId];

@@ -132,11 +132,13 @@ export default async function sendDeposit(
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    console.log(receipt.events)
-    const depositKey = receipt.events[6]?.data[0]
+    console.log(receipt.value.events)
+
+    // TODO: parse and get the right key
+    const depositKey = receipt.value.events[6]?.data[0]
     console.log(depositKey)
 
-    return {tx: receipt.transaction_hash}
+    return {tx: receipt.value.transaction_hash, depositKey}
   }
   throw new Error('Cannot deposit')
 }

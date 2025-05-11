@@ -106,11 +106,13 @@ export default async function sendWithdrawal(
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    console.log(receipt.events)
-    const depositKey = receipt.events[1]?.data[0]
-    console.log(depositKey)
+    console.log(receipt.value.events)
 
-    return {tx: receipt.transaction_hash}
+    // TODO: parse and get the right key
+    const withdrawalKey = receipt.value.events[1]?.data[0]
+    console.log(withdrawalKey)
+
+    return {tx: receipt.value.transaction_hash, withdrawalKey}
   }
   throw new Error('Cannot withdrawal')
 }

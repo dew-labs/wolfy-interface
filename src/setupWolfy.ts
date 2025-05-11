@@ -1,3 +1,5 @@
+// TODO: upgrade to RPC v0.8
+
 import {
   clearProviders,
   ProviderType,
@@ -130,7 +132,7 @@ function registerContractAddresses() {
   > = {
     [StarknetChainId.SN_SEPOLIA]: {
       [WolfyContract.Multicall]:
-        '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
+        '0x066be29f7ddf044ebe2401d5174ab5aed9aec0a672858cc7ec66d5e4ed49191b',
       [WolfyContract.Reader]: '0x54ad30fc0e247c9f13a1af51fc4c82d89c42dd759829d2caed80a1da750b02d',
       [WolfyContract.EventEmitter]:
         '0x5720be1fffa5991829f27a81b22469559c71074edf277bf7c920b98df740e45',
@@ -148,25 +150,6 @@ function registerContractAddresses() {
       [WolfyContract.ExchangeRouter]:
         '0x2dd55cffd779c241953963eb6df80edc8b952819ec386e8587a70fd9ea2e38',
     },
-    // [StarknetChainId.SN_SEPOLIA]: {
-    //   [WolfyContract.Multicall]:
-    //     '0x062e7261fc39b214e56a5dc9b6f77674d953973d1b8892f14d76f88c97909647',
-    //   [WolfyContract.Reader]: '0x3be559b429d6ede49c660c27fe800322dd51a8e0b1088d93b1fc05fc7f30247',
-    //   [WolfyContract.EventEmitter]:
-    //     '0x36e20d5ea2e457cc7f68dad32904873a3f595f05f6444341281920455a21688',
-    //   [WolfyContract.Router]: '0x32e01927628df34b2018fa4e891770704553053b0e98f738eae21f210b12000',
-    //   [WolfyContract.ReferralStorage]:
-    //     '0x73a58f3b492401c6bd7cb8658f6aabfa7e2b814e5011ff7a80a33dda6547f06',
-    //   [WolfyContract.DataStore]: '0xb55e56b59a632d4d4648b207d972e9f3284e9cae3da63c96800109955bc0bd',
-    //   [WolfyContract.OrderVault]:
-    //     '0x62b5d0da14d863a466fc74f53336ebdceedbcdd02e166671105fb9172c7cc9b',
-    //   [WolfyContract.DepositVault]:
-    //     '0x55cb850dc97ecf71e60d2b8c9c1ef3cbf875c56c55133f86a1e2011b401d370',
-    //   [WolfyContract.WithdrawalVault]:
-    //     '0x3b444f14d9cde9eef02250d7dab635269c75056a824ab4cc211960163c31e1a',
-    //   [WolfyContract.ExchangeRouter]:
-    //     '0x7583497845a3159f30a799f7d74f46cf16baae16bcc4c5973c65f71af651bad',
-    // },
     // Not available
     [StarknetChainId.SN_MAIN]: {
       [WolfyContract.Multicall]:

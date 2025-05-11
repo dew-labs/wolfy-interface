@@ -191,6 +191,7 @@ const TOKENS_METADATA = new Map<StarknetChainId, Map<string, Token>>([
 ])
 
 // TODO: support change fee token
+// NOTE: must follow contractconfig
 export const FEE_TOKEN_ADDRESS = new Map<StarknetChainId, string>([
   [StarknetChainId.SN_KATANA, '0x060daff2e4fbf2a789baa16c01f14733434fb32aa1db9558e9944ad154fa42b2'], // wfETH
   [

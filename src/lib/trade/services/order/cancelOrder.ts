@@ -25,7 +25,7 @@ export default async function cancelOrder(
   )
 
   if (receipt.isSuccess()) {
-    return {tx: receipt.transaction_hash}
+    return {tx: receipt.value.transaction_hash}
   }
   throw new Error('Cannot cancel order')
 }

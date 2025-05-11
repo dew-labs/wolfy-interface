@@ -112,10 +112,13 @@ export default async function sendOrder(
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    console.log(receipt.events)
-    const orderKey = receipt.events[1]?.data[0]
+    console.log(receipt.value.events)
+
+    // TODO: parse and get the right key
+    const orderKey = receipt.value.events[1]?.data[0]
     console.log(orderKey)
-    return {tx: receipt.transaction_hash}
+
+    return {tx: receipt.value.transaction_hash, orderKey}
   }
   throw new Error('Cannot place order')
 }

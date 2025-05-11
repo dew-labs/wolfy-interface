@@ -28,7 +28,7 @@ export default async function dripFaucet(wallet: WalletAccount) {
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    return {tx: receipt.transaction_hash}
+    return {tx: receipt.value.transaction_hash}
   }
   throw new Error('Cannot drip faucet')
 }

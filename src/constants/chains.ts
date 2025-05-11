@@ -1,6 +1,6 @@
 import {StarknetChainId} from 'wolfy-sdk'
 
-export const DEFAULT_CHAIN_ID = StarknetChainId.SN_SEPOLIA
+export const DEFAULT_CHAIN_ID: StarknetChainId = StarknetChainId.SN_SEPOLIA
 
 export const SUPPORTED_CHAINS: {chainId: StarknetChainId; name: string}[] = [
   // {

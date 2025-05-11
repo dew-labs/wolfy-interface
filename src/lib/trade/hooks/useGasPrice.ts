@@ -1,29 +1,23 @@
-import type {WalletAccount} from 'starknet'
 import {type StarknetChainId} from 'wolfy-sdk'
 
+import {BLOCK_TIME} from '@/lib/starknet/constants'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import fetchGasPrice from '@/lib/trade/services/fetchGasPrice'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getGasPriceQueryKey(chainId: StarknetChainId, walletAccount?: WalletAccount) {
-  return ['gasPrice', chainId, walletAccount?.address] as const
+export function getGasPriceQueryKey(chainId: StarknetChainId) {
+  return ['gasPrice', chainId] as const
 }
 
-function createGetGasPriceQueryOptions(
-  wallet: WalletAccount | undefined,
-  chainId: StarknetChainId,
-) {
+function createGetGasPriceQueryOptions(chainId: StarknetChainId, blockTime: number) {
   return queryOptions({
-    queryKey: getGasPriceQueryKey(chainId, wallet),
-    queryFn: wallet
-      ? async () => {
-          return await fetchGasPrice(chainId, wallet)
-        }
-      : skipToken,
+    queryKey: getGasPriceQueryKey(chainId),
+    queryFn: async () => {
+      return await fetchGasPrice(chainId)
+    },
     placeholderData: previousData => previousData ?? 0n,
     ...NO_REFETCH_OPTIONS,
-    refetchInterval: 60000, // 1 minute
+    refetchInterval: blockTime,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     throwOnError: false,
@@ -31,8 +25,8 @@ function createGetGasPriceQueryOptions(
 }
 
 export default function useGasPrice() {
-  const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
+  const blockTime = BLOCK_TIME[chainId]
 
-  return useQuery(createGetGasPriceQueryOptions(walletAccount, chainId))
+  return useQuery(createGetGasPriceQueryOptions(chainId, blockTime))
 }

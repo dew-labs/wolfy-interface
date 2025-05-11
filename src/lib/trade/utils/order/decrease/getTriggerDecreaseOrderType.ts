@@ -4,7 +4,7 @@ export default function getTriggerDecreaseOrderType(p: {
   triggerPrice: bigint
   markPrice: bigint
   isLong: boolean
-}): OrderType.LimitDecrease | OrderType.StopLossDecrease {
+}): typeof OrderType.LimitDecrease | typeof OrderType.StopLossDecrease {
   const {triggerPrice, markPrice, isLong} = p
 
   const isTriggerAboveMarkPrice = triggerPrice > markPrice

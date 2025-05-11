@@ -63,7 +63,7 @@ export interface DecreasePositionAmounts {
   receiveTokenAmount: bigint
   receiveUsd: bigint
 
-  triggerOrderType?: OrderType.LimitDecrease | OrderType.StopLossDecrease | undefined
+  triggerOrderType?: typeof OrderType.LimitDecrease | typeof OrderType.StopLossDecrease | undefined
   triggerThresholdType?: TriggerThresholdType | undefined
   decreaseSwapType: DecreasePositionSwapType
 }
