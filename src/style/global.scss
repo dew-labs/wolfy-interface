@@ -1,7 +1,4 @@
 @use '@/style/utils';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 body {
   min-block-size: 100dvh;
@@ -62,13 +59,6 @@ $heroUiForeground: hsl(
   text-decoration: none;
 
   background-color: $heroUiPrimary;
-}
-
-@layer utilities {
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    @apply appearance-none;
-  }
 }
 
 [data-disabled='true'] {

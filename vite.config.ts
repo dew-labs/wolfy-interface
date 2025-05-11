@@ -11,6 +11,8 @@ import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
+import tailwindcss from '@tailwindcss/vite'
+import {tanstackStart} from '@tanstack/react-start/plugin/vite'
 import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
@@ -114,6 +116,9 @@ export function getConfig(mode: string): UserConfig {
   }
 
   const plugins: PluginOption[] = [
+    tsconfigPaths({
+      projects: ['./tsconfig.json'],
+    }),
     patchCssModules(),
     optimizeLocales,
     paraglideVitePlugin({project: './project.inlang', outdir: './src/paraglide'}),
@@ -285,9 +290,6 @@ export function getConfig(mode: string): UserConfig {
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
-    tsconfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
     partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
     isDevMode &&
       turboConsole({
@@ -448,6 +450,7 @@ export function getConfig(mode: string): UserConfig {
       },
     }),
     FontaineTransform.vite(fontaineOptions),
+    tailwindcss(),
     // NOTE: enable this if you need support for legacy browsers
     // Legacy plugin need extra setup for CSP (Content Security Policy)
     legacy({
@@ -461,6 +464,7 @@ export function getConfig(mode: string): UserConfig {
     circleDependency({
       circleImportThrowErr: false,
     }),
+    tanstackStart(),
   ].filter(Boolean)
 
   // Put the Sentry vite plugin after all other plugins
