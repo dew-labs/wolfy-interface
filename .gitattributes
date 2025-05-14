@@ -215,3 +215,7 @@ Procfile          text
 
 # Prevents massive diffs from built files
 dist/*            binary
+
+# Generated files
+*.gen.ts          linguist-generated=true
+*.scss.d.ts       linguist-generated=true

@@ -15,10 +15,5 @@ export default function getNextOpenInterestParams(p: {
     nextShortUsd = currentShortUsd + usdDelta
   }
 
-  return {
-    currentLongUsd,
-    currentShortUsd,
-    nextLongUsd,
-    nextShortUsd,
-  }
+  return {currentLongUsd, currentShortUsd, nextLongUsd, nextShortUsd}
 }

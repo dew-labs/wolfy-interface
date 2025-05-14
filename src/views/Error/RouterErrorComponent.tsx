@@ -1,30 +1,26 @@
-import {useQueryErrorResetBoundary} from '@tanstack/react-query'
-import {type ErrorComponentProps, useRouter} from '@tanstack/react-router'
-import {useEffect} from 'react'
+import {type ErrorComponentProps} from '@tanstack/react-router'
 
 import {logError} from '@/utils/logger'
 
 import ErrorComponent from './ErrorComponent'
 
-export default function RouterErrorComponent(props: ErrorComponentProps) {
+export default memo(function RouterErrorComponent({
+  error,
+  info,
+  reset,
+}: Readonly<ErrorComponentProps>) {
   const router = useRouter()
-  const queryErrorResetBoundary = useQueryErrorResetBoundary()
+  const {reset: resetQueryErrorBoundary} = useQueryErrorResetBoundary()
 
-  useEffect(() => {
-    // Reset the query error boundary
-    queryErrorResetBoundary.reset()
-  }, [queryErrorResetBoundary])
+  logError(error, info)
 
-  logError(props.error, props.info)
+  const onReset = useCallback(() => {
+    // Reset the router error boundary
+    reset()
+    resetQueryErrorBoundary()
+    // Invalidate the route to reload the loader
+    void router.invalidate()
+  }, [reset, resetQueryErrorBoundary, router])
 
-  return (
-    <ErrorComponent
-      reset={() => {
-        // Reset the router error boundary
-        props.reset()
-        // Invalidate the route to reload the loader
-        void router.invalidate()
-      }}
-    />
-  )
-}
+  return <ErrorComponent reset={onReset} />
+})

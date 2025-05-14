@@ -7,14 +7,18 @@ export default {
   trailingComma: 'all',
   bracketSpacing: false,
   bracketSameLine: false,
+  objectWrap: 'preserve',
   arrowParens: 'avoid',
   proseWrap: 'preserve',
   htmlWhitespaceSensitivity: 'strict',
   plugins: [
     // 'some-other-plugin',
+    'prettier-plugin-classnames',
     '@svgr/plugin-prettier',
-    'prettier-plugin-tailwindcss', // tailwindcss plugin must be loaded last
+    'prettier-plugin-merge',
   ],
-  tailwindConfig: './tailwind.config.js',
-  tailwindFunctions: ['clsx', 'cva', 'tw', 'cn'],
+  customFunctions: ['cn', 'tw', 'classNames', 'clsx', 'twMerge'],
+  endingPosition: 'absolute-with-indent',
+  experimentalOptimization: true,
+  syntaxTransformation: false,
 }

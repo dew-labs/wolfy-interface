@@ -1,5 +1,3 @@
-import {atom, useAtomValue} from 'jotai'
-
 import {walletAccountAtom} from '@/lib/starknet/atoms'
 
 const isConnectedAtom = atom(get => {

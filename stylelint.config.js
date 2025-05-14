@@ -22,7 +22,7 @@ const config = {
     'stylelint-config-clean-order', // https://npmtrends.com/stylelint-config-clean-order-vs-stylelint-config-concentric-order-vs-stylelint-config-hudochenkov/order-vs-stylelint-config-idiomatic-order-vs-stylelint-config-property-sort-order-smacss-vs-stylelint-config-rational-order-vs-stylelint-config-recess-order
   ],
   rules: {
-    'unit-allowed-list': ['%', 'deg', 'px', 'rem', 'ms', 's', 'dvh', 'fr', 'ex'],
+    'unit-allowed-list': ['%', 'deg', 'rem', 'ms', 's', 'dvh', 'fr', 'ex'],
     'custom-property-pattern': '([A-Z][a-z]+)(-[A-Z][a-z]+)*',
     'scss/dollar-variable-pattern': '([A-Z][a-z]+)(-[A-Z][a-z]+)*',
     'liberty/use-logical-spec': 'always',
@@ -55,15 +55,43 @@ const config = {
     'plugin/declaration-block-no-ignored-properties': true,
     'css-modules/no-global-scoped-selector': [
       true,
-      {
-        fileExtensions: ['.module.css', '.module.scss'],
-      },
+      {fileExtensions: ['.module.css', '.module.scss']},
     ],
     'plugin/no-low-performance-animation-properties': true,
     'scss/at-rule-no-unknown': [
       true,
       {
-        ignoreAtRules: ['apply', 'layer', 'responsive', 'screen', 'tailwind', 'variants'],
+        ignoreAtRules: [
+          'apply',
+          'layer',
+          'responsive',
+          'screen',
+          'tailwind',
+          'variants',
+          'config',
+          'custom-variant',
+        ],
+      },
+    ],
+    'at-rule-no-unknown': [
+      true,
+      {
+        ignoreAtRules: [
+          'apply',
+          'layer',
+          'responsive',
+          'screen',
+          'tailwind',
+          'variants',
+          'config',
+          'custom-variant',
+        ],
+      },
+    ],
+    'at-rule-no-deprecated': [
+      true,
+      {
+        ignoreAtRules: ['apply'],
       },
     ],
   },
@@ -71,12 +99,14 @@ const config = {
     {
       files: ['*.module.scss', '**/*.module.scss'],
       rules: {
-        'selector-class-pattern': [
-          new RegExp(PASCAL_CASE),
-          {
-            resolveNestedSelectors: true,
-          },
-        ],
+        'selector-class-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
+        'selector-id-pattern': [new RegExp(PASCAL_CASE), {resolveNestedSelectors: true}],
+      },
+    },
+    {
+      files: ['*.scss'],
+      rules: {
+        'at-rule-no-unknown': [null],
       },
     },
   ],

@@ -1,5 +1,6 @@
 import type {UTCTimestamp} from 'lightweight-charts'
 
+import {correctTimezone} from '@/lib/tvchart/constants'
 import {logError} from '@/utils/logger'
 
 export default function binanceHistoryDataToChartData(binanceData: unknown) {
@@ -17,7 +18,7 @@ export default function binanceHistoryDataToChartData(binanceData: unknown) {
         }
 
         return {
-          time: (Number(candle[0]) / 1000) as UTCTimestamp,
+          time: correctTimezone(Number(candle[0]) / 1000) as UTCTimestamp,
           low: Number(candle[3]),
           high: Number(candle[2]),
           open: Number(candle[1]),

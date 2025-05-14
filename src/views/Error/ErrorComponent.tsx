@@ -1,43 +1,39 @@
-import {useEffect} from 'react'
+import {FocusScope} from '@react-aria/focus'
 
+import WolfyBackground from '@/components/WolfyBackground'
 import HeadTags from '@/lib/head/HeadTags'
 
-import style from './ErrorComponent.module.scss'
-
 interface Props {
-  errorCode?: string
-  errorMessage?: string
+  errorCode?: string | undefined
+  errorMessage?: string | undefined
   reset?: () => void
 }
 
 export default function ErrorComponent({reset, errorCode, errorMessage}: Readonly<Props>) {
-  useEffect(() => {
-    localStorage.clear()
-  }, [])
+  const onTryAgain = useCallback(() => {
+    if (reset) {
+      reset()
+    } else {
+      location.reload()
+    }
+  }, [reset])
 
   return (
-    <div className={style.Page}>
+    <div className='absolute left-0 top-0 size-full bg-background' style={{zIndex: 1000}}>
+      <WolfyBackground />
       <HeadTags title='Error' />
-      <main>
-        <div className={style.NotFound}>
-          <h1 className={style.Heading}>
-            We’re not perfect, error happens{errorCode ? ': ' + errorCode : '!'}
+      <main className='relative flex h-dvh w-full flex-col items-center justify-center gap-2 p-4'>
+        <FocusScope contain restoreFocus>
+          <h1 className='text-center text-4xl font-bold' tabIndex={-1}>
+            We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}
           </h1>
-          <span className={style.Description}>{errorMessage}</span>
+          <span>{errorMessage}</span>
           <div>
-            <button
-              onClick={() => {
-                if (reset) {
-                  reset()
-                } else {
-                  location.reload()
-                }
-              }}
-            >
+            <button className='border-spacing-2 border p-2' onClick={onTryAgain}>
               Try again
             </button>
           </div>
-        </div>
+        </FocusScope>
       </main>
     </div>
   )

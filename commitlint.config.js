@@ -1,3 +1,1 @@
-export default {
-  extends: ['gitmoji'],
-}
+export default {extends: ['gitmoji']}

@@ -1,21 +1,14 @@
+/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {Window} from 'happy-dom'
-import type {ReactNode} from 'react'
-import {act} from 'react'
+import {act, type ReactNode} from 'react'
 import {hydrateRoot} from 'react-dom/client'
 import {renderToString} from 'react-dom/server'
 import {vi} from 'vitest'
 
 export const renderHookServer = <Hook extends () => unknown>(
   useHook: Hook,
-  {
-    wrapper: Wrapper,
-  }: {
-    wrapper?: ({children}: {children: ReactNode}) => React.ReactElement
-  } = {},
-): {
-  result: {current: ReturnType<Hook> | undefined}
-  hydrate: () => void
-} => {
+  {wrapper: Wrapper}: {wrapper?: ({children}: {children: ReactNode}) => React.ReactElement} = {},
+): {result: {current: ReturnType<Hook> | undefined}; hydrate: () => void} => {
   // Store hook return values
   const results: ReturnType<Hook>[] = []
 
@@ -29,7 +22,8 @@ export const renderHookServer = <Hook extends () => unknown>(
     results.push(value)
   }
 
-  const Component = ({useHook}: {useHook: Hook}) => {
+  const Component = ({useHook}: Readonly<{useHook: Hook}>) => {
+    // eslint-disable-next-line react-compiler/react-compiler -- its intentional
     setValue(useHook() as ReturnType<Hook>)
     return null
   }
@@ -59,10 +53,8 @@ export const renderHookServer = <Hook extends () => unknown>(
     })
   }
 
-  return {
-    result,
-    hydrate: hydrate,
-  }
+  return {result, hydrate}
 }
 
 export type RenderHookServer = typeof renderHookServer
+/* eslint-enable @eslint-react/naming-convention/filename */

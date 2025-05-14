@@ -1,3 +1,5 @@
+import isTypeError from '@/utils/schema/isTypeError'
+
 export default class MaybePermanentError extends Error {
   isPermanent: boolean = false
 
@@ -7,10 +9,14 @@ export default class MaybePermanentError extends Error {
   }
 }
 
-export function isPermanentError(e: unknown) {
+export function isPermanentError(e: unknown): e is MaybePermanentError {
   try {
-    return e && typeof e === 'object' && 'isPermanent' in e && !!e.isPermanent
-  } catch (_) {
+    if (isTypeError(e)) return true
+    if (e && typeof e === 'object' && 'isPermanent' in e) {
+      return !!e.isPermanent
+    }
+    return false
+  } catch {
     return false
   }
 }

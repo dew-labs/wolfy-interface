@@ -1,5 +1,5 @@
-import {createCall, createTokenContract} from 'satoru-sdk'
-import type {Call, WalletAccount} from 'starknet'
+import {type Call, type WalletAccount} from 'starknet'
+import {createCall, createTokenContract} from 'wolfy-sdk'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import expandDecimals from '@/utils/numbers/expandDecimals'
@@ -7,12 +7,12 @@ import expandDecimals from '@/utils/numbers/expandDecimals'
 export default async function dripFaucet(wallet: WalletAccount) {
   const chainId = await wallet.getChainId()
 
-  // TODO: add asset to wallet
-  // wallet.watchAsset({
-
-  // })
-
   const tokens = getTokensMetadata(chainId)
+
+  for (const token of tokens) {
+    // eslint-disable-next-line no-await-in-loop -- this is the desired behavior
+    await wallet.watchAsset({type: 'ERC20', options: {address: token[1].address}})
+  }
 
   const calls: Call[] = []
 
@@ -28,10 +28,7 @@ export default async function dripFaucet(wallet: WalletAccount) {
   const receipt = await wallet.waitForTransaction(result.transaction_hash)
 
   if (receipt.isSuccess()) {
-    return {
-      tx: receipt.transaction_hash,
-    }
-  } else {
-    throw new Error('Cannot drip faucet')
+    return {tx: receipt.value.transaction_hash}
   }
+  throw new Error('Cannot drip faucet')
 }

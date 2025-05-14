@@ -1,9 +1,7 @@
-import {OrderType} from 'satoru-sdk'
+import {OrderType} from 'wolfy-sdk'
 
-export enum TriggerThresholdType {
-  Above = '>',
-  Below = '<',
-}
+export const TriggerThresholdType = {Above: '>', Below: '<'} as const
+export type TriggerThresholdType = (typeof TriggerThresholdType)[keyof typeof TriggerThresholdType]
 
 export default function getTriggerThresholdType(orderType: OrderType, isLong: boolean) {
   // limit order

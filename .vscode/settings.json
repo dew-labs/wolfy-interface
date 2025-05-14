@@ -1,12 +1,6 @@
 {
   "stylelint.packageManager": "pnpm",
   "npm.packageManager": "pnpm",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "never", // Imports are organize by eslint
-    "source.sortImports": "never", // Imports are sorted by eslint
-    "source.fixAll.eslint": "always",
-    "source.fixAll.stylelint": "always"
-  },
   // Typescript
   "typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.validate.enable": true, // Unlike javascript, we still need typescript validator as its not covered by eslint
@@ -34,29 +28,16 @@
   "javascript.format.enable": false,
   "typescript.format.enable": false,
   "eslint.format.enable": true,
-  "[json]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[json5]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[vue]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  "[json][jsonc][json5][javascript][javascriptreact][typescript][typescriptreact][vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always",
+      // Imports are organize and sorted by eslint
+      "source.organizeImports": "never",
+      "source.sortImports": "never",
+      "source.organizeImports.ts": "never",
+      "source.sortImports.ts": "never"
+    }
   },
   "eslint.rules.customizations": [
     {
@@ -66,6 +47,14 @@
     {
       "rule": "simple-import-sort/imports",
       "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+    },
+    {
+      "rule": "vitest/padding-*",
+      "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+    },
+    {
+      "rule": "jest-formatting/*",
+      "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
     }
   ],
   "eslint.runtime": "node", // Run eslint via our local node instead of vscode's node
@@ -73,20 +62,11 @@
   "stylelint.validate": ["css", "postcss", "scss", "sass", "less"],
   "stylelint.snippet": ["css", "postcss", "scss", "sass", "less"],
   // Use only styleleint to format (because its included prettier rules)
-  "[scss]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
-  },
-  "[sass]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
-  },
-  "[less]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
-  },
-  "[postcss]": {
-    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  "[scss][sass][less][css][postcss]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.stylelint": "always"
+    }
   },
   // svg files
   "prettier.documentSelectors": ["**/*.svg"],
@@ -105,7 +85,16 @@
     "env*": true,
     "**/routeTree.gen.ts": true
   },
-  "i18n-ally.localesPaths": ["src/i18n", "src/i18n/locales"],
-  "i18n-ally.keystyle": "nested",
-  "cSpell.words": ["Numberish", "Satoru"]
+  "jsdoc-generator.includeTypes": false,
+  "jsdoc-generator.includeAsync": false,
+  "jsdoc-generator.includeExport": false,
+  "files.watcherExclude": {"**/routeTree.gen.ts": true},
+  "files.readonlyInclude": {"**/routeTree.gen.ts": true},
+  // allow autocomplete for ArkType expressions like "string | num"
+  "editor.quickSuggestions": {"strings": "on"},
+  // prioritize ArkType's "type" for autoimports
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
+  "mise.configureExtensionsAutomatically": false,
+  "i18n-ally.disabled": true,
+  "cSpell.words": ["heroui", "Numberish", "Wolfy", "lqip"]
 }

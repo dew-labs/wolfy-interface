@@ -1,5 +1,3 @@
-import {useAtom, useSetAtom} from 'jotai'
-
 import {walletChainIdAtom} from '@/lib/starknet/atoms'
 
 export default function useWalletChainId() {

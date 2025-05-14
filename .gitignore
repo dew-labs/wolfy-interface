@@ -31,3 +31,11 @@ coverage
 
 public/~partytown
 vitest.config.ts.timestamp*
+
+# Million Lint
+.million
+
+tsconfig.vitest-temp.json
+
+coverage-ts
+.type-coverage

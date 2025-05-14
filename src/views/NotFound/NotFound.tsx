@@ -1,15 +1,11 @@
 import HeadTags from '@/lib/head/HeadTags'
 
-import style from './NotFound.module.scss'
-
 export default function NotFound() {
   return (
-    <div className={style.Page}>
+    <div>
       <HeadTags title='Not found' />
-      <main>
-        <div className={style.NotFound}>
-          <h1 className={style.Heading}>We couldn&apos;t find what you&apos;re looking for</h1>
-        </div>
+      <main className='relative flex h-dvh w-full flex-col items-center justify-center gap-2 p-4'>
+        <h1 className='text-center text-4xl font-bold'>404 Not Found</h1>
       </main>
     </div>
   )

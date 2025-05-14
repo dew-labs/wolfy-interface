@@ -1,24 +1,47 @@
 import {
   cairoIntToBigInt,
-  createSatoruMulticallRequest,
+  createWolfyMulticallRequest,
   DataStoreABI,
-  SatoruContract,
-  satoruMulticall,
   type StarknetChainId,
-} from 'satoru-sdk'
-
+  WolfyContract,
+  wolfyMulticall,
+} from 'wolfy-sdk'
 import {
-  DECREASE_ORDER_GAS_LIMIT_KEY,
+  DECREASE_ORDER_GAS_LIMIT,
   depositGasLimitKey,
-  ESTIMATED_GAS_FEE_BASE_AMOUNT_KEY,
-  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR_KEY,
-  INCREASE_ORDER_GAS_LIMIT_KEY,
-  SINGLE_SWAP_GAS_LIMIT_KEY,
-  SWAP_ORDER_GAS_LIMIT_KEY,
-  WITHDRAWAL_GAS_LIMIT_KEY,
-} from '@/constants/dataStore'
+  ESTIMATED_GAS_FEE_BASE_AMOUNT,
+  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
+  INCREASE_ORDER_GAS_LIMIT,
+  SINGLE_SWAP_GAS_LIMIT,
+  SWAP_ORDER_GAS_LIMIT,
+  WITHDRAWAL_GAS_LIMIT,
+} from 'wolfy-sdk/dataStore'
 
-export default async function fetchGasLimits(chainId: StarknetChainId) {
+export interface GasLimitsConfig {
+  depositSingleToken: bigint
+  depositMultiToken: bigint
+  withdrawalMultiToken: bigint
+  singleSwap: bigint
+  swapOrder: bigint
+  increaseOrder: bigint
+  decreaseOrder: bigint
+  estimatedFeeBaseGasLimit: bigint
+  estimatedFeeMultiplierFactor: bigint
+}
+
+export const DEFAULT_GAS_LIMITS: GasLimitsConfig = {
+  depositSingleToken: 0n,
+  depositMultiToken: 0n,
+  withdrawalMultiToken: 0n,
+  singleSwap: 0n,
+  swapOrder: 0n,
+  increaseOrder: 0n,
+  decreaseOrder: 0n,
+  estimatedFeeBaseGasLimit: 0n,
+  estimatedFeeMultiplierFactor: 0n,
+}
+
+export default async function fetchGasLimits(chainId: StarknetChainId): Promise<GasLimitsConfig> {
   const [
     depositSingleToken,
     depositMultiToken,
@@ -29,45 +52,45 @@ export default async function fetchGasLimits(chainId: StarknetChainId) {
     decreaseOrder,
     estimatedFeeBaseGasLimit,
     estimatedFeeMultiplierFactor,
-  ] = await satoruMulticall(chainId, [
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+  ] = await wolfyMulticall(chainId, [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       depositGasLimitKey(true),
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       depositGasLimitKey(false),
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      WITHDRAWAL_GAS_LIMIT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      WITHDRAWAL_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      SINGLE_SWAP_GAS_LIMIT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      SINGLE_SWAP_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      SWAP_ORDER_GAS_LIMIT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      SWAP_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      INCREASE_ORDER_GAS_LIMIT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      INCREASE_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      DECREASE_ORDER_GAS_LIMIT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      DECREASE_ORDER_GAS_LIMIT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      ESTIMATED_GAS_FEE_BASE_AMOUNT_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      ESTIMATED_GAS_FEE_BASE_AMOUNT,
     ]),
-    createSatoruMulticallRequest(chainId, SatoruContract.DataStore, DataStoreABI, 'get_u256', [
-      ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR_KEY,
+    createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
+      ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
     ]),
   ])
 
   return {
-    depositSingleToken: cairoIntToBigInt(depositSingleToken ?? 0),
-    depositMultiToken: cairoIntToBigInt(depositMultiToken ?? 0),
-    withdrawalMultiToken: cairoIntToBigInt(withdrawalMultiToken ?? 0),
-    singleSwap: cairoIntToBigInt(singleSwap ?? 0),
-    swapOrder: cairoIntToBigInt(swapOrder ?? 0),
-    increaseOrder: cairoIntToBigInt(increaseOrder ?? 0),
-    decreaseOrder: cairoIntToBigInt(decreaseOrder ?? 0),
-    estimatedFeeBaseGasLimit: cairoIntToBigInt(estimatedFeeBaseGasLimit ?? 0),
-    estimatedFeeMultiplierFactor: cairoIntToBigInt(estimatedFeeMultiplierFactor ?? 0),
+    depositSingleToken: cairoIntToBigInt(depositSingleToken),
+    depositMultiToken: cairoIntToBigInt(depositMultiToken),
+    withdrawalMultiToken: cairoIntToBigInt(withdrawalMultiToken),
+    singleSwap: cairoIntToBigInt(singleSwap),
+    swapOrder: cairoIntToBigInt(swapOrder),
+    increaseOrder: cairoIntToBigInt(increaseOrder),
+    decreaseOrder: cairoIntToBigInt(decreaseOrder),
+    estimatedFeeBaseGasLimit: cairoIntToBigInt(estimatedFeeBaseGasLimit),
+    estimatedFeeMultiplierFactor: cairoIntToBigInt(estimatedFeeMultiplierFactor),
   }
 }

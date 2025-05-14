@@ -1,5 +1,3 @@
-import {useEffect} from 'react'
-
 import createIdleTimeScheduler from '@/utils/createIdleTimeScheduler'
 
 import {useLazyRef} from './useLazyRef'

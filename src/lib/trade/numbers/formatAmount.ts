@@ -13,17 +13,13 @@ export default function formatAmount(
   useCommas?: boolean,
   defaultValue?: string,
 ) {
-  if (defaultValue === undefined) {
-    defaultValue = '...'
-  }
+  defaultValue ??= '...'
 
   if (amount === undefined || amount === '') {
     return defaultValue
   }
 
-  if (displayDecimals === undefined) {
-    displayDecimals = 4
-  }
+  displayDecimals ??= 4
 
   let amountStr = shrinkDecimals(amount, tokenDecimals)
 

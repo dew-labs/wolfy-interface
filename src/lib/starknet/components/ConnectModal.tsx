@@ -7,24 +7,24 @@ import {
   ModalBody,
   ModalContent,
   ModalHeader,
-} from '@nextui-org/react'
+} from '@heroui/react'
 import getStarknetCore, {
-  Permission,
   type StarknetWindowObject,
   type WalletProvider,
-} from 'get-starknet-core'
-import {useAtom} from 'jotai'
-import {memo, useCallback, useEffect, useRef, useState} from 'react'
-import {useLatest} from 'react-use'
-import {getProvider, ProviderType, type StarknetChainId} from 'satoru-sdk'
+} from '@starknet-io/get-starknet-core'
+import {Permission} from '@starknet-io/types-js'
 import {toast} from 'sonner'
 import {WalletAccount} from 'starknet'
+import type {ReadonlyDeep} from 'type-fest'
 import {UAParser} from 'ua-parser-js'
+import {getProvider, ProviderType, type StarknetChainId} from 'wolfy-sdk'
 
-import {isChainIdSupported} from '@/constants/chains'
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
+import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
+import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
+import useWallets from '@/lib/starknet/hooks/useWallets'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import UnexpectedError from '@/utils/api/UnexpectedError'
@@ -32,7 +32,7 @@ import toastErrorMessage from '@/utils/errors/toastErrorMessage'
 
 interface AvailableWalletProps {
   wallet: StarknetWindowObject
-  connect: (wallet: StarknetWindowObject) => void
+  connect: MemoizedCallback<(wallet: StarknetWindowObject) => void>
   isLastConnected?: boolean
 }
 
@@ -41,7 +41,10 @@ interface UnavailableWalletProps {
   isNotAvailable?: boolean
 }
 
-const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWalletProps) {
+/* eslint-disable @eslint-react/prefer-destructuring-assignment -- conditional props*/
+const Wallet = memo(function Wallet(
+  props: ReadonlyDeep<UnavailableWalletProps | AvailableWalletProps>,
+) {
   const [theme] = useCurrentTheme()
 
   const icon = (() => {
@@ -50,8 +53,6 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
       case Theme.Light:
         return props.wallet.icon.light
       case Theme.Dark:
-        return props.wallet.icon.dark
-      default:
         return props.wallet.icon.dark
     }
   })()
@@ -87,14 +88,9 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
 
   return (
     <li>
-      <Card
-        shadow='sm'
-        isPressable
-        onPress={handlePress}
-        className='align-center justify-content-center w-full'
-      >
-        <CardBody className='align-center flex flex-row justify-center gap-2 p-2'>
-          <Image shadow='none' radius='none' alt='' className='h-[24px] w-[24px]' src={icon} />
+      <Card shadow='sm' isPressable onPress={handlePress} className='w-full'>
+        <CardBody className='flex flex-row justify-center gap-2 p-2'>
+          <Image shadow='none' radius='none' alt='' className='size-[24px]' src={icon} />
           <div className='flex flex-row gap-2'>
             <div>
               <b>{props.wallet.name}</b>
@@ -112,25 +108,21 @@ const Wallet = memo(function Wallet(props: UnavailableWalletProps | AvailableWal
   )
 })
 
-export default memo(function ConnectModal() {
-  const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
-
+function useConnect({
+  onConnected,
+  onCancel,
+}: {
+  onConnected?: MemoizedCallback<() => void>
+  onCancel?: MemoizedCallback<() => void>
+}) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
-
-  const [wallets, setWallets] = useState<StarknetWindowObject[]>([])
-  const [lastConnectedWallet, setLastConnectedWallet] = useState<StarknetWindowObject>()
-  const [unavailableWallets, setUnavailableWallets] = useState<WalletProvider[]>([])
+  const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
+  const isConnected = useIsWalletConnected()
 
   const [isConnecting, setIsConnecting] = useState(false)
   const latestIsConnecting = useLatest(isConnecting)
   const isCancelled = useRef(false)
-
-  const handleClose = useCallback(() => {
-    if (latestIsConnecting.current) isCancelled.current = true
-    setIsConnecting(false)
-    setIsOpen(false)
-  }, [])
 
   const shouldStopConnectingOrContinue = useCallback(() => {
     if (isCancelled.current) {
@@ -138,29 +130,6 @@ export default memo(function ConnectModal() {
       throw new Error('Connection cancelled')
     }
   }, [])
-
-  useEffect(() => {
-    void (async function () {
-      // TODO:retry
-      const [wallets, discoveryWallets, lastConnectedWallet] = await Promise.all([
-        getStarknetCore.getAvailableWallets(),
-        getStarknetCore.getDiscoveryWallets(),
-        getStarknetCore.getLastConnectedWallet(),
-      ])
-
-      setLastConnectedWallet(lastConnectedWallet ?? undefined)
-
-      const lowerPriorityWallets = wallets.filter(wallet =>
-        lastConnectedWallet?.id ? wallet.id !== lastConnectedWallet.id : true,
-      )
-      setWallets(lowerPriorityWallets)
-
-      const unavailableWallets = discoveryWallets.filter(
-        wallet => !wallets.some(w => w.name === wallet.name),
-      )
-      setUnavailableWallets(unavailableWallets)
-    })()
-  }, [isOpen])
 
   const connect = useCallback(
     async (wallet: StarknetWindowObject) => {
@@ -174,25 +143,24 @@ export default memo(function ConnectModal() {
         })) as StarknetChainId
         shouldStopConnectingOrContinue()
 
-        const walletAccount = new WalletAccount(
-          isChainIdSupported(connectedWalletChainId)
-            ? getProvider(ProviderType.HTTP, connectedWalletChainId)
-            : {},
+        const walletAccount = await WalletAccount.connect(
+          getProvider(ProviderType.HTTP, connectedWalletChainId),
           connectedWallet,
         )
+        shouldStopConnectingOrContinue()
 
         const permissions = (await connectedWallet.request({
           type: 'wallet_getPermissions',
         })) as Permission[]
         shouldStopConnectingOrContinue()
+
         if (!permissions.includes(Permission.ACCOUNTS)) {
           throw new Error('The connected wallet does not have the required permissions')
         }
 
-        const accounts = await connectedWallet.request({
-          type: 'wallet_requestAccounts',
-        })
+        const accounts = await connectedWallet.request({type: 'wallet_requestAccounts'})
         shouldStopConnectingOrContinue()
+
         if (accounts.length === 0) {
           throw new Error('The connected wallet does not have any accounts')
         }
@@ -202,22 +170,65 @@ export default memo(function ConnectModal() {
 
         setWalletAccount(walletAccount)
         setWalletChainId(connectedWalletChainId)
+        setShouldReconnect(true)
       } catch (error: unknown) {
         console.error(error)
         toastErrorMessage(error, 'Unexpected error occurred while connecting to the wallet')
         void getStarknetCore.disconnect()
+        setShouldReconnect(false)
       }
-      setIsConnecting(false)
-      setIsOpen(false)
-    },
-    [setWalletAccount, setWalletChainId, shouldStopConnectingOrContinue],
-  )
-  useEffect(() => {
-    console.log('lastConnectedWallet:', lastConnectedWallet)
-    if (!lastConnectedWallet) return
 
-    void connect(lastConnectedWallet)
-  }, [lastConnectedWallet, connect])
+      setIsConnecting(false)
+      onConnected?.()
+    },
+    [
+      setShouldReconnect,
+      setWalletAccount,
+      setWalletChainId,
+      shouldStopConnectingOrContinue,
+      onConnected,
+    ],
+  )
+
+  const cancel = useCallback(() => {
+    if (latestIsConnecting.current) isCancelled.current = true
+    setIsConnecting(false)
+    onCancel?.()
+  }, [onCancel])
+
+  return {shouldReconnect, isConnected, isConnecting, connect, cancel}
+}
+
+export default memo(function ConnectModal() {
+  const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
+
+  const {isConnecting, isConnected, connect, shouldReconnect, cancel} = useConnect({
+    onConnected: useCallback(() => {
+      setIsOpen(false)
+    }, []),
+    onCancel: useCallback(() => {
+      setIsOpen(false)
+    }, []),
+  })
+
+  const latestIsWalletConnected = useLatest(isConnected)
+
+  const handleClose = useCallback(() => {
+    cancel()
+  }, [cancel])
+
+  const {data: wallets} = useWallets()
+
+  useEffect(
+    function connectToLastConnectedWallet() {
+      if (!wallets?.lastConnectedWallet) return
+      if (!shouldReconnect) return
+      if (latestIsWalletConnected.current) return
+
+      void connect(wallets.lastConnectedWallet)
+    },
+    [connect, shouldReconnect, wallets?.lastConnectedWallet],
+  )
 
   return (
     <Modal isOpen={isOpen} placement={'center'} onOpenChange={handleClose} backdrop='blur'>
@@ -231,19 +242,21 @@ export default memo(function ConnectModal() {
           )}
           {!isConnecting && (
             <ul className='flex flex-col gap-3'>
-              {lastConnectedWallet && (
-                <Wallet wallet={lastConnectedWallet} connect={connect} isLastConnected />
+              {wallets?.lastConnectedWallet && (
+                <Wallet wallet={wallets.lastConnectedWallet} connect={connect} isLastConnected />
               )}
-              {wallets.map(wallet => (
+              {wallets?.lowerPriorityWallets.map(wallet => (
                 <Wallet key={wallet.id} wallet={wallet} connect={connect} />
               ))}
-              {unavailableWallets.map(wallet => (
+              {wallets?.unavailableWallets.map(wallet => (
                 <Wallet key={wallet.id} wallet={wallet} isNotAvailable />
               ))}
             </ul>
+            // TODO: Add a switch to let user choose to reconnect to the last connected wallet in the next time
           )}
         </ModalBody>
       </ModalContent>
     </Modal>
   )
 })
+/* eslint-enable @eslint-react/prefer-destructuring-assignment */

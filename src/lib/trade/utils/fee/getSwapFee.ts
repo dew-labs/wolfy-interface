@@ -1,5 +1,5 @@
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
-import {type MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 
 export default function getSwapFee(
   marketInfo: MarketData,

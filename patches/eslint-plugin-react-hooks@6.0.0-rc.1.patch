@@ -1,0 +1,79 @@
+diff --git a/cjs/eslint-plugin-react-hooks.development.js b/cjs/eslint-plugin-react-hooks.development.js
+index 179bf427960002c7ca4b6d7d81515f23d542b4ef..7723fe5df4e1a4a0116f4ad560933d61690262f5 100644
+--- a/cjs/eslint-plugin-react-hooks.development.js
++++ b/cjs/eslint-plugin-react-hooks.development.js
+@@ -44,6 +44,28 @@ const rule$2 = {
+                     enableDangerousAutofixThisMayCauseInfiniteLoops: {
+                         type: 'boolean',
+                     },
++                    staticHooks: {
++                        type: 'object',
++                        additionalProperties: {
++                            oneOf: [
++                                {
++                                    type: 'boolean',
++                                },
++                                {
++                                    type: 'array',
++                                    items: {
++                                        type: 'boolean',
++                                    },
++                                },
++                                {
++                                    type: 'object',
++                                    additionalProperties: {
++                                        type: 'boolean',
++                                    },
++                                },
++                            ],
++                        },
++                    },
+                 },
+             },
+         ],
+@@ -58,9 +80,11 @@ const rule$2 = {
+             context.options[0] &&
+             context.options[0].enableDangerousAutofixThisMayCauseInfiniteLoops) ||
+             false;
++        const staticHooks = (context.options && context.options[0] && context.options[0].staticHooks) || {};
+         const options = {
+             additionalHooks,
+             enableDangerousAutofixThisMayCauseInfiniteLoops,
++            staticHooks,
+         };
+         function reportProblem(problem) {
+             if (enableDangerousAutofixThisMayCauseInfiniteLoops) {
+@@ -246,6 +270,33 @@ const rule$2 = {
+                             return true;
+                         }
+                     }
++                } else if (options.staticHooks[name]) {
++                    const staticParts = options.staticHooks[name];
++                    if (staticParts === true) {
++                        // entire return value is static
++                        return true;
++                    } else if (Array.isArray(staticParts)) {
++                        // destructured tuple return where some elements are static
++                        if (
++                            id.type === 'ArrayPattern' &&
++                            id.elements.length <= staticParts.length &&
++                            Array.isArray(resolved.identifiers)
++                        ) {
++                            // find index of the resolved ident in the array pattern
++                            const idx = id.elements.findIndex(
++                                ident => ident === resolved.identifiers[0],
++                            );
++                            if (idx >= 0) {
++                                return staticParts[idx];
++                            }
++                        }
++                    } else if (typeof staticParts === 'object' && id.type === 'ObjectPattern') {
++                        // destructured object return where some properties are static
++                        const property = id.properties.find(p => p.key === resolved.identifiers[0])
++                        if (property) {
++                            return staticParts[property.key.name]
++                        }
++                    }
+                 }
+                 return false;
+             }

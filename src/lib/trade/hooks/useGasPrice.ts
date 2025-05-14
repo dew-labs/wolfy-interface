@@ -1,29 +1,32 @@
-import {queryOptions, skipToken, useQuery} from '@tanstack/react-query'
-import type {WalletAccount} from 'starknet'
+import {type StarknetChainId} from 'wolfy-sdk'
 
-import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
+import {BLOCK_TIME} from '@/lib/starknet/constants'
+import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchGasPrice from '@/lib/trade/services/fetchGasPrice'
+import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-function createGetGasPriceQueryOptions(wallet: WalletAccount | undefined) {
+export function getGasPriceQueryKey(chainId: StarknetChainId) {
+  return ['gasPrice', chainId] as const
+}
+
+function createGetGasPriceQueryOptions(chainId: StarknetChainId, blockTime: number) {
   return queryOptions({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- wallet constantly changes
-    queryKey: ['gasPrice'],
-    queryFn: wallet
-      ? async () => {
-          return await fetchGasPrice(wallet)
-        }
-      : skipToken,
-    structuralSharing: false,
-    refetchInterval: 60000, // 1 minute
-    refetchIntervalInBackground: false,
-    refetchOnMount: false,
+    queryKey: getGasPriceQueryKey(chainId),
+    queryFn: async () => {
+      return await fetchGasPrice(chainId)
+    },
+    placeholderData: previousData => previousData ?? 0n,
+    ...NO_REFETCH_OPTIONS,
+    refetchInterval: blockTime,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    throwOnError: false,
   })
 }
 
 export default function useGasPrice() {
-  const [walletAccount] = useWalletAccount()
-  const {data} = useQuery(createGetGasPriceQueryOptions(walletAccount))
-  return data
+  const [chainId] = useChainId()
+  const blockTime = BLOCK_TIME[chainId]
+
+  return useQuery(createGetGasPriceQueryOptions(chainId, blockTime))
 }

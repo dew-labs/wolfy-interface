@@ -3,18 +3,14 @@ export default function VisuallyHidden<
 >({
   as,
   strict,
-  isNotHiddenAnymore,
+  isVisible,
   ...props
 }: T extends keyof React.JSX.IntrinsicElements
-  ? {
-      as?: T
-      strict?: boolean
-      isNotHiddenAnymore?: boolean
-    } & React.JSX.IntrinsicElements[T]
+  ? {as?: T; strict?: boolean; isVisible?: boolean} & React.JSX.IntrinsicElements[T]
   : {
       as?: T
       strict?: boolean
-      isNotHiddenAnymore?: boolean
+      isVisible?: boolean
       // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
     } & React.ComponentProps<T>): React.JSX.Element {
   const Tag = (as ?? 'span') as React.JSX.ElementType
@@ -23,7 +19,7 @@ export default function VisuallyHidden<
   if ('className' in props && typeof props.className === 'string') {
     classNames.push(props.className)
   }
-  if (!isNotHiddenAnymore) classNames.push((strict ? 'strict-' : '') + 'visually-hidden')
+  if (!isVisible) classNames.push(`${strict ? 'strict-' : ''}visually-hidden`)
 
   return <Tag {...props} className={classNames.join(' ')} />
 }
@@ -38,16 +34,16 @@ export default function VisuallyHidden<
 //   return (
 //     <>
 //       <VisuallyHidden as={TestComponent} test={true}>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as={TestComponent} test={1}>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as='button' srcSet='hihi'>
-//         Children
+//         children
 //       </VisuallyHidden>
 //       <VisuallyHidden as='img' srcSet='hihi'>
-//         Children
+//         children
 //       </VisuallyHidden>
 //     </>
 //   )

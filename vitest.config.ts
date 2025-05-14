@@ -2,6 +2,7 @@
 import os from 'os'
 import {coverageConfigDefaults, defineConfig, mergeConfig} from 'vitest/config'
 
+import globs from './globs'
 import viteConfig from './vite.config'
 
 export default defineConfig(configEnv =>
@@ -15,15 +16,11 @@ export default defineConfig(configEnv =>
         passWithNoTests: true,
         globals: true,
         unstubGlobals: true,
+        include: globs.TEST_NOT_TYPE,
         environment: 'happy-dom',
-        environmentMatchGlobs: [
-          ['**/*.ssr.{test,spec}.?(c|m)[jt]s?(x)', 'node'],
-          ['**/*.{test,spec}.?(c|m)[jt]s?(x)', 'happy-dom'],
-        ],
+        environmentMatchGlobs: globs.TEST_SSR.map(path => [path, 'node']),
         setupFiles: 'src/setupTest.ts',
-        typecheck: {
-          enabled: true,
-        },
+        typecheck: {enabled: true, ignoreSourceErrors: true, include: globs.TEST_TYPE},
         coverage: {
           enabled: false,
           // provider: 'istanbul', // Switch back to istanbul instead of native v8? https://www.thecandidstartup.org/2024/03/18/vitest-code-coverage.html
@@ -40,7 +37,7 @@ export default defineConfig(configEnv =>
           //   autoUpdate: true,
           // },
           include: ['src/**/*'],
-          exclude: ['setupTest.ts', ...coverageConfigDefaults.exclude],
+          exclude: ['src/setupTest.ts', ...coverageConfigDefaults.exclude],
         },
       },
     }),

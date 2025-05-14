@@ -1,4 +1,4 @@
-import {type MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import abs from '@/utils/numbers/bigint/abs'
 
 import getNextOpenInterestForVirtualInventory from './getNextOpenInterestForVirtualInventory'
@@ -11,13 +11,20 @@ export default function getPriceImpactForPosition(
   isLong: boolean,
   opts: {fallbackToZero?: boolean} = {},
 ) {
-  const {longInterestUsd, shortInterestUsd} = marketInfo
+  const {
+    longInterestUsd,
+    shortInterestUsd,
+    positionImpactFactorPositive,
+    positionImpactFactorNegative,
+    positionImpactExponentFactor,
+    virtualInventoryForPositions,
+  } = marketInfo
 
   const {currentLongUsd, currentShortUsd, nextLongUsd, nextShortUsd} = getNextOpenInterestParams({
     currentLongUsd: longInterestUsd,
     currentShortUsd: shortInterestUsd,
     usdDelta: sizeDeltaUsd,
-    isLong: isLong,
+    isLong,
   })
 
   const priceImpactUsd = getPriceImpactUsd({
@@ -25,9 +32,9 @@ export default function getPriceImpactForPosition(
     currentShortUsd,
     nextLongUsd,
     nextShortUsd,
-    factorPositive: marketInfo.positionImpactFactorPositive,
-    factorNegative: marketInfo.positionImpactFactorNegative,
-    exponentFactor: marketInfo.positionImpactExponentFactor,
+    factorPositive: positionImpactFactorPositive,
+    factorNegative: positionImpactFactorNegative,
+    exponentFactor: positionImpactExponentFactor,
     fallbackToZero: !!opts.fallbackToZero,
   })
 
@@ -35,14 +42,14 @@ export default function getPriceImpactForPosition(
     return priceImpactUsd
   }
 
-  if (abs(marketInfo.virtualInventoryForPositions) <= 0) {
+  if (abs(virtualInventoryForPositions) <= 0) {
     return priceImpactUsd
   }
 
   const virtualInventoryParams = getNextOpenInterestForVirtualInventory({
-    virtualInventory: marketInfo.virtualInventoryForPositions,
+    virtualInventory: virtualInventoryForPositions,
     usdDelta: sizeDeltaUsd,
-    isLong: isLong,
+    isLong,
   })
 
   const priceImpactUsdForVirtualInventory = getPriceImpactUsd({
@@ -50,9 +57,9 @@ export default function getPriceImpactForPosition(
     currentShortUsd: virtualInventoryParams.currentShortUsd,
     nextLongUsd: virtualInventoryParams.nextLongUsd,
     nextShortUsd: virtualInventoryParams.nextShortUsd,
-    factorPositive: marketInfo.positionImpactFactorPositive,
-    factorNegative: marketInfo.positionImpactFactorNegative,
-    exponentFactor: marketInfo.positionImpactExponentFactor,
+    factorPositive: positionImpactFactorPositive,
+    factorNegative: positionImpactFactorNegative,
+    exponentFactor: positionImpactExponentFactor,
     fallbackToZero: !!opts.fallbackToZero,
   })
 

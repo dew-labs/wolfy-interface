@@ -42,8 +42,8 @@ body {
 }
 
 /* Root stacking context */
-/* stylelint-disable-next-line selector-id-pattern */
 #root,
+/* stylelint-disable-next-line selector-id-pattern */
 #__next {
   isolation: isolate;
 }
@@ -63,13 +63,13 @@ body {
   margin: 0;
   padding: 0;
 
-  /* Word wrapping */
-  hyphens: auto;
-  overflow-wrap: break-word;
-
   /* Remove border, border-radius */
   border: 0;
   border-radius: none;
+
+  /* Word wrapping */
+  hyphens: auto;
+  overflow-wrap: break-word;
 
   /* outline style */
   outline-offset: -0.125rem;

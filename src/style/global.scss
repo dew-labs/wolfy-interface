@@ -1,0 +1,121 @@
+@use '@/style/utils';
+
+body {
+  min-block-size: 100dvh;
+}
+
+/* Fix for fullscreen page in PWA */
+
+// html,
+// body,
+// #root {
+//   inline-size: 100%;inline-size
+//   max-inline-size: 100%;max-inline-size
+//   block-size: 100%;block-size
+//   min-block-size: 100%;min-block-size
+// }
+
+// html {
+//   min-block-size: calc(100% + env(safe-area-inset-top));min-block-size
+// }
+
+/* END fix */
+
+/* stylelint-disable custom-property-pattern */
+$heroUiPrimary: hsl(var(--heroui-primary) / var(--heroui-primary-opacity, var(--tw-bg-opacity)));
+$heroUiPrimaryHover: hsl(var(--heroui-primary) / var(--heroui-hover-opacity, var(--tw-bg-opacity)));
+$heroUiBackground: hsl(
+  var(--heroui-background) / var(--heroui-background-opacity, var(--tw-bg-opacity))
+);
+/* stylelint-disable scss/operator-no-newline-after */
+$heroUiForeground: hsl(
+  var(--heroui-primary-foreground) /
+    var(--heroui-primary-foreground-opacity, var(--tw-text-opacity))
+);
+/* stylelint-enable custom-property-pattern */
+
+* {
+  outline-color: $heroUiPrimary;
+}
+
+.visually-hidden:not(:focus, :active, :focus-within),
+.strict-visually-hidden {
+  @include utils.visually-hidden;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10000;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+  border-end-start-radius: 0.5rem;
+  border-end-end-radius: 0.5rem;
+
+  color: $heroUiForeground;
+  text-decoration: none;
+
+  background-color: $heroUiPrimary;
+}
+
+[data-disabled='true'] {
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+// Theme toggle animation
+
+::view-transition-group(root) {
+  animation-duration: 0.7s;
+  /* stylelint-disable-next-line custom-property-pattern */
+  animation-timing-function: var(--expo-out);
+}
+
+::view-transition-new(root) {
+  animation-name: reveal-light;
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  z-index: -1;
+  animation: none;
+}
+
+.dark::view-transition-new(root) {
+  animation-name: reveal-dark;
+}
+
+@keyframes reveal-dark {
+  from {
+    clip-path: polygon(50% -71%, -50% 71%, -50% 71%, 50% -71%);
+  }
+
+  to {
+    clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
+  }
+}
+@keyframes reveal-light {
+  from {
+    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+  }
+
+  to {
+    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+  }
+}
+
+.truncate-none {
+  overflow: visible;
+  text-overflow: unset;
+}
+
+::view-transition-old(.slow-fade) {
+  animation-duration: 500ms;
+}
+
+::view-transition-new(.slow-fade) {
+  animation-duration: 500ms;
+}

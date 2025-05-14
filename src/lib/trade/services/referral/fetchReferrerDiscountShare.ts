@@ -1,10 +1,5 @@
-import type {StarknetChainId} from 'satoru-sdk'
-import {
-  cairoIntToBigInt,
-  createSatoruContract,
-  ReferralStorageABI,
-  SatoruContract,
-} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
+import {cairoIntToBigInt, createWolfyContract, ReferralStorageABI, WolfyContract} from 'wolfy-sdk'
 
 export default async function fetchReferrerDiscountShare(
   chainId: StarknetChainId,
@@ -12,9 +7,9 @@ export default async function fetchReferrerDiscountShare(
 ) {
   if (!owner) return 0n
 
-  const referralStorageContract = createSatoruContract(
+  const referralStorageContract = createWolfyContract(
     chainId,
-    SatoruContract.ReferralStorage,
+    WolfyContract.ReferralStorage,
     ReferralStorageABI,
   )
   return cairoIntToBigInt(await referralStorageContract.referrer_discount_shares(owner))

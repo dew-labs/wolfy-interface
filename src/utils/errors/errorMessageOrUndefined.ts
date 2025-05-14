@@ -6,11 +6,10 @@ export default function errorMessageOrUndefined(error: unknown): string | undefi
     if ('message' in error) {
       if (typeof error.message === 'string') {
         return error.message
-      } else {
-        return stringify(error.message)
       }
+      return stringify(error.message)
     }
-  } catch (_) {
+  } catch {
     return undefined
   }
 }

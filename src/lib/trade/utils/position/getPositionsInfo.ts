@@ -1,17 +1,19 @@
-import type {StarknetChainId} from 'satoru-sdk'
+import type {StarknetChainId} from 'wolfy-sdk'
 
 import {getTokensMetadata, type Token} from '@/constants/tokens'
 import {getBasisPoints} from '@/lib/trade/numbers/getBasisPoints'
-import type {MarketData, MarketsData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
+import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {Position, PositionsData} from '@/lib/trade/services/fetchPositions'
 import type {PositionConstants} from '@/lib/trade/services/fetchPositionsConstants'
-import type {Price, TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
+import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import type {ReferralInfo} from '@/lib/trade/services/referral/fetchReferralInfo'
 import {getPositionFee} from '@/lib/trade/utils/fee/getPositionFee'
 import getPriceImpactForPosition from '@/lib/trade/utils/fee/getPriceImpactForPosition'
 import {getMaxAllowedLeverageByMinCollateralFactor} from '@/lib/trade/utils/market/getMaxAllowedLeverageByMinCollateralFactor'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 import convertUsdToTokenAmount from '@/lib/trade/utils/price/convertUsdToTokenAmount'
+import {getMarkPrice} from '@/lib/trade/utils/price/getMarkPrice'
 import expandDecimals from '@/utils/numbers/expandDecimals'
 
 import getLeverage from './getLeverage'
@@ -20,23 +22,11 @@ import {getPositionNetValue} from './getPositionNetValue'
 import getPositionPendingFeesUsd from './getPositionPendingFeesUsd'
 import getPositionPnlUsd from './getPositionPnlUsd'
 
-export function getShouldUseMaxPrice(isIncrease: boolean, isLong: boolean) {
-  return isIncrease ? isLong : !isLong
-}
-
-export function getMarkPrice(p: {price: Price; isIncrease: boolean; isLong: boolean}) {
-  const {price, isIncrease, isLong} = p
-
-  const shouldUseMaxPrice = getShouldUseMaxPrice(isIncrease, isLong)
-
-  return shouldUseMaxPrice ? price.max : price.min
-}
-
 export function getEntryPrice(p: {sizeInUsd: bigint; sizeInTokens: bigint; indexToken: Token}) {
   const {sizeInUsd, sizeInTokens, indexToken} = p
 
   if (sizeInTokens <= 0) {
-    return undefined
+    return
   }
 
   return (sizeInUsd * expandDecimals(1, indexToken.decimals)) / sizeInTokens
@@ -67,37 +57,41 @@ export type PositionInfo = Position & {
   pendingClaimableFundingFeesUsd: bigint
 }
 
-export type PositionsInfoData = Map<bigint, PositionInfo>
+export interface PositionsInfoData {
+  positionsInfo: Map<bigint, PositionInfo>
+  positionsInfoViaStringRepresentation: Map<string, PositionInfo>
+}
 
 export default function getPositionsInfo(
   chainId: StarknetChainId,
-  marketsData: MarketsData,
-  tokenPricesData: TokenPricesData,
-  positionsData: PositionsData,
-  positionConstants: PositionConstants,
-  uiFeeFactor: bigint,
-  showPnlInLeverage: boolean,
-  referralInfo?: ReferralInfo | undefined | null,
+  marketsData?: MarketsData,
+  tokenPricesData?: TokenPricesData,
+  positionsData?: PositionsData,
+  positionConstants?: PositionConstants,
+  uiFeeFactor?: bigint,
+  showPnlInLeverage?: boolean,
+  referralInfo?: ReferralInfo | null,
 ): PositionsInfoData {
-  const {minCollateralUsd} = positionConstants
+  const {minCollateralUsd} = positionConstants ?? {}
   const tokensMetadata = getTokensMetadata(chainId)
 
   const positionsInfo = new Map<bigint, PositionInfo>()
+  const positionsInfoViaStringRepresentation = new Map<string, PositionInfo>()
 
-  positionsData.forEach((position, positionKey) => {
-    const marketData = marketsData.get(position.marketAddress)
+  for (const [positionKey, position] of positionsData?.positionsData.entries() ?? []) {
+    const marketData = marketsData?.get(position.marketAddress)
     const indexToken = marketData?.indexToken
     const pnlToken = position.isLong ? marketData?.longToken : marketData?.shortToken
     const collateralToken = tokensMetadata.get(position.collateralTokenAddress)
 
-    if (!marketData || !indexToken || !pnlToken || !collateralToken) return
+    if (!marketData || !indexToken || !pnlToken || !collateralToken) continue
 
-    const indexTokenPrice = tokenPricesData.get(marketData.indexToken.address)
-    const collateralTokenPrice = tokenPricesData.get(collateralToken.address)
-    const longTokenPrice = tokenPricesData.get(marketData.longToken.address)
-    const shortTokenPrice = tokenPricesData.get(marketData.shortToken.address)
+    const indexTokenPrice = tokenPricesData?.get(marketData.indexToken.address)
+    const collateralTokenPrice = tokenPricesData?.get(collateralToken.address)
+    const longTokenPrice = tokenPricesData?.get(marketData.longToken.address)
+    const shortTokenPrice = tokenPricesData?.get(marketData.shortToken.address)
 
-    if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) return
+    if (!indexTokenPrice || !collateralTokenPrice || !longTokenPrice || !shortTokenPrice) continue
 
     const markPrice = getMarkPrice({
       price: indexTokenPrice,
@@ -168,44 +162,49 @@ export default function getPositionsInfo(
       collateralMinPrice,
     )
 
-    const pnl = getPositionPnlUsd({
-      marketInfo: marketData,
-      tokenPricesData,
-      sizeInUsd: position.sizeInUsd,
-      sizeInTokens: position.sizeInTokens,
-      markPrice,
-      isLong: position.isLong,
-    })
+    const pnl = tokenPricesData
+      ? getPositionPnlUsd({
+          marketInfo: marketData,
+          tokenPricesData,
+          sizeInUsd: position.sizeInUsd,
+          sizeInTokens: position.sizeInTokens,
+          markPrice,
+          isLong: position.isLong,
+        })
+      : 0n
 
-    const pnlPercentage = collateralUsd != 0n ? getBasisPoints(pnl, collateralUsd) : 0n
+    const pnlPercentage = collateralUsd === 0n ? 0n : getBasisPoints(pnl, collateralUsd)
 
     const netValue = getPositionNetValue({
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
       closingFeeUsd,
       uiFeeUsd,
     })
 
+    // Liquidated positions, don't need to show them
+    if (netValue <= 0n) continue
+
     const pnlAfterFees = pnl - totalPendingFeesUsd - closingFeeUsd - uiFeeUsd
     const pnlAfterFeesPercentage =
-      collateralUsd != 0n ? getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd) : 0n
+      collateralUsd === 0n ? 0n : getBasisPoints(pnlAfterFees, collateralUsd + closingFeeUsd)
 
     const leverage = getLeverage({
       sizeInUsd: position.sizeInUsd,
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl: showPnlInLeverage ? pnl : undefined,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
     })
 
     const leverageWithPnl = getLeverage({
       sizeInUsd: position.sizeInUsd,
-      collateralUsd: collateralUsd,
+      collateralUsd,
       pnl,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
-      pendingFundingFeesUsd: pendingFundingFeesUsd,
+      pendingFundingFeesUsd,
     })
 
     const maxAllowedLeverage = getMaxAllowedLeverageByMinCollateralFactor(
@@ -222,13 +221,13 @@ export default function getPositionsInfo(
       collateralUsd,
       collateralAmount: position.collateralAmount,
       referralInfo,
-      minCollateralUsd,
+      minCollateralUsd: minCollateralUsd ?? 0n,
       pendingBorrowingFeesUsd: position.pendingBorrowingFeesUsd,
       pendingFundingFeesUsd,
       isLong: position.isLong,
     })
 
-    positionsInfo.set(positionKey, {
+    const data = {
       ...position,
       marketData,
       indexToken,
@@ -252,8 +251,11 @@ export default function getPositionsInfo(
       uiFeeUsd,
       pendingFundingFeesUsd,
       pendingClaimableFundingFeesUsd,
-    })
-  })
+    }
 
-  return positionsInfo
+    positionsInfo.set(positionKey, data)
+    positionsInfoViaStringRepresentation.set(position.stringRepresentation, data)
+  }
+
+  return {positionsInfo, positionsInfoViaStringRepresentation}
 }

@@ -1,5 +1,6 @@
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import getPositionsInfo from '@/lib/trade/utils/position/getPositionsInfo'
+import type {PositionsData} from '@/lib/trade/services/fetchPositions'
+import getPositionsInfo, {type PositionsInfoData} from '@/lib/trade/utils/position/getPositionsInfo'
 
 import useMarketsData from './useMarketsData'
 import usePositionConstants from './usePositionConstants'
@@ -8,35 +9,47 @@ import useReferralInfo from './useReferralInfo'
 import useTokenPrices from './useTokenPrices'
 import useUiFeeFactor from './useUiFeeFactor'
 
-export default function usePositionsInfoData() {
+export default function usePositionsInfoData(): UseQueryResult<PositionsInfoData>
+export default function usePositionsInfoData<T = PositionsInfoData>(
+  selector: MemoizedCallback<(data: PositionsInfoData) => T>,
+): UseQueryResult<T>
+export default function usePositionsInfoData<T = PositionsInfoData>(
+  selector?: MemoizedCallback<(data: PositionsInfoData) => T>,
+) {
   const [chainId] = useChainId()
-  const marketsData = useMarketsData()
-  const positionConstants = usePositionConstants()
-  const uiFeeFactor = useUiFeeFactor()
-  const referralInfo = useReferralInfo()
-  const tokenPricesData = useTokenPrices(data => data)
-  const positionsData = usePositionsData()
+  const {data: marketsData} = useMarketsData()
+  const {data: positionConstants} = usePositionConstants()
+  const {data: uiFeeFactor} = useUiFeeFactor()
+  const {data: referralInfo} = useReferralInfo()
+  //TODO: optimize, do not subscribe to entire token prices
+  const {data: tokenPricesData} = useTokenPrices()
 
-  let positionsInfoData
+  return usePositionsData(
+    useCallback(
+      (positionsData: PositionsData) => {
+        const data = getPositionsInfo(
+          chainId,
+          marketsData,
+          tokenPricesData,
+          positionsData,
+          positionConstants,
+          uiFeeFactor,
+          true,
+          referralInfo,
+        )
 
-  if (
-    marketsData &&
-    tokenPricesData &&
-    positionsData &&
-    positionConstants &&
-    uiFeeFactor !== undefined
-  ) {
-    positionsInfoData = getPositionsInfo(
-      chainId,
-      marketsData,
-      tokenPricesData,
-      positionsData,
-      positionConstants,
-      uiFeeFactor,
-      true,
-      referralInfo,
-    )
-  }
-
-  return positionsInfoData
+        if (selector) return selector(data)
+        return data
+      },
+      [
+        chainId,
+        marketsData,
+        positionConstants,
+        referralInfo,
+        tokenPricesData,
+        uiFeeFactor,
+        selector,
+      ],
+    ),
+  )
 }

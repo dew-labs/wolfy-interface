@@ -1,14 +1,24 @@
+import {announce} from '@react-aria/live-announcer'
 import {toast} from 'sonner'
 
-export default function toastErrorMessage(error: unknown, message?: string) {
+const DEFAULT_ERROR_MESSAGE = 'Something went wrong, please try again later.'
+
+export default function toastErrorMessage(error?: unknown, message?: string) {
+  let errorMessage = message ?? DEFAULT_ERROR_MESSAGE
+
   if (
     error &&
     typeof error === 'object' &&
     'message' in error &&
     typeof error.message === 'string'
   ) {
-    toast.error(error.message)
-  } else if (message) {
-    toast.error(message)
+    errorMessage = error.message
   }
+
+  if (typeof error === 'string') {
+    errorMessage = error
+  }
+
+  toast.error(errorMessage)
+  announce(errorMessage)
 }

@@ -1,4 +1,4 @@
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
 
@@ -18,7 +18,6 @@ export function getReservedUsd(
       marketInfo.indexToken.decimals,
       indexTokenPrice.max,
     )
-  } else {
-    return marketInfo.shortInterestUsd
   }
+  return marketInfo.shortInterestUsd
 }

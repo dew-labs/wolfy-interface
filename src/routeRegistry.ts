@@ -1,7 +1,8 @@
 /* eslint-disable no-barrel-files/no-barrel-files -- this file need to be a barrel */
-import {Route as TradeRoute} from '@/routes/trade/route'
+import {Route as TradeRoute} from '@/routes/index/route'
+import {Route as PoolsRoute} from '@/routes/pools/route'
 
-export type RegisteredRoutes = typeof TradeRoute
+export type RegisteredRoutes = typeof TradeRoute | typeof PoolsRoute
 
-export {TradeRoute}
+export {PoolsRoute, TradeRoute}
 /* eslint-enable no-barrel-files/no-barrel-files -- this file need to be a barrel */

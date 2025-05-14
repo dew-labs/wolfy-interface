@@ -1,6 +1,7 @@
-# Ready2React
+# Wolfy Interface
 
 Setup
+
 ```sh
 pnpm install
 ```
@@ -37,3 +38,9 @@ Create a `.env.production(.local?)` based on `.env.example`
 ```sh
 pnpm build
 ```
+
+## Notes
+
+About `abi-wan-kanabi`:
+
+- Using version `2.2.3` will result in type errors, must pin at `2.2.2`

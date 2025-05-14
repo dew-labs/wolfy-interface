@@ -1,0 +1,10 @@
+gitignore: true
+frontMatter: '^---\s(?:\S.*\r?\n)*---\s'
+globs:
+  - 'src/**/*.{md,markdown,mdx,mdc}'
+outputFormatters:
+  - [ 'markdownlint-cli2-formatter-pretty', { appendLink: true } ]
+  - [ 'markdownlint-cli2-formatter-summarize', { byFileByRule: true } ]
+noProgress: true
+config:
+  MD013: false

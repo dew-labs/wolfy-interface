@@ -17,6 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     // END Interop constraints
     // Type checking
     "strict": true,
@@ -48,11 +49,25 @@
     // Basically, it will respect tsconfig.base.json's aliases in paths first,
     // because the full non-relative path would be longer.
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "/*": ["./public/*"]
-    },
-    "types": ["vite/client", "vite-plugin-svgr/client", "vitest/globals", "gtag.js"]
+    "paths": {"@/*": ["./src/*"], "/*": ["./public/*"]},
+    "types": [
+      "vite/client",
+      "vite-plugin-svgr/client",
+      "vitest/globals",
+      "gtag.js",
+      "unplugin-fonts/client"
+    ],
+    "plugins": [
+      {
+        "name": "ts-plugin-sort-import-suggestions",
+        "moveUpPatterns": ["@/", "\\.{1,2}/"],
+        "moveDownPatterns": ["dist"]
+      }
+      // Cause performance issues, so disabled for now
+      // {
+      //   "name": "ts-plugin-type-coverage"
+      // }
+    ]
   },
   "exclude": ["vitest.config.ts.timestamp*"],
   "include": ["src/**/*", "*"]

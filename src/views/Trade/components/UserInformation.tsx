@@ -1,20 +1,21 @@
-import {Tab, Tabs} from '@nextui-org/react'
-import {memo, useCallback, useState} from 'react'
+import {Tab, Tabs} from '@heroui/react'
 
 import OrdersTab from './OrdersTab'
 import PositionsTab from './PositionsTab'
+import TradesTab from './TradesTab'
 
-enum UserTabs {
-  Positions = 'Positions',
-  Orders = 'Orders',
-  Trades = 'Trades',
-  Claims = 'Claims',
-}
+export const UserTabs = {
+  Positions: 'positions',
+  Orders: 'orders',
+  Trades: 'trades',
+  Claims: 'claims',
+} as const
+export type UserTabs = (typeof UserTabs)[keyof typeof UserTabs]
 
 const AVAILABLE_TABS = [
   UserTabs.Positions,
   UserTabs.Orders,
-  // UserTabs.Trades,
+  UserTabs.Trades,
   // UserTabs.Claims
 ]
 
@@ -25,9 +26,9 @@ const TABS_LABEL: Record<UserTabs, string> = {
   [UserTabs.Claims]: 'Claims',
 }
 
-function UserTrades() {
-  return <div>Comming soon...</div>
-}
+// function UserTrades() {
+//   return <div>Comming soon...</div>
+// }
 
 function UserClaims() {
   return <div>Comming soon...</div>
@@ -56,7 +57,7 @@ export default memo(function UserInformation() {
       </Tabs>
       {tab === UserTabs.Positions && <PositionsTab />}
       {tab === UserTabs.Orders && <OrdersTab />}
-      {tab === UserTabs.Trades && <UserTrades />}
+      {tab === UserTabs.Trades && <TradesTab />}
       {tab === UserTabs.Claims && <UserClaims />}
     </>
   )

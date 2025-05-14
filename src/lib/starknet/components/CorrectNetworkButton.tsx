@@ -1,15 +1,12 @@
-import {Icon} from '@iconify/react'
-import {Button, Tooltip} from '@nextui-org/react'
-import {memo, useCallback} from 'react'
-import {useLatest} from 'react-use'
+import {Button, Tooltip} from '@heroui/react'
 import {toast} from 'sonner'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useChainIdIsSupportedMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
+import useChainIdIsMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 
 export default memo(function CorrectNetworkButton() {
-  const matched = useChainIdIsSupportedMatched()
+  const matched = useChainIdIsMatched()
   const [chainId] = useChainId()
   const latestChainId = useLatest(chainId)
   const [walletAccount] = useWalletAccount()
@@ -20,18 +17,16 @@ export default memo(function CorrectNetworkButton() {
     try {
       await latestWalletAccount.current.walletProvider.request({
         type: 'wallet_switchStarknetChain',
-        params: {
-          chainId: latestChainId.current,
-        },
+        params: {chainId: latestChainId.current},
       })
-    } catch (_e: unknown) {
+    } catch {
       toast.error('Cannot switch chain, please switch manually in your wallet')
     }
   }, [])
 
   if (!matched)
     return (
-      <Tooltip content='Wrong network'>
+      <Tooltip content='Wrong network' showArrow>
         <Button isIconOnly color='warning' onPress={handleCorrectNetwork}>
           <Icon icon='jam:triangle-danger-f' />
         </Button>

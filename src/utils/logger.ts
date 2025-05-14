@@ -15,11 +15,14 @@ const logError = function (
   const error = isUserFriendlyError(err) ? err.cause : err
 
   console.error(error)
+  if (extra) console.info('Extra:', extra)
+  if (hint) console.info('Hint:', hint)
 
   // Log metadata of the error
-  ;(function logMetadata() {
-    // @ts-expect-error error can be anything
-    if ('metadata' in error) {
+
+  // @ts-expect-error error can be anything
+  if (typeof error === 'object' && 'metadata' in error) {
+    ;(function logMetadata() {
       const depthExceeded = isObjectDepthExceed(error.metadata, 3)
 
       if (!depthExceeded) {
@@ -27,7 +30,7 @@ const logError = function (
           // @ts-expect-error optimistically set metadata for the error
           setContext('metadata', error.metadata)
           return
-        } catch (_) {
+        } catch {
           /* empty */
         }
       }
@@ -38,20 +41,18 @@ const logError = function (
         serializedMetadata = stringify(error.metadata, {
           Function: value => value instanceof Function && (value as () => unknown).toString(),
         })
-      } catch (_) {
+      } catch {
         /* empty */
       }
 
       if (serializedMetadata) {
-        setContext('metadata', {
-          serializedMetadata,
-        })
+        setContext('metadata', {serializedMetadata})
         return
       }
 
       console.log('[metadata]', error.metadata)
-    }
-  })()
+    })()
+  }
 
   if (extra) setContext('extra', extra)
 
@@ -74,7 +75,7 @@ const logEvent = function (
 ) {
   try {
     window.gtag('event', eventName, eventParams)
-  } catch (_) {
+  } catch {
     console.error('Cannot log event', eventName, eventParams)
     /* empty */
   }

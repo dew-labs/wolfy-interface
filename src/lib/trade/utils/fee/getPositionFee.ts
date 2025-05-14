@@ -1,5 +1,5 @@
 import {applyFactor} from '@/lib/trade/numbers/applyFactor'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 
 export function getPositionFee(
   marketInfo: MarketData,
@@ -13,7 +13,7 @@ export function getPositionFee(
     : marketInfo.positionFeeFactorForNegativeImpact
 
   let positionFeeUsd = applyFactor(sizeDeltaUsd, factor)
-  const uiFeeUsd = applyFactor(sizeDeltaUsd, uiFeeFactor ?? 0n)
+  const uiFeeUsd = applyFactor(sizeDeltaUsd, uiFeeFactor)
 
   if (!referralInfo) {
     return {positionFeeUsd, discountUsd: 0n, totalRebateUsd: 0n}
@@ -24,10 +24,5 @@ export function getPositionFee(
 
   positionFeeUsd = positionFeeUsd - discountUsd
 
-  return {
-    positionFeeUsd,
-    discountUsd,
-    totalRebateUsd,
-    uiFeeUsd,
-  }
+  return {positionFeeUsd, discountUsd, totalRebateUsd, uiFeeUsd}
 }

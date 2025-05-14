@@ -1,6 +1,6 @@
 import type {BigNumberish} from 'starknet'
 
-export function roundToNDecimal(n: BigNumberish, decimals = 2) {
-  const precision = Math.pow(10, decimals)
+export default function roundToNDecimal(n: BigNumberish, decimals = 2) {
+  const precision = 10 ** decimals
   return Math.round(Number(n) * precision) / precision
 }

@@ -1,4 +1,4 @@
-import {BASIS_POINTS_DIVISOR_BIGINT} from '@/lib/trade/numbers/constants'
+import {LEVERAGE_PRECISION} from '@/constants/config'
 
 import getPositionPendingFeesUsd from './getPositionPendingFeesUsd'
 
@@ -22,5 +22,5 @@ export default function getLeverage(p: {
     return undefined
   }
 
-  return (sizeInUsd * BASIS_POINTS_DIVISOR_BIGINT) / remainingCollateralUsd
+  return (sizeInUsd * LEVERAGE_PRECISION) / remainingCollateralUsd
 }

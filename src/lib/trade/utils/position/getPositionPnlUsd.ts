@@ -1,5 +1,5 @@
 import type {Token} from '@/constants/tokens'
-import type {MarketData} from '@/lib/trade/services/fetchMarketsData'
+import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {getCappedPoolPnl} from '@/lib/trade/utils/market/getCappedPoolPnl'
 import {getPoolUsdWithoutPnl} from '@/lib/trade/utils/market/getPoolUsdWithoutPnl'
@@ -41,12 +41,7 @@ export default function getPositionPnlUsd(p: {
   const poolPnl = isLong ? p.marketInfo.pnlLongMax : p.marketInfo.pnlShortMax
   const poolUsd = getPoolUsdWithoutPnl(marketInfo, tokenPricesData, isLong, 'min')
 
-  const cappedPnl = getCappedPoolPnl({
-    marketInfo,
-    poolUsd,
-    isLong,
-    maximize: true,
-  })
+  const cappedPnl = getCappedPoolPnl({marketInfo, poolUsd, isLong, maximize: true})
 
   const WEI_PRECISION = expandDecimals(1, 18)
 

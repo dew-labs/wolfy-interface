@@ -1,21 +1,22 @@
 export default function preloadImage(
   url: string | string[],
-  priority = 'low',
+  priority: HTMLImageElement['fetchPriority'] = 'low',
   strategy: 'sequential' | 'parallel' = 'sequential',
   callback?: () => void,
 ) {
   if (Array.isArray(url)) {
     if (strategy === 'parallel') {
-      let loadedCounter = 0
-      url.forEach(u => {
-        preloadImage(u, priority, strategy, () => {
-          loadedCounter++
+      const context = {loadedCounter: 0}
 
-          if (loadedCounter == url.length) {
+      for (const u of url) {
+        preloadImage(u, priority, strategy, () => {
+          context.loadedCounter++
+
+          if (context.loadedCounter === url.length) {
             callback?.()
           }
         })
-      })
+      }
     } else {
       const remainingUrls = url.slice()
 
@@ -36,7 +37,7 @@ export default function preloadImage(
     const img = new Image()
     img.src = url
     img.fetchPriority = priority
-    if (callback) img.onload = callback
+    if (callback) img.addEventListener('load', callback)
   } catch {
     // empty
   }

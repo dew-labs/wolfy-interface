@@ -1,13 +1,7 @@
-import {useAtom, useSetAtom} from 'jotai'
-import {atomWithStorage} from 'jotai/utils'
-
 import {isNotTrigger, TradeMode} from './useTradeMode'
 
-export enum TradeType {
-  Long = 'Long',
-  Short = 'Short',
-  Swap = 'Swap',
-}
+export const TradeType = {Long: 'Long', Short: 'Short', Swap: 'Swap'} as const
+export type TradeType = (typeof TradeType)[keyof typeof TradeType]
 
 const tradeTypeAtom = atomWithStorage<TradeType>('orderType', TradeType.Long)
 
@@ -19,7 +13,9 @@ export function useSetTradeType() {
   return useSetAtom(tradeTypeAtom)
 }
 
-export function isPosition(type: TradeType): type is TradeType.Long | TradeType.Short {
+export function isPosition(
+  type: TradeType,
+): type is typeof TradeType.Long | typeof TradeType.Short {
   return [TradeType.Long, TradeType.Short].includes(type)
 }
 

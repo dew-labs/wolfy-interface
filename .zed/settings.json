@@ -10,7 +10,12 @@
     "JavaScript": {
       "formatter": "language_server",
       "code_actions_on_format": {
-        "source.fixAll.eslint": true,
+        "source.organizeImports": false
+      }
+    },
+    "TypeScript": {
+      "formatter": "language_server",
+      "code_actions_on_format": {
         "source.organizeImports": false
       }
     }
@@ -25,9 +30,23 @@
       },
       "rulesCustomizations": [
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "prettier/prettier", "severity": "off"},
+        {
+          "rule": "prettier/prettier",
+          "severity": "off"
+        },
         // Silent the stylistic rules in you IDE, but still auto fix them
-        {"rule": "simple-import-sort/imports", "severity": "off"}
+        {
+          "rule": "simple-import-sort/imports",
+          "severity": "off"
+        },
+        {
+          "rule": "vitest/padding-*",
+          "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+        },
+        {
+          "rule": "jest-formatting/*",
+          "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+        }
       ]
     }
   }
