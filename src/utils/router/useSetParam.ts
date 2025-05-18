@@ -1,40 +1,47 @@
 import {type RegisteredRouter} from '@tanstack/react-router'
-import type {ResolveUseParams} from '@tanstack/router-core'
+import type {ConstrainLiteral, MakeRouteMatch, RouteIds} from '@tanstack/router-core'
 import type {
   NavigateOptionProps,
-  PathParamOptions,
+  NavigateOptions,
 } from 'node_modules/@tanstack/router-core/dist/esm/link'
 
 import isFunction from '@/utils/types/guards/isFunction'
 
 export default function useSetParam<
-  CurrentRoute extends string,
-  SetParam extends Exclude<
-    PathParamOptions<RegisteredRouter, CurrentRoute, CurrentRoute>['params'],
-    undefined | true
+  RouteId extends ConstrainLiteral<string, RouteIds<RegisteredRouter['routeTree']>>,
+  RouteFullPath extends MakeRouteMatch<RegisteredRouter['routeTree'], RouteId>['fullPath'],
+  ParamSetter extends Extract<
+    NavigateOptions<RegisteredRouter, RouteFullPath, RouteFullPath>['params'],
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- intentional
+    Function
   >,
-  ParamOut extends ResolveUseParams<RegisteredRouter, CurrentRoute, true>,
-  ParamKey extends keyof ParamOut,
   // @ts-expect-error -- complex typescript
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- its valid
-  ParamValueIn extends Exclude<SetParam, Function>[ParamKey],
->(currentRoute: CurrentRoute, name: ParamKey, defaultOptions?: NavigateOptionProps) {
+  ParamKey extends keyof ReturnType<ParamSetter>,
+  // @ts-expect-error -- complex typescript
+  ParamValueOut extends ReturnType<ParamSetter>[ParamKey],
+>(currentRoute: RouteId, name: ParamKey, defaultOptions?: NavigateOptionProps) {
   const navigate = useNavigate()
   const latestDefaultOptions = useLatest(defaultOptions)
+  const {fullPath} = useMatch({from: currentRoute})
+  const latestFullPatch = useLatest(fullPath)
 
   return useCallback(
     async (
-      value: ParamValueIn | ((prevValue: ParamOut[ParamKey]) => ParamValueIn),
+      value:
+        | ParamValueOut
+        // @ts-expect-error -- complex typescript
+        | ((prevValue: Parameters<ParamSetter>[0][ParamKey]) => ParamValueOut),
       options?: NavigateOptionProps,
     ) => {
       // @ts-expect-error -- complex typescript
       return navigate({
-        to: currentRoute,
+        to: latestFullPatch.current,
         search: prevSearch => prevSearch,
         params: prevParams => ({
           ...prevParams,
           // @ts-expect-error -- complex typescript
-          [name]: isFunction(value) ? value(prevParams[[name]] as ParamValueIn) : value,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- complex typescript
+          [name]: isFunction(value) ? value(prevParams[name] as ParamValueIn) : value,
         }),
         replace: true,
         resetScroll: false,
@@ -42,6 +49,6 @@ export default function useSetParam<
         ...options,
       })
     },
-    [navigate, currentRoute, name],
+    [navigate, name],
   )
 }

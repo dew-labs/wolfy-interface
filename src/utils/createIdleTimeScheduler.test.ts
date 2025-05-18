@@ -27,8 +27,6 @@ describe(createIdleTimeScheduler, () => {
   })
 
   afterEach(() => {
-    vi.clearAllMocks()
-    vi.clearAllTimers()
     vi.useRealTimers()
   })
 

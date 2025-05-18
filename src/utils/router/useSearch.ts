@@ -1,22 +1,20 @@
 import {type RegisteredRouter, useSearch as useBaseSearch} from '@tanstack/react-router'
-import type {ResolveUseSearch} from '@tanstack/router-core'
+import type {ConstrainLiteral, ResolveUseSearch, RouteIds} from '@tanstack/router-core'
 import type {NavigateOptionProps} from 'node_modules/@tanstack/router-core/dist/esm/link'
 
 import useSetSearch from './useSetSearch'
 
 export default function useSearch<
-  CurrentRoute extends string,
-  SearchParamOut extends ResolveUseSearch<RegisteredRouter, CurrentRoute, true>,
+  RouteId extends ConstrainLiteral<string, RouteIds<RegisteredRouter['routeTree']>>,
+  SearchParamOut extends ResolveUseSearch<RegisteredRouter, RouteId, true>,
   SearchParamKey extends keyof SearchParamOut,
->(currentRoute: CurrentRoute, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
+>(routeId: RouteId, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
   const {[name]: value} = useBaseSearch({
-    // @ts-expect-error -- complex typescript
-    from: currentRoute,
+    from: routeId,
   })
 
   return [
     value as SearchParamOut[SearchParamKey],
-    // @ts-expect-error -- complex typescript
-    useSetSearch(currentRoute, name, defaultOptions),
+    useSetSearch(routeId, name, defaultOptions),
   ] as const
 }
