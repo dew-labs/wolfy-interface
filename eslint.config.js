@@ -615,6 +615,8 @@ function getReactConfigs() {
   // TODO: add all react-use and other hooks libraries to additionalHooks
   const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
 
+  const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortControllerEffect']
+
   return [
     ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
     ...applyTo.react('react/hooks/custom', {
@@ -632,7 +634,7 @@ function getReactConfigs() {
               useIdleTimeScheduler: true,
               ...reactUseStaticHooks,
             },
-            additionalHooks: `(${['useMemoClientValue', ...reactUseAdditionalHooks].join('|')})`,
+            additionalHooks: `(${[...utilityHooks, ...reactUseAdditionalHooks].join('|')})`,
           },
         ],
       },
