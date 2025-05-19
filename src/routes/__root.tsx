@@ -3,6 +3,7 @@ import {Partytown} from '@qwik.dev/partytown/react'
 import type {Href} from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
+import {UnheadProvider} from '@unhead/react/client'
 import {Provider as JotaiProvider} from 'jotai'
 import type {PropsWithChildren} from 'react'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
@@ -85,45 +86,49 @@ const PARTYTOWN_FORWARD = ['dataLayer.push']
 
 const RootRoute = memo(function RootRoute() {
   const router = useRouter()
-  const {store, queryClient} = useRouteContext({
+  const {store, queryClient, head} = useRouteContext({
     strict: false,
   })
 
   invariant(queryClient, 'queryClient is required')
   invariant(store, 'store is required')
+  invariant(head, 'head is required')
 
   // eslint-disable-next-line @eslint-react/naming-convention/use-state -- not needed
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
   const useHref = useCallback((to: Href) => router.buildLocation({to}).href, [router])
+
   return (
     <>
       <ErrorBoundary fallback={null}>
         <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
       </ErrorBoundary>
       <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
-        <JotaiProvider store={store}>
-          <HeroUIProvider navigate={navigate} useHref={useHref}>
-            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-              <QueryErrorBoundary>
-                <Global />
-                <VisuallyHidden strict {...skipTargetProps('top')} />
-                <HeadContent />
-                <Outlet />
+        <UnheadProvider head={head}>
+          <JotaiProvider store={store}>
+            <HeroUIProvider navigate={navigate} useHref={useHref}>
+              <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+                <QueryErrorBoundary>
+                  <Global />
+                  <VisuallyHidden strict {...skipTargetProps('top')} />
+                  <HeadContent />
+                  <Outlet />
+                  <DevTool>
+                    <Inspector />
+                  </DevTool>
+                </QueryErrorBoundary>
                 <DevTool>
-                  <Inspector />
+                  <ReactQueryDevtools initialIsOpen={false} />
                 </DevTool>
-              </QueryErrorBoundary>
-              <DevTool>
-                <ReactQueryDevtools initialIsOpen={false} />
-              </DevTool>
-            </PersistQueryClientProvider>
-          </HeroUIProvider>
-          <DevTool>
-            <JotaiDevTools />
-          </DevTool>
-        </JotaiProvider>
+              </PersistQueryClientProvider>
+            </HeroUIProvider>
+            <DevTool>
+              <JotaiDevTools />
+            </DevTool>
+          </JotaiProvider>
+        </UnheadProvider>
       </ErrorBoundary>
       <DevTool>
         <TanStackRouterDevtools initialIsOpen={false} />

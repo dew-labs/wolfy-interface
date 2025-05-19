@@ -13,7 +13,6 @@ import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
-import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
 import {FontaineTransform} from 'fontaine'
@@ -276,7 +275,6 @@ export function getConfig(mode: string): UserConfig {
     dynamicImport(),
     preload(),
     robots({}),
-    UnheadVite(),
     // Tree-shaking for sentry https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/
     replace({
       preventAssignment: false,

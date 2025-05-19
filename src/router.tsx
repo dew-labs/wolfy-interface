@@ -1,6 +1,7 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
+import {createHead} from '@unhead/react/client'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {type createStore} from 'jotai'
 
@@ -11,6 +12,7 @@ import NotFound from './views/NotFound/NotFound'
 export interface RouterContext {
   queryClient: QueryClient
   store: ReturnType<typeof createStore>
+  head: ReturnType<typeof createHead>
 }
 
 // Tanstack's default parse behavior: just like JSON.parse, JSON.stringify => suport JSON types
@@ -43,13 +45,7 @@ export interface RouterContext {
 // const parseSearch = (search: string) => queryString.parse(search, PARSE_SEARCH_OPTIONS),
 // const stringifySearch = (search: Record<string, unknown>) => queryString.stringify(search, STRINGIFY_SEARCH_OPTIONS),
 
-export function createRouter({
-  queryClient,
-  store,
-}: {
-  queryClient: QueryClient
-  store: ReturnType<typeof createStore>
-}) {
+export function createRouter({queryClient, store, head}: RouterContext) {
   return createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
     // Thinking about using jsurl2 for better readability, or zipson for shorter string,
@@ -66,7 +62,7 @@ export function createRouter({
       return String(value)
     }, JSON.parse),
     routeTree,
-    context: {queryClient, store},
+    context: {queryClient, store, head},
     // On the server, dehydrate the loader client and return it
     // to the router to get injected into `<DehydrateRouter />`
     dehydrate: () => ({queryClientState: dehydrate(queryClient)}),

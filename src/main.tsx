@@ -7,6 +7,7 @@ import {createStore} from 'jotai'
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 
+import createHead from './lib/head/head'
 import {createQueryClient} from './queries/queries'
 import {createRouter} from './router'
 
@@ -15,7 +16,8 @@ function App() {
   /* eslint-disable @eslint-react/naming-convention/use-state -- not needed */
   const [queryClient] = useState(() => createQueryClient())
   const [store] = useState(() => createStore())
-  const [router] = useState(() => createRouter({queryClient, store}))
+  const [head] = useState(() => createHead())
+  const [router] = useState(() => createRouter({queryClient, store, head}))
   /* eslint-enable @eslint-react/naming-convention/use-state */
 
   const context = useMemo(() => ({queryClient, store}), [queryClient, store])

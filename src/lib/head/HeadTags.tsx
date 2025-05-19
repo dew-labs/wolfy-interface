@@ -1,11 +1,16 @@
-import {useSeoMeta} from 'unhead'
+import {useHead} from '@unhead/react'
 
 import {TITLE} from '@/constants/config'
 
-const HeadTags = function (
-  props: Readonly<Omit<Parameters<typeof useSeoMeta>[0], 'titleTemplate'>>,
-) {
-  useSeoMeta({...props, titleTemplate: (title?: string) => `${title} | ${TITLE}`})
+const HeadTags = function (props: Parameters<typeof useHead>[0]) {
+  useHead({
+    ...props,
+    titleTemplate: '%s %separator %siteName',
+    templateParams: {
+      separator: '—',
+      siteName: TITLE,
+    },
+  })
 
   return null
 }

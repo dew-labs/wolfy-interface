@@ -340,11 +340,15 @@ export default memo(function MarketInformation() {
   const longInterestPercentage = selectedMarket?.longInterestPercentage ?? 0
   const shortInterestPercentage = selectedMarket?.shortInterestPercentage ?? 0
 
+  const title = useDeferredValue(
+    tokenMetadata?.symbol && priceIndexText
+      ? `${priceIndexText} | ${tokenMetadata.symbol}/USD`
+      : '',
+  )
+
   return (
     <>
-      {tokenMetadata?.symbol && priceIndexText && (
-        <HeadTags title={`${priceIndexText} | ${tokenMetadata.symbol}/USD`} />
-      )}
+      {title && <HeadTags title={title} />}
       <Card>
         <CardBody className='flex flex-row items-center gap-4'>
           <Popover

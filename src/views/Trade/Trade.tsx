@@ -1,7 +1,6 @@
 import SkipLink from '@/components/SkipLink'
 import WolfyNavbar from '@/components/WolfyNavbar'
 import {getTokenMetadata} from '@/constants/tokens'
-import HeadTags from '@/lib/head/HeadTags'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import {OHLCVEffects} from '@/lib/trade/hooks/useOHLCV'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
@@ -23,7 +22,6 @@ export default function Trade() {
 
   return (
     <div>
-      <HeadTags title='Trade' />
       <SkipLink title='Skip to main content' to='#main-content' />
       <WolfyNavbar />
       <OHLCVEffects symbol={symbol} />
