@@ -135,14 +135,16 @@ const Controller = createResetableComponent(({reset}) => {
   const tradeFlags = useTradeFlags(tradeType, tradeMode)
 
   const handleChangeTradeType = useCallback(
-    (value: Key) => {
+    (value: Key | null) => {
+      if (!value) return
       setTradeType(value as TradeType)
     },
     [setTradeType],
   )
 
   const handleChangeTradeMode = useCallback(
-    (value: Key) => {
+    (value: Key | null) => {
+      if (!value) return
       const tradeMode = value as TradeMode
       setTradeMode(tradeMode)
     },

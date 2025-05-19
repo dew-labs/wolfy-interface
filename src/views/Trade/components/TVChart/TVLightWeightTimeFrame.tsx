@@ -5,7 +5,7 @@ import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 
 interface Props {
   selectedInterval: ChartInterval
-  onSelectInterval: MemoizedCallbackOrDispatch<Key>
+  onSelectInterval: MemoizedCallbackOrDispatch<Key | null>
 }
 
 export default memo(function TVLightWeightTimeFrame({selectedInterval, onSelectInterval}: Props) {
