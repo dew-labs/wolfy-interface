@@ -344,6 +344,13 @@ export function getConfig(mode: string): UserConfig {
       plugins: [
         ['@swc-jotai/debug-label', {}],
         ['@swc-jotai/react-refresh', {}],
+        // ['swc-plugin-dev-expression', {}], // Need to upgrade swc_core
+        // [
+        //   '@swc/plugin-remove-console',
+        //   {
+        //     exclude: ['error'],
+        //   },
+        // ],
         inTestOrDevMode
           ? false
           : [

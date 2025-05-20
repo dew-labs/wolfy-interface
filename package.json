@@ -47,7 +47,8 @@
     "lighthouse:prod": "pnpm dlx unlighthouse --site 'https://ready2.react/'",
     "preinstall": "npx only-allow pnpm",
     "commit": "better-commits",
-    "branch": "better-branch"
+    "branch": "better-branch",
+    "jscpd": "pnpm dlx jscpd ./src"
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.8",
