@@ -1,7 +1,13 @@
-// import {useMemoOne as useStableMemo} from 'use-memo-one'
+import type {Atom} from 'jotai'
 
-// type EffectFn = Parameters<typeof atomEffect>[0]
-
-// export function useAtomEffect(effectFn: EffectFn) {
-//   useAtomValue(useStableMemo(() => atomEffect(effectFn), [effectFn]))
-// }
+export function useAtomEffect<T>(atom: Atom<T>, dispatch: Dispatch<SetStateAction<T>>) {
+  useAtom(
+    useMemo(
+      () =>
+        atomEffect(get => {
+          dispatch(get(atom))
+        }),
+      [atom, dispatch],
+    ),
+  )
+}

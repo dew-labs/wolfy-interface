@@ -1,15 +1,14 @@
 // import {createLink, type LinkComponent} from '@tanstack/react-router'
-// import type {AnchorHTMLAttributes} from 'react'
 // import type {AriaLinkOptions} from 'react-aria'
 // import {mergeProps, useFocusRing, useHover, useLink, useObjectRef} from 'react-aria'
 
 // interface RACLinkProps
 //   extends Omit<AriaLinkOptions, 'href'>,
 //     Omit<
-//       AnchorHTMLAttributes<HTMLAnchorElement>,
+//       JSX.IntrinsicElements['a'],
 //       'href' | 'download' | 'onBlur' | 'onFocus' | 'onKeyDown' | 'onKeyUp' | 'onClick'
 //     > {
-//   ref: React.RefObject<HTMLAnchorElement>
+//   ref: Ref<HTMLAnchorElement>
 // }
 
 // /*

@@ -14,7 +14,6 @@ import {
   Tooltip,
 } from '@heroui/react'
 import {type Key} from '@react-types/shared'
-import {type DOMAttributes, type KeyboardEventHandler} from 'react'
 import {toast} from 'sonner'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
@@ -805,7 +804,7 @@ const Controller = createResetableComponent(({reset}) => {
   }, [setLeverageInputFocused])
 
   const sliderRenderValue = useCallback(
-    (props: DOMAttributes<HTMLOutputElement>) => (
+    (props: JSX.IntrinsicElements['output']) => (
       <output {...props}>
         {'x '}
         <Tooltip

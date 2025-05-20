@@ -1,5 +1,4 @@
 import type {Getter, Setter} from 'jotai'
-import type {SetStateAction} from 'react'
 
 type Callback<Value> = (get: Getter, set: Setter, newVal: Value, prevVal: Value) => void
 

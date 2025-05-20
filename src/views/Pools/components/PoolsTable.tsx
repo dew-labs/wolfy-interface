@@ -57,7 +57,7 @@ export interface ExtendedMarketData {
   balanceValue: number
   balanceValueString: string
   apy: string
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
 const TABLE_CLASS_NAMES = {th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider']}

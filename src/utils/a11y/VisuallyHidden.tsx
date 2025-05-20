@@ -1,19 +1,23 @@
 export default function VisuallyHidden<
-  T extends keyof React.JSX.IntrinsicElements | ((...args: never[]) => React.ReactNode),
+  T extends keyof JSX.IntrinsicElements | ((...args: never[]) => ReactNode),
 >({
   as,
   strict,
   isVisible,
   ...props
-}: T extends keyof React.JSX.IntrinsicElements
-  ? {as?: T; strict?: boolean; isVisible?: boolean} & React.JSX.IntrinsicElements[T]
+}: T extends keyof JSX.IntrinsicElements
+  ? {
+      as?: T
+      strict?: boolean
+      isVisible?: boolean
+    } & JSX.IntrinsicElements[T]
   : {
       as?: T
       strict?: boolean
       isVisible?: boolean
-      // @ts-expect-error -- in order to have typecheck, do not change the type of T in generic
-    } & React.ComponentProps<T>): React.JSX.Element {
-  const Tag = (as ?? 'span') as React.JSX.ElementType
+      // @ts-expect-error complex type
+    } & ComponentPropsWithRef<T>): ReactElement {
+  const Tag = (as ?? 'span') as ElementType
 
   const classNames = []
   if ('className' in props && typeof props.className === 'string') {
@@ -33,18 +37,24 @@ export default function VisuallyHidden<
 // function Test() {
 //   return (
 //     <>
-//       <VisuallyHidden as={TestComponent} test={true}>
+//       <VisuallyHidden as={TestComponent} test>
 //         children
 //       </VisuallyHidden>
-//       <VisuallyHidden as={TestComponent} test={1}>
+//       <VisuallyHidden as={TestComponent} test={1} what=''> {/* Should error because `what` is not exist */}
 //         children
 //       </VisuallyHidden>
-//       <VisuallyHidden as='button' srcSet='hihi'>
+//       <VisuallyHidden as='button' srcSet='hihi' type='button'>
 //         children
 //       </VisuallyHidden>
-//       <VisuallyHidden as='img' srcSet='hihi'>
+//       <VisuallyHidden as='img' srcSet='hihi' alt='' what=''>
 //         children
 //       </VisuallyHidden>
+//       <VisuallyHidden
+//         as='form'
+//         onSubmit={e => {
+//           e.preventDefault()
+//         }}
+//       />
 //     </>
 //   )
 // }

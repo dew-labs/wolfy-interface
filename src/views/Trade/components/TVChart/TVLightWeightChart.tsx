@@ -9,7 +9,6 @@ import {
   type ISeriesApi,
   LineStyle,
 } from 'lightweight-charts'
-import {type ReactElement} from 'react'
 import invariant from 'tiny-invariant'
 import type {PartialDeep} from 'type-fest'
 

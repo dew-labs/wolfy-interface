@@ -1,5 +1,3 @@
-import type {SetStateAction} from 'react'
-
 export function atomWithBroadcast<Value>(key: string, initialValue: Value) {
   const baseAtom = atom(initialValue)
   const listeners = new Set<(event: MessageEvent) => void>()

@@ -1,13 +1,13 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {Window} from 'happy-dom'
-import {act, type ReactNode} from 'react'
+import {act} from 'react'
 import {hydrateRoot} from 'react-dom/client'
 import {renderToString} from 'react-dom/server'
 import {vi} from 'vitest'
 
 export const renderHookServer = <Hook extends () => unknown>(
   useHook: Hook,
-  {wrapper: Wrapper}: {wrapper?: ({children}: {children: ReactNode}) => React.ReactElement} = {},
+  {wrapper: Wrapper}: {wrapper?: ({children}: {children: ReactNode}) => ReactElement} = {},
 ): {result: {current: ReturnType<Hook> | undefined}; hydrate: () => void} => {
   // Store hook return values
   const results: ReturnType<Hook>[] = []

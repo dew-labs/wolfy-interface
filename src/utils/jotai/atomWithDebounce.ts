@@ -1,5 +1,3 @@
-import type {SetStateAction} from 'react'
-
 export default function atomWithDebounce<T>(
   initialValue: T,
   delayMilliseconds = 500,

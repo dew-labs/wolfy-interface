@@ -1,5 +1,4 @@
 import cssEscape from 'css.escape'
-import type {ImgHTMLAttributes} from 'react'
 import {preload as reactDomPreload} from 'react-dom'
 import type {SetRequired} from 'type-fest'
 
@@ -36,7 +35,7 @@ interface Src {
   lqip?: Lqip
 }
 
-export interface PictureProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'id' | 'src'> {
+export interface PictureProps extends Omit<JSX.IntrinsicElements['img'], 'id' | 'src'> {
   /**
    * Can be a single or an list of {@link Src}, if was an array, all item in the list should also have `media`
    */
@@ -51,7 +50,7 @@ export interface PictureProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
    * Preload this picture
    */
   preload?: boolean
-  ref?: React.Ref<HTMLImageElement>
+  ref?: Ref<HTMLImageElement>
 }
 
 const PRELOAD_PRIORITY = ['avif', 'webp', 'png', 'jpeg', 'gif'] as const // mime format
