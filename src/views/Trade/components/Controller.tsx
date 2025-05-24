@@ -804,7 +804,7 @@ const Controller = createResetableComponent(({reset}) => {
   }, [setLeverageInputFocused])
 
   const sliderRenderValue = useCallback(
-    (props: JSX.IntrinsicElements['output']) => (
+    (props: ComponentProps<'output'>) => (
       <output {...props}>
         {'x '}
         <Tooltip

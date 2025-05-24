@@ -29,6 +29,7 @@ declare global {
   const createContext: typeof import('react')['createContext']
   const createJSONStorage: typeof import('jotai/utils')['createJSONStorage']
   const createRef: typeof import('react')['createRef']
+  const deepMemo: typeof import('@/utils/react/deepMemo')['default']
   const focusAtom: typeof import('jotai-optics')['focusAtom']
   const focusManager: typeof import('@tanstack/react-query')['focusManager']
   const forwardRef: typeof import('react')['forwardRef']

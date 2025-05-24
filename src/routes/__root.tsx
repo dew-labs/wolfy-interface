@@ -15,7 +15,7 @@ import type {RouterContext} from '@/router'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
 import {logError} from '@/utils/logger'
-import {QueryErrorBoundary} from '@/utils/query/QueryErrorBoundary'
+import QueryErrorBoundary from '@/utils/query/QueryErrorBoundary'
 import ErrorComponent from '@/views/Error/ErrorComponent'
 
 const JotaiDevTools = ENABLE_DEVTOOLS
@@ -70,7 +70,7 @@ function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
   return <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} />
 }
 
-const DevTool = memo(function DevTool({children}: PropsWithChildren) {
+const DevTool = deepMemo(function DevTool({children}: PropsWithChildren) {
   if (!ENABLE_DEVTOOLS) return null
 
   return (

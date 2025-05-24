@@ -75,7 +75,7 @@ interface TVLightWeightChartProps extends PropsWithChildren {
   children: ReactElement<LineProps> | ReactElement<LineProps>[]
 }
 
-export default memo(function TVLightWeightChart({
+export default deepMemo(function TVLightWeightChart({
   asset,
   textColor,
   gridColor,

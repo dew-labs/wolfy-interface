@@ -5,7 +5,7 @@
 // interface RACLinkProps
 //   extends Omit<AriaLinkOptions, 'href'>,
 //     Omit<
-//       JSX.IntrinsicElements['a'],
+//       ComponentProps<'a'>,
 //       'href' | 'download' | 'onBlur' | 'onFocus' | 'onKeyDown' | 'onKeyUp' | 'onClick'
 //     > {
 //   ref: Ref<HTMLAnchorElement>

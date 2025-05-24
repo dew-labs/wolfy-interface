@@ -1,22 +1,18 @@
+import type {JSXElementConstructor} from 'react'
+
 export default function VisuallyHidden<
-  T extends keyof JSX.IntrinsicElements | ((...args: never[]) => ReactNode),
+  T extends keyof JSX.IntrinsicElements | JSXElementConstructor<never>,
 >({
   as,
   strict,
   isVisible,
   ...props
-}: T extends keyof JSX.IntrinsicElements
-  ? {
-      as?: T
-      strict?: boolean
-      isVisible?: boolean
-    } & JSX.IntrinsicElements[T]
-  : {
-      as?: T
-      strict?: boolean
-      isVisible?: boolean
-      // @ts-expect-error complex type
-    } & ComponentPropsWithRef<T>): ReactElement {
+}: {
+  as?: T
+  strict?: boolean
+  isVisible?: boolean
+  // @ts-expect-error complex type
+} & ComponentProps<T>): ReactElement {
   const Tag = (as ?? 'span') as ElementType
 
   const classNames = []

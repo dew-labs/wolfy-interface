@@ -35,7 +35,7 @@ interface Src {
   lqip?: Lqip
 }
 
-export interface PictureProps extends Omit<JSX.IntrinsicElements['img'], 'id' | 'src'> {
+export interface PictureProps extends Omit<ComponentProps<'img'>, 'id' | 'src'> {
   /**
    * Can be a single or an list of {@link Src}, if was an array, all item in the list should also have `media`
    */

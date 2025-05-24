@@ -104,7 +104,9 @@ export function getConfig(mode: string): UserConfig {
   const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
-  const optimizeLocales = pluginOptimizeLocales.vite({locales: ['en-US']})
+  const optimizeLocales = pluginOptimizeLocales.vite({
+    locales: ['en-US'],
+  })
 
   if (Array.isArray(optimizeLocales)) {
     optimizeLocales.forEach(plugin => {
@@ -122,6 +124,9 @@ export function getConfig(mode: string): UserConfig {
       include: [...globs.SCRIPT],
       ignore: [],
       imports: [
+        {
+          '@/utils/react/deepMemo': [['default', 'deepMemo']],
+        },
         {
           'tiny-invariant': [['default', 'invariant']],
         },

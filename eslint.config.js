@@ -704,7 +704,11 @@ function getReactConfigs() {
       rules: {
         'react-refresh/only-export-components': [
           'warn',
-          {allowConstantExport: true, checkJS: true},
+          {
+            allowConstantExport: true,
+            checkJS: true,
+            customHOCs: ['deepMemo'],
+          },
         ],
       },
     }),
