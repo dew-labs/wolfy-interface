@@ -1,4 +1,4 @@
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import getDepositAmounts from '@/lib/trade/utils/deposit/getDepositAmounts'
@@ -56,7 +56,7 @@ export function useDepositWithdrawalAmounts({
   focusedInput: 'market' | 'longCollateral' | 'shortCollateral'
 }): DepositWithdrawalAmounts | undefined {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: {longTokenPrice, marketTokenPrice, shortTokenPrice} = {}} = useTokenPrices(
+  const {data: {longTokenPrice, marketTokenPrice, shortTokenPrice} = {}} = useTokenPricesQuery(
     useCallback(
       prices => {
         const longTokenPrice = prices.get(marketInfo?.longTokenAddress ?? '')

@@ -1,6 +1,6 @@
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
-import useGasLimits from '@/lib/trade/hooks/useGasLimits'
-import useGasPrice from '@/lib/trade/hooks/useGasPrice'
+import useGasLimitsQuery from '@/lib/trade/hooks/useGasLimitsQuery'
+import useGasPriceQuery from '@/lib/trade/hooks/useGasPriceQuery'
 import estimateExecuteDepositGasLimit from '@/lib/trade/utils/fee/estimateExecuteDepositGasLimit'
 import estimateExecuteWithdrawalGasLimit from '@/lib/trade/utils/fee/estimateExecuteWithdrawalGasLimit'
 import {getExecutionFee} from '@/lib/trade/utils/fee/getExecutionFee'
@@ -10,8 +10,8 @@ export default function useDepositWithdrawalExecutionFee(
   shortTokenAmount: bigint,
   isDeposit: boolean,
 ) {
-  const {data: gasLimits} = useGasLimits()
-  const {data: gasPrice} = useGasPrice()
+  const {data: gasLimits} = useGasLimitsQuery()
+  const {data: gasPrice} = useGasPriceQuery()
   const {feeToken, feeTokenPrice} = useFeeToken()
 
   if (!gasLimits || !gasPrice) return undefined

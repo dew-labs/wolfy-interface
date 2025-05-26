@@ -24,7 +24,7 @@ function createGetGasPriceQueryOptions(chainId: StarknetChainId, blockTime: numb
   })
 }
 
-export default function useGasPrice() {
+export default function useGasPriceQuery() {
   const [chainId] = useChainId()
   const blockTime = BLOCK_TIME[chainId]
 

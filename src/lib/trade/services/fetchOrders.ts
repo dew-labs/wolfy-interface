@@ -39,8 +39,11 @@ export interface Order {
 
 export type OrdersData = Map<string, Order>
 
-export default async function fetchOrders(chainId: StarknetChainId, account: string | undefined) {
-  if (!account) return new Map() as OrdersData
+export default async function fetchOrders(
+  chainId: StarknetChainId,
+  account: string | undefined,
+): Promise<OrdersData> {
+  if (!account) return new Map()
 
   const dataStoreContract = createWolfyContract(chainId, WolfyContract.DataStore, DataStoreABI)
   const orderCount = await dataStoreContract.get_account_order_count(account)

@@ -1,6 +1,6 @@
 import type {StarknetChainId} from 'wolfy-sdk'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchOrders, {type OrdersData} from '@/lib/trade/services/fetchOrders'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
@@ -31,15 +31,15 @@ function createGetOrdersDataQueryOptions<T>(
   })
 }
 
-export default function useOrdersData(): UseQueryResult<OrdersData>
-export default function useOrdersData<T = OrdersData>(
+export default function useOrdersDataQuery(): UseQueryResult<OrdersData>
+export default function useOrdersDataQuery<T = OrdersData>(
   selector: MemoizedCallback<(data: OrdersData) => T>,
 ): UseQueryResult<T>
-export default function useOrdersData<T = OrdersData>(
+export default function useOrdersDataQuery<T = OrdersData>(
   selector?: MemoizedCallback<(data: OrdersData) => T>,
 ) {
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
 
   return useQuery(
     createGetOrdersDataQueryOptions(

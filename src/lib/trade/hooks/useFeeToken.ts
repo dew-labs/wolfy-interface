@@ -4,7 +4,7 @@ import {FEE_TOKEN_ADDRESS, getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import {DEFAULT_PRICE} from '@/lib/trade/services/fetchTokenPrices'
 
-import useTokenPrices from './useTokenPrices'
+import useTokenPricesQuery from './useTokenPricesQuery'
 
 export default function useFeeToken() {
   const [chainId] = useChainId()
@@ -13,7 +13,7 @@ export default function useFeeToken() {
 
   const feeToken = getTokenMetadata(chainId, feeTokenAddress)
 
-  const {data: feeTokenPrice = DEFAULT_PRICE} = useTokenPrices(
+  const {data: feeTokenPrice = DEFAULT_PRICE} = useTokenPricesQuery(
     useCallback(data => data.get(feeTokenAddress), [feeTokenAddress]),
   )
 

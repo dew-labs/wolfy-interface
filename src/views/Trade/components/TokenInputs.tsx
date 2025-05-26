@@ -9,9 +9,9 @@ import {
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useTokenBalancesQuery from '@/lib/trade/hooks/useTokenBalancesQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_PRICE} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
@@ -86,7 +86,7 @@ export default memo(function TokenInputs({
   const latestTokensMetadata = useLatest(tokensMetadata)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: payTokenBalance = 0n} = useTokenBalances(
+  const {data: payTokenBalance = 0n} = useTokenBalancesQuery(
     useCallback(
       data => {
         return data.get(payTokenAddress ?? '')
@@ -96,7 +96,7 @@ export default memo(function TokenInputs({
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: currentMarketData} = useMarketsData(
+  const {data: currentMarketData} = useMarketsDataQuery(
     useCallback(
       data => {
         return data.get(marketAddress ?? '')
@@ -106,7 +106,7 @@ export default memo(function TokenInputs({
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: realTokenPrice} = useTokenPrices(
+  const {data: realTokenPrice} = useTokenPricesQuery(
     useCallback(
       data => {
         return data.get(currentMarketData?.indexToken.address ?? '')
@@ -115,7 +115,7 @@ export default memo(function TokenInputs({
     ),
   )
 
-  const {data: payTokenPrice} = useTokenPrices(
+  const {data: payTokenPrice} = useTokenPricesQuery(
     useCallback(
       data => {
         return data.get(payTokenAddress ?? '')

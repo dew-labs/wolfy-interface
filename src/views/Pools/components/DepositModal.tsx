@@ -13,11 +13,11 @@ import {toast} from 'sonner'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
-import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
+import useTokenBalancesQuery from '@/lib/trade/hooks/useTokenBalancesQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendDeposit from '@/lib/trade/services/market/sendDeposit'
 import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
@@ -46,11 +46,11 @@ export default memo(function DepositModal({
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
   // TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPrices = new Map()} = useTokenPrices()
-  const {data: marketsData = new Map()} = useMarketsData()
-  const {data: marketTokensData = new Map()} = useMarketTokensData()
-  const {data: tokenBalances = new Map()} = useTokenBalances()
-  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
+  const {data: tokenPrices = new Map()} = useTokenPricesQuery()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
+  const {data: marketTokensData = new Map()} = useMarketTokensDataQuery()
+  const {data: tokenBalances = new Map()} = useTokenBalancesQuery()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactorQuery()
 
   const [longTokenAmountInput, setLongTokenAmountInput] = useState('')
   const [shortTokenAmountInput, setShortTokenAmountInput] = useState('')

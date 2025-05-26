@@ -1,23 +1,23 @@
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getOrdersInfo, {type OrderInfosData} from '@/lib/trade/utils/order/getOrdersInfo'
 
-import useMarketsData from './useMarketsData'
-import useOrdersData from './useOrdersData'
-import useTokenPrices from './useTokenPrices'
+import useMarketsDataQuery from './useMarketsDataQuery'
+import useOrdersDataQuery from './useOrdersDataQuery'
+import useTokenPricesQuery from './useTokenPricesQuery'
 
-export default function useOrdersInfosData(): UseQueryResult<OrderInfosData>
-export default function useOrdersInfosData<T = OrderInfosData>(
+export default function useOrdersInfosDataQuery(): UseQueryResult<OrderInfosData>
+export default function useOrdersInfosDataQuery<T = OrderInfosData>(
   selector: MemoizedCallback<(data: OrderInfosData) => T>,
 ): UseQueryResult<T>
-export default function useOrdersInfosData<T = OrderInfosData>(
+export default function useOrdersInfosDataQuery<T = OrderInfosData>(
   selector?: MemoizedCallback<(data: OrderInfosData) => T>,
 ) {
   const [chainId] = useChainId()
-  const {data: marketsData} = useMarketsData()
+  const {data: marketsData} = useMarketsDataQuery()
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPricesData} = useTokenPrices()
+  const {data: tokenPricesData} = useTokenPricesQuery()
 
-  return useOrdersData(
+  return useOrdersDataQuery(
     useCallback(
       ordersData => {
         const ordersInfo =

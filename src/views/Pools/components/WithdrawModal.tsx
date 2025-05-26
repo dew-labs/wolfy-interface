@@ -13,11 +13,11 @@ import {toast} from 'sonner'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
-import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketTokenBalancesQuery from '@/lib/trade/hooks/useMarketTokenBalancesQuery'
+import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import sendWithdrawal from '@/lib/trade/services/market/sendWithdrawal'
 import calculateMarketPrice from '@/lib/trade/utils/market/calculateMarketPrice'
@@ -52,11 +52,11 @@ export default memo(function WithdrawModal({
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPrices = new Map()} = useTokenPrices()
-  const {data: marketsData = new Map()} = useMarketsData()
-  const {data: marketTokensData = new Map()} = useMarketTokensData()
-  const {data: marketTokenBalances = new Map()} = useMarketTokenBalances()
-  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
+  const {data: tokenPrices = new Map()} = useTokenPricesQuery()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
+  const {data: marketTokensData = new Map()} = useMarketTokensDataQuery()
+  const {data: marketTokenBalances = new Map()} = useMarketTokenBalancesQuery()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactorQuery()
 
   const marketData = useMemo(
     () => marketsData.get(marketTokenAddress),

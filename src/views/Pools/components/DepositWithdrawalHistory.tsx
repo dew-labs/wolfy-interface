@@ -17,11 +17,11 @@ import {create} from 'mutative'
 
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
-import useDepositWithdrawalHistory from '@/lib/trade/hooks/useDepositWithdrawalHistory'
+import useDepositWithdrawalHistoryQuery from '@/lib/trade/hooks/useDepositWithdrawalHistoryQuery'
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
@@ -98,8 +98,8 @@ const getActionLabel = (value: TradeHistoryAction): string => {
 
 export default memo(function DepositWithdrawalHistory() {
   const [chainId] = useChainId()
-  const {data: marketsData = new Map()} = useMarketsData()
-  const {data: marketTokensData = new Map()} = useMarketTokensData()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
+  const {data: marketTokensData = new Map()} = useMarketTokensDataQuery()
   const {feeToken, feeTokenPrice} = useFeeToken()
 
   const markets = useMemo(() => {
@@ -119,7 +119,7 @@ export default memo(function DepositWithdrawalHistory() {
     refetch,
     isLoading,
     isFetching,
-  } = useDepositWithdrawalHistory(selectedActions, selectedMarkets, currentPage, 10)
+  } = useDepositWithdrawalHistoryQuery(selectedActions, selectedMarkets, currentPage, 10)
   const totalPages = history?.totalPages ?? 0
   const historyItems = useMemo(() => history?.data ?? [], [history])
 
@@ -133,7 +133,7 @@ export default memo(function DepositWithdrawalHistory() {
     )
   }, [historyItems, marketsData])
 
-  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPricesQuery(
     useCallback(
       prices => {
         if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData

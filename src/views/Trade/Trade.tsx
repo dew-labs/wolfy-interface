@@ -3,7 +3,7 @@ import WolfyNavbar from '@/components/WolfyNavbar'
 import {getTokenMetadata} from '@/constants/tokens'
 import HeadTags from '@/lib/head/HeadTags'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import {OHLCVEffects} from '@/lib/trade/hooks/useOHLCV'
+import {OHLCVEffects} from '@/lib/trade/hooks/useOHLCVQuery'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 

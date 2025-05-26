@@ -19,9 +19,9 @@ import {groupBy} from 'remeda'
 import {getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
 import HeadTags from '@/lib/head/HeadTags'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useOHLCV from '@/lib/trade/hooks/useOHLCV'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useOHLCVQuery from '@/lib/trade/hooks/useOHLCVQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import type {AvailableTokens} from '@/lib/trade/utils/market/getAvailableTokens'
@@ -43,7 +43,7 @@ interface TokenOption {
 }
 
 function use1DMarketInformation(symbol: string | undefined) {
-  const {data: ohlcvData} = useOHLCV(symbol)
+  const {data: ohlcvData} = useOHLCVQuery(symbol)
 
   const open = ohlcvData?.open ?? 0
   const close = ohlcvData?.close ?? 0
@@ -70,10 +70,10 @@ export default memo(function MarketInformation() {
   const [tokenAddress, setTokenAddress] = useTokenAddress()
   const tokensMetadata = getTokensMetadata(chainId)
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPricesData = new Map()} = useTokenPrices()
+  const {data: tokenPricesData = new Map()} = useTokenPricesQuery()
   const [marketSortDescriptor, setMarketSortDescriptor] = useState<SortDescriptor>()
 
-  const {data: marketsData = new Map()} = useMarketsData()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
 
   const availableTokens: AvailableTokens | undefined = useMemo(() => {
     return getAvailableTokens(marketsData, tokenPricesData)

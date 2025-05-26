@@ -20,22 +20,22 @@ import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, LEVERAGE_DECIMALS, SLIPPAGE_PRECISION} from '@/constants/config'
 import {FEE_TOKEN_ADDRESS, getTokensMetadata} from '@/constants/tokens'
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useConnect from '@/lib/starknet/hooks/useConnect'
 import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
-import useGasLimits from '@/lib/trade/hooks/useGasLimits'
-import useGasPrice from '@/lib/trade/hooks/useGasPrice'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import usePositionsConstants from '@/lib/trade/hooks/usePositionConstants'
-import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
-import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
-import useTokenBalances from '@/lib/trade/hooks/useTokenBalances'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
+import useGasLimitsQuery from '@/lib/trade/hooks/useGasLimitsQuery'
+import useGasPriceQuery from '@/lib/trade/hooks/useGasPriceQuery'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import usePositionsConstantsQuery from '@/lib/trade/hooks/usePositionConstantsQuery'
+import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
+import useReferralInfoQuery from '@/lib/trade/hooks/useReferralInfoQuery'
+import useTokenBalancesQuery from '@/lib/trade/hooks/useTokenBalancesQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_GAS_LIMITS} from '@/lib/trade/services/fetchGasLimits'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
@@ -108,14 +108,14 @@ const Controller = createResetableComponent(({reset}) => {
   const queryClient = useQueryClient()
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
   const latestAccountAddress = useLatest(accountAddress)
   const tokensMetadata = getTokensMetadata(chainId)
-  const {data: gasPrice = 0n} = useGasPrice()
-  const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimits()
-  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
-  const {data: referralInfo} = useReferralInfo()
-  const {data: tokenBalancesData = new Map()} = useTokenBalances()
+  const {data: gasPrice = 0n} = useGasPriceQuery()
+  const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimitsQuery()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactorQuery()
+  const {data: referralInfo} = useReferralInfoQuery()
+  const {data: tokenBalancesData = new Map()} = useTokenBalancesQuery()
 
   // TODO
   const {
@@ -262,7 +262,7 @@ const Controller = createResetableComponent(({reset}) => {
       shortTokenPrice: undefined,
       feeTokenPrice: undefined,
     },
-  } = useTokenPrices(
+  } = useTokenPricesQuery(
     useCallback(
       data => {
         const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
@@ -294,7 +294,7 @@ const Controller = createResetableComponent(({reset}) => {
     ),
   )
 
-  const {data: positionConstants = DEFAULT_POSITION_CONSTANTS} = usePositionsConstants()
+  const {data: positionConstants = DEFAULT_POSITION_CONSTANTS} = usePositionsConstantsQuery()
 
   const priceFractionDigits = calculatePriceFractionDigits(
     tokenAddress ? tokenPricesDataShortlisted.tokenPrice?.min : 0,
@@ -394,9 +394,9 @@ const Controller = createResetableComponent(({reset}) => {
     return ''
   })()
 
-  const {data: marketsData = new Map()} = useMarketsData()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPricesData = new Map()} = useTokenPrices()
+  const {data: tokenPricesData = new Map()} = useTokenPricesQuery()
 
   const swapAmounts = (() => {
     const payToken = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined
@@ -451,7 +451,7 @@ const Controller = createResetableComponent(({reset}) => {
   })()
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: positions = new Map()} = usePositionsInfoData(
+  const {data: positions = new Map()} = usePositionsInfoDataQuery(
     selectPositionsInfoViaStringRepresentation,
   )
 

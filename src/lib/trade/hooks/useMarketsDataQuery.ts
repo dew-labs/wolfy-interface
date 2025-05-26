@@ -6,7 +6,7 @@ import fetchMarketsData, {type MarketsData} from '@/lib/trade/services/fetchMark
 import fetchTokenPrices from '@/lib/trade/services/fetchTokenPrices'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-import useMarkets from './useMarkets'
+import useMarketsQuery from './useMarketsQuery'
 
 export function getMarketsDataQueryKey(chainId: StarknetChainId, markets: Market[] | undefined) {
   return ['marketsData', chainId, markets] as const
@@ -34,15 +34,15 @@ function createGetMarketsDataQueryOptions<T>(
   })
 }
 
-export default function useMarketsData(): UseQueryResult<MarketsData>
-export default function useMarketsData<T = MarketsData>(
+export default function useMarketsDataQuery(): UseQueryResult<MarketsData>
+export default function useMarketsDataQuery<T = MarketsData>(
   selector: MemoizedCallback<(data: MarketsData) => T>,
 ): UseQueryResult<T>
-export default function useMarketsData<T = MarketsData>(
+export default function useMarketsDataQuery<T = MarketsData>(
   selector?: MemoizedCallback<(data: MarketsData) => T>,
 ) {
   const [chainId] = useChainId()
-  const {data: markets} = useMarkets()
+  const {data: markets} = useMarketsQuery()
 
   return useQuery(createGetMarketsDataQueryOptions(chainId, markets, selector))
 }

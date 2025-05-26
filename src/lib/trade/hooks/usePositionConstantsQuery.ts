@@ -19,7 +19,7 @@ function createGetPositionsConstantsQueryOptions(chainId: StarknetChainId) {
   })
 }
 
-export default function usePositionsConstants() {
+export default function usePositionsConstantsQuery() {
   const [chainId] = useChainId()
   return useQuery(createGetPositionsConstantsQueryOptions(chainId))
 }

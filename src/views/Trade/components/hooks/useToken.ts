@@ -1,6 +1,6 @@
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
@@ -12,7 +12,7 @@ export default function useToken(tradeMode: TradeMode) {
   const [tokenAddress] = useTokenAddress()
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: tokenMinPriceData = 0n} = useTokenPrices(
+  const {data: tokenMinPriceData = 0n} = useTokenPricesQuery(
     useCallback(
       tokenPrices => {
         return tokenPrices.get(tokenAddress ?? '')?.min
