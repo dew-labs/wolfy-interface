@@ -1,6 +1,6 @@
 import type {StarknetChainId} from 'wolfy-sdk'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchReferralInfo from '@/lib/trade/services/referral/fetchReferralInfo'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
@@ -25,9 +25,9 @@ function createGetReferralInfoQueryOptions(
   })
 }
 
-export default function useReferralInfo() {
+export default function useReferralInfoQuery() {
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
 
   return useQuery(createGetReferralInfoQueryOptions(chainId, accountAddress))
 }

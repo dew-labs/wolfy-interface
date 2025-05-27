@@ -15,10 +15,10 @@ import {create} from 'mutative'
 
 import {getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useMarketTokenBalances from '@/lib/trade/hooks/useMarketTokenBalances'
-import useMarketTokensData from '@/lib/trade/hooks/useMarketTokensData'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketTokenBalancesQuery from '@/lib/trade/hooks/useMarketTokenBalancesQuery'
+import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
@@ -57,7 +57,7 @@ export interface ExtendedMarketData {
   balanceValue: number
   balanceValueString: string
   apy: string
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
 const TABLE_CLASS_NAMES = {th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider']}
@@ -77,19 +77,19 @@ export default memo(function PoolsTable() {
     isLoading: isMarketsDataLoading,
     isFetching: isMarketsDataFetching,
     refetch: refetchMarketsData,
-  } = useMarketsData(selectMarketTokenAddresses)
+  } = useMarketsDataQuery(selectMarketTokenAddresses)
   const {
     data: marketTokensData = new Map(),
     isLoading: isMarketTokensDataLoading,
     isFetching: isMarketTokensDataFetching,
     refetch: refetchMarketTokensData,
-  } = useMarketTokensData()
+  } = useMarketTokensDataQuery()
   const {
     data: marketTokensBalances = new Map(),
     isLoading: isMarketTokensBalancesLoading,
     isFetching: isMarketTokensBalancesFetching,
     refetch: refetchMarketTokensBalances,
-  } = useMarketTokenBalances()
+  } = useMarketTokenBalancesQuery()
 
   const refetchPools = useCallback(() => {
     void refetchMarketsData()
@@ -112,7 +112,7 @@ export default memo(function PoolsTable() {
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: shortlistedTokenPrices = new Map()} = useTokenPrices(
+  const {data: shortlistedTokenPrices = new Map()} = useTokenPricesQuery(
     useCallback(
       prices => {
         if (filteredMarkets.length === 0) return new Map() as TokenPricesData

@@ -1,22 +1,17 @@
 import {type RegisteredRouter, useParams as useBaseParams} from '@tanstack/react-router'
-import type {ResolveUseParams} from '@tanstack/router-core'
+import type {ConstrainLiteral, ResolveUseParams, RouteIds} from '@tanstack/router-core'
 import type {NavigateOptionProps} from 'node_modules/@tanstack/router-core/dist/esm/link'
 
 import useSetParam from './useSetParam'
 
 export default function useParam<
-  CurrentRoute extends string,
-  ParamOut extends ResolveUseParams<RegisteredRouter, CurrentRoute, true>,
+  RouteId extends ConstrainLiteral<string, RouteIds<RegisteredRouter['routeTree']>>,
+  ParamOut extends ResolveUseParams<RegisteredRouter, RouteId, true>,
   ParamKey extends keyof ParamOut,
->(currentRoute: CurrentRoute, name: ParamKey, defaultOptions?: NavigateOptionProps) {
+>(routeId: RouteId, name: ParamKey, defaultOptions?: NavigateOptionProps) {
   const {[name]: value} = useBaseParams({
-    // @ts-expect-error -- complex typescript
-    from: currentRoute,
+    from: routeId,
   })
 
-  return [
-    value as ParamOut[ParamKey],
-    // @ts-expect-error -- complex typescript
-    useSetParam(currentRoute, name, defaultOptions),
-  ] as const
+  return [value as ParamOut[ParamKey], useSetParam(routeId, name, defaultOptions)] as const
 }

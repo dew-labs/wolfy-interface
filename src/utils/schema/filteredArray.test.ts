@@ -75,10 +75,6 @@ describe('filteredArray runtime tests', () => {
     const errorHandler = vi.fn()
     const numbersType = filteredArray(numberType, errorHandler)
 
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     it('should call error handler for each invalid value', () => {
       expect.assertions(2)
 

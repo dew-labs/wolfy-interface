@@ -10,8 +10,8 @@ import {
   Tooltip,
 } from '@heroui/react'
 
-import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
 // import getMarketIndexName from '@/lib/trade/utils/market/getMarketIndexName'
@@ -44,10 +44,10 @@ export default memo(function PositionTab() {
     isLoading,
     isFetching,
     refetch,
-  } = usePositionsInfoData(selectSortedPositions)
+  } = usePositionsInfoDataQuery(selectSortedPositions)
 
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPricesData = new Map()} = useTokenPrices()
+  const {data: tokenPricesData = new Map()} = useTokenPricesQuery()
   const setTokenAddress = useSetTokenAddress()
 
   const refetchPositionsInfo = useCallback(() => {

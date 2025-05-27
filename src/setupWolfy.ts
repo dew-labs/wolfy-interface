@@ -48,7 +48,7 @@ function registerHttpProviders() {
       'https://starknet-mainnet.g.alchemy.com/v2/demo',
       // 'https://starknet.drpc.org',
       'https://starknet.blockpi.network/v1/rpc/public',
-      'https://free-rpc.nethermind.io/mainnet-juno',
+      // 'https://free-rpc.nethermind.io/mainnet-juno',
       'https://starknet-mainnet.public.blastapi.io/rpc/v0_7',
       // 'https://rpc.starknet.lava.build:443',
       // 'https://g.w.lavanet.xyz:443/gateway/strk/rpc-http/f7ee0000000000000000000000000000',
@@ -66,13 +66,13 @@ function registerHttpProviders() {
       'https://starknet-sepolia.blastapi.io/6e65b40f-7148-4714-856f-9754a74d9d5d/rpc/v0_7',
       'https://starknet-sepolia.blastapi.io/9b95b6b2-ba0f-4fc8-b110-a87d2bda503b/rpc/v0_7',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/Snq-IYMCQSA2MqkyN85BljqG6-8SpM0z',
-      'https://rpc.nethermind.io/sepolia-juno/?apikey=YUVMGlmfoAEUCrf9vRERnyb7YeCNFE5sA8Awf0htjD2RyKS7',
+      // 'https://rpc.nethermind.io/sepolia-juno/?apikey=YUVMGlmfoAEUCrf9vRERnyb7YeCNFE5sA8Awf0htjD2RyKS7',
       // -------------------------------------------------------------------------
       'https://g.w.lavanet.xyz:443/gateway/strks/rpc-http/2ca1d8a490566df47090a33ec1238e50',
       'https://api-starknet-sepolia.dwellir.com/1b4bd5e6-e3bd-4732-9178-3a66c45f0952',
       // 'https://lb.drpc.org/ogrpc?network=starknet-sepolia&dkey=Ah5vfhDAbU7znWCHm81snotf6wv3QV0R76qFUgWAgP__',
       'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_7/-xREXsAaaQDXnEY1ZQmOqhcBjnQbbvza',
-      'https://rpc.nethermind.io/sepolia-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
+      // 'https://rpc.nethermind.io/sepolia-juno/?apikey=5v9T3rXRGAeZz446aA7GjxCneADe2vZ3N9HdotFQH4DQBIM3',
       'https://starknet-sepolia.blastapi.io/e38e0729-e402-4759-b0d1-dce28898f3ff/rpc/v0_7',
       'https://starknet-sepolia.infura.io/v3/2106130ac5734a04b3b1db1588ee9bad',
       // -------------------------------------------------------------------------
@@ -80,7 +80,7 @@ function registerHttpProviders() {
       // 'https://endpoints.omniatech.io/v1/starknet/sepolia/bb7dbf2360f246bfacce409fdd752e93', // Somehow cannot config cors
       // -------------------------------------------------------------------------
       // 'https://starknet-sepolia.drpc.org',
-      'https://free-rpc.nethermind.io/sepolia-juno',
+      // 'https://free-rpc.nethermind.io/sepolia-juno',
       'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
       // 'https://rpc.starknet-testnet.lava.build:443',
     ],

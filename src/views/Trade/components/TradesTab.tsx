@@ -20,8 +20,8 @@ import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
-import useTradeHistory from '@/lib/trade/hooks/useTradeHistory'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useTradeHistoryQuery from '@/lib/trade/hooks/useTradeHistoryQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
@@ -158,7 +158,7 @@ const formatUsd = (amount: string | null): string => {
 export default memo(function TradesTab() {
   const [chainId] = useChainId()
   const tokensMetadata = getTokensMetadata(chainId)
-  const {data: marketsData = new Map()} = useMarketsData()
+  const {data: marketsData = new Map()} = useMarketsDataQuery()
   const setTokenAddress = useSetTokenAddress()
   const {feeToken, feeTokenPrice} = useFeeToken()
 
@@ -209,7 +209,7 @@ export default memo(function TradesTab() {
     refetch,
     isLoading,
     isFetching,
-  } = useTradeHistory(selectedActions, selectedMarkets, selectedDirection, currentPage, 10)
+  } = useTradeHistoryQuery(selectedActions, selectedMarkets, selectedDirection, currentPage, 10)
   const totalPages = tradeHistory?.totalPages ?? 0
   const tradeHistoryItems = useMemo(() => tradeHistory?.data ?? [], [tradeHistory?.data])
 

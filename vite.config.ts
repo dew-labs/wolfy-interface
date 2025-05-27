@@ -104,7 +104,9 @@ export function getConfig(mode: string): UserConfig {
   const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
-  const optimizeLocales = pluginOptimizeLocales.vite({locales: ['en-US']})
+  const optimizeLocales = pluginOptimizeLocales.vite({
+    locales: ['en-US'],
+  })
 
   if (Array.isArray(optimizeLocales)) {
     optimizeLocales.forEach(plugin => {
@@ -123,6 +125,9 @@ export function getConfig(mode: string): UserConfig {
       ignore: [],
       imports: [
         {
+          '@/utils/react/deepMemo': [['default', 'deepMemo']],
+        },
+        {
           'tiny-invariant': [['default', 'invariant']],
         },
         'react',
@@ -134,13 +139,33 @@ export function getConfig(mode: string): UserConfig {
           imports: [
             'MemoizedCallback',
             'MemoizedCallbackOrDispatch',
-            'PropsWithChildren',
-            'ChangeEventHandler',
+            'SyntheticEvent', // base of all events, use when unsure about event type
+            'ReactEventHandler',
+            'UIEventHandler',
             'MouseEventHandler',
+            'TouchEventHandler',
+            'PointerEventHandler',
+            'ChangeEventHandler',
+            'KeyboardEventHandler',
+            'FormEventHandler',
             'ComponentProps',
+            'ComponentPropsWithRef',
+            'ComponentPropsWithoutRef',
+            'CustomComponentPropsWithRef',
+            'PropsWithoutRef',
+            'PropsWithChildren',
+            'ComponentRef',
+            'Ref',
             'RefObject',
             'RefCallback',
-            'ReactNode',
+            'Dispatch',
+            'SetStateAction',
+            'ReactNode', // best, accepts everything React can render (all possible return values of a component)
+            'JSX', // JSX.IntrinsicElements: all HTML components
+            'ComponentType', // generic custom component
+            'ElementType',
+            'ReactElement',
+            'CSSProperties',
           ],
           type: true,
         },
@@ -324,6 +349,13 @@ export function getConfig(mode: string): UserConfig {
       plugins: [
         ['@swc-jotai/debug-label', {}],
         ['@swc-jotai/react-refresh', {}],
+        // ['swc-plugin-dev-expression', {}], // Need to upgrade swc_core
+        // [
+        //   '@swc/plugin-remove-console',
+        //   {
+        //     exclude: ['error'],
+        //   },
+        // ],
         inTestOrDevMode
           ? false
           : [

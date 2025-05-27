@@ -4,9 +4,9 @@ import {LineStyle} from 'lightweight-charts'
 
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useOrderInfosData from '@/lib/trade/hooks/useOrderInfosData'
-import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useOrderInfosDataQuery from '@/lib/trade/hooks/useOrderInfosDataQuery'
+import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
@@ -19,7 +19,7 @@ import TVLightWeightChart, {Line} from '@/views/Trade/components/TVChart/TVLight
 import TVLightWeightTimeFrame from '@/views/Trade/components/TVChart/TVLightWeightTimeFrame.tsx'
 
 function useOrderKeysOfCurrentToken(tokenAddress: string | undefined) {
-  return useOrderInfosData(
+  return useOrderInfosDataQuery(
     useCallback(
       orders =>
         Array.from(orders.values())
@@ -31,7 +31,7 @@ function useOrderKeysOfCurrentToken(tokenAddress: string | undefined) {
 }
 
 function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
-  return usePositionsInfoData(
+  return usePositionsInfoDataQuery(
     useCallback(
       positions =>
         Array.from(positions.positionsInfoViaStringRepresentation.values())
@@ -43,8 +43,8 @@ function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
 }
 
 function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
-  const {data: order} = useOrderInfosData(useCallback(data => data.get(orderKey), [orderKey]))
-  const {data: initialCollateralTokenPrice} = useTokenPrices(
+  const {data: order} = useOrderInfosDataQuery(useCallback(data => data.get(orderKey), [orderKey]))
+  const {data: initialCollateralTokenPrice} = useTokenPricesQuery(
     useCallback(
       data => {
         if (!order || !isPositionOrder(order)) return null
@@ -88,11 +88,11 @@ function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
 }
 
 function PositionLine({positionKey}: Readonly<{positionKey: bigint}>) {
-  const {data: position} = usePositionsInfoData(
+  const {data: position} = usePositionsInfoDataQuery(
     useCallback(data => data.positionsInfo.get(positionKey), [positionKey]),
   )
 
-  const {data: collateralTokenPrice} = useTokenPrices(
+  const {data: collateralTokenPrice} = useTokenPricesQuery(
     useCallback(
       data => {
         if (!position) return null

@@ -11,11 +11,11 @@ import {
 } from '@heroui/react'
 import {toast} from 'sonner'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
-import useOrdersInfosData from '@/lib/trade/hooks/useOrderInfosData'
+import useOrdersInfosDataQuery from '@/lib/trade/hooks/useOrderInfosDataQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import cancelOrder from '@/lib/trade/services/order/cancelOrder'
 import {useSetTokenAddress} from '@/lib/trade/states/useTokenAddress'
@@ -45,7 +45,7 @@ const selectReversedPositionOrders = markAsMemoized((data: OrderInfosData) => {
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
   const latestAccountAddress = useLatest(accountAddress)
   const latestWalletAccount = useLatest(walletAccount)
   const latestChainId = useLatest(chainId)
@@ -57,7 +57,7 @@ export default memo(function OrdersTab() {
     isLoading,
     isFetching,
     refetch,
-  } = useOrdersInfosData(selectReversedPositionOrders)
+  } = useOrdersInfosDataQuery(selectReversedPositionOrders)
   const refetchOrders = useCallback(() => {
     void refetch()
   }, [refetch])

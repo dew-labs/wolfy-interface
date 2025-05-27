@@ -22,7 +22,7 @@ import wolfyLogoDarkSvg from '@/assets/icons/wolfy-text-dark.svg'
 import wolfyLogoLightSvg from '@/assets/icons/wolfy-text-light.svg'
 import ChainSelect from '@/lib/starknet/components/ChainSelect'
 import ConnectModal from '@/lib/starknet/components/ConnectModal'
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useChainIdIsMatched from '@/lib/starknet/hooks/useChainIdIsMatched'
 import useConnect from '@/lib/starknet/hooks/useConnect'
@@ -43,7 +43,12 @@ const menuItems = [
   {label: 'Pools', to: PoolsRoute.fullPath, target: '_self', external: false},
   {label: 'Referrals', to: '', target: '_self', external: true},
   {label: 'Leaderboard', to: '', target: '_self', external: true},
-  {label: 'Docs', to: 'https://docs.wolfy.trade/', target: '_blank', external: true},
+  {
+    label: 'Docs',
+    to: 'https://docs.wolfy.trade/',
+    target: '_blank',
+    external: true,
+  },
 ] as const
 
 const NAVBAR_MENU_MOTION_PROPS = {
@@ -62,7 +67,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   const isConnected = useIsWalletConnected()
   const chainIdIsMatched = useChainIdIsMatched()
   const [, disconnect] = useWalletAccount()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
 
   const handleDisconnect = useCallback(async () => {
     await disconnect()

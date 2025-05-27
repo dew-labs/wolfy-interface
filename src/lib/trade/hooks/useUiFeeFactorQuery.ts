@@ -19,7 +19,7 @@ function createGetUiFeeFactorQueryOptions(chainId: StarknetChainId) {
   })
 }
 
-export default function useUiFeeFactor() {
+export default function useUiFeeFactorQuery() {
   const [chainId] = useChainId()
   return useQuery(createGetUiFeeFactorQueryOptions(chainId))
 }

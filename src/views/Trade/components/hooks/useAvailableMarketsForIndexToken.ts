@@ -1,7 +1,7 @@
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
 
 export default function useAvailableMarketsForIndexToken(indexTokenAddress: string | undefined) {
-  return useMarketsData(
+  return useMarketsDataQuery(
     useCallback(
       data => {
         if (!indexTokenAddress) return []

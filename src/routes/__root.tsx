@@ -4,7 +4,6 @@ import type {Href} from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
 import {Provider as JotaiProvider} from 'jotai'
-import type {PropsWithChildren} from 'react'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import invariant from 'tiny-invariant'
 import type {ReadonlyDeep} from 'type-fest'
@@ -16,7 +15,7 @@ import type {RouterContext} from '@/router'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
 import {logError} from '@/utils/logger'
-import {QueryErrorBoundary} from '@/utils/query/QueryErrorBoundary'
+import QueryErrorBoundary from '@/utils/query/QueryErrorBoundary'
 import ErrorComponent from '@/views/Error/ErrorComponent'
 
 const JotaiDevTools = ENABLE_DEVTOOLS
@@ -53,7 +52,7 @@ function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
     if (typeof error.message !== 'string') return undefined
 
-    return error.message as string
+    return String(error.message)
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
   })()
 
@@ -64,14 +63,14 @@ function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
     if (typeof error.code !== 'string') return undefined
 
-    return error.code as string
+    return String(error.code)
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
   })()
 
   return <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} />
 }
 
-const DevTool = memo(function DevTool({children}: PropsWithChildren) {
+const DevTool = deepMemo(function DevTool({children}: PropsWithChildren) {
   if (!ENABLE_DEVTOOLS) return null
 
   return (

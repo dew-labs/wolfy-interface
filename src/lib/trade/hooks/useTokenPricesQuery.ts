@@ -23,11 +23,11 @@ function createGetTokenPricesQueryOptions<T>(
   })
 }
 
-export default function useTokenPrices(): UseQueryResult<TokenPricesData>
-export default function useTokenPrices<T = TokenPricesData>(
+export default function useTokenPricesQuery(): UseQueryResult<TokenPricesData>
+export default function useTokenPricesQuery<T = TokenPricesData>(
   selector: MemoizedCallback<(data: TokenPricesData) => T>,
 ): UseQueryResult<T>
-export default function useTokenPrices<T = TokenPricesData>(
+export default function useTokenPricesQuery<T = TokenPricesData>(
   selector?: MemoizedCallback<(data: TokenPricesData) => T>,
 ): UseQueryResult<T | undefined> {
   const [chainId] = useChainId()

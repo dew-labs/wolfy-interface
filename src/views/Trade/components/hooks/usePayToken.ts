@@ -1,7 +1,7 @@
 import {LEVERAGE_DECIMALS, LEVERAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
@@ -34,7 +34,7 @@ export default function usePayToken(
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: payTokenMinPriceData = 0n} = useTokenPrices(
+  const {data: payTokenMinPriceData = 0n} = useTokenPricesQuery(
     useCallback(data => data.get(payTokenAddress ?? '')?.min, [payTokenAddress]),
   )
 

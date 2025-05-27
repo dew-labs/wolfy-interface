@@ -1,19 +1,19 @@
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import type {FundingFeeData} from '@/lib/trade/services/fetchFundingFee'
 import fetchFundingFee from '@/lib/trade/services/fetchFundingFee'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-import useMarkets from './useMarkets'
+import useMarketsQuery from './useMarketsQuery'
 
-export default function useFundingFees(): UseQueryResult<FundingFeeData>[]
-export default function useFundingFees<T = FundingFeeData>(
+export default function useFundingFeeQueries(): UseQueryResult<FundingFeeData>[]
+export default function useFundingFeeQueries<T = FundingFeeData>(
   selector: MemoizedCallback<(data: FundingFeeData) => T>,
 ): UseQueryResult<T>[]
-export default function useFundingFees() {
+export default function useFundingFeeQueries() {
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
-  const {data: markets} = useMarkets()
+  const accountAddress = useAccountAddressValue()
+  const {data: markets} = useMarketsQuery()
 
   const queries = useMemo(() => {
     return (

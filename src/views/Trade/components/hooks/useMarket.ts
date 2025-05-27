@@ -1,4 +1,4 @@
-import useMarketsData from '@/lib/trade/hooks/useMarketsData'
+import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 
@@ -8,7 +8,7 @@ export default function useMarket(
 ) {
   const [marketAddress, setMarketAddress] = useState<string>()
   const latestMarketAddress = useLatest(marketAddress)
-  const {data: marketData} = useMarketsData(
+  const {data: marketData} = useMarketsDataQuery(
     useCallback(data => data.get(marketAddress ?? ''), [marketAddress]),
   )
   const latestMarketData = useLatest(marketData)

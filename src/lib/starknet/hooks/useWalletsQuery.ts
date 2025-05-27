@@ -22,6 +22,6 @@ const loadWallets = async () => {
   }
 }
 
-export default function useWallets() {
+export default function useWalletsQuery() {
   return useQuery({queryKey: ['!wallets'], queryFn: loadWallets})
 }

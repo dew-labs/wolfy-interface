@@ -1,6 +1,6 @@
 import type {StarknetChainId} from 'wolfy-sdk'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchMarketTokenBalances from '@/lib/trade/services/fetchMarketTokenBalances'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
@@ -34,15 +34,15 @@ function createGetMarketTokenBalancesQueryOptions<T = Map<string, bigint>>(
   })
 }
 
-export default function useMarketTokenBalances(): UseQueryResult<Map<string, bigint>>
-export default function useMarketTokenBalances<T = Map<string, bigint>>(
+export default function useMarketTokenBalancesQuery(): UseQueryResult<Map<string, bigint>>
+export default function useMarketTokenBalancesQuery<T = Map<string, bigint>>(
   selector: MemoizedCallback<(data: Map<string, bigint>) => T>,
 ): UseQueryResult<T>
-export default function useMarketTokenBalances<T = Map<string, bigint>>(
+export default function useMarketTokenBalancesQuery<T = Map<string, bigint>>(
   selector?: MemoizedCallback<(data: Map<string, bigint>) => T>,
 ): UseQueryResult<T> {
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
   const {data: marketTokenAddresses} = useMarketTokenAddresses()
 
   return useQuery(

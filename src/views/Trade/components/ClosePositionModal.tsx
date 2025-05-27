@@ -5,17 +5,17 @@ import {OrderType} from 'wolfy-sdk'
 
 import {DEFAULT_SLIPPAGE, SLIPPAGE_PRECISION} from '@/constants/config'
 import {FEE_TOKEN_ADDRESS} from '@/constants/tokens'
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useWalletAccount from '@/lib/starknet/hooks/useWalletAccount'
 import getScanUrl, {ScanType} from '@/lib/starknet/utils/getScanUrl'
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
-import useGasLimits from '@/lib/trade/hooks/useGasLimits'
-import useGasPrice from '@/lib/trade/hooks/useGasPrice'
-import usePositionsInfoData from '@/lib/trade/hooks/usePositionsInfoData'
-import useReferralInfo from '@/lib/trade/hooks/useReferralInfo'
-import useTokenPrices from '@/lib/trade/hooks/useTokenPrices'
-import useUiFeeFactor from '@/lib/trade/hooks/useUiFeeFactor'
+import useGasLimitsQuery from '@/lib/trade/hooks/useGasLimitsQuery'
+import useGasPriceQuery from '@/lib/trade/hooks/useGasPriceQuery'
+import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
+import useReferralInfoQuery from '@/lib/trade/hooks/useReferralInfoQuery'
+import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_GAS_LIMITS} from '@/lib/trade/services/fetchGasLimits'
 import sendOrder from '@/lib/trade/services/order/sendOrder'
@@ -46,14 +46,14 @@ const selectPositionsInfo = markAsMemoized((data: PositionsInfoData) => data.pos
 
 export default memo(function ClosePositionModal() {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: positionsInfoData = new Map()} = usePositionsInfoData(selectPositionsInfo)
+  const {data: positionsInfoData = new Map()} = usePositionsInfoDataQuery(selectPositionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
 
   const position = positionKey ? positionsInfoData.get(positionKey) : undefined
   const latestPosition = useLatest(position)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: collateralTokenPrice = 0n} = useTokenPrices(
+  const {data: collateralTokenPrice = 0n} = useTokenPricesQuery(
     useCallback(
       data => {
         return data.get(position?.collateralTokenAddress ?? '')?.min
@@ -80,7 +80,10 @@ export default memo(function ClosePositionModal() {
   const maximumCollateralTokenToDecreaseText = formatNumber(
     shrinkDecimals(maximumCollateralTokenToDecrease, collateralTokenDecimals),
     Format.READABLE,
-    {exactFractionDigits: true, fractionDigits: calculateTokenFractionDigits(collateralTokenPrice)},
+    {
+      exactFractionDigits: true,
+      fractionDigits: calculateTokenFractionDigits(collateralTokenPrice),
+    },
   )
 
   const maximumSizeUsdToDecreaseText = formatNumber(
@@ -141,7 +144,7 @@ export default memo(function ClosePositionModal() {
 
   const [wallet] = useWalletAccount()
   const latestWallet = useLatest(wallet)
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
   const latestAccountAddress = useLatest(accountAddress)
   const queryClient = useQueryClient()
   const [chainId] = useChainId()
@@ -159,16 +162,19 @@ export default memo(function ClosePositionModal() {
   )
 
   const inputSizeClassNames = useMemo(
-    () => ({input: 'appearance-none', label: !isValidSizeUsdToDecrease && '!text-danger-500'}),
+    () => ({
+      input: 'appearance-none',
+      label: !isValidSizeUsdToDecrease && '!text-danger-500',
+    }),
     [isValidSizeUsdToDecrease],
   )
 
-  const {data: gasPrice = 0n} = useGasPrice()
-  const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimits()
-  const {data: uiFeeFactor = 0n} = useUiFeeFactor()
-  const {data: referralInfo} = useReferralInfo()
+  const {data: gasPrice = 0n} = useGasPriceQuery()
+  const {data: gasLimits = DEFAULT_GAS_LIMITS} = useGasLimitsQuery()
+  const {data: uiFeeFactor = 0n} = useUiFeeFactorQuery()
+  const {data: referralInfo} = useReferralInfoQuery()
   //TODO: optimize, do not subscribe to entire token prices
-  const {data: tokenPricesData = new Map()} = useTokenPrices()
+  const {data: tokenPricesData = new Map()} = useTokenPricesQuery()
 
   const {
     data: tokenPricesDataShortlisted = {
@@ -179,7 +185,7 @@ export default memo(function ClosePositionModal() {
       shortTokenPrice: undefined,
       feeTokenPrice: undefined,
     },
-  } = useTokenPrices(
+  } = useTokenPricesQuery(
     useCallback(
       data => {
         const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)

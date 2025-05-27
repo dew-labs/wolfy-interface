@@ -1,6 +1,6 @@
 import type {StarknetChainId} from 'wolfy-sdk'
 
-import useAccountAddress from '@/lib/starknet/hooks/useAccountAddress'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTokenBalances, {type TokenBalancesData} from '@/lib/trade/services/fetchTokenBalances'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
@@ -31,15 +31,15 @@ function createGetTokenBalancesQueryOptions<T = TokenBalancesData>(
   })
 }
 
-export default function useTokenBalances(): UseQueryResult<TokenBalancesData>
-export default function useTokenBalances<T = TokenBalancesData>(
+export default function useTokenBalancesQuery(): UseQueryResult<TokenBalancesData>
+export default function useTokenBalancesQuery<T = TokenBalancesData>(
   selector: MemoizedCallback<(data: TokenBalancesData) => T>,
 ): UseQueryResult<T>
-export default function useTokenBalances<T = TokenBalancesData>(
+export default function useTokenBalancesQuery<T = TokenBalancesData>(
   selector?: MemoizedCallback<(data: TokenBalancesData) => T>,
 ) {
   const [chainId] = useChainId()
-  const accountAddress = useAccountAddress()
+  const accountAddress = useAccountAddressValue()
 
   return useQuery(createGetTokenBalancesQueryOptions(chainId, accountAddress, selector))
 }

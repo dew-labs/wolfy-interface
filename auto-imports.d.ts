@@ -29,6 +29,7 @@ declare global {
   const createContext: typeof import('react')['createContext']
   const createJSONStorage: typeof import('jotai/utils')['createJSONStorage']
   const createRef: typeof import('react')['createRef']
+  const deepMemo: typeof import('@/utils/react/deepMemo')['default']
   const focusAtom: typeof import('jotai-optics')['focusAtom']
   const focusManager: typeof import('@tanstack/react-query')['focusManager']
   const forwardRef: typeof import('react')['forwardRef']
@@ -111,7 +112,7 @@ declare global {
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { MemoizedCallback, MemoizedCallbackOrDispatch, PropsWithChildren, ChangeEventHandler, MouseEventHandler, ComponentProps, RefObject, RefCallback, ReactNode } from 'react'
+  export type { MemoizedCallback, MemoizedCallbackOrDispatch, SyntheticEvent, ReactEventHandler, UIEventHandler, MouseEventHandler, TouchEventHandler, PointerEventHandler, ChangeEventHandler, KeyboardEventHandler, FormEventHandler, ComponentProps, ComponentPropsWithRef, ComponentPropsWithoutRef, CustomComponentPropsWithRef, PropsWithoutRef, PropsWithChildren, ComponentRef, Ref, RefObject, RefCallback, Dispatch, SetStateAction, ReactNode, JSX, ComponentType, ElementType, ReactElement, CSSProperties } from 'react'
   import('react')
   // @ts-ignore
   export type { QueryClient, UseQueryResult } from '@tanstack/react-query'

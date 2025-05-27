@@ -1,6 +1,7 @@
 import {
   addIntegration,
   browserTracingIntegration,
+  consoleLoggingIntegration,
   init,
   lazyLoadIntegration,
   makeBrowserOfflineTransport,
@@ -10,6 +11,8 @@ import {
 } from '@sentry/react'
 
 import {APP_NAME, COMMIT_HASH, DEBUG, MODE, SENTRY_DSN} from './constants/config'
+
+export const DEPTH = 10
 
 // TODO: Shared Environment implementation
 if (!DEBUG) {
@@ -31,6 +34,10 @@ if (!DEBUG) {
             behaviour: 'apply-tag-if-contains-third-party-frames',
           }),
           browserTracingIntegration(),
+          // send console.* calls as logs to Sentry: https://docs.sentry.io/platforms/javascript/guides/react/logs/
+          consoleLoggingIntegration({
+            levels: ['log', 'error', 'warn', 'info', 'debug', 'assert', 'trace'],
+          }),
           moduleMetadataIntegration(),
         ],
       )
@@ -44,9 +51,14 @@ if (!DEBUG) {
     // Session Replay
     replaysSessionSampleRate: 0.1, // This  sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
     replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+    profilesSampleRate: 1.0,
     transport: makeBrowserOfflineTransport(makeFetchTransport),
     transportOptions: {}, // https://docs.sentry.io/platforms/javascript/guides/react/best-practices/offline-caching/
-    // ignoreTransactions: [] // TODO: add more ignore transactions
+    ignoreTransactions: [], // TODO: add more ignore transactions
+    ignoreErrors: [],
+    normalizeDepth: DEPTH,
+    // Enable logs to be sent to Sentry
+    _experiments: {enableLogs: true},
   })
 }
 

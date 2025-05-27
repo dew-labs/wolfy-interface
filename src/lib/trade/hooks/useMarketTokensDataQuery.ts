@@ -35,11 +35,11 @@ function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
   })
 }
 
-export default function useMarketTokensData(): UseQueryResult<MarketTokensData>
-export default function useMarketTokensData<T = MarketTokensData>(
+export default function useMarketTokensDataQuery(): UseQueryResult<MarketTokensData>
+export default function useMarketTokensDataQuery<T = MarketTokensData>(
   selector: MemoizedCallback<(data: MarketTokensData) => T>,
 ): UseQueryResult<T>
-export default function useMarketTokensData<T = MarketTokensData>(
+export default function useMarketTokensDataQuery<T = MarketTokensData>(
   selector?: MemoizedCallback<(data: MarketTokensData) => T>,
 ): UseQueryResult<T> {
   const [chainId] = useChainId()

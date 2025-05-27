@@ -4,7 +4,7 @@ import type {NamedExoticComponent} from 'react'
 import {useResetComponent} from './useResetComponent'
 
 export default function createResetableComponent<T extends {reset: MemoizedCallback<() => void>}>(
-  Component: React.ComponentType<T>,
+  Component: ComponentType<T>,
 ): NamedExoticComponent<Omit<T, 'reset'>> {
   const ResettableComponent = function (props: Omit<T, 'reset'>) {
     const [resetKey, reset] = useResetComponent()

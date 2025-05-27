@@ -2,7 +2,7 @@ import {ErrorBoundary} from 'react-error-boundary'
 
 import QueryErrorComponent from '@/views/Error/QueryErrorComponent'
 
-export function QueryErrorBoundary({children}: Readonly<PropsWithChildren>) {
+export default deepMemo(function QueryErrorBoundary({children}: Readonly<PropsWithChildren>) {
   return (
     <QueryErrorResetBoundary>
       {({reset}) => (
@@ -12,4 +12,4 @@ export function QueryErrorBoundary({children}: Readonly<PropsWithChildren>) {
       )}
     </QueryErrorResetBoundary>
   )
-}
+})

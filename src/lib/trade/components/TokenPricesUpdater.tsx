@@ -3,7 +3,7 @@ import {create} from 'mutative'
 
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import {getTokenPricesQueryKey} from '@/lib/trade/hooks/useTokenPrices'
+import {getTokenPricesQueryKey} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {type TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {logError} from '@/utils/logger'
@@ -32,7 +32,7 @@ export default memo(function TokenPricesUpdater() {
 
             if (price) {
               queryClient.setQueryData<TokenPricesData>(queryKey, prevData => {
-                if (!prevData) return new Map() as TokenPricesData
+                if (!prevData) return new Map()
 
                 const existingPrice = prevData.get(token.address)
                 if (existingPrice && existingPrice.min === price) return prevData

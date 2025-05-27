@@ -24,7 +24,7 @@ import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
 import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
-import useWallets from '@/lib/starknet/hooks/useWallets'
+import useWalletsQueryQuery from '@/lib/starknet/hooks/useWalletsQuery'
 import {Theme} from '@/lib/theme/theme'
 import {useCurrentTheme} from '@/lib/theme/useCurrentTheme'
 import UnexpectedError from '@/utils/api/UnexpectedError'
@@ -217,7 +217,7 @@ export default memo(function ConnectModal() {
     cancel()
   }, [cancel])
 
-  const {data: wallets} = useWallets()
+  const {data: wallets} = useWalletsQueryQuery()
 
   useEffect(
     function connectToLastConnectedWallet() {

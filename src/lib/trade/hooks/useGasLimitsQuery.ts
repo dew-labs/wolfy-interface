@@ -20,7 +20,7 @@ function createGetGasLimitsQueryOptions(chainId: StarknetChainId) {
   })
 }
 
-export default function useGasLimits() {
+export default function useGasLimitsQuery() {
   const [chainId] = useChainId()
   return useQuery(createGetGasLimitsQueryOptions(chainId))
 }

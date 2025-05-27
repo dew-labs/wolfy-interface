@@ -23,11 +23,11 @@ function createGetMarketsQueryOptions<T = Market[]>(
   })
 }
 
-export default function useMarkets(): UseQueryResult<Market[]>
-export default function useMarkets<T = Market[]>(
+export default function useMarketsQuery(): UseQueryResult<Market[]>
+export default function useMarketsQuery<T = Market[]>(
   selector: MemoizedCallback<(data: Market[]) => T>,
 ): UseQueryResult<T>
-export default function useMarkets<T = Market[]>(
+export default function useMarketsQuery<T = Market[]>(
   selector?: MemoizedCallback<(data: Market[]) => T>,
 ) {
   const [chainId] = useChainId()

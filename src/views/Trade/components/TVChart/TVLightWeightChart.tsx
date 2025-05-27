@@ -9,7 +9,6 @@ import {
   type ISeriesApi,
   LineStyle,
 } from 'lightweight-charts'
-import {type ReactElement} from 'react'
 import invariant from 'tiny-invariant'
 import type {PartialDeep} from 'type-fest'
 
@@ -76,7 +75,7 @@ interface TVLightWeightChartProps extends PropsWithChildren {
   children: ReactElement<LineProps> | ReactElement<LineProps>[]
 }
 
-export default memo(function TVLightWeightChart({
+export default deepMemo(function TVLightWeightChart({
   asset,
   textColor,
   gridColor,
