@@ -578,9 +578,15 @@ importers:
       stylelint-config-css-modules:
         specifier: ^4.4.0
         version: 4.4.0(stylelint@16.19.1(typescript@5.8.3))
+      stylelint-config-standard:
+        specifier: ^38.0.0
+        version: 38.0.0(stylelint@16.19.1(typescript@5.8.3))
       stylelint-config-standard-scss:
         specifier: ^15.0.1
         version: 15.0.1(postcss@8.5.3)(stylelint@16.19.1(typescript@5.8.3))
+      stylelint-config-tailwindcss:
+        specifier: ^1.0.0
+        version: 1.0.0(stylelint@16.19.1(typescript@5.8.3))(tailwindcss@4.1.7)
       stylelint-css-modules-no-global-scoped-selector:
         specifier: ^1.0.2
         version: 1.0.2(stylelint@16.19.1(typescript@5.8.3))
@@ -10057,6 +10063,12 @@ packages:
     engines: {node: '>=18.12.0'}
     peerDependencies:
       stylelint: ^16.18.0
+
+  stylelint-config-tailwindcss@1.0.0:
+    resolution: {integrity: sha512-e6WUBJeLdOZ0sy8FZ1jk5Zy9iNGqqJbrMwnnV0Hpaw/yin6QO3gVv/zvyqSty8Yg6nEB5gqcyJbN387TPhEa7Q==}
+    peerDependencies:
+      stylelint: '>=13.13.1'
+      tailwindcss: '>=2.2.16'
 
   stylelint-css-modules-no-global-scoped-selector@1.0.2:
     resolution: {integrity: sha512-NMerTM1/8D4Az/c3P59eYptP3PoNuUXV1NuJ+Xe+TILqZH8UE4oV9NvjUnklnVHvYqk5HsjAURnvMNXZAzYBLA==}
@@ -22260,6 +22272,11 @@ snapshots:
     dependencies:
       stylelint: 16.19.1(typescript@5.8.3)
       stylelint-config-recommended: 16.0.0(stylelint@16.19.1(typescript@5.8.3))
+
+  stylelint-config-tailwindcss@1.0.0(stylelint@16.19.1(typescript@5.8.3))(tailwindcss@4.1.7):
+    dependencies:
+      stylelint: 16.19.1(typescript@5.8.3)
+      tailwindcss: 4.1.7
 
   stylelint-css-modules-no-global-scoped-selector@1.0.2(stylelint@16.19.1(typescript@5.8.3)):
     dependencies:

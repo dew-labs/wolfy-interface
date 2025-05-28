@@ -24,6 +24,7 @@ $Viewport-Width-4: 26.5rem; // 0 -> 424 (xs)
     }
   }
 }
+
 @mixin visually-hidden {
   position: absolute !important;
 
@@ -39,6 +40,7 @@ $Viewport-Width-4: 26.5rem; // 0 -> 424 (xs)
 
   clip: rect(0 0 0 0) !important;
 }
+
 @mixin auto-hide-scroll-bar {
   &::-webkit-scrollbar-track {
     margin: 1rem;
