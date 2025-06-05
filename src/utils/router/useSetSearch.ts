@@ -5,43 +5,65 @@ import type {
   NavigateOptions,
   RouteIds,
 } from '@tanstack/router-core'
+// eslint-disable-next-line sonarjs/no-internal-api-use -- i have to
 import type {NavigateOptionProps} from 'node_modules/@tanstack/router-core/dist/esm/link'
 
 import isFunction from '@/utils/types/guards/isFunction'
 
+/**
+ * A React hook that let you update a tanstack router's search param via a setter.
+ *
+ * @example
+ * ```tsx
+ * const setKeyword = useSetSearch(Route.id, 'keyword')
+ *
+ * setKeyword('hello')
+ * await setKeyword(prev => prev + ' world', {
+ *   replace: false,
+ *   resetScroll: true,
+ *   hashScrollIntoView: {
+ *     behavior: 'smooth',
+ *     block: 'start',
+ *     inline: 'nearest',
+ *   },
+ * }))
+ * ```
+ *
+ * @param routeId - The route ID to use
+ * @param name - The name of the search param to use
+ * @param defaultOptions - The default navigate options to use
+ * @returns The search param async setter.
+ */
 export default function useSetSearch<
   RouteId extends ConstrainLiteral<string, RouteIds<RegisteredRouter['routeTree']>>,
   RouteFullPath extends MakeRouteMatch<RegisteredRouter['routeTree'], RouteId>['fullPath'],
   SearchParamSetter extends Extract<
     NavigateOptions<RegisteredRouter, RouteFullPath, RouteFullPath>['search'],
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- intentional
-    Function
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- match library type
+    (...args: any) => any
   >,
-  // @ts-expect-error -- complex typescript
   SearchParamKey extends keyof ReturnType<SearchParamSetter>,
-  // @ts-expect-error -- complex typescript
   SearchParamValueOut extends ReturnType<SearchParamSetter>[SearchParamKey],
->(currentRoute: RouteId, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
+>(routeId: RouteId, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
   const navigate = useNavigate()
   const latestDefaultOptions = useLatest(defaultOptions)
-  const {fullPath} = useMatch({from: currentRoute})
+  const {fullPath} = useMatch({from: routeId})
   const latestFullPatch = useLatest(fullPath)
 
   return useCallback(
     async (
       value:
         | SearchParamValueOut
-        // @ts-expect-error -- complex typescript
         | ((prevValue: Parameters<SearchParamSetter>[0][SearchParamKey]) => SearchParamValueOut),
       options?: NavigateOptionProps,
     ) => {
-      // @ts-expect-error -- complex typescript
+      // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
       return navigate({
         to: latestFullPatch.current,
         search: prevSearch => ({
           ...prevSearch,
-          // @ts-expect-error -- complex typescript
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- complex typescript
+          // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
           [name]: isFunction(value) ? value(prevSearch[name]) : value,
         }),
         replace: true,
@@ -55,13 +77,14 @@ export default function useSetSearch<
 }
 
 // type RouteId = ConstrainLiteral<string, RouteIds<RegisteredRouter['routeTree']>>
-// const route = '/flights/' satisfies RouteId
+// const route = '/_flight/flights/' satisfies RouteId
 // type RouteFullPath = MakeRouteMatch<RegisteredRouter['routeTree'], typeof route>['fullPath']
 // type SearchParamSetter = Extract<
 //   // ^?
 //   NavigateOptions<RegisteredRouter, RouteFullPath, RouteFullPath>['search'],
-//   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- intentional
-//   Function
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- match library type
+//   (...args: any) => any
+//   // Function
 // >
 // type SearchParamKey = keyof ReturnType<SearchParamSetter>
 // const key = 'class' satisfies SearchParamKey
