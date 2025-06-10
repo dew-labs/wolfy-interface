@@ -23,7 +23,7 @@ function createGetTokenBalancesQueryOptions<T = TokenBalancesData>(
       return await fetchTokenBalances(chainId, accountAddress)
     },
     select: selector as (data: TokenBalancesData) => T,
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

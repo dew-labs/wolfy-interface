@@ -17,7 +17,7 @@ function createGetTokenPricesQueryOptions<T>(
     queryFn: async () => {
       return await fetchTokenPrices(chainId)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     select: selector as (data: TokenPricesData) => T,
     ...NO_REFETCH_OPTIONS,
   })

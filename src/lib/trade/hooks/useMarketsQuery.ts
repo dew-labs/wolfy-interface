@@ -17,7 +17,7 @@ function createGetMarketsQueryOptions<T = Market[]>(
     queryFn: async () => {
       return await fetchMarkets(chainId)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     select: selector as (data: Market[]) => T,
     ...NO_REFETCH_OPTIONS,
   })

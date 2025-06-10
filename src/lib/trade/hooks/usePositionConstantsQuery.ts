@@ -14,7 +14,7 @@ function createGetPositionsConstantsQueryOptions(chainId: StarknetChainId) {
     queryFn: async () => {
       return await fetchPositionsConstants(chainId)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
   })
 }

@@ -22,7 +22,7 @@ function createGetOrdersDataQueryOptions<T>(
     queryFn: async () => {
       return await fetchOrders(chainId, accountAddress)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     select: selector,
     refetchInterval: 10000,

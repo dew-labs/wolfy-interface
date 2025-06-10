@@ -14,7 +14,7 @@ function createGetGasLimitsQueryOptions(chainId: StarknetChainId) {
     queryFn: async () => {
       return await fetchGasLimits(chainId)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 100000,
   })
