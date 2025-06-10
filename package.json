@@ -325,7 +325,8 @@
     "ignoreFiles": [
       "*.js",
       "**/__tests__/**/*.?(c|m)[jt]s?(x)",
-      "**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)"
+      "**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)",
+      "src/routeTree.gen.ts"
     ],
     "strict": true,
     "reportUnusedIgnore": true
