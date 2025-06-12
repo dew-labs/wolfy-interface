@@ -239,6 +239,7 @@ export function getConfig(mode: string): UserConfig {
             'focusManager',
             'onlineManager',
             'notifyManager',
+            'keepPreviousData',
           ],
         },
         {

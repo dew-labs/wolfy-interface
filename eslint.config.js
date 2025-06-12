@@ -27,9 +27,9 @@ import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
 import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 // import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
-import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+// import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
-import pluginReactCompiler from 'eslint-plugin-react-compiler'
+// import pluginReactCompiler from 'eslint-plugin-react-compiler'
 import * as pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
@@ -225,6 +225,7 @@ function getCoreConfigs() {
             ignoreExternal: true,
           },
         ],
+        'import-x/no-named-as-default': 'off', // lag
       },
     }),
     ...applyTo.all('core/no-use-extend-native', pluginNoUseExtendNative.configs.recommended),
@@ -561,7 +562,7 @@ function getTypescriptConfigs() {
           'error',
           {fixMixedExportsWithInlineTypeSpecifier: false},
         ],
-        '@typescript-eslint/promise-function-async': ['error'],
+        // '@typescript-eslint/promise-function-async': ['error'], // lag
         'no-loop-func': 'off',
         '@typescript-eslint/no-loop-func': 'error',
         '@typescript-eslint/no-unnecessary-parameter-property-assignment': 'error',
@@ -586,9 +587,13 @@ function getTypescriptConfigs() {
           'error',
           {allowDefaultCaseForExhaustiveSwitch: false},
         ],
-        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
-        '@typescript-eslint/restrict-plus-operands': 'error',
+        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error', // TODO: enable
+        '@typescript-eslint/restrict-plus-operands': 'error', // TODO: enable
         '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
+        '@typescript-eslint/no-deprecated': 'off', // lag
+        '@typescript-eslint/no-unsafe-assignment': 'off', // lag
+        '@typescript-eslint/no-misused-promises': 'off', // lag
+        '@typescript-eslint/no-floating-promises': 'off', // lag
       },
     }),
     ...applyTo.typescript('typescript/tsdoc', {
@@ -712,7 +717,7 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended),
+    // ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended), // lag, we didn't use react-compiler anyway
     ...applyTo.react('react/perf', pluginReactPerf.configs.flat.all),
     ...applyTo.react('react/perf-custom', {
       rules: {
@@ -862,5 +867,5 @@ export default tsEslint.config(
   // NOTE: enable this when using pnpm workspaces & catalogs
   // ...pluginPnpmConfigs.json,
   // ...pluginPnpmConfigs.yaml,
-  ...applyTo.all('prettier', pluginPrettierRecommended), // always the last
+  // ...applyTo.all('prettier', pluginPrettierRecommended), // always the last // lag
 )

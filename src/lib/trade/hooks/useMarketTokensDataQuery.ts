@@ -27,7 +27,7 @@ function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
       return await fetchMarketTokensData(chainId, marketTokenAddresses ?? [])
     },
     select: selector as (data: MarketTokensData) => T,
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,

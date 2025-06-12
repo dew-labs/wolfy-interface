@@ -34,7 +34,7 @@ export function createQueryClient() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        throwOnError: true,
+        // throwOnError: true,
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false
@@ -42,7 +42,7 @@ export function createQueryClient() {
         },
       },
       mutations: {
-        throwOnError: true,
+        // throwOnError: true,
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         retry(failureCount, error) {
           if (isPermanentError(error)) return false

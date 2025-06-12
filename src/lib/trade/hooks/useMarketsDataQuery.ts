@@ -25,7 +25,7 @@ function createGetMarketsDataQueryOptions<T>(
           return await fetchMarketsData(chainId, markets, tokenPricesData)
         }
       : skipToken,
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     select: selector as (data: MarketsData) => T,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,

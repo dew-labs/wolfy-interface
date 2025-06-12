@@ -31,7 +31,7 @@ function createGetPositionsQueryOptions<T>(
           return await fetchPositions(chainId, marketsData, tokenPricesData, accountAddress)
         }
       : skipToken,
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     select: selector as (data: PositionsData) => T,
     refetchInterval: 10000,

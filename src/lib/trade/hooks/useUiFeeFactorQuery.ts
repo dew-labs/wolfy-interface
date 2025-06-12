@@ -14,7 +14,7 @@ function createGetUiFeeFactorQueryOptions(chainId: StarknetChainId) {
     queryFn: async () => {
       return await fetchUiFeeFactor(chainId)
     },
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
   })
 }

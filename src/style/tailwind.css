@@ -1,6 +1,17 @@
 @import 'tailwindcss';
-@config '../../tailwind.config.js';
 @custom-variant dark (&:is(.dark *));
+@plugin '../hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+:root {
+  --font-sans:
+    'Geist Mono', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif: 'Pixelify Sans', ui-serif, 'Georgia', 'Cambria', 'Times New Roman', 'Times', serif;
+  --font-mono:
+    'Geist Mono', ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono',
+    'Courier New', monospace;
+}
 
 @layer utilities {
   input[type='number']::-webkit-inner-spin-button,

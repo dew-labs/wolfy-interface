@@ -48,7 +48,8 @@
     "preinstall": "npx only-allow pnpm",
     "commit": "better-commits",
     "branch": "better-branch",
-    "jscpd": "pnpm dlx jscpd ./src"
+    "jscpd": "pnpm dlx jscpd ./src",
+    "taze": "pnpm dlx taze"
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.8",
@@ -237,7 +238,9 @@
     "stylelint": "^16.19.1",
     "stylelint-config-clean-order": "^7.0.0",
     "stylelint-config-css-modules": "^4.4.0",
+    "stylelint-config-standard": "^38.0.0",
     "stylelint-config-standard-scss": "^15.0.1",
+    "stylelint-config-tailwindcss": "^1.0.0",
     "stylelint-css-modules-no-global-scoped-selector": "^1.0.2",
     "stylelint-declaration-block-no-ignored-properties": "^2.8.0",
     "stylelint-formatter-pretty": "^4.0.1",
@@ -279,32 +282,6 @@
   "engines": {
     "node": "22.x"
   },
-  "pnpm": {
-    "overrides": {
-      "@swc/core": "1.9.3"
-    },
-    "patchedDependencies": {
-      "eslint-plugin-react-perf@3.3.3": "patches/eslint-plugin-react-perf@3.3.3.patch",
-      "eslint-plugin-react-hooks@6.0.0-rc.1": "patches/eslint-plugin-react-hooks@6.0.0-rc.1.patch",
-      "typed-scss-modules@8.1.1": "patches/typed-scss-modules@8.1.1.patch",
-      "starknet@7.2.0": "patches/starknet@7.2.0.patch"
-    },
-    "onlyBuiltDependencies": [
-      "@heroui/shared-utils",
-      "@parcel/watcher",
-      "@sentry/cli",
-      "@swc/core",
-      "core-js",
-      "esbuild",
-      "javascript-obfuscator",
-      "sharp",
-      "unrs-resolver"
-    ],
-    "configDependencies": {
-      "@pnpm/trusted-deps": "0.1.1+sha512-jI3PWNv2zCg9+KHI3qQTsa534c5nisZQrHFeWSyyHoUXcuzvjkXxQKPFLJ/qtNAF+PtKHDlRntO2aZKb3VDuHQ=="
-    },
-    "onlyBuiltDependenciesFile": "node_modules/.pnpm-config/@pnpm/trusted-deps/allow.json"
-  },
   "trustedDependencies": [
     "@sentry/cli",
     "@swc/core",
@@ -322,7 +299,8 @@
     "ignoreFiles": [
       "*.js",
       "**/__tests__/**/*.?(c|m)[jt]s?(x)",
-      "**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)"
+      "**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)",
+      "src/routeTree.gen.ts"
     ],
     "strict": true,
     "reportUnusedIgnore": true

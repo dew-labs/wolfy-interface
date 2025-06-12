@@ -21,7 +21,6 @@ body {
 
 /* END fix */
 
-/* stylelint-disable custom-property-pattern */
 $heroUiPrimary: hsl(var(--heroui-primary) / var(--heroui-primary-opacity, var(--tw-bg-opacity)));
 $heroUiPrimaryHover: hsl(var(--heroui-primary) / var(--heroui-hover-opacity, var(--tw-bg-opacity)));
 $heroUiBackground: hsl(
@@ -32,7 +31,6 @@ $heroUiForeground: hsl(
   var(--heroui-primary-foreground) /
     var(--heroui-primary-foreground-opacity, var(--tw-text-opacity))
 );
-/* stylelint-enable custom-property-pattern */
 
 * {
   outline-color: $heroUiPrimary;
@@ -70,7 +68,6 @@ $heroUiForeground: hsl(
 
 ::view-transition-group(root) {
   animation-duration: 0.7s;
-  /* stylelint-disable-next-line custom-property-pattern */
   animation-timing-function: var(--expo-out);
 }
 
@@ -97,6 +94,7 @@ $heroUiForeground: hsl(
     clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
   }
 }
+
 @keyframes reveal-light {
   from {
     clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);

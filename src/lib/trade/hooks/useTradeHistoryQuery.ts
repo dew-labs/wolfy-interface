@@ -37,7 +37,7 @@ export default function useTradeHistoryQuery<T = TradeDataResponse>(
     queryFn: async () =>
       fetchTradeHistories(chainId, accountAddress, actions, markets, isLong, page, limit),
     ...NO_REFETCH_OPTIONS,
-    placeholderData: previousData => previousData,
+    placeholderData: keepPreviousData,
     select: selector as (data: TradeDataResponse) => T,
     refetchInterval: 10000,
   })
