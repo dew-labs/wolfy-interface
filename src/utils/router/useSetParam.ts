@@ -50,9 +50,7 @@ export default function useSetParam<
 
   return useCallback(
     async (
-      value:
-        | ParamValueOut
-        | ((prevValue: Parameters<ParamSetter>[0][ParamKey]) => ParamValueOut),
+      value: ParamValueOut | ((prevValue: Parameters<ParamSetter>[0][ParamKey]) => ParamValueOut),
       options?: NavigateOptionProps,
     ) => {
       // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time

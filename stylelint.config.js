@@ -68,12 +68,12 @@ const config = {
       extends: ['stylelint-config-standard-scss'], // This included: stylelint-config-standard, stylelint-config-recommended-scss (stylelint-config-recommended, stylelint-scss, postcss-scss included)
       rules: {
         'scss/dollar-variable-pattern': '([A-Z][a-z]+)(-[A-Z][a-z]+)*',
-      }
+      },
     },
     // For CSS, SCSS Modules
     {
-      files: ['*.module.css', '*.module.scss'],
-      extends: ['stylelint-config-css-modules'],
+      'files': ['*.module.css', '*.module.scss'],
+      'extends': ['stylelint-config-css-modules'],
       'css-modules/no-global-scoped-selector': [
         true,
         {fileExtensions: ['.module.css', '.module.scss']},
