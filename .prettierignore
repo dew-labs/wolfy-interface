@@ -1,3 +1,8 @@
 node_modules
 public
 dist
+
+# Generated Files
+pnpm-lock.yaml
+auto-imports.d.ts
+src/routeTree.gen.ts

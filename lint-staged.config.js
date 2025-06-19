@@ -19,6 +19,12 @@ const projectRoot = packageDirectorySync()
 
 const settings = [
   {
+      glob: ['**/*'],
+      script: filenames => [
+        `pnpm dlx prettier --write --ignore-unknown ${filenames.map(escape).join(' ')}`,
+      ],
+    },
+  {
     glob: globs.SCRIPT_AND_JSONS,
     script: filePaths => [
       `${packageJson.scripts['base:lint:script']} --fix ${filePaths.map(filePath => escape(filePath)).join(' ')}`,

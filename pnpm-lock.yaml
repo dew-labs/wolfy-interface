@@ -7,7 +7,7 @@ settings:
 overrides:
   '@swc/core': 1.9.3
 
-pnpmfileChecksum: sha256-UkSXbk7xTfjytnnRnNv1uIYJSoeBeqXnoeacuuyHbPk=
+pnpmfileChecksum: sha256-DDwEhDrXuLq8o5FD830ia2zzjCIsyYaCoyt3FPVxsW8=
 
 patchedDependencies:
   eslint-plugin-react-hooks@6.0.0-rc.1:
