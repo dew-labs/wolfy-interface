@@ -12,6 +12,7 @@ import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
+import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
@@ -37,7 +38,6 @@ import * as pluginRegexp from 'eslint-plugin-regexp'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
-// import pluginTailwindCss from 'eslint-plugin-tailwindcss'
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
 import pluginTsDoc from 'eslint-plugin-tsdoc'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
@@ -252,10 +252,6 @@ function getCoreConfigs() {
       files: ['auto-imports.d.ts'],
     },
     ...applyTo.all('core/regexp', pluginRegexp.configs['flat/recommended']),
-    ...applyTo.all(
-      'core/ssr-friendly',
-      fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
-    ),
     ...applyTo.all('core/depend', pluginDepend.configs['flat/recommended']),
     ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
     ...applyTo.all('core/sonarjs/duplicated', {
@@ -466,6 +462,15 @@ function getCoreConfigs() {
   ]
 }
 
+function getWebConfigs() {
+  return [
+    ...applyTo.all(
+      'core/ssr-friendly',
+      fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
+    ),
+  ]
+}
+
 function getJsonConfigs() {
   // TODO: make `eslint-plugin-jsonc` working with `@eslint/json` https://github.com/ota-meshi/eslint-plugin-jsonc#experimental-support-for-eslintjson
   return [
@@ -496,27 +501,35 @@ function getI18nextConfigs() {
   ]
 }
 
-// function getTailwindCssConfigs() {
-//   return [
-//     ...applyTo.scriptNotTest('tailwindcss', pluginTailwindCss.configs['flat/recommended']),
-//     ...applyTo.scriptNotTest('tailwindcss/custom', {
-//       settings: {
-//         tailwindcss: {
-//           // These are the default values but feel free to customize
-//           callees: ['classnames', 'clsx', 'ctl', 'cva', 'tw', 'cn'],
-//           config: 'tailwind.config.js', // returned from `loadConfig()` utility if not provided
-//           cssFiles: ['**/*.css', '!**/node_modules', '!**/.*', '!**/dist', '!**/build'],
-//           cssFilesRefreshRate: 5000,
-//           removeDuplicates: true,
-//           skipClassAttribute: false,
-//           whitelist: [],
-//           tags: [], // can be set to e.g. ['tw'] for use in tw`bg-blue`
-//           classRegex: '^class(Name)?$', // can be modified to support custom attributes. E.g. "^tw$" for `twin.macro`
-//         },
-//       },
-//     }),
-//   ]
-// }
+function getTailwindCssConfigs() {
+  return [
+    ...applyTo.scriptNotTest('tailwindcss', {
+      plugins: {
+        'better-tailwindcss': eslintPluginBetterTailwindcss,
+      },
+      rules: {
+        ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
+      },
+    }),
+    ...applyTo.scriptNotTest('tailwindcss/custom', {
+      rules: {
+        'better-tailwindcss/enforce-consistent-line-wrapping': 'off', // We rely on prettier or dprint to format
+        'better-tailwindcss/enforce-consistent-variable-syntax': 'error',
+        'better-tailwindcss/no-conflicting-classes': 'error',
+      },
+      settings: {
+        // "better-tailwindcss": {
+        //   "entryPoint": "...",
+        //   "tailwindConfig": "...",
+        //   "attributes": [/* ... */],
+        //   "callees": [/* ... */],
+        //   "variables": [/* ... */],
+        //   "tags": [/* ... */]
+        // }
+      },
+    }),
+  ]
+}
 
 function getTypescriptConfigs() {
   return [
@@ -624,6 +637,13 @@ function getReactConfigs() {
 
   return [
     ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
+    // Use below when using expo
+    // ...applyTo.react('react/hooks', {
+    //   // Expo already define `react-hooks` plugin so we cannot redefine
+    //   rules: {
+    //     ...pluginReactHooks.configs.recommended.rules,
+    //   },
+    // }),
     ...applyTo.react('react/hooks/custom', {
       rules: {
         'react-hooks/exhaustive-deps': [
@@ -743,24 +763,39 @@ function getReactConfigs() {
       languageOptions: {globals: {React: true}, parserOptions: {ecmaFeatures: {jsx: true}}},
       rules: {'jsx-a11y/label-has-associated-control': ['error', {controlComponents: ['button']}]},
     }),
-    ...applyTo.react('react-router', pluginRouter.configs['flat/recommended']),
   ]
 }
 
-function getReactNativeConfigs() {
-  return [
-    // ...applyTo.reactNative('react-native/dom', pluginReactNative.configs.all),
-    // ...applyTo.reactNative('react-native/off-dom', pluginReact.configs['off-dom']),
-  ]
+function getReactWebConfigs() {
+  return [...applyTo.react('react-router', pluginRouter.configs['flat/recommended'])]
 }
 
-function getNextJsConfigs() {
-  // If files is in a nextJs project or not
-  // const isNextJsProject = fs.existsSync('next.config.js');
-  // const nextJsOrEmptyExtends = isNextJsProject ? ['plugin:@next/next/core-web-vitals'] : [];
+// function getReactNativeConfigs() {
+//   return [
+//     expoConfig,
+//     ...applyTo.react('@react-native', fixupConfigRules(flatCompat.plugins('@react-native'))),
+//     ...applyTo.react('@react-native/rules', {
+//       rules: {
+//         '@react-native/no-deep-imports': 'error',
+//         '@react-native/platform-colors': 'error',
+//       }
+//     }),
+//     ...applyTo.react('react-native', fixupConfigRules(flatCompat.extends('plugin:react-native/all'))),
+//     ...applyTo.react('react-native-a11y', fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all'))),
+//     ...applyTo.react('react-native/off-dom', pluginReact.configs['off-dom']),
+//     ...applyTo.reactComponents('react/naming-convention/components', {
+//       rules: {'@eslint-react/naming-convention/filename': ['error', 'kebab-case']},
+//     }),
+//   ]
+// }
 
-  return []
-}
+// function getNextJsConfigs() {
+//   // If files is in a nextJs project or not
+//   // const isNextJsProject = fs.existsSync('next.config.js');
+//   // const nextJsOrEmptyExtends = isNextJsProject ? ['plugin:@next/next/core-web-vitals'] : [];
+
+//   return []
+// }
 
 function getReactTypescriptConfigs() {
   return [
@@ -803,15 +838,20 @@ function getVitestConfigs() {
       settings: {vitest: {typecheck: true}},
       languageOptions: {globals: pluginVitest.environments.env.globals},
     }),
-    ...applyTo.test(
-      'testing/vitest/formatting',
-      flatCompat.extends('plugin:jest-formatting/strict'),
-    ),
     ...applyTo.testType('testing/vitest/type', {
       rules: {
         'vitest/prefer-expect-assertions': 'off',
       },
     }),
+  ]
+}
+
+function getJestConfigs() {
+  return [
+    ...applyTo.test(
+      'testing/vitest/formatting',
+      flatCompat.extends('plugin:jest-formatting/strict'),
+    ),
   ]
 }
 
@@ -835,17 +875,20 @@ function getCypressConfigs() {
 export default tsEslint.config(
   ...getIgnoreConfigs(),
   ...getCoreConfigs(),
+  ...getWebConfigs(),
   ...getJsonConfigs(),
   ...getCssModuleConfigs(),
   ...getI18nextConfigs(),
-  // ...getTailwindCssConfigs(), // TODO: enable when this plugin support tailwind v4
+  ...getTailwindCssConfigs(),
   ...getTypescriptConfigs(),
   ...getReactConfigs(),
-  ...getReactNativeConfigs(),
-  ...getNextJsConfigs(),
+  ...getReactWebConfigs(),
+  // ...getReactNativeConfigs(),
+  // ...getNextJsConfigs(),
   ...getReactTypescriptConfigs(),
   ...getTestConfigs(),
   ...getVitestConfigs(),
+  ...getJestConfigs(),
   ...getTestingLibraryDomConfigs(),
   ...getTestingLibraryReactConfigs(),
   ...getCypressConfigs(),

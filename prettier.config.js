@@ -13,6 +13,7 @@ export default {
   htmlWhitespaceSensitivity: 'strict',
   plugins: [
     // 'some-other-plugin',
+    '@prettier/plugin-oxc',
     'prettier-plugin-classnames',
     '@svgr/plugin-prettier',
     'prettier-plugin-merge',

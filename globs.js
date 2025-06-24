@@ -15,7 +15,7 @@ const globs = {
   REACT: ['**/*.?(c|m)[jt]sx', '**/use*.?(c|m)[jt]s?(x)'],
   REACT_JAVASCRIPT: ['**/*.?(c|m)tsx', '**/use*.?(c|m)js?(x)'],
   REACT_TYPESCRIPT: ['**/*.?(c|m)tsx', '**/use*.?(c|m)ts?(x)'],
-  ROUTES: ['src/routes/**/*'],
+  ROUTES: ['src/routes/**/*', '**/_layout.tsx'],
   TEST: ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}?(-d).?(c|m)[jt]s?(x)'],
   TEST_NOT_TYPE: ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/*.{test,spec}.?(c|m)[jt]s?(x)'],
   TEST_SSR: ['**/*.ssr.{test,spec}?(-d).?(c|m)[jt]s?(x)', '**/__tests__/**/*.ssr.?(c|m)[jt]s?(x)'],

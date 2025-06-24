@@ -8,15 +8,91 @@
   },
   "languages": {
     "JavaScript": {
-      "formatter": "language_server",
+      "language_servers": ["vtsls", "eslint"],
+      // "formatter": [
+      //   {
+      //     "code_actions": {
+      //       "source.fixAll.eslint": true
+      //     }
+      //   },
+      //   {
+      //     "external": {
+      //       "command": "prettierd",
+      //       "arguments": ["--stdin-filepath", "{buffer_path}"]
+      //     }
+      //   }
+      // ],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
       "code_actions_on_format": {
-        "source.organizeImports": false
+        "source.organizeImports": false,
+        "source.fixAll.eslint": true
       }
     },
     "TypeScript": {
-      "formatter": "language_server",
+      "language_servers": ["vtsls", "eslint"],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
       "code_actions_on_format": {
-        "source.organizeImports": false
+        "source.organizeImports": false,
+        "source.fixAll.eslint": true
+      }
+    },
+    "TSX": {
+      "language_servers": ["vtsls", "eslint"],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports": false,
+        "source.fixAll.eslint": true
+      }
+    },
+    "JSON": {
+      "language_servers": ["json-language-server", "eslint"],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true
+      }
+    },
+    "JSONC": {
+      "language_servers": ["json-language-server", "eslint"],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true
+      }
+    },
+    "Vue.js": {
+      "language_servers": ["vue", "eslint"],
+      "formatter": {
+        "external": {
+          "command": "prettierd",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true
       }
     }
   },
@@ -48,6 +124,67 @@
           "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
         }
       ]
+    },
+    "vtsls": {
+      "settings": {
+        "javascript": {
+          "validate.enable": false,
+          "format.enable": false
+        },
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib",
+          "validate.enable": true,
+          "format.enable": false,
+          "tsserver": {
+            "nodePath": "node"
+          },
+          "preferences": {
+            "autoImportSpecifierExcludeRegexes": ["^(node:)?os$"]
+          }
+        }
+      }
+    },
+    "json-language-server": {
+      "settings": {
+        "json": {
+          "format": {
+            "enable": false
+          },
+          "validate": {
+            "enable": false
+          }
+        }
+      }
+    },
+    "vue": {
+      "initialization_options": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib"
+        }
+      }
+    },
+    "svelte-language-server": {
+      // https://github.com/sveltejs/language-tools/tree/master/packages/language-server
+      "initialization_options": {
+        "configuration": {
+          "typescript": {},
+          "javascript": {}
+        }
+      }
+    },
+    "stylelint-lsp": {
+      "settings": {
+        "stylelint": {
+          "customSyntax": "",
+          "packageManager": "pnpm",
+          "stylelintPath": "./node_modules/stylelint",
+          "reportDescriptionlessDisables": true,
+          "reportInvalidScopeDisables": true,
+          "reportNeedlessDisables": true,
+          "snippet": ["css", "postcss", "scss", "sass", "less"],
+          "validate": ["css", "postcss", "scss", "sass", "less"]
+        }
+      }
     }
   }
 }

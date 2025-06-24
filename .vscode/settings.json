@@ -29,7 +29,7 @@
   "typescript.format.enable": false,
   "eslint.format.enable": true,
   "[json][jsonc][json5][javascript][javascriptreact][typescript][typescriptreact][vue]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "always",
       // Imports are organize and sorted by eslint
@@ -61,7 +61,9 @@
   // Stylelint
   "stylelint.validate": ["css", "postcss", "scss", "sass", "less"],
   "stylelint.snippet": ["css", "postcss", "scss", "sass", "less"],
-  // Use only styleleint to format (because its included prettier rules)
+  "stylelint.stylelintPath": "./node_modules/stylelint",
+  "stylelint.customSyntax": "",
+  // Use only stylelint to format (because its included prettier rules)
   "[scss][sass][less][css][postcss]": {
     "editor.defaultFormatter": "stylelint.vscode-stylelint",
     "editor.codeActionsOnSave": {
