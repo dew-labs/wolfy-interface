@@ -5,53 +5,34 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchOrders, {type OrdersData} from '@/lib/trade/services/fetchOrders'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getOrdersDataQueryKey(
-  chainId: StarknetChainId,
-  accountAddress: string | undefined,
-) {
-  return ['ordersData', chainId, accountAddress] as const
+export function getOrdersDataQueryKey(params: {
+  chainId: StarknetChainId
+  accountAddress: string | undefined
+}) {
+  return ['ordersData', params.chainId, params.accountAddress] as const
 }
 
-function createGetOrdersDataQueryOptions<T>(
-  chainId: StarknetChainId,
-  accountAddress: string | undefined,
-  selector: MemoizedCallback<(data: OrdersData) => T>,
+export function getOrdersDataQueryOptions<TData = OrdersData, TError = Error>(
+  params: Parameters<typeof getOrdersDataQueryKey>[0],
+  options?: Omit<UseQueryOptions<OrdersData, TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getOrdersDataQueryKey(chainId, accountAddress),
+    queryKey: getOrdersDataQueryKey(params),
     queryFn: async () => {
-      return await fetchOrders(chainId, accountAddress)
+      return await fetchOrders(params.chainId, params.accountAddress)
     },
     placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
-    select: selector,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    ...options,
   })
 }
 
-export default function useOrdersDataQuery(): UseQueryResult<OrdersData>
-export default function useOrdersDataQuery<T = OrdersData>(
-  selector: MemoizedCallback<(data: OrdersData) => T>,
-): UseQueryResult<T>
-export default function useOrdersDataQuery<T = OrdersData>(
-  selector?: MemoizedCallback<(data: OrdersData) => T>,
-) {
+export default function useOrdersDataQuery() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddressValue()
 
-  return useQuery(
-    createGetOrdersDataQueryOptions(
-      chainId,
-      accountAddress,
-      useCallback(
-        ordersData => {
-          if (selector) return selector(ordersData)
-          return ordersData
-        },
-        [selector],
-      ),
-    ),
-  )
+  return useQuery(getOrdersDataQueryOptions({chainId, accountAddress}))
 }

@@ -6,7 +6,7 @@ import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import useOrderInfosDataQuery from '@/lib/trade/hooks/useOrderInfosDataQuery'
 import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import useTokenAddress from '@/lib/trade/states/useTokenAddress'
 import isPositionOrder from '@/lib/trade/utils/order/type/isPositionOrder'
@@ -44,13 +44,19 @@ function usePositionKeysOfCurrentToken(tokenAddress: string | undefined) {
 
 function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
   const {data: order} = useOrderInfosDataQuery(useCallback(data => data.get(orderKey), [orderKey]))
-  const {data: initialCollateralTokenPrice} = useTokenPricesQuery(
-    useCallback(
-      data => {
-        if (!order || !isPositionOrder(order)) return null
-        return data.get(order.initialCollateralToken.address)
+  const [chainId] = useChainId()
+  const {data: initialCollateralTokenPrice} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            if (!order || !isPositionOrder(order)) return null
+            return data.get(order.initialCollateralToken.address)
+          },
+          [order],
+        ),
       },
-      [order],
     ),
   )
 
@@ -88,17 +94,24 @@ function OrderLine({orderKey}: Readonly<{orderKey: string}>) {
 }
 
 function PositionLine({positionKey}: Readonly<{positionKey: bigint}>) {
+  const [chainId] = useChainId()
+
   const {data: position} = usePositionsInfoDataQuery(
     useCallback(data => data.positionsInfo.get(positionKey), [positionKey]),
   )
 
-  const {data: collateralTokenPrice} = useTokenPricesQuery(
-    useCallback(
-      data => {
-        if (!position) return null
-        return data.get(position.collateralTokenAddress)
+  const {data: collateralTokenPrice} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            if (!position) return null
+            return data.get(position.collateralTokenAddress)
+          },
+          [position],
+        ),
       },
-      [position],
     ),
   )
 
@@ -170,7 +183,7 @@ export default memo(function Chart() {
   const tokenSymbol = getTokensMetadata(chainId).get(tokenAddress ?? '')?.symbol
   const asset = tokenSymbol ? MOCK_SYMBOL_MAP[tokenSymbol] : undefined
 
-  const handleChartIntervalSelection = useCallback((key: Key) => {
+  const handleChartIntervalSelection = useCallback((key: Key | null) => {
     if (isChartInterval(key)) {
       setChartInterval(key)
     }

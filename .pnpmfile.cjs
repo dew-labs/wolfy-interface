@@ -1,5 +1,5 @@
 const {updateConfig: makeBetterDefaults} =
-  require('.pnpm-config/@pnpm/better-defaults/pnpmfile.cjs').hooks
+  require('.pnpm-config/@pnpm/plugin-better-defaults/pnpmfile.cjs').hooks
 
 module.exports = {
   hooks: {

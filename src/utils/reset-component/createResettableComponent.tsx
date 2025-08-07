@@ -3,7 +3,7 @@ import type {NamedExoticComponent} from 'react'
 
 import {useResetComponent} from './useResetComponent'
 
-export default function createResetableComponent<T extends {reset: MemoizedCallback<() => void>}>(
+export default function createResettableComponent<T extends {reset: () => void}>(
   Component: ComponentType<T>,
 ): NamedExoticComponent<Omit<T, 'reset'>> {
   const ResettableComponent = function (props: Omit<T, 'reset'>) {

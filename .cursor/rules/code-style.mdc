@@ -1,0 +1,28 @@
+---
+description: Writing readable, maintainable code
+globs: **/*
+alwaysApply: false
+---
+# Code Style
+
+## Recommended
+
++ The filename should match the functionality
++ Follow SOLID principles, DRY, YAGNI, KISS, etc.
++ Prioritize reusability and modularity over code duplication. Use abstraction to extract core logic and hide complexity, making code flexible and generic. Keep components focused on a single responsibility.
++ Use functional and declarative programming patterns; avoid classes
++ Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
++ Document complex types with JSDoc
++ Separate concerns: presentational components, business logic, side effects
++ Always write tests, type tests
++ Always try to add:
+  + Informational log with `console.info` about the events, behaviors, etc
+  + Fine-grained debug log with `console.debug` about the function/program state
+  + Error log with `console.error` about the errors, bugs, etc
+  + Warn log with `console.warn` about the warnings, potential issues, etc
++ Always try to keep the files small (< 300 lines of code) and focused, with single responsibility
++ Document and comment code clearly and concisely, focusing on "Why" rather than "What". Because "What" can be hidden with abstraction.
+
+## Custom
+
++ You don't have to import libraries that are already auto-imported by `unplugin-auto-import` (read `auto-imports.d.ts` for the list).

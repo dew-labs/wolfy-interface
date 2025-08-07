@@ -12,7 +12,7 @@ import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
-import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
+import {tanstackRouter} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
@@ -137,8 +137,6 @@ export function getConfig(mode: string): UserConfig {
         {
           from: 'react',
           imports: [
-            'MemoizedCallback',
-            'MemoizedCallbackOrDispatch',
             'SyntheticEvent', // base of all events, use when unsure about event type
             'ReactEventHandler',
             'UIEventHandler',
@@ -244,7 +242,13 @@ export function getConfig(mode: string): UserConfig {
         },
         {
           from: '@tanstack/react-query',
-          imports: ['QueryClient', 'UseQueryResult'],
+          imports: [
+            'QueryClient',
+            'UseQueryResult',
+            'UseInfiniteQueryResult',
+            'UseQueryOptions',
+            'UseInfiniteQueryOptions',
+          ],
           type: true,
         },
         {'@iconify/react': ['Icon']},
@@ -415,7 +419,7 @@ export function getConfig(mode: string): UserConfig {
       cache: true,
       cacheLocation: './.imageoptimizercache',
     }),
-    TanStackRouterVite({
+    tanstackRouter({
       target: 'react',
       // autoCodeSplitting: true,
     }),
@@ -571,8 +575,8 @@ export function getConfig(mode: string): UserConfig {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
       devSourcemap: shouldUseSourceMap,
       preprocessorOptions: {
-        scss: {api: 'modern-compiler', sourceMapIncludeSources: shouldUseSourceMap},
-        sass: {api: 'modern-compiler', sourceMapIncludeSources: shouldUseSourceMap},
+        scss: {sourceMapIncludeSources: shouldUseSourceMap},
+        sass: {sourceMapIncludeSources: shouldUseSourceMap},
       },
     },
     json: {stringify: true},

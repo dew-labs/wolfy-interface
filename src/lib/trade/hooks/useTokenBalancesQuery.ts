@@ -5,41 +5,34 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTokenBalances, {type TokenBalancesData} from '@/lib/trade/services/fetchTokenBalances'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getTokenBalancesQueryKey(
-  chainId: StarknetChainId,
-  accountAddress: string | undefined,
-) {
-  return ['tokenBalances', chainId, accountAddress] as const
+export function getTokenBalancesQueryKey(params: {
+  chainId: StarknetChainId
+  accountAddress: string | undefined
+}) {
+  return ['tokenBalances', params.chainId, params.accountAddress] as const
 }
 
-function createGetTokenBalancesQueryOptions<T = TokenBalancesData>(
-  chainId: StarknetChainId,
-  accountAddress: string | undefined,
-  selector?: MemoizedCallback<(data: TokenBalancesData) => T>,
+export function getTokenBalancesQueryOptions<TData = TokenBalancesData, TError = Error>(
+  params: Parameters<typeof getTokenBalancesQueryKey>[0],
+  options?: Omit<UseQueryOptions<TokenBalancesData, TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getTokenBalancesQueryKey(chainId, accountAddress),
+    queryKey: getTokenBalancesQueryKey(params),
     queryFn: async () => {
-      return await fetchTokenBalances(chainId, accountAddress)
+      return await fetchTokenBalances(params.chainId, params.accountAddress)
     },
-    select: selector as (data: TokenBalancesData) => T,
     placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchInterval: 5000,
+    ...options,
   })
 }
 
-export default function useTokenBalancesQuery(): UseQueryResult<TokenBalancesData>
-export default function useTokenBalancesQuery<T = TokenBalancesData>(
-  selector: MemoizedCallback<(data: TokenBalancesData) => T>,
-): UseQueryResult<T>
-export default function useTokenBalancesQuery<T = TokenBalancesData>(
-  selector?: MemoizedCallback<(data: TokenBalancesData) => T>,
-) {
+export default function useTokenBalancesQuery() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddressValue()
 
-  return useQuery(createGetTokenBalancesQueryOptions(chainId, accountAddress, selector))
+  return useQuery(getTokenBalancesQueryOptions({chainId, accountAddress}))
 }

@@ -23,19 +23,18 @@ import * as m from '@/paraglide/messages'
 import max from '@/utils/numbers/bigint/max'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import markAsMemoized from '@/utils/react/markAsMemoized'
 
 import ClosePositionModal, {useClosePosition} from './ClosePositionModal'
 
 const TABLE_CLASS_NAMES = {th: '!rounded-none font-serif'}
 
-const selectSortedPositions = markAsMemoized((data: PositionsInfoData) => {
+const selectSortedPositions = (data: PositionsInfoData) => {
   return Array.from(data.positionsInfo.values()).sort((a, b) => {
     const timeA = max(a.increasedAtBlock, a.decreasedAtBlock)
     const timeB = max(b.increasedAtBlock, b.decreasedAtBlock)
     return Number(timeB - timeA)
   })
-})
+}
 
 export default memo(function PositionTab() {
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
@@ -63,7 +62,7 @@ export default memo(function PositionTab() {
       <ClosePositionModal />
       <div className='relative'>
         <Button
-          className='absolute right-2 top-2 z-10'
+          className='absolute top-2 right-2 z-10'
           size='md'
           variant='solid'
           isIconOnly
@@ -114,14 +113,14 @@ export default memo(function PositionTab() {
                 <TableRow key={position.key} className='relative'>
                   <TableCell>
                     <div
-                      className={`!absolute -left-4 top-[10%] h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                      className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                     />
                     <Tooltip content='Press to switch market' showArrow>
                       <Button
                         disableRipple
                         disableAnimation
                         variant='light'
-                        className='inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                        className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                         onPress={() => {
                           setTokenAddress(position.marketData.indexTokenAddress)
                         }}
@@ -138,7 +137,7 @@ export default memo(function PositionTab() {
                               : m.zesty_bald_bullock_list()}{' '}
                             {position.marketData.indexToken.symbol}
                           </div>
-                          <div className='whitespace-nowrap text-xs opacity-50'>[{poolName}]</div>
+                          <div className='text-xs whitespace-nowrap opacity-50'>[{poolName}]</div>
                         </div>
                       </Button>
                     </Tooltip>

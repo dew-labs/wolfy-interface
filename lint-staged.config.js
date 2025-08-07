@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 
 import micromatch from 'micromatch'
-import {packageDirectorySync} from 'pkg-dir'
+import {packageDirectorySync} from 'package-directory'
 
 import globs from './globs.js'
 

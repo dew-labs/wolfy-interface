@@ -28,7 +28,7 @@ export type InputMode = (typeof InputMode)[keyof typeof InputMode]
 export default function useTokenInput(
   decimals: bigint | number,
   amount: bigint | undefined,
-  setAmount: MemoizedCallbackOrDispatch<bigint>,
+  setAmount: Dispatch<bigint>,
   price: Price,
   defaultMode?: InputMode,
 ) {

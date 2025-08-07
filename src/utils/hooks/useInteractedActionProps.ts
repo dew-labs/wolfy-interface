@@ -1,7 +1,4 @@
-export default function useInteractedActionProps(
-  action: MemoizedCallback<() => void>,
-  delay = 200,
-) {
+export default function useInteractedActionProps(action: () => void, delay = 200) {
   const isInteracted = useRef(false)
 
   const setInteracted = useCallback(() => {

@@ -1,0 +1,41 @@
+---
+description: Writing Typescript
+globs: **/*.ts, **/*.cts, **/*.mts, **/*.tsx, **/*.ctsx, **/*.mtsx
+---
+# Typescript Rules
+
+## Recommended
+
++ Avoid `any`, prefer `unknown` with runtime checks
++ Avoid inline type definitions, use `type` declarations instead
++ Prefer `interface` over `type` (type aliases)
++ Use `type` for unions, intersections, and primitive compositions
++ Use `never` for variables that can never be any type
++ Avoid enums; use const objects with 'as const' assertion, then export the same const as type: `export type <const name> = (typeof <const name>)[keyof typeof <const name>]`
++ Avoid ambiguous union types, use discriminated unions when necessary
++ Use advanced TypeScript features (type guards, mapped types, conditional types, utility types)
++ Use strict TypeScript mode
++ Prefer type inference over explicit type annotations when possible
++ Use type utilities to enhance type safety and validation
++ Create reusable type utilities for common patterns
++ Document complex types with JSDoc
++ Test both runtime behavior and type correctness
++ Handle type transformation errors gracefully
++ Document type limitations and edge cases
++ Prefer absolute imports for all files: `@/...`
++ Avoid try/catch blocks unless there's good reason to translate or handle error in that abstraction
+
+### Naming Convention
+
++ UPPER_CASE for const, PascalCase for enums, enum values, types, and interfaces, most of the rest: camelCase
++ Avoid using List in the name of plural variables, use its plural form instead.
++ Boolean variables must begin with: is, are, has, can, should, etc.
++ Use present tense for function names.
++ Use basic imperative mood for function names.
++ Event handler's name should have prefixed with `handle`, `on` should be use for component's prop event trigger.
++ Use `use` prefix for custom hooks.
++ When exporting default, the variable name should be the same as the file name.
+
+## Custom
+
+<!-- Add project-specific Typescript rules here -->

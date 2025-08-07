@@ -34,7 +34,9 @@ import usePositionsConstantsQuery from '@/lib/trade/hooks/usePositionConstantsQu
 import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
 import useReferralInfoQuery from '@/lib/trade/hooks/useReferralInfoQuery'
 import useTokenBalancesQuery from '@/lib/trade/hooks/useTokenBalancesQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useTokenPricesQuery, {
+  getTokenPricesQueryOptions,
+} from '@/lib/trade/hooks/useTokenPricesQuery'
 import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_GAS_LIMITS} from '@/lib/trade/services/fetchGasLimits'
@@ -58,8 +60,7 @@ import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountT
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import markAsMemoized from '@/utils/react/markAsMemoized'
-import createResetableComponent from '@/utils/reset-component/createResettableComponent'
+import createResettableComponent from '@/utils/reset-component/createResettableComponent'
 
 import useAcceptablePriceImpact from './hooks/useAcceptablePriceImpact'
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
@@ -97,11 +98,10 @@ const SUPPORTED_TRADE_TYPES: TradeType[] = [
 
 const DEFAULT_AVAILABLE_MARKETS: MarketData[] = []
 
-const selectPositionsInfoViaStringRepresentation = markAsMemoized(
-  (data: PositionsInfoData) => data.positionsInfoViaStringRepresentation,
-)
+const selectPositionsInfoViaStringRepresentation = (data: PositionsInfoData) =>
+  data.positionsInfoViaStringRepresentation
 
-const Controller = createResetableComponent(({reset}) => {
+const Controller = createResettableComponent(({reset}) => {
   const latestReset = useLatest(reset)
   const [chainId] = useChainId()
   const latestChainId = useRef(chainId)
@@ -262,35 +262,40 @@ const Controller = createResetableComponent(({reset}) => {
       shortTokenPrice: undefined,
       feeTokenPrice: undefined,
     },
-  } = useTokenPricesQuery(
-    useCallback(
-      data => {
-        const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
-        invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
+  } = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
+            invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
 
-        return {
-          tokenPrice: tokenAddress ? data.get(tokenAddress) : undefined,
-          payTokenPrice: payTokenAddress ? data.get(payTokenAddress) : undefined,
-          collateralTokenPrice: collateralTokenAddress
-            ? data.get(collateralTokenAddress)
-            : undefined,
-          longTokenPrice: marketData?.longTokenAddress
-            ? data.get(marketData.longTokenAddress)
-            : undefined,
-          shortTokenPrice: marketData?.shortTokenAddress
-            ? data.get(marketData.shortTokenAddress)
-            : undefined,
-          feeTokenPrice: data.get(feeTokenAddress),
-        }
+            return {
+              tokenPrice: tokenAddress ? data.get(tokenAddress) : undefined,
+              payTokenPrice: payTokenAddress ? data.get(payTokenAddress) : undefined,
+              collateralTokenPrice: collateralTokenAddress
+                ? data.get(collateralTokenAddress)
+                : undefined,
+              longTokenPrice: marketData?.longTokenAddress
+                ? data.get(marketData.longTokenAddress)
+                : undefined,
+              shortTokenPrice: marketData?.shortTokenAddress
+                ? data.get(marketData.shortTokenAddress)
+                : undefined,
+              feeTokenPrice: data.get(feeTokenAddress),
+            }
+          },
+          [
+            chainId,
+            collateralTokenAddress,
+            marketData?.longTokenAddress,
+            marketData?.shortTokenAddress,
+            payTokenAddress,
+            tokenAddress,
+          ],
+        ),
       },
-      [
-        chainId,
-        collateralTokenAddress,
-        marketData?.longTokenAddress,
-        marketData?.shortTokenAddress,
-        payTokenAddress,
-        tokenAddress,
-      ],
     ),
   )
 
@@ -816,7 +821,7 @@ const Controller = createResetableComponent(({reset}) => {
           <input
             className={clsx(
               `w-16 rounded-small border-medium bg-default-100 px-1 py-0.5 text-right text-small
-              font-medium text-default-700 outline-none transition-colors hover:border-primary
+              font-medium text-default-700 transition-colors outline-none hover:border-primary
               focus:border-primary`,
               leverage > 0n && !isValidLeverage ? 'border-danger-500' : 'border-transparent',
             )}

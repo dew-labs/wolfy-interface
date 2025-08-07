@@ -8,10 +8,12 @@ import {
 } from '@heroui/react'
 
 import {getTokensMetadata} from '@/constants/tokens'
+import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
-import useTokenBalancesQuery from '@/lib/trade/hooks/useTokenBalancesQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import {getMarketsDataQueryOptions} from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketsQuery from '@/lib/trade/hooks/useMarketsQuery'
+import {getTokenBalancesQueryOptions} from '@/lib/trade/hooks/useTokenBalancesQuery'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_PRICE} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
@@ -34,15 +36,15 @@ interface Props {
   tradeMode: Exclude<TradeMode, typeof TradeMode.Trigger>
   marketAddress: string | undefined
   tokenAmount: bigint
-  setTokenAmount: MemoizedCallbackOrDispatch<bigint>
+  setTokenAmount: Dispatch<bigint>
   tokenAmountUsd: bigint
   tokenPrice: bigint | undefined
-  setTokenPrice: MemoizedCallbackOrDispatch<bigint>
+  setTokenPrice: Dispatch<bigint>
   availablePayTokenAddresses: string[]
   payTokenAddress: string | undefined
-  setPayTokenAddress: MemoizedCallbackOrDispatch<string | undefined>
+  setPayTokenAddress: Dispatch<string | undefined>
   payTokenAmount: bigint
-  setPayTokenAmount: MemoizedCallbackOrDispatch<bigint>
+  setPayTokenAmount: Dispatch<bigint>
 }
 
 const SIZE_CLASS_NAMES = {
@@ -82,45 +84,67 @@ export default memo(function TokenInputs({
   setTokenAmount,
 }: Readonly<Props>) {
   const [chainId] = useChainId()
+  const accountAddress = useAccountAddressValue()
   const tokensMetadata = getTokensMetadata(chainId)
   const latestTokensMetadata = useLatest(tokensMetadata)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: payTokenBalance = 0n} = useTokenBalancesQuery(
-    useCallback(
-      data => {
-        return data.get(payTokenAddress ?? '')
+  const {data: payTokenBalance = 0n} = useQuery(
+    getTokenBalancesQueryOptions(
+      {chainId, accountAddress},
+      {
+        select: useCallback(
+          data => {
+            return data.get(payTokenAddress ?? '')
+          },
+          [payTokenAddress],
+        ),
       },
-      [payTokenAddress],
+    ),
+  )
+
+  const {data: markets} = useMarketsQuery()
+  // TODO: optimize, extract this query to a single function to avoid closure memory leak
+  const {data: currentMarketData} = useQuery(
+    getMarketsDataQueryOptions(
+      {chainId, markets},
+      {
+        select: useCallback(
+          data => {
+            return data.get(marketAddress ?? '')
+          },
+          [marketAddress],
+        ),
+      },
     ),
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: currentMarketData} = useMarketsDataQuery(
-    useCallback(
-      data => {
-        return data.get(marketAddress ?? '')
+  const {data: realTokenPrice} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            return data.get(currentMarketData?.indexToken.address ?? '')
+          },
+          [currentMarketData],
+        ),
       },
-      [marketAddress],
     ),
   )
 
-  // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: realTokenPrice} = useTokenPricesQuery(
-    useCallback(
-      data => {
-        return data.get(currentMarketData?.indexToken.address ?? '')
+  const {data: payTokenPrice} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            return data.get(payTokenAddress ?? '')
+          },
+          [payTokenAddress],
+        ),
       },
-      [currentMarketData],
-    ),
-  )
-
-  const {data: payTokenPrice} = useTokenPricesQuery(
-    useCallback(
-      data => {
-        return data.get(payTokenAddress ?? '')
-      },
-      [payTokenAddress],
     ),
   )
 
@@ -303,9 +327,9 @@ export default memo(function TokenInputs({
           }
           endContent={
             <div className='pointer-events-none flex h-full min-w-max items-center justify-center gap-2'>
-              <span className='mr-1 whitespace-nowrap text-lg text-default-400'>per</span>
+              <span className='mr-1 text-lg whitespace-nowrap text-default-400'>per</span>
               <img src={tokenData?.imageUrl} alt='' className='size-6' />
-              <span className='whitespace-nowrap text-lg text-default-400'>
+              <span className='text-lg whitespace-nowrap text-default-400'>
                 {tokenData?.symbol}
               </span>
             </div>
@@ -324,7 +348,7 @@ export default memo(function TokenInputs({
             placement='top'
           >
             <button
-              className={clsx('absolute bottom-0 whitespace-nowrap p-0')}
+              className={clsx('absolute bottom-0 p-0 whitespace-nowrap')}
               onClick={togglePayTokenInputMode}
             >
               Pay: {payTokenText}
@@ -353,7 +377,7 @@ export default memo(function TokenInputs({
         endContent={
           <>
             {payTokenInputMode === InputMode.Usd && (
-              <div className='pointer-events-none mb-1 mr-2 flex items-center'>
+              <div className='pointer-events-none mr-2 mb-1 flex items-center'>
                 <span className='text-2xl text-default-400'>in</span>
               </div>
             )}
@@ -365,7 +389,7 @@ export default memo(function TokenInputs({
             >
               <button
                 className={clsx(
-                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  'absolute top-2 right-3 m-0 p-0 text-xs whitespace-nowrap',
                   payTokenData && !isValidPayTokenAmount && 'text-danger-500',
                 )}
                 onClick={handlePayTokenAmountSetToMax}
@@ -405,7 +429,7 @@ export default memo(function TokenInputs({
             placement='top'
           >
             <button
-              className={clsx('absolute bottom-0 whitespace-nowrap p-0')}
+              className={clsx('absolute bottom-0 p-0 whitespace-nowrap')}
               onClick={toggleTokenInputMode}
             >
               {INPUT_2_LABEL[tradeType]}: {tokenText}
@@ -434,10 +458,10 @@ export default memo(function TokenInputs({
         endContent={
           <div className='pointer-events-none flex h-full min-w-max items-center justify-center gap-2'>
             {tokenInputMode === InputMode.Usd && (
-              <span className='whitespace-nowrap text-lg text-default-400'>in</span>
+              <span className='text-lg whitespace-nowrap text-default-400'>in</span>
             )}
             <img src={tokenData?.imageUrl} alt='' className='size-6' />
-            <span className='whitespace-nowrap text-lg text-default-400'>{tokenData?.symbol}</span>
+            <span className='text-lg whitespace-nowrap text-default-400'>{tokenData?.symbol}</span>
           </div>
         }
       />

@@ -4,22 +4,26 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchUiFeeFactor from '@/lib/trade/services/fetchUiFeeFactor'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getUiFeeFactorQueryKey(chainId: StarknetChainId) {
-  return ['uiFeeFactor', chainId] as const
+export function getUiFeeFactorQueryKey(params: {chainId: StarknetChainId}) {
+  return ['uiFeeFactor', params.chainId] as const
 }
 
-function createGetUiFeeFactorQueryOptions(chainId: StarknetChainId) {
+export function getUiFeeFactorQueryOptions<TData = bigint, TError = Error>(
+  params: Parameters<typeof getUiFeeFactorQueryKey>[0],
+  options?: Omit<UseQueryOptions<bigint, TError, TData>, 'queryKey' | 'queryFn'>,
+) {
   return queryOptions({
-    queryKey: getUiFeeFactorQueryKey(chainId),
+    queryKey: getUiFeeFactorQueryKey(params),
     queryFn: async () => {
-      return await fetchUiFeeFactor(chainId)
+      return await fetchUiFeeFactor(params.chainId)
     },
     placeholderData: keepPreviousData,
     ...NO_REFETCH_OPTIONS,
+    ...options,
   })
 }
 
 export default function useUiFeeFactorQuery() {
   const [chainId] = useChainId()
-  return useQuery(createGetUiFeeFactorQueryOptions(chainId))
+  return useQuery(getUiFeeFactorQueryOptions({chainId}))
 }

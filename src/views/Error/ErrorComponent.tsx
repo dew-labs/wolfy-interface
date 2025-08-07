@@ -19,7 +19,7 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
   }, [reset])
 
   return (
-    <div className='absolute left-0 top-0 size-full bg-background' style={{zIndex: 1000}}>
+    <div className='absolute top-0 left-0 size-full bg-background' style={{zIndex: 1000}}>
       <WolfyBackground />
       <HeadTags title='Error' />
       <main className='relative flex h-dvh w-full flex-col items-center justify-center gap-2 p-4'>

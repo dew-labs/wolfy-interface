@@ -1,7 +1,7 @@
 import {LEVERAGE_DECIMALS, LEVERAGE_PRECISION} from '@/constants/config'
 import {getTokensMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {TradeMode} from '@/lib/trade/states/useTradeMode'
 import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountToUsd'
@@ -19,7 +19,7 @@ export default function usePayToken(
   tokenAddress: string | undefined,
   tokenPrice: bigint | undefined,
   tokenAmountUsd: bigint,
-  setTokenAmountUsd: MemoizedCallbackOrDispatch<bigint>,
+  setTokenAmountUsd: Dispatch<bigint>,
   minCollateralFactor: bigint | undefined,
 ) {
   const [chainId] = useChainId()
@@ -34,8 +34,13 @@ export default function usePayToken(
 
   const [payTokenAddress, setPayTokenAddress] = useState<string>()
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: payTokenMinPriceData = 0n} = useTokenPricesQuery(
-    useCallback(data => data.get(payTokenAddress ?? '')?.min, [payTokenAddress]),
+  const {data: payTokenMinPriceData = 0n} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(data => data.get(payTokenAddress ?? '')?.min, [payTokenAddress]),
+      },
+    ),
   )
 
   const payTokenData = payTokenAddress ? tokensMetadata.get(payTokenAddress) : undefined

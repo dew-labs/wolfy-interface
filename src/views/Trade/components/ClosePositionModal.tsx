@@ -14,7 +14,9 @@ import useGasLimitsQuery from '@/lib/trade/hooks/useGasLimitsQuery'
 import useGasPriceQuery from '@/lib/trade/hooks/useGasPriceQuery'
 import usePositionsInfoDataQuery from '@/lib/trade/hooks/usePositionsInfoDataQuery'
 import useReferralInfoQuery from '@/lib/trade/hooks/useReferralInfoQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useTokenPricesQuery, {
+  getTokenPricesQueryOptions,
+} from '@/lib/trade/hooks/useTokenPricesQuery'
 import useUiFeeFactorQuery from '@/lib/trade/hooks/useUiFeeFactorQuery'
 import {BASIS_POINTS_DIVISOR_BIGINT, USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import {DEFAULT_GAS_LIMITS} from '@/lib/trade/services/fetchGasLimits'
@@ -29,7 +31,6 @@ import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import {cleanNumberString} from '@/utils/numberInputs'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import markAsMemoized from '@/utils/react/markAsMemoized'
 
 const closePositionKeyAtom = atom<bigint>()
 const isCLosePositionModalOpenAtom = atom(get => !!get(closePositionKeyAtom))
@@ -42,9 +43,12 @@ export function useClosePosition() {
   }, [])
 }
 
-const selectPositionsInfo = markAsMemoized((data: PositionsInfoData) => data.positionsInfo)
+const selectPositionsInfo = (data: PositionsInfoData) => data.positionsInfo
 
 export default memo(function ClosePositionModal() {
+  const [chainId] = useChainId()
+  const latestChainId = useLatest(chainId)
+
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
   const {data: positionsInfoData = new Map()} = usePositionsInfoDataQuery(selectPositionsInfo)
   const [positionKey, setPositionKey] = useAtom(closePositionKeyAtom)
@@ -53,12 +57,17 @@ export default memo(function ClosePositionModal() {
   const latestPosition = useLatest(position)
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: collateralTokenPrice = 0n} = useTokenPricesQuery(
-    useCallback(
-      data => {
-        return data.get(position?.collateralTokenAddress ?? '')?.min
+  const {data: collateralTokenPrice = 0n} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            return data.get(position?.collateralTokenAddress ?? '')?.min
+          },
+          [position],
+        ),
       },
-      [position],
     ),
   )
 
@@ -147,8 +156,6 @@ export default memo(function ClosePositionModal() {
   const accountAddress = useAccountAddressValue()
   const latestAccountAddress = useLatest(accountAddress)
   const queryClient = useQueryClient()
-  const [chainId] = useChainId()
-  const latestChainId = useLatest(chainId)
 
   const {feeToken} = useFeeToken()
   const latestFeeToken = useLatest(feeToken)
@@ -185,29 +192,34 @@ export default memo(function ClosePositionModal() {
       shortTokenPrice: undefined,
       feeTokenPrice: undefined,
     },
-  } = useTokenPricesQuery(
-    useCallback(
-      data => {
-        const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
-        invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
+  } = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          data => {
+            const feeTokenAddress = FEE_TOKEN_ADDRESS.get(chainId)
+            invariant(feeTokenAddress, `No fee token found for chainId ${chainId}`)
 
-        return {
-          tokenPrice: position?.indexToken.address
-            ? data.get(position.indexToken.address)
-            : undefined,
-          collateralTokenPrice: position?.collateralToken.address
-            ? data.get(position.collateralToken.address)
-            : undefined,
-          longTokenPrice: position?.marketData.longTokenAddress
-            ? data.get(position.marketData.longTokenAddress)
-            : undefined,
-          shortTokenPrice: position?.marketData.shortTokenAddress
-            ? data.get(position.marketData.shortTokenAddress)
-            : undefined,
-          feeTokenPrice: data.get(feeTokenAddress),
-        }
+            return {
+              tokenPrice: position?.indexToken.address
+                ? data.get(position.indexToken.address)
+                : undefined,
+              collateralTokenPrice: position?.collateralToken.address
+                ? data.get(position.collateralToken.address)
+                : undefined,
+              longTokenPrice: position?.marketData.longTokenAddress
+                ? data.get(position.marketData.longTokenAddress)
+                : undefined,
+              shortTokenPrice: position?.marketData.shortTokenAddress
+                ? data.get(position.marketData.shortTokenAddress)
+                : undefined,
+              feeTokenPrice: data.get(feeTokenAddress),
+            }
+          },
+          [chainId, position],
+        ),
       },
-      [chainId, position],
     ),
   )
 

@@ -21,7 +21,7 @@ import useDepositWithdrawalHistoryQuery from '@/lib/trade/hooks/useDepositWithdr
 import useFeeToken from '@/lib/trade/hooks/useFeeToken'
 import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
 import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {TradeHistoryAction} from '@/lib/trade/services/fetchTradeHistories'
@@ -133,20 +133,25 @@ export default memo(function DepositWithdrawalHistory() {
     )
   }, [historyItems, marketsData])
 
-  const {data: shortlistedTokenPrices = new Map()} = useTokenPricesQuery(
-    useCallback(
-      prices => {
-        if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData
+  const {data: shortlistedTokenPrices = new Map()} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          prices => {
+            if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData
 
-        return create(prices, draft => {
-          draft.forEach((_, key) => {
-            if (!shortlistedTokenAddresses.has(key)) {
-              draft.delete(key)
-            }
-          })
-        })
+            return create(prices, draft => {
+              draft.forEach((_, key) => {
+                if (!shortlistedTokenAddresses.has(key)) {
+                  draft.delete(key)
+                }
+              })
+            })
+          },
+          [shortlistedTokenAddresses],
+        ),
       },
-      [shortlistedTokenAddresses],
     ),
   )
 
@@ -251,7 +256,7 @@ export default memo(function DepositWithdrawalHistory() {
       <h2 className='mt-4 text-lg font-bold text-default-900'>Deposit/Withdrawal History</h2>
       <div className='relative mt-4'>
         <Button
-          className='absolute right-2 top-2 z-10'
+          className='absolute top-2 right-2 z-10'
           size='md'
           variant='solid'
           isIconOnly
@@ -326,7 +331,7 @@ export default memo(function DepositWithdrawalHistory() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div
-                      className={`!absolute -left-4 top-[10%] h-4/5 w-1 ${(() => {
+                      className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${(() => {
                         if (
                           item.action === TradeHistoryAction.RequestDeposit ||
                           item.action === TradeHistoryAction.Deposit ||
@@ -349,7 +354,7 @@ export default memo(function DepositWithdrawalHistory() {
                       />
                       <div className='flex flex-col'>
                         <div>{item.market.indexToken.symbol}</div>
-                        <div className='whitespace-nowrap text-xs opacity-50'>
+                        <div className='text-xs whitespace-nowrap opacity-50'>
                           {getMarketPoolName(item.market)}
                         </div>
                       </div>
@@ -364,7 +369,7 @@ export default memo(function DepositWithdrawalHistory() {
                   </TableCell>
                   <TableCell>
                     <div>{item.executionFeeUsdText}</div>
-                    <div className='whitespace-nowrap text-xs opacity-50'>
+                    <div className='text-xs whitespace-nowrap opacity-50'>
                       {item.executionFeeText}
                     </div>
                   </TableCell>

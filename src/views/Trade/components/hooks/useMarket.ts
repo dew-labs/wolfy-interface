@@ -1,4 +1,6 @@
-import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import {getMarketsDataQueryOptions} from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketsQuery from '@/lib/trade/hooks/useMarketsQuery'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 
@@ -6,10 +8,17 @@ export default function useMarket(
   tokenAddress: string | undefined,
   availableMarkets: MarketData[],
 ) {
+  const [chainId] = useChainId()
+  const {data: markets} = useMarketsQuery()
   const [marketAddress, setMarketAddress] = useState<string>()
   const latestMarketAddress = useLatest(marketAddress)
-  const {data: marketData} = useMarketsDataQuery(
-    useCallback(data => data.get(marketAddress ?? ''), [marketAddress]),
+  const {data: marketData} = useQuery(
+    getMarketsDataQueryOptions(
+      {chainId, markets},
+      {
+        select: useCallback(data => data.get(marketAddress ?? ''), [marketAddress]),
+      },
+    ),
   )
   const latestMarketData = useLatest(marketData)
 

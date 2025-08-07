@@ -1,25 +1,32 @@
-import {type Out, type Type} from 'arktype'
+import {type Type} from 'arktype'
 
-export default function createCodec<Model, RawModel>(
-  model: Type<(In: Model) => Out<Model>> | Type<Model>,
-  rawModel: Type<(In: RawModel) => Out<RawModel>> | Type<RawModel>,
-  encoder: (input: Model) => RawModel,
-  decoder: (input: RawModel) => Model,
+import filteredArray from './filteredArray'
+
+export default function createCodec<Model extends Type, RawModel extends Type>(
+  model: Model,
+  rawModel: RawModel,
+  encoder: (input: Model['inferOut']) => RawModel['inferIn'],
+  decoder: (input: RawModel['inferOut']) => Model['inferOut'],
 ) {
-  const e = model.pipe.try(encoder)
-  const d = rawModel.pipe.try(decoder)
+  const e = model.pipe.try(encoder) // modelIn -> modelOut -> rawModelIn
+  const d = rawModel.pipe.try(decoder) // rawModelIn -> rawModelOut -> modelOut
 
   return {
-    // @ts-expect-error -- complex type
-    encode: (input: Model) => e.from(input) as RawModel,
-    decode: (rawInput: unknown) => d.assert(rawInput) as Model,
+    encode: (input: Model['inferIn']) => e.assert(input),
+    decode: (rawInput: unknown) => d.assert(rawInput),
     validate: (input: unknown) => model.allows(input),
     validateRaw: (rawInput: unknown) => rawModel.allows(rawInput),
+    encodeList: (inputs: Model['inferIn'][], filter = true) =>
+      (filter ? filteredArray(e) : e.array()).assert(inputs) as RawModel['inferIn'][],
+    decodeList: (inputs: unknown[], filter = true) =>
+      (filter ? filteredArray(d) : d.array()).assert(inputs) as Model['inferOut'][],
     model,
     rawModel,
   }
 }
-export type Codec<Model, RawModel> = ReturnType<typeof createCodec<Model, RawModel>>
+export type Codec<Model extends Type, RawModel extends Type> = ReturnType<
+  typeof createCodec<Model, RawModel>
+>
 
 // import {type} from 'arktype'
 // export const COUNTRIES = ['CA', 'US'] as const
@@ -40,7 +47,7 @@ export type Codec<Model, RawModel> = ReturnType<typeof createCodec<Model, RawMod
 
 // const RawUser = type({
 //   '...': User.omit('country'),
-//   'resident': User.get('country'), // response from APi can still contains `US` (which previously valid but now invalid)
+//   'resident': User.get('country'), // response from API can still contains `US` (which previously valid but now invalid)
 // })
 // export type RawUser = typeof RawUser.infer
 
@@ -59,5 +66,5 @@ export type Codec<Model, RawModel> = ReturnType<typeof createCodec<Model, RawMod
 // const user = UserCodec.decode('anything')
 // // encode: transform from User to RawUser
 // const rawUser = UserCodec.encode({
-//   country: 'UK',
+//   country: 'UK', // should error
 // })

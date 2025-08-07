@@ -17,6 +17,7 @@ import {
   NavbarMenuToggle,
 } from '@heroui/react'
 import BoringAvatar from 'boring-avatars'
+import type {HTMLMotionProps} from 'motion/react'
 
 import wolfyLogoDarkSvg from '@/assets/icons/wolfy-text-dark.svg'
 import wolfyLogoLightSvg from '@/assets/icons/wolfy-text-light.svg'
@@ -56,7 +57,7 @@ const NAVBAR_MENU_MOTION_PROPS = {
   animate: {opacity: 1, y: 0},
   exit: {opacity: 0, y: -20},
   transition: {ease: 'easeInOut', duration: 0.2},
-}
+} as const satisfies HTMLMotionProps<'ul'>
 
 export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   const [theme] = useCurrentTheme()
@@ -199,7 +200,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
           </NavbarItem>
         </NavbarContent>
         <NavbarMenu
-          className='top-[calc(var(--navbar-height)_-_1px)] mt-4 max-h-fit bg-default-200/50 pb-2 pt-4 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
+          className='top-[calc(var(--navbar-height)_-_1px)] mt-4 max-h-fit bg-default-200/50 pt-4 pb-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
           motionProps={NAVBAR_MENU_MOTION_PROPS}
         >
           {menuItems.map((item, index) => (

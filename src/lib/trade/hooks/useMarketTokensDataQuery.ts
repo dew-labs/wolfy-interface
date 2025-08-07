@@ -19,7 +19,7 @@ export function getMarketTokensDataQueryKey(
 function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
   chainId: StarknetChainId,
   marketTokenAddresses: string[] | undefined,
-  selector?: MemoizedCallback<(data: MarketTokensData) => T>,
+  selector?: (data: MarketTokensData) => T,
 ) {
   return queryOptions({
     queryKey: getMarketTokensDataQueryKey(chainId, marketTokenAddresses),
@@ -37,10 +37,10 @@ function createGetMarketTokensDataQueryOptions<T = MarketTokensData>(
 
 export default function useMarketTokensDataQuery(): UseQueryResult<MarketTokensData>
 export default function useMarketTokensDataQuery<T = MarketTokensData>(
-  selector: MemoizedCallback<(data: MarketTokensData) => T>,
+  selector: (data: MarketTokensData) => T,
 ): UseQueryResult<T>
 export default function useMarketTokensDataQuery<T = MarketTokensData>(
-  selector?: MemoizedCallback<(data: MarketTokensData) => T>,
+  selector?: (data: MarketTokensData) => T,
 ): UseQueryResult<T> {
   const [chainId] = useChainId()
   const {data: marketTokenAddresses} = useMarketTokenAddresses()

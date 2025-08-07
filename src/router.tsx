@@ -2,7 +2,7 @@
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
-import {type createStore} from 'jotai'
+import {type Store} from 'jotai'
 
 import {routeTree} from './routeTree.gen'
 import RouterErrorComponent from './views/Error/RouterErrorComponent'
@@ -10,10 +10,10 @@ import NotFound from './views/NotFound/NotFound'
 
 export interface RouterContext {
   queryClient: QueryClient
-  store: ReturnType<typeof createStore>
+  store: Store
 }
 
-// Tanstack's default parse behavior: just like JSON.parse, JSON.stringify => suport JSON types
+// Tanstack's default parse behavior: just like JSON.parse, JSON.stringify => support JSON types
 // - Support deeply parse objects (nested objects)
 // - Convert legit value to `number`, `boolean`, `null`, `object`, `array`
 // - Everything else is `string`
@@ -43,13 +43,7 @@ export interface RouterContext {
 // const parseSearch = (search: string) => queryString.parse(search, PARSE_SEARCH_OPTIONS),
 // const stringifySearch = (search: Record<string, unknown>) => queryString.stringify(search, STRINGIFY_SEARCH_OPTIONS),
 
-export function createRouter({
-  queryClient,
-  store,
-}: {
-  queryClient: QueryClient
-  store: ReturnType<typeof createStore>
-}) {
+export function createRouter({queryClient, store}: {queryClient: QueryClient; store: Store}) {
   return createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
     // Thinking about using jsurl2 for better readability, or zipson for shorter string,

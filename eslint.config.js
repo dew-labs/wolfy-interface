@@ -8,6 +8,7 @@ import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
 import pluginReact from '@eslint-react/eslint-plugin'
 import pluginQuery from '@tanstack/eslint-plugin-query'
+// import expoConfig from 'eslint-config-expo/flat.js'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import pluginGitignore from 'eslint-config-flat-gitignore'
@@ -17,6 +18,7 @@ import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
 import pluginI18next from 'eslint-plugin-i18next'
+// import pluginI18nJson from 'eslint-plugin-i18n-json'
 import pluginImportX, {createNodeResolver} from 'eslint-plugin-import-x'
 import pluginJestDom from 'eslint-plugin-jest-dom'
 import pluginJsdoc from 'eslint-plugin-jsdoc'
@@ -42,7 +44,6 @@ import pluginTestingLibrary from 'eslint-plugin-testing-library'
 import pluginTsDoc from 'eslint-plugin-tsdoc'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
-// eslint-disable-next-line import-x/no-unresolved -- import-x error
 import tsEslint from 'typescript-eslint'
 
 // eslint-plugin-unused-imports
@@ -90,6 +91,7 @@ const applyTo = {
   jsonc: createApplyTo(globs.JSONC),
   json5: createApplyTo(globs.JSON5),
   jsonC5: createApplyTo(globs.JSONC5),
+  // translations: createApplyTo(globs.TRANSLATIONS),
   typescript: createApplyTo(globs.TYPESCRIPT),
   react: createApplyTo(globs.REACT),
   reactHooks: createApplyTo(globs.REACT_HOOKS, globs.ROUTES),
@@ -498,6 +500,17 @@ function getI18nextConfigs() {
       plugins: {i18next: pluginI18next},
       rules: {'i18next/no-literal-string': 1},
     }),
+    // ...applyTo.translations('i18n', {
+    //   plugins: {'i18n-json': pluginI18nJson},
+    //   processor: {
+    //     meta: {name: '.json'},
+    //     ...pluginI18nJson.processors['.json'],
+    //   },
+    //   rules: {
+    //     ...pluginI18nJson.configs.recommended.rules,
+    //     'i18n-json/valid-message-syntax': 'off',
+    //   },
+    // }),
   ]
 }
 
@@ -510,22 +523,22 @@ function getTailwindCssConfigs() {
       rules: {
         ...eslintPluginBetterTailwindcss.configs['recommended-error'].rules,
       },
+      settings: {
+        'better-tailwindcss': {
+          entryPoint: 'src/style/tailwind.css',
+          //   "tailwindConfig": "...",
+          //   "attributes": [/* ... */],
+          //   "callees": [/* ... */],
+          //   "variables": [/* ... */],
+          //   "tags": [/* ... */]
+        },
+      },
     }),
     ...applyTo.scriptNotTest('tailwindcss/custom', {
       rules: {
         'better-tailwindcss/enforce-consistent-line-wrapping': 'off', // We rely on prettier or dprint to format
         'better-tailwindcss/enforce-consistent-variable-syntax': 'error',
         'better-tailwindcss/no-conflicting-classes': 'error',
-      },
-      settings: {
-        // "better-tailwindcss": {
-        //   "entryPoint": "...",
-        //   "tailwindConfig": "...",
-        //   "attributes": [/* ... */],
-        //   "callees": [/* ... */],
-        //   "variables": [/* ... */],
-        //   "tags": [/* ... */]
-        // }
       },
     }),
   ]
@@ -635,6 +648,8 @@ function getReactConfigs() {
 
   const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortControllerEffect']
 
+  const reactPerfIgnoreSources = ['@heroui/react']
+
   return [
     ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
     // Use below when using expo
@@ -743,19 +758,19 @@ function getReactConfigs() {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: ['@heroui/react']},
+          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
         ],
         'react-perf/jsx-no-new-array-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: ['@heroui/react']},
+          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
         ],
         'react-perf/jsx-no-new-function-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: ['@heroui/react']},
+          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
         ],
         'react-perf/jsx-no-jsx-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: ['@heroui/react']},
+          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
         ],
       },
     }),
@@ -778,10 +793,16 @@ function getReactWebConfigs() {
 //       rules: {
 //         '@react-native/no-deep-imports': 'error',
 //         '@react-native/platform-colors': 'error',
-//       }
+//       },
 //     }),
-//     ...applyTo.react('react-native', fixupConfigRules(flatCompat.extends('plugin:react-native/all'))),
-//     ...applyTo.react('react-native-a11y', fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all'))),
+//     ...applyTo.react(
+//       'react-native',
+//       fixupConfigRules(flatCompat.extends('plugin:react-native/all')),
+//     ),
+//     ...applyTo.react(
+//       'react-native-a11y',
+//       fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all')),
+//     ),
 //     ...applyTo.react('react-native/off-dom', pluginReact.configs['off-dom']),
 //     ...applyTo.reactComponents('react/naming-convention/components', {
 //       rules: {'@eslint-react/naming-convention/filename': ['error', 'kebab-case']},

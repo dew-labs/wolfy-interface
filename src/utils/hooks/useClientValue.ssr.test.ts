@@ -1,5 +1,5 @@
 import {renderHookServer} from '@testing-library/react'
-import {expect} from 'vitest'
+import {describe, expect, it} from 'vitest'
 
 import useClientValue from './useClientValue'
 

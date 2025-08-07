@@ -30,7 +30,7 @@ import {useDepositWithdrawalAmounts} from '@/views/Pools/hooks/useDepositWithdra
 import useDepositWithdrawalExecutionFee from '@/views/Pools/hooks/useDepositWithdrawalExecutionFee'
 interface DepositModalProps {
   isOpen: boolean
-  onClose: MemoizedCallback<() => void>
+  onClose: () => void
   marketTokenAddress: string
   orderType: 'buy' | 'sell'
 }
@@ -386,7 +386,7 @@ export default memo(function DepositModal({
             endContent={
               <button
                 className={clsx(
-                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  'absolute top-2 right-3 m-0 p-0 text-xs whitespace-nowrap',
                   Number.parseFloat(longTokenAmountInput.replaceAll(',', '')) > maxLongToken &&
                     'text-danger-500',
                 )}
@@ -405,7 +405,7 @@ export default memo(function DepositModal({
             endContent={
               <button
                 className={clsx(
-                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  'absolute top-2 right-3 m-0 p-0 text-xs whitespace-nowrap',
                   Number.parseFloat(shortTokenAmountInput.replaceAll(',', '')) > maxShortToken &&
                     'text-danger-500',
                 )}

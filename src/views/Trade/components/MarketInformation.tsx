@@ -357,7 +357,7 @@ export default memo(function MarketInformation() {
           >
             <PopoverTrigger>
               <Button
-                className='min-w-fit text-nowrap p-4 text-2xl font-medium'
+                className='min-w-fit p-4 text-2xl font-medium text-nowrap'
                 size='lg'
                 variant='flat'
                 startContent={
@@ -417,19 +417,19 @@ export default memo(function MarketInformation() {
           </Popover>
           <div className='flex flex-1 flex-row gap-4'>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-2xl leading-6'>{priceIndexComp}</div>
-              <div className='text-nowrap text-xs opacity-70'>{priceMarkText}</div>
+              <div className='text-2xl leading-6 text-nowrap'>{priceIndexComp}</div>
+              <div className='text-xs text-nowrap opacity-70'>{priceMarkText}</div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>Long Liq.</div>
+              <div className='text-xs text-nowrap opacity-70'>Long Liq.</div>
               <div className='text-sm'>{maxLongLiquidityText}</div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>Short Liq.</div>
+              <div className='text-xs text-nowrap opacity-70'>Short Liq.</div>
               <div className='text-sm'>{maxShortLiquidityText}</div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>24h Chg.</div>
+              <div className='text-xs text-nowrap opacity-70'>24h Chg.</div>
               <div className='text-sm'>
                 <span className={change > 0 ? 'text-success' : 'text-danger'}>
                   {formatNumber(changePercent, Format.PERCENT_SIGNED)}
@@ -437,20 +437,20 @@ export default memo(function MarketInformation() {
               </div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>24h High/Low</div>
-              <div className='text-nowrap text-sm'>
+              <div className='text-xs text-nowrap opacity-70'>24h High/Low</div>
+              <div className='text-sm text-nowrap'>
                 <span className='text-success'>${high}</span>/
                 <span className='text-danger'>${low}</span>
               </div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>24h Vol.</div>
-              <div className='text-nowrap text-sm'>
+              <div className='text-xs text-nowrap opacity-70'>24h Vol.</div>
+              <div className='text-sm text-nowrap'>
                 {formatNumber(volume, Format.USD_ABBREVIATED)}
               </div>
             </div>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-nowrap text-xs opacity-70'>Open Interest</div>
+              <div className='text-xs text-nowrap opacity-70'>Open Interest</div>
               <div className='mt-0.5 flex overflow-hidden text-xs'>
                 <div className='bg-success px-1 py-0.5 text-white'>{longInterestPercentage}%</div>
                 <div className='bg-danger px-1 py-0.5 text-white'>{shortInterestPercentage}%</div>

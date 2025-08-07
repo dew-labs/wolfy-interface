@@ -1,11 +1,14 @@
-import type {Atom} from 'jotai'
+import type {Atom, Getter, Setter} from 'jotai'
 
-export function useAtomEffect<T>(atom: Atom<T>, dispatch: Dispatch<SetStateAction<T>>) {
+export function useAtomEffect<T>(
+  atom: Atom<T>,
+  dispatch: (value: T, get?: Getter, set?: Setter) => void,
+) {
   useAtom(
     useMemo(
       () =>
-        atomEffect(get => {
-          dispatch(get(atom))
+        atomEffect((get, set) => {
+          dispatch(get(atom), get, set)
         }),
       [atom, dispatch],
     ),

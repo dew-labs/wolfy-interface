@@ -132,7 +132,7 @@ export function getIncreasePositionAmounts(p: {
     return values
   }
 
-  const isLimit = !!(triggerPrice !== undefined && triggerPrice > 0)
+  const isLimit = triggerPrice !== undefined && triggerPrice > 0
 
   if (isLimit) {
     values.triggerPrice = triggerPrice

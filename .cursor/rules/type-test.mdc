@@ -1,0 +1,12 @@
+---
+description: Writing typescript type testing
+globs: **/*.test-d.*, **/*.spec-d.*
+---
+# Type Testing
+
+## Recommended
+
++ Write type test with `vitest`: `expectTypeOf`, `describe`, `it`,...
++ Don't need `expect.assertions` at the beginning of each test.
+
+## Custom

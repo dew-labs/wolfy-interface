@@ -15,10 +15,11 @@ import {create} from 'mutative'
 
 import {getTokenMetadata} from '@/constants/tokens'
 import useChainId from '@/lib/starknet/hooks/useChainId'
-import useMarketsDataQuery from '@/lib/trade/hooks/useMarketsDataQuery'
+import {getMarketsDataQueryOptions} from '@/lib/trade/hooks/useMarketsDataQuery'
+import useMarketsQuery from '@/lib/trade/hooks/useMarketsQuery'
 import useMarketTokenBalancesQuery from '@/lib/trade/hooks/useMarketTokenBalancesQuery'
 import useMarketTokensDataQuery from '@/lib/trade/hooks/useMarketTokensDataQuery'
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import {USD_DECIMALS} from '@/lib/trade/numbers/constants'
 import type {MarketsData} from '@/lib/trade/services/fetchMarketsData'
 import type {TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
@@ -27,7 +28,6 @@ import calculateTokenFractionDigits from '@/lib/trade/utils/price/calculateToken
 import {logError} from '@/utils/logger'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import markAsMemoized from '@/utils/react/markAsMemoized'
 
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
@@ -62,7 +62,7 @@ export interface ExtendedMarketData {
 
 const TABLE_CLASS_NAMES = {th: ['bg-transparent', 'text-default-500', 'border-b', 'border-divider']}
 
-const selectMarketTokenAddresses = markAsMemoized((data: MarketsData) => Array.from(data.values()))
+const selectMarketTokenAddresses = (data: MarketsData) => Array.from(data.values())
 
 export default memo(function PoolsTable() {
   const [filterValue, setFilterValue] = useState('')
@@ -71,13 +71,21 @@ export default memo(function PoolsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy')
   const [chainId] = useChainId()
+  const {data: markets} = useMarketsQuery()
 
   const {
     data: marketsData = [],
     isLoading: isMarketsDataLoading,
     isFetching: isMarketsDataFetching,
     refetch: refetchMarketsData,
-  } = useMarketsDataQuery(selectMarketTokenAddresses)
+  } = useQuery(
+    getMarketsDataQueryOptions(
+      {chainId, markets},
+      {
+        select: selectMarketTokenAddresses,
+      },
+    ),
+  )
   const {
     data: marketTokensData = new Map(),
     isLoading: isMarketTokensDataLoading,
@@ -112,25 +120,30 @@ export default memo(function PoolsTable() {
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: shortlistedTokenPrices = new Map()} = useTokenPricesQuery(
-    useCallback(
-      prices => {
-        if (filteredMarkets.length === 0) return new Map() as TokenPricesData
-        const tokenAddresses = new Set<string>()
-        filteredMarkets.forEach(market => {
-          tokenAddresses.add(market.longToken.address)
-          tokenAddresses.add(market.shortToken.address)
-        })
+  const {data: shortlistedTokenPrices = new Map()} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          prices => {
+            if (filteredMarkets.length === 0) return new Map() as TokenPricesData
+            const tokenAddresses = new Set<string>()
+            filteredMarkets.forEach(market => {
+              tokenAddresses.add(market.longToken.address)
+              tokenAddresses.add(market.shortToken.address)
+            })
 
-        return create(prices, draft => {
-          draft.forEach((_, key) => {
-            if (!tokenAddresses.has(key)) {
-              draft.delete(key)
-            }
-          })
-        })
+            return create(prices, draft => {
+              draft.forEach((_, key) => {
+                if (!tokenAddresses.has(key)) {
+                  draft.delete(key)
+                }
+              })
+            })
+          },
+          [filteredMarkets],
+        ),
       },
-      [filteredMarkets],
     ),
   )
 
@@ -291,7 +304,7 @@ export default memo(function PoolsTable() {
       return (
         <>
           <div className='text-nowrap'>{market.totalSupplyString} WM</div>
-          <div className='text-nowrap text-xs opacity-50'>{market.valueString}</div>
+          <div className='text-xs text-nowrap opacity-50'>{market.valueString}</div>
         </>
       )
     }
@@ -300,7 +313,7 @@ export default memo(function PoolsTable() {
       return (
         <>
           <div className='text-nowrap'>{market.balanceString} WM</div>
-          <div className='text-nowrap text-xs opacity-50'>${market.balanceValueString}</div>
+          <div className='text-xs text-nowrap opacity-50'>${market.balanceValueString}</div>
         </>
       )
     }
@@ -369,7 +382,7 @@ export default memo(function PoolsTable() {
   return (
     <div className='relative'>
       <Button
-        className='absolute -right-2 top-20 z-10'
+        className='absolute top-20 -right-2 z-10'
         size='md'
         variant='solid'
         isIconOnly

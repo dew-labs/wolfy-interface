@@ -1,0 +1,172 @@
+---
+description: Build memory bank which help agent have memory and aware of what it learned from the past
+globs:
+alwaysApply: false
+---
+# Memory Bank
+
+You should maintain perfect documentation. For every task, you rely ENTIRELY on your Memory Bank to understand the project and continue work effectively. You MUST read ALL memory bank files at the start of EVERY task - this is not optional.
+
+## Memory Bank Structure
+
+The Memory Bank consists of required core files and optional context files, all in Markdown format. Files build upon each other in a clear hierarchy:
+
+```mermaid
+flowchart TD
+    PB[projectbrief.md] --> PC[productContext.md]
+    PB --> SP[systemPatterns.md]
+    PB --> TC[techContext.md]
+
+    PC --> AC[activeContext.md]
+    SP --> AC
+    TC --> AC
+
+    AC --> P[progress.md]
+```
+
+### Core Files (Required)
+
+1. `projectbrief.md`
+   - Foundation document that shapes all other files
+   - Created at project start if it doesn't exist
+   - Defines core requirements and goals
+   - Source of truth for project scope
+
+2. `productContext.md`
+   - Why this project exists
+   - Problems it solves
+   - How it should work
+   - User experience goals
+
+3. `activeContext.md`
+   - Current work focus
+   - Recent changes
+   - Next steps
+   - Active decisions and considerations
+
+4. `systemPatterns.md`
+   - System architecture
+   - Key technical decisions
+   - Design patterns in use
+   - Component relationships
+
+5. `techContext.md`
+   - Technologies used
+   - Development setup
+   - Technical constraints
+   - Dependencies
+
+6. `progress.md`
+   - What works
+   - What's left to build
+   - Current status
+   - Known issues
+
+The content of these files should not include any knowledge that already/should included in `Project Intelligence` files.
+
+### Additional Context
+
+Create additional files/folders within .memory-bank/ when they help organize:
+
+- Complex feature documentation
+- Integration specifications
+- API documentation
+- Testing strategies
+- Deployment procedures
+
+## Core Workflows
+
+### Plan Mode
+
+```mermaid
+flowchart TD
+    Start[Start] --> ReadFiles[Read Memory Bank]
+    ReadFiles --> CheckFiles{Files Complete?}
+
+    CheckFiles -->|No| Plan[Create Plan]
+    Plan --> Document[Document in Chat]
+
+    CheckFiles -->|Yes| Verify[Verify Context]
+    Verify --> Strategy[Develop Strategy]
+    Strategy --> Present[Present Approach]
+```
+
+### Act Mode
+
+```mermaid
+flowchart TD
+    Start[Start] --> Context[Check Memory Bank]
+    Context --> Update[Update Documentation]
+    Update --> Rules[Update .cursorrules if needed]
+    Update --> Project Rules[Update .cursor/rules/*.mdc project rules if needed]
+    Rules --> Execute[Execute Task]
+    Execute --> Document[Document Changes]
+```
+
+## Documentation Updates
+
+Memory Bank updates occur when:
+
+1. Discovering new project patterns
+2. After implementing significant changes
+3. When user requests with **update memory bank** (MUST review ALL files)
+4. When context needs clarification
+
+```mermaid
+flowchart TD
+    Start[Update Process]
+
+    subgraph Process
+        P1[Review ALL Files]
+        P2[Document Current State]
+        P3[Clarify Next Steps]
+        P4[Update .cursorrules, .cursor/rules/*.mdc]
+
+        P1 --> P2 --> P3 --> P4
+    end
+
+    Start --> Process
+```
+
+Note: When triggered by **update memory bank**, you MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
+
+## Project Intelligence (`.cursorrules`, `.cursor/rules/*.mdc`)
+
+You learn incrementally from working, chatting with me. The `.cursorrules` and `.cursor/rules/*.mdc` files is your learning journal for each project. It captures important patterns, preferences, and project intelligence that help me work more effectively. As you work with you and the project, You'll discover and document key insights that aren't obvious from the code alone.
+
+```mermaid
+flowchart TD
+    Start{Discover New Pattern}
+
+    subgraph Learn [Learning Process]
+        D1[Identify Pattern]
+        D2[Validate with User]
+        D3[Document in .cursorrules]
+        D4[Rules in .cursor/rules/*.mdc]
+    end
+
+    subgraph Apply [Usage]
+        A1[Read .cursorrules]
+        A2[Read .cursor/rules/*.mdc]
+        A3[Apply Learned Patterns]
+        A4[Improve Future Work]
+    end
+
+    Start --> Learn
+    Learn --> Apply
+```
+
+### What to Capture
+
+- Critical implementation paths
+- User preferences and workflow
+- Project-specific patterns
+- Known challenges
+- Evolution of project decisions
+- Tool usage patterns
+
+The format is flexible - focus on capturing valuable insights that help me work more effectively with you and the project. Think of `.cursorrules`, `.cursor/rules/*.mdc` as a living document that grows smarter as we work together.
+
+REMEMBER: After every memory reset, you begin completely fresh. The Memory Bank is your only link to previous work. It must be maintained with precision and clarity, as your effectiveness depends entirely on its accuracy.
+
+ALWAYS update the memory bank whenever possible!

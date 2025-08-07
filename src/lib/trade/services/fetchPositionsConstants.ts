@@ -18,7 +18,9 @@ export const DEFAULT_POSITION_CONSTANTS: PositionConstants = {
   minPositionSizeUsd: 0n,
 }
 
-export default async function fetchPositionsConstants(chainId: StarknetChainId) {
+export default async function fetchPositionsConstants(
+  chainId: StarknetChainId,
+): Promise<PositionConstants> {
   const [minCollateralUsd, minPositionSizeUsd] = await wolfyMulticall(chainId, [
     createWolfyMulticallRequest(chainId, WolfyContract.DataStore, DataStoreABI, 'get_u256', [
       MIN_COLLATERAL_USD,

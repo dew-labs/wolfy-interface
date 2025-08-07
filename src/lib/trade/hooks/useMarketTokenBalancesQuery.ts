@@ -7,50 +7,46 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarketTokenAddresses from './useMarketTokenAddresses'
 
-export function getMarketTokenBalancesQueryKey(
-  chainId: StarknetChainId,
-  marketTokenAddresses: string[] | undefined,
-  accountAddress: string | undefined,
-) {
-  return ['marketTokenBalances', chainId, marketTokenAddresses, accountAddress] as const
+export function getMarketTokenBalancesQueryKey(params: {
+  chainId: StarknetChainId
+  marketTokenAddresses: string[] | undefined
+  accountAddress: string | undefined
+}) {
+  return [
+    'marketTokenBalances',
+    params.chainId,
+    params.marketTokenAddresses,
+    params.accountAddress,
+  ] as const
 }
 
-function createGetMarketTokenBalancesQueryOptions<T = Map<string, bigint>>(
-  chainId: StarknetChainId,
-  marketTokenAddresses: string[] | undefined,
-  accountAddress: string | undefined,
-  selector?: MemoizedCallback<(data: Map<string, bigint>) => T>,
+export function getMarketTokenBalancesQueryOptions<TData = Map<string, bigint>, TError = Error>(
+  params: Parameters<typeof getMarketTokenBalancesQueryKey>[0],
+  options?: Omit<UseQueryOptions<Map<string, bigint>, TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getMarketTokenBalancesQueryKey(chainId, marketTokenAddresses, accountAddress),
+    queryKey: getMarketTokenBalancesQueryKey(params),
     queryFn: async () => {
-      return await fetchMarketTokenBalances(chainId, marketTokenAddresses ?? [], accountAddress)
+      return await fetchMarketTokenBalances(
+        params.chainId,
+        params.marketTokenAddresses ?? [],
+        params.accountAddress,
+      )
     },
-    select: selector as (data: Map<string, bigint>) => T,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    ...options,
   })
 }
 
-export default function useMarketTokenBalancesQuery(): UseQueryResult<Map<string, bigint>>
-export default function useMarketTokenBalancesQuery<T = Map<string, bigint>>(
-  selector: MemoizedCallback<(data: Map<string, bigint>) => T>,
-): UseQueryResult<T>
-export default function useMarketTokenBalancesQuery<T = Map<string, bigint>>(
-  selector?: MemoizedCallback<(data: Map<string, bigint>) => T>,
-): UseQueryResult<T> {
+export default function useMarketTokenBalancesQuery() {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddressValue()
   const {data: marketTokenAddresses} = useMarketTokenAddresses()
 
   return useQuery(
-    createGetMarketTokenBalancesQueryOptions(
-      chainId,
-      marketTokenAddresses,
-      accountAddress,
-      selector,
-    ),
+    getMarketTokenBalancesQueryOptions({chainId, marketTokenAddresses, accountAddress}),
   )
 }

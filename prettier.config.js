@@ -18,8 +18,9 @@ export default {
     '@svgr/plugin-prettier',
     'prettier-plugin-merge',
   ],
+  // BEGIN prettier-plugin-classnames config
   customFunctions: ['cn', 'tw', 'classNames', 'clsx', 'twMerge'],
-  endingPosition: 'absolute-with-indent',
-  experimentalOptimization: true,
+  endingPosition: 'absolute',
   syntaxTransformation: false,
+  // END prettier-plugin-classnames config
 }

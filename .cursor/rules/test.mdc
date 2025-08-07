@@ -1,0 +1,35 @@
+---
+description: Writing unit tests, component tests, integration tests, end-to-end (e2e) tests
+globs: **/__tests__/**/*, **/*.test.*, **/*.spec.*, **/*.test-d.*, **/*.spec-d.*
+---
+# Testing
+
+## Recommended
+
++ Write both runtime and type tests when applicable
++ Organize tests in descriptive nested describe blocks
++ Use `expect` for runtime assertions
++ Use `expectTypeOf` for type assertions
++ Reset mocks between tests using `beforeEach`
++ Test basic cases, edge cases, and complex scenarios
++ Test error handling explicitly
++ Follow consistent test patterns:
+  + Basic validation
+  + Transformations
+  + Complex scenarios
+  + Error handling
+  + Edge cases
++ Name test files consistently:
+  + `.test.ts` for runtime tests
+  + `.test-d.ts` for type tests
++ Write clear test descriptions that explain the expected behavior
++ Use test utilities appropriately (vi.fn(), expectTypeOf)
++ Test error handlers and their arguments
++ Verify both positive and negative test cases
++ Test empty/invalid inputs
++ Test complex transformations thoroughly
+
+## Custom
+
++ Keep unit tests in the same place as the function they are testing, use `__tests__` folder only when the tests are many functions/components involved
++ Use `vitest` as the testing framework

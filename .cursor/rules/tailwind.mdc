@@ -1,0 +1,14 @@
+---
+description: Working with Tailwind CSS
+globs: **/*.htm, **/*.html, **/*.tsx, **/*.jsx, **/*.ctsx, **/*.cjsx, **/*.mtsx, **/*.mjsx, **/*.vue, **/*.svelte
+---
+# Tailwind CSS
+
+## Recommended
+
++ Use Tailwind's responsive variants for adaptive designs
++ Avoid custom CSS unless absolutely necessary
+
+## Custom
+
+<!-- Add project-specific Tailwind CSS rules here -->

@@ -165,7 +165,7 @@ export default function getDecreasePositionAmounts(p: {
   values.decreaseSwapType = getDecreaseSwapType(pnlToken, collateralToken, receiveToken)
 
   const markPrice = getMarkPrice({price: indexTokenPrice, isIncrease: false, isLong})
-  const isTrigger = Boolean(triggerPrice !== undefined && triggerPrice > 0)
+  const isTrigger = triggerPrice !== undefined && triggerPrice > 0
 
   if (triggerPrice !== undefined && triggerPrice > 0) {
     values.triggerPrice = triggerPrice

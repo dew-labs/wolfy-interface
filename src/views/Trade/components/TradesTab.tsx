@@ -276,7 +276,7 @@ export default memo(function TradesTab() {
   return (
     <div className='relative'>
       <Button
-        className='absolute right-2 top-2 z-10'
+        className='absolute top-2 right-2 z-10'
         size='md'
         variant='solid'
         isIconOnly
@@ -360,7 +360,7 @@ export default memo(function TradesTab() {
               <TableRow key={item.id}>
                 <TableCell>
                   <div
-                    className={`!absolute -left-4 top-[10%] h-4/5 w-1 ${(() => {
+                    className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${(() => {
                       if (
                         item.action === TradeHistoryAction.MarketIncrease ||
                         item.action === TradeHistoryAction.RequestMarketIncrease ||
@@ -392,7 +392,7 @@ export default memo(function TradesTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
                         setTokenAddress(item.market.indexTokenAddress)
                       }}
@@ -406,7 +406,7 @@ export default memo(function TradesTab() {
                         <div>
                           {item.isLong ? 'Long' : 'Short'} {item.market.indexToken.symbol}
                         </div>
-                        <div className='whitespace-nowrap text-xs opacity-50'>
+                        <div className='text-xs whitespace-nowrap opacity-50'>
                           [{item.poolName}]
                         </div>
                       </div>
@@ -418,7 +418,7 @@ export default memo(function TradesTab() {
                 <TableCell>{formatUsd(item.rpnl)}</TableCell>
                 <TableCell>
                   <div>{item.executionFeeUsdText}</div>
-                  <div className='whitespace-nowrap text-xs opacity-50'>
+                  <div className='text-xs whitespace-nowrap opacity-50'>
                     {item.executionFeeText}
                   </div>
                 </TableCell>

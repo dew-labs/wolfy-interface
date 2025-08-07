@@ -1,4 +1,5 @@
-import useTokenPricesQuery from '@/lib/trade/hooks/useTokenPricesQuery'
+import useChainId from '@/lib/starknet/hooks/useChainId'
+import {getTokenPricesQueryOptions} from '@/lib/trade/hooks/useTokenPricesQuery'
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import type {MarketTokenData} from '@/lib/trade/services/fetchMarketTokensData'
 import getDepositAmounts from '@/lib/trade/utils/deposit/getDepositAmounts'
@@ -55,21 +56,27 @@ export function useDepositWithdrawalAmounts({
   uiFeeFactor: bigint
   focusedInput: 'market' | 'longCollateral' | 'shortCollateral'
 }): DepositWithdrawalAmounts | undefined {
+  const [chainId] = useChainId()
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: {longTokenPrice, marketTokenPrice, shortTokenPrice} = {}} = useTokenPricesQuery(
-    useCallback(
-      prices => {
-        const longTokenPrice = prices.get(marketInfo?.longTokenAddress ?? '')
-        const shortTokenPrice = prices.get(marketInfo?.shortTokenAddress ?? '')
-        const marketTokenPrice = calculateMarketPrice(
-          marketInfo,
-          marketToken,
-          longTokenPrice,
-          shortTokenPrice,
-        )
-        return {longTokenPrice, marketTokenPrice, shortTokenPrice}
+  const {data: {longTokenPrice, marketTokenPrice, shortTokenPrice} = {}} = useQuery(
+    getTokenPricesQueryOptions(
+      {chainId},
+      {
+        select: useCallback(
+          prices => {
+            const longTokenPrice = prices.get(marketInfo?.longTokenAddress ?? '')
+            const shortTokenPrice = prices.get(marketInfo?.shortTokenAddress ?? '')
+            const marketTokenPrice = calculateMarketPrice(
+              marketInfo,
+              marketToken,
+              longTokenPrice,
+              shortTokenPrice,
+            )
+            return {longTokenPrice, marketTokenPrice, shortTokenPrice}
+          },
+          [marketInfo, marketToken],
+        ),
       },
-      [marketInfo, marketToken],
     ),
   )
   const halfOfLong = longTokenInputState.amount ? longTokenInputState.amount / 2n : undefined

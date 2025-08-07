@@ -1,0 +1,29 @@
+---
+description: Writing React code (React components, React hooks,...)
+globs: **/*.tsx, **/*.jsx, **/*.ctsx, **/*.cjsx, **/*.mtsx, **/*.mjsx, **/use*.ts, **/use*.js, **/use*.mts, **/use*.mjs, **/use*.cts, **/use*.cjs
+alwaysApply: false
+---
+# React
+
+## Recommended
+
++ Use functional components exclusively with hooks
++ Keep components pure and focused on single responsibility, decouple the logic from the UI
++ Keep global state minimal, prefer local state and parameter passing when possible
++ Implement lazy loading for all route components
++ Always use `dispatch` function updates for `useState`
++ Should try to use uncontrolled components when possible, only use controlled components when necessary
++ Should always use `memo` (`React.memo`) if applicable. But DO NOT use it for simple components, only use it for components that are expensive to render.
++ Use `useMemo`, `useCallback` for expensive calculations, or when the value is used in another components to prevent unnecessary re-renders. DO NOT use them for simple values or primitives.
++ Use lazy initialization for `useState` for expensive initial values.
++ Avoid introduce side effects (`useEffect`, `useLayoutEffect`,...) as much as possible
++ Avoid using context `useContext` as much as possible
++ Lazyload components with `lazy` (`React.lazy`) and `Suspense` if applicable
+
+## Custom
+
++ Use `Tanstack React Query`'s `useMutation` for server data mutation, side effects
++ Utilize the `useSetAtom` from `jotai` for set write atoms, and `useAtomValue` for read only atoms
++ Use custom hooks that wrap around `useQuery`, `useMutation`, `useAtom`, `useSetAtom`, `useAtomValue` from `Tanstack React Query`, `jotai`, `React Hook Form`, `React Use` (`react-use`),... for better readability, reusability, and encapsulation
++ Always use `vite-plugin-lqip` to provide a low-quality image placeholder for large, critical images.
++ Try to lazy load images with the native `loading="lazy"` attribute or the `react-lazy-load-image-component`.

@@ -99,7 +99,7 @@ export function createQueryPersistOptions(): OmitKeyof<PersistQueryClientOptions
       shouldDehydrateMutation: ({meta}) => {
         if (!meta) return true
         if (typeof meta.persist !== 'boolean') return true
-        return !!meta.persist
+        return meta.persist
       },
     },
     buster: COMMIT_HASH,

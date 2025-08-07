@@ -5,22 +5,26 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchGasPrice from '@/lib/trade/services/fetchGasPrice'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getGasPriceQueryKey(chainId: StarknetChainId) {
-  return ['gasPrice', chainId] as const
+export function getGasPriceQueryKey(params: {chainId: StarknetChainId}) {
+  return ['gasPrice', params.chainId] as const
 }
 
-function createGetGasPriceQueryOptions(chainId: StarknetChainId, blockTime: number) {
+function getGasPriceQueryOptions<TData = bigint, TError = Error>(
+  params: Parameters<typeof getGasPriceQueryKey>[0] & {blockTime: number},
+  options?: Omit<UseQueryOptions<bigint, TError, TData>, 'queryKey' | 'queryFn'>,
+) {
   return queryOptions({
-    queryKey: getGasPriceQueryKey(chainId),
+    queryKey: getGasPriceQueryKey(params),
     queryFn: async () => {
-      return await fetchGasPrice(chainId)
+      return await fetchGasPrice(params.chainId)
     },
     placeholderData: previousData => previousData ?? 0n,
     ...NO_REFETCH_OPTIONS,
-    refetchInterval: blockTime,
+    refetchInterval: params.blockTime,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     throwOnError: false,
+    ...options,
   })
 }
 
@@ -28,5 +32,5 @@ export default function useGasPriceQuery() {
   const [chainId] = useChainId()
   const blockTime = BLOCK_TIME[chainId]
 
-  return useQuery(createGetGasPriceQueryOptions(chainId, blockTime))
+  return useQuery(getGasPriceQueryOptions({chainId, blockTime}))
 }

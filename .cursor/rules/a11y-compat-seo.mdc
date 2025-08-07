@@ -1,0 +1,16 @@
+---
+description: Writing code with Accessibility, Compatibility, Search Engine Optimization (SEO) in mind
+globs: **/*
+---
+# Accessibility, Compatibility, SEO
+
+## Recommended
+
++ Always include accessibility considerations to make sure that every users (visual impaired, colorblind, keyboard only users, etc.) can use the component with ease and no discrimination. (like adding custom `aria` attribute and native accessibility props, checking the contrast level of colors,...)
++ Ensure compatibility with different browsers and devices
++ Optimize for SEO when applicable
++ Consider internationalization requirements
+
+## Custom
+
+<!-- Add project-specific a11y, compatibility, and SEO rules here -->

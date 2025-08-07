@@ -4,33 +4,27 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTokenPrices, {type TokenPricesData} from '@/lib/trade/services/fetchTokenPrices'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getTokenPricesQueryKey(chainId: StarknetChainId) {
-  return ['tokenPrices', chainId] as const
+export function getTokenPricesQueryKey(params: {chainId: StarknetChainId}) {
+  return ['tokenPrices', params.chainId] as const
 }
 
-function createGetTokenPricesQueryOptions<T>(
-  chainId: StarknetChainId,
-  selector?: MemoizedCallback<(data: TokenPricesData) => T>,
+export function getTokenPricesQueryOptions<TData = TokenPricesData, TError = Error>(
+  params: Parameters<typeof getTokenPricesQueryKey>[0],
+  options?: Omit<UseQueryOptions<TokenPricesData, TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getTokenPricesQueryKey(chainId),
+    queryKey: getTokenPricesQueryKey(params),
     queryFn: async () => {
-      return await fetchTokenPrices(chainId)
+      return await fetchTokenPrices(params.chainId)
     },
     placeholderData: keepPreviousData,
-    select: selector as (data: TokenPricesData) => T,
     ...NO_REFETCH_OPTIONS,
+    ...options,
   })
 }
 
-export default function useTokenPricesQuery(): UseQueryResult<TokenPricesData>
-export default function useTokenPricesQuery<T = TokenPricesData>(
-  selector: MemoizedCallback<(data: TokenPricesData) => T>,
-): UseQueryResult<T>
-export default function useTokenPricesQuery<T = TokenPricesData>(
-  selector?: MemoizedCallback<(data: TokenPricesData) => T>,
-): UseQueryResult<T | undefined> {
+export default function useTokenPricesQuery() {
   const [chainId] = useChainId()
 
-  return useQuery(createGetTokenPricesQueryOptions(chainId, selector))
+  return useQuery(getTokenPricesQueryOptions({chainId}))
 }

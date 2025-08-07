@@ -1,3 +1,5 @@
+import type {StarknetChainId} from 'wolfy-sdk'
+
 import {useAccountAddressValue} from '@/lib/starknet/hooks/useAccountAddress'
 import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchTradeHistories, {
@@ -6,39 +8,61 @@ import fetchTradeHistories, {
 } from '@/lib/trade/services/fetchTradeHistories'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
+export function getTradeHistoryQueryKey(params: {
+  chainId: StarknetChainId
+  accountAddress: string | undefined
+  actions: TradeHistoryAction[]
+  markets: string[]
+  isLong: boolean[]
+  page: number
+  limit: number
+}) {
+  return [
+    'trade-histories',
+    params.chainId,
+    params.accountAddress,
+    params.actions,
+    params.markets,
+    params.isLong,
+    params.page,
+    params.limit,
+  ] as const
+}
+
+export function getTradeHistoryQueryOptions<TData = TradeDataResponse, TError = Error>(
+  params: Parameters<typeof getTradeHistoryQueryKey>[0],
+  options?: Omit<UseQueryOptions<TradeDataResponse, TError, TData>, 'queryKey' | 'queryFn'>,
+) {
+  return queryOptions({
+    queryKey: getTradeHistoryQueryKey(params),
+    queryFn: async () =>
+      fetchTradeHistories(
+        params.chainId,
+        params.accountAddress,
+        params.actions,
+        params.markets,
+        params.isLong,
+        params.page,
+        params.limit,
+      ),
+    ...NO_REFETCH_OPTIONS,
+    refetchInterval: 10000,
+    placeholderData: keepPreviousData,
+    ...options,
+  })
+}
+
 export default function useTradeHistoryQuery(
   actions: TradeHistoryAction[],
   markets: string[],
   isLong: boolean[],
   page: number,
   limit: number,
-): UseQueryResult<TradeDataResponse>
-export default function useTradeHistoryQuery<T = TradeDataResponse>(
-  actions: TradeHistoryAction[],
-  markets: string[],
-  isLong: boolean[],
-  page: number,
-  limit: number,
-  selector: MemoizedCallback<(data: TradeDataResponse) => T>,
-): UseQueryResult<T>
-export default function useTradeHistoryQuery<T = TradeDataResponse>(
-  actions: TradeHistoryAction[],
-  markets: string[],
-  isLong: boolean[],
-  page: number,
-  limit: number,
-  selector?: MemoizedCallback<(data: TradeDataResponse) => T>,
 ) {
   const [chainId] = useChainId()
   const accountAddress = useAccountAddressValue()
 
-  return useQuery({
-    queryKey: ['trade-histories', chainId, accountAddress, actions, markets, isLong, page, limit],
-    queryFn: async () =>
-      fetchTradeHistories(chainId, accountAddress, actions, markets, isLong, page, limit),
-    ...NO_REFETCH_OPTIONS,
-    placeholderData: keepPreviousData,
-    select: selector as (data: TradeDataResponse) => T,
-    refetchInterval: 10000,
-  })
+  return useQuery(
+    getTradeHistoryQueryOptions({chainId, accountAddress, actions, markets, isLong, page, limit}),
+  )
 }

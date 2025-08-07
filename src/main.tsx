@@ -7,7 +7,7 @@ import {createStore} from 'jotai'
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 
-import {createQueryClient} from './queries/queries'
+import {createQueryClient} from './query'
 import {createRouter} from './router'
 
 function App() {

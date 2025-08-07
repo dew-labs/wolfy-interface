@@ -4,32 +4,26 @@ import useChainId from '@/lib/starknet/hooks/useChainId'
 import fetchMarkets, {type Market} from '@/lib/trade/services/fetchMarkets'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
-export function getMarketsQueryKey(chainId: StarknetChainId) {
-  return ['markets', chainId] as const
+export function getMarketsQueryKey(params: {chainId: StarknetChainId}) {
+  return ['markets', params.chainId] as const
 }
 
-function createGetMarketsQueryOptions<T = Market[]>(
-  chainId: StarknetChainId,
-  selector?: MemoizedCallback<(data: Market[]) => T>,
+export function getMarketsQueryOptions<TData = Market[], TError = Error>(
+  params: Parameters<typeof getMarketsQueryKey>[0],
+  options?: Omit<UseQueryOptions<Market[], TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getMarketsQueryKey(chainId),
+    queryKey: getMarketsQueryKey(params),
     queryFn: async () => {
-      return await fetchMarkets(chainId)
+      return await fetchMarkets(params.chainId)
     },
     placeholderData: keepPreviousData,
-    select: selector as (data: Market[]) => T,
     ...NO_REFETCH_OPTIONS,
+    ...options,
   })
 }
 
-export default function useMarketsQuery(): UseQueryResult<Market[]>
-export default function useMarketsQuery<T = Market[]>(
-  selector: MemoizedCallback<(data: Market[]) => T>,
-): UseQueryResult<T>
-export default function useMarketsQuery<T = Market[]>(
-  selector?: MemoizedCallback<(data: Market[]) => T>,
-) {
+export default function useMarketsQuery() {
   const [chainId] = useChainId()
-  return useQuery(createGetMarketsQueryOptions(chainId, selector))
+  return useQuery(getMarketsQueryOptions({chainId}))
 }

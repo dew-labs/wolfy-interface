@@ -8,41 +8,38 @@ import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 import useMarketsQuery from './useMarketsQuery'
 
-export function getMarketsDataQueryKey(chainId: StarknetChainId, markets: Market[] | undefined) {
-  return ['marketsData', chainId, markets] as const
+export function getMarketsDataQueryKey(params: {
+  chainId: StarknetChainId
+  markets: Market[] | undefined
+}) {
+  return ['marketsData', params.chainId, params.markets] as const
 }
 
-function createGetMarketsDataQueryOptions<T>(
-  chainId: StarknetChainId,
-  markets: Market[] | undefined,
-  selector?: MemoizedCallback<(data: MarketsData) => T>,
+export function getMarketsDataQueryOptions<TData = MarketsData, TError = Error>(
+  params: Parameters<typeof getMarketsDataQueryKey>[0],
+  options?: Omit<UseQueryOptions<MarketsData, TError, TData>, 'queryKey' | 'queryFn'>,
 ) {
   return queryOptions({
-    queryKey: getMarketsDataQueryKey(chainId, markets),
-    queryFn: markets
+    queryKey: getMarketsDataQueryKey(params),
+    queryFn: params.markets
       ? async () => {
-          const tokenPricesData = await fetchTokenPrices(chainId)
-          return await fetchMarketsData(chainId, markets, tokenPricesData)
+          const tokenPricesData = await fetchTokenPrices(params.chainId)
+          invariant(params.markets)
+          return await fetchMarketsData(params.chainId, params.markets, tokenPricesData)
         }
       : skipToken,
     placeholderData: keepPreviousData,
-    select: selector as (data: MarketsData) => T,
     ...NO_REFETCH_OPTIONS,
     refetchInterval: 60000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    ...options,
   })
 }
 
-export default function useMarketsDataQuery(): UseQueryResult<MarketsData>
-export default function useMarketsDataQuery<T = MarketsData>(
-  selector: MemoizedCallback<(data: MarketsData) => T>,
-): UseQueryResult<T>
-export default function useMarketsDataQuery<T = MarketsData>(
-  selector?: MemoizedCallback<(data: MarketsData) => T>,
-) {
+export default function useMarketsDataQuery() {
   const [chainId] = useChainId()
   const {data: markets} = useMarketsQuery()
 
-  return useQuery(createGetMarketsDataQueryOptions(chainId, markets, selector))
+  return useQuery(getMarketsDataQueryOptions({chainId, markets}))
 }

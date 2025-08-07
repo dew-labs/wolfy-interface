@@ -38,8 +38,8 @@ function useChartHistoryData(asset: string, interval: ChartInterval) {
 }
 
 interface ChartContextValue {
-  createPriceLine: MemoizedCallback<(options: CreatePriceLineOptions) => IPriceLine> | null
-  removePriceLine: MemoizedCallbackOrDispatch<IPriceLine> | null
+  createPriceLine: ((options: CreatePriceLineOptions) => IPriceLine) | null
+  removePriceLine: Dispatch<IPriceLine> | null
 }
 
 const ChartContext = createContext<ChartContextValue>({

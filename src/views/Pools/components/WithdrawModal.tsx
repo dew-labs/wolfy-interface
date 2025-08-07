@@ -31,7 +31,7 @@ import useDepositWithdrawalExecutionFee from '@/views/Pools/hooks/useDepositWith
 
 interface WithdrawModalProps {
   isOpen: boolean
-  onClose: MemoizedCallback<() => void>
+  onClose: () => void
   marketTokenAddress: string
 }
 
@@ -298,7 +298,7 @@ export default memo(function WithdrawModal({
             endContent={
               <button
                 className={clsx(
-                  'absolute right-3 top-2 m-0 whitespace-nowrap p-0 text-xs',
+                  'absolute top-2 right-3 m-0 p-0 text-xs whitespace-nowrap',
                   Number.parseFloat(wmAmount.replaceAll(',', '')) > userBalance &&
                     'text-danger-500',
                 )}

@@ -10,7 +10,7 @@ import type {ReadonlyDeep} from 'type-fest'
 
 import {DEBUG, ENABLE_DEVTOOLS} from '@/constants/config'
 import Global from '@/Global'
-import {createQueryPersistOptions} from '@/queries/queries'
+import {createQueryPersistOptions} from '@/query'
 import type {RouterContext} from '@/router'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
@@ -42,7 +42,7 @@ const TanStackRouterDevtools = ENABLE_DEVTOOLS
     )
   : () => null
 
-function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
+function ErrorBoundaryFallback({error, resetErrorBoundary}: ReadonlyDeep<FallbackProps>) {
   logError(error)
 
   const errorMessage = (() => {
@@ -67,7 +67,9 @@ function ErrorBoundaryFallbackRender({error}: ReadonlyDeep<FallbackProps>) {
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
   })()
 
-  return <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} />
+  return (
+    <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} reset={resetErrorBoundary} />
+  )
 }
 
 const DevTool = deepMemo(function DevTool({children}: PropsWithChildren) {
@@ -101,11 +103,11 @@ const RootRoute = memo(function RootRoute() {
       <ErrorBoundary fallback={null}>
         <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
       </ErrorBoundary>
-      <ErrorBoundary fallbackRender={ErrorBoundaryFallbackRender}>
+      <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
         <JotaiProvider store={store}>
           <HeroUIProvider navigate={navigate} useHref={useHref}>
             <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-              <QueryErrorBoundary>
+              <QueryErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
                 <Global />
                 <VisuallyHidden strict {...skipTargetProps('top')} />
                 <HeadContent />

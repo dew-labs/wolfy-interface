@@ -32,15 +32,14 @@ import {getMarkPrice} from '@/lib/trade/utils/price/getMarkPrice'
 import * as m from '@/paraglide/messages'
 import {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import markAsMemoized from '@/utils/react/markAsMemoized'
 
 const TABLE_CLASS_NAMES = {th: '!rounded-none font-serif'}
 
-const selectReversedPositionOrders = markAsMemoized((data: OrderInfosData) => {
+const selectReversedPositionOrders = (data: OrderInfosData) => {
   const orders = Array.from(data.values()).reverse()
 
   return orders.filter(order => isPositionOrder(order))
-})
+}
 
 export default memo(function OrdersTab() {
   const [walletAccount] = useWalletAccount()
@@ -177,7 +176,7 @@ export default memo(function OrdersTab() {
   return (
     <div className='relative'>
       <Button
-        className='absolute right-2 top-2 z-10'
+        className='absolute top-2 right-2 z-10'
         size='md'
         variant='solid'
         isIconOnly
@@ -207,7 +206,7 @@ export default memo(function OrdersTab() {
               <TableRow key={order.key}>
                 <TableCell>
                   <div
-                    className={`!absolute -left-4 top-[10%] h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                   />
                   <div>
                     {isDecreaseOrderType(order.orderType)
@@ -223,7 +222,7 @@ export default memo(function OrdersTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='inline-flex min-w-max items-center justify-center gap-2 whitespace-nowrap rounded-none bg-transparent px-0 text-sm !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
                         setTokenAddress(order.marketData.indexTokenAddress)
                       }}
@@ -235,7 +234,7 @@ export default memo(function OrdersTab() {
                       />
                       <div className='flex flex-col'>
                         <div>{order.indexName}</div>
-                        <div className='whitespace-nowrap text-xs opacity-50'>
+                        <div className='text-xs whitespace-nowrap opacity-50'>
                           [{order.poolName}]
                         </div>
                       </div>
@@ -245,7 +244,7 @@ export default memo(function OrdersTab() {
                 <TableCell>{order.sizeText}</TableCell>
                 <TableCell>
                   <div className='text-nowrap'>{order.collateralUdsShrinked}</div>
-                  <div className='text-nowrap text-xs opacity-50'>{order.collateralText}</div>
+                  <div className='text-xs text-nowrap opacity-50'>{order.collateralText}</div>
                 </TableCell>
                 <TableCell>
                   <span>{order.triggerPriceText}</span>

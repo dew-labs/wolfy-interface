@@ -32,7 +32,7 @@ import toastErrorMessage from '@/utils/errors/toastErrorMessage'
 
 interface AvailableWalletProps {
   wallet: StarknetWindowObject
-  connect: MemoizedCallback<(wallet: StarknetWindowObject) => void>
+  connect: (wallet: StarknetWindowObject) => void
   isLastConnected?: boolean
 }
 
@@ -108,13 +108,7 @@ const Wallet = memo(function Wallet(
   )
 })
 
-function useConnect({
-  onConnected,
-  onCancel,
-}: {
-  onConnected?: MemoizedCallback<() => void>
-  onCancel?: MemoizedCallback<() => void>
-}) {
+function useConnect({onConnected, onCancel}: {onConnected?: () => void; onCancel?: () => void}) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
   const [shouldReconnect, setShouldReconnect] = useShouldReconnect()

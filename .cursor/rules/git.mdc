@@ -1,0 +1,16 @@
+---
+description: Working with Git version control
+globs:
+alwaysApply: false
+---
+# Git
+
+## Recommended
+
++ Use descriptive commit messages following conventional commits with emoji format
++ Create meaningful branch names that reflect the feature or fix
++ Keep pull requests focused and of reasonable size
+
+## Custom
+
+<!-- Add project-specific Git rules here -->

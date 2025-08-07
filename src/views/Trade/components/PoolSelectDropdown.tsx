@@ -7,7 +7,7 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 interface PoolSelectDropdownProps {
   availableMarkets: MarketData[]
   poolName: string | undefined
-  handlePoolChange: MemoizedCallbackOrDispatch<Key>
+  handlePoolChange: Dispatch<Key>
 }
 
 // TODO: provide more information about the pool
