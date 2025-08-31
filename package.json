@@ -279,6 +279,7 @@
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-optimize-css-modules": "^1.2.0",
     "vite-plugin-preload": "^0.4.2",
+    "vite-plugin-react-fallback-throttle": "^0.1.0",
     "vite-plugin-robots": "^1.0.5",
     "vite-plugin-svgr": "^4.3.0",
     "vite-tsconfig-paths": "^5.1.4",

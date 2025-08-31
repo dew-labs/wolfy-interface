@@ -38,6 +38,7 @@ import lqip from 'vite-plugin-lqip'
 import mkcert from 'vite-plugin-mkcert'
 import {optimizeCssModules} from 'vite-plugin-optimize-css-modules'
 import preload from 'vite-plugin-preload'
+import reactFallbackThrottlePlugin from 'vite-plugin-react-fallback-throttle'
 import {robots} from 'vite-plugin-robots'
 import svgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -408,6 +409,7 @@ export function getConfig(mode: string): UserConfig {
     //         initialIsOpen: false,
     //       },
     //     }),
+    reactFallbackThrottlePlugin(),
     svgr({
       svgrOptions: {
         plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
