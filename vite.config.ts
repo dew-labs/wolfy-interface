@@ -17,7 +17,6 @@ import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
 import {FontaineTransform} from 'fontaine'
-// import react from '@vitejs/plugin-react'
 import {humanId} from 'human-id'
 import {obfuscator} from 'rollup-obfuscator'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -374,12 +373,13 @@ export function getConfig(mode: string): UserConfig {
             ],
       ].filter(Boolean),
     }),
-    // Babel React for react compiler
+
+    // Oxc + Babel React for react compiler
     // react({
     //   babel: {
     //     plugins: [
     //       [
-    //         'babel-plugin-react-compiler',
+    //         'babel-plugin-react-compiler', // must run first!
     //         {
     //           // compilationMode: 'annotation',
     //         },
@@ -560,6 +560,7 @@ export function getConfig(mode: string): UserConfig {
       // ssr: true,
       rollupOptions: {output: {manualChunks: {sentry: ['@sentry/react']}}},
       target: 'esnext',
+      cssMinify: 'lightningcss',
     },
     esbuild: {
       supported: {
@@ -576,9 +577,9 @@ export function getConfig(mode: string): UserConfig {
     css: {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
       devSourcemap: shouldUseSourceMap,
-      preprocessorOptions: {
-        scss: {sourceMapIncludeSources: shouldUseSourceMap},
-        sass: {sourceMapIncludeSources: shouldUseSourceMap},
+      transformer: 'lightningcss',
+      lightningcss: {
+        cssModules: {},
       },
     },
     json: {stringify: true},
