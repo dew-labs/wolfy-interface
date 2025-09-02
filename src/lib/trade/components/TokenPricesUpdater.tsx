@@ -53,5 +53,6 @@ export default memo(function TokenPricesUpdater() {
       connection.closeWebSocket()
     }
   }, [queryClient, chainId])
+
   return null
 })

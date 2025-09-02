@@ -24,6 +24,7 @@ import {
 import fetchChartHistoryData from '@/lib/tvchart/services/fetchChartHistoryData.ts'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData.ts'
 import debounce from '@/utils/debounce'
+import useAbortableEffect from '@/utils/hooks/useAbortableEffect'
 import {NO_REFETCH_OPTIONS} from '@/utils/query/constants'
 
 const CHART_HEIGHT = 300
@@ -55,7 +56,7 @@ export const Line = memo(function Line({options}: LineProps) {
   const {createPriceLine, removePriceLine} = use(ChartContext)
 
   useEffect(() => {
-    if (!createPriceLine || !removePriceLine) return
+    invariant(createPriceLine && removePriceLine, 'ChartContext is not initialized')
 
     const line = createPriceLine(options)
 
@@ -168,12 +169,10 @@ export default deepMemo(function TVLightWeightChart({
     })
   }, [])
 
-  useEffect(
-    function updateRealTimeData() {
+  useAbortableEffect(
+    function updateRealTimeData({signal}) {
       const wssUrl = getChartWssUrl(asset, interval)
       const chartDataWS = new WebSocket(wssUrl)
-
-      const abortController = new AbortController()
 
       chartDataWS.addEventListener(
         'message',
@@ -191,11 +190,10 @@ export default deepMemo(function TVLightWeightChart({
             chartMainCandlestickSeries.current.update(data)
           }
         },
-        {signal: abortController.signal},
+        {signal},
       )
 
       return () => {
-        abortController.abort()
         chartDataWS.close()
       }
     },

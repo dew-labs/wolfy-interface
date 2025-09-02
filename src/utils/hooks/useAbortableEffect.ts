@@ -1,6 +1,13 @@
 import type {DependencyList, EffectCallback} from 'react'
 
-export default function useAbortControllerEffect(
+
+/**
+ * An effect that will automatically abort when the component is unmounted.
+ *
+ * @param effect - The effect to run.
+ * @param [deps] - The dependencies to watch.
+ */
+export default function useAbortableEffect(
   effect: (abortController: AbortController) => ReturnType<EffectCallback>,
   deps?: DependencyList,
 ) {

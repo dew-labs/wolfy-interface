@@ -41,7 +41,6 @@ import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
 import pluginTestingLibrary from 'eslint-plugin-testing-library'
-import pluginTsDoc from 'eslint-plugin-tsdoc'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
@@ -622,10 +621,6 @@ function getTypescriptConfigs() {
         '@typescript-eslint/no-floating-promises': 'off', // lag
       },
     }),
-    ...applyTo.typescript('typescript/tsdoc', {
-      plugins: {tsdoc: pluginTsDoc},
-      rules: {'tsdoc/syntax': 'error'},
-    }),
     ...applyTo.typescript(
       'typescript/jsdoc',
       pluginJsdoc.configs['flat/recommended-typescript-error'],
@@ -646,7 +641,7 @@ function getReactConfigs() {
   // TODO: add all react-use and other hooks libraries to additionalHooks
   const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
 
-  const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortControllerEffect']
+  const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortableEffect']
 
   const reactPerfIgnoreSources = ['@heroui/react']
 

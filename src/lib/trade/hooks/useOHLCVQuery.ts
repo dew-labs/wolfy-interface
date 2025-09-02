@@ -2,6 +2,7 @@ import {MOCK_SYMBOL_MAP} from '@/constants/tokens'
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData'
 import {getChartWssUrl} from '@/lib/tvchart/constants'
 import {parseChartData} from '@/lib/tvchart/utils/binanceDataToChartData'
+import useAbortableEffect from '@/utils/hooks/useAbortableEffect'
 
 interface OHLCV {
   open: number
@@ -18,8 +19,8 @@ interface OHLCVEffectsProps {
 export const OHLCVEffects = memo(function OHLCVEffects({symbol}: OHLCVEffectsProps) {
   const queryClient = useQueryClient()
 
-  useEffect(
-    function subscribeToChartData() {
+  useAbortableEffect(
+    function subscribeToChartData({signal}) {
       if (!symbol) return
 
       const asset = MOCK_SYMBOL_MAP[symbol]
@@ -28,8 +29,6 @@ export const OHLCVEffects = memo(function OHLCVEffects({symbol}: OHLCVEffectsPro
 
       const wssUrl = getChartWssUrl(asset, ChartInterval['1d'])
       const chartDataWS = new WebSocket(wssUrl)
-
-      const abortController = new AbortController()
 
       chartDataWS.addEventListener(
         'message',
@@ -51,11 +50,10 @@ export const OHLCVEffects = memo(function OHLCVEffects({symbol}: OHLCVEffectsPro
             volume: data.volume ?? 0,
           })
         },
-        {signal: abortController.signal},
+        {signal},
       )
 
       return () => {
-        abortController.abort()
         chartDataWS.close()
       }
     },

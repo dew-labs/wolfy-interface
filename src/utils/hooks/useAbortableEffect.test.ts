@@ -1,9 +1,9 @@
 import {renderHook} from '@testing-library/react'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
-import useAbortControllerEffect from './useAbortControllerEffect'
+import useAbortableEffect from './useAbortableEffect'
 
-describe(useAbortControllerEffect, () => {
+describe(useAbortableEffect, () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
@@ -17,7 +17,7 @@ describe(useAbortControllerEffect, () => {
 
     const effect = vi.fn()
     renderHook(() => {
-      useAbortControllerEffect(effect)
+      useAbortableEffect(effect)
     })
 
     expect(effect).toHaveBeenCalledTimes(1)
@@ -31,7 +31,7 @@ describe(useAbortControllerEffect, () => {
     const effect = vi.fn().mockReturnValue(cleanup)
 
     const {unmount} = renderHook(() => {
-      useAbortControllerEffect(effect)
+      useAbortableEffect(effect)
     })
     unmount()
 
@@ -51,7 +51,7 @@ describe(useAbortControllerEffect, () => {
     })
 
     const {unmount} = renderHook(() => {
-      useAbortControllerEffect(effect)
+      useAbortableEffect(effect)
     })
 
     expect(stateRef?.signal.aborted).toBe(false)
@@ -66,7 +66,7 @@ describe(useAbortControllerEffect, () => {
 
     const effect = vi.fn()
     const {unmount} = renderHook(() => {
-      useAbortControllerEffect(abortController => {
+      useAbortableEffect(abortController => {
         setTimeout(() => {
           if (!abortController.signal.aborted) effect()
         }, 100)
@@ -85,7 +85,7 @@ describe(useAbortControllerEffect, () => {
 
     const effect = vi.fn()
     const {unmount} = renderHook(() => {
-      useAbortControllerEffect(() => {
+      useAbortableEffect(() => {
         setTimeout(() => {
           effect()
         }, 100)
@@ -107,7 +107,7 @@ describe(useAbortControllerEffect, () => {
     const effect = vi.fn()
     const {rerender} = renderHook(
       ({dep}) => {
-        useAbortControllerEffect(effect, [dep])
+        useAbortableEffect(effect, [dep])
       },
       {initialProps: {dep: 1}},
     )
@@ -124,7 +124,7 @@ describe(useAbortControllerEffect, () => {
 
     const effect = vi.fn()
     const {unmount} = renderHook(() => {
-      useAbortControllerEffect(({signal}) => {
+      useAbortableEffect(({signal}) => {
         setTimeout(() => {
           if (!signal.aborted) effect()
         }, 100)
