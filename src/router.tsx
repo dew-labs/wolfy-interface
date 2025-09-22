@@ -1,6 +1,7 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
+import {setupRouterSsrQueryIntegration} from '@tanstack/react-router-ssr-query'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {type Store} from 'jotai'
 
@@ -44,7 +45,7 @@ export interface RouterContext {
 // const stringifySearch = (search: Record<string, unknown>) => queryString.stringify(search, STRINGIFY_SEARCH_OPTIONS),
 
 export function createRouter({queryClient, store}: {queryClient: QueryClient; store: Store}) {
-  return createReactRouter({
+  const router = createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
     // Thinking about using jsurl2 for better readability, or zipson for shorter string,
     // type-coverage:ignore-next-line
@@ -81,6 +82,15 @@ export function createRouter({queryClient, store}: {queryClient: QueryClient; st
       types: ['slow-fade'],
     },
   })
+
+  setupRouterSsrQueryIntegration({
+    router,
+    queryClient,
+    wrapQueryClient: false,
+    handleRedirects: true,
+  })
+
+  return router
 }
 
 export type Router = ReturnType<typeof createRouter>

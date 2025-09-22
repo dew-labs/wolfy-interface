@@ -46,7 +46,7 @@ describe(createIdleTimeScheduler, () => {
 
   describe('schedule', () => {
     it('should schedule a task and return an id', () => {
-      expect.assertions(2)
+      expect.assertions(1)
 
       const task = vi.fn()
       const id = scheduler.schedule(task)
