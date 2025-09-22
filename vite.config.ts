@@ -15,7 +15,7 @@ import tailwindcss from '@tailwindcss/vite'
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {humanId} from 'human-id'
 import {obfuscator} from 'rollup-obfuscator'
@@ -350,49 +350,49 @@ export function getConfig(mode: string): UserConfig {
     }),
     millionLintVite({enabled: shouldEnableProfile}),
     // SWC React
-    react({
-      plugins: [
-        ['@swc-jotai/debug-label', {}],
-        ['@swc-jotai/react-refresh', {}],
-        // ['swc-plugin-dev-expression', {}], // Need to upgrade swc_core
-        // [
-        //   '@swc/plugin-remove-console',
-        //   {
-        //     exclude: ['error'],
-        //   },
-        // ],
-        inTestOrDevMode
-          ? false
-          : [
-              '@swc/plugin-react-remove-properties',
-              {
-                // The regexes defined here are processed in Rust so the syntax is different from
-                // JavaScript `RegExp`s. See https://docs.rs/regex.
-                properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
-              },
-            ],
-      ].filter(Boolean),
-    }),
+    // react({
+    //   plugins: [
+    //     ['@swc-jotai/debug-label', {}],
+    //     ['@swc-jotai/react-refresh', {}],
+    //     // ['swc-plugin-dev-expression', {}], // Need to upgrade swc_core
+    //     // [
+    //     //   '@swc/plugin-remove-console',
+    //     //   {
+    //     //     exclude: ['error'],
+    //     //   },
+    //     // ],
+    //     inTestOrDevMode
+    //       ? false
+    //       : [
+    //           '@swc/plugin-react-remove-properties',
+    //           {
+    //             // The regexes defined here are processed in Rust so the syntax is different from
+    //             // JavaScript `RegExp`s. See https://docs.rs/regex.
+    //             properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
+    //           },
+    //         ],
+    //   ].filter(Boolean),
+    // }),
 
     // Oxc + Babel React for react compiler
-    // react({
-    //   babel: {
-    //     plugins: [
-    //       [
-    //         'babel-plugin-react-compiler', // must run first!
-    //         {
-    //           // compilationMode: 'annotation',
-    //         },
-    //       ],
-    //       ['jotai/babel/plugin-debug-label', {}],
-    //       ['jotai/babel/plugin-react-refresh', {}],
-    //       [
-    //         'react-remove-properties',
-    //         {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
-    //       ],
-    //     ],
-    //   },
-    // }),
+    react({
+      babel: {
+        plugins: [
+          [
+            'babel-plugin-react-compiler', // must run first!
+            {
+              // compilationMode: 'annotation',
+            },
+          ],
+          ['jotai/babel/plugin-debug-label', {}],
+          ['jotai/babel/plugin-react-refresh', {}],
+          [
+            'react-remove-properties',
+            {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
+          ],
+        ],
+      },
+    }),
     // process.env.VITEST
     //   ? undefined
     //   : pluginChecker({
@@ -558,7 +558,18 @@ export function getConfig(mode: string): UserConfig {
       // manifest: true,
       // ssrManifest: true,
       // ssr: true,
-      rollupOptions: {output: {manualChunks: {sentry: ['@sentry/react']}}},
+      rollupOptions: {
+        output: {
+          advancedChunks: {
+            groups: [
+              {
+                name: 'sentry',
+                test: /@sentry\/react/,
+              },
+            ],
+          },
+        },
+      },
       target: 'esnext',
       cssMinify: 'lightningcss',
     },

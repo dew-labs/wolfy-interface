@@ -13,7 +13,7 @@ import {
   Tabs,
   Tooltip,
 } from '@heroui/react'
-import {type Key} from '@react-types/shared'
+import type {Key} from '@react-types/shared'
 import {toast} from 'sonner'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'

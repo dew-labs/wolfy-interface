@@ -1,5 +1,5 @@
 import {Card} from '@heroui/react'
-import {type Key} from '@react-types/shared'
+import type {Key} from '@react-types/shared'
 import {LineStyle} from 'lightweight-charts'
 
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
