@@ -34,8 +34,10 @@ export default function useParam<
   ParamOut extends ResolveUseParams<RegisteredRouter, RouteId, true>,
   ParamKey extends keyof ParamOut,
 >(routeId: RouteId, name: ParamKey, defaultOptions?: NavigateOptionProps) {
-  const {[name]: value} = useBaseParams({
+  // @ts-expect-error -- navigate type gone wrong because the typeof ParamKey cannot determine at compile time
+  const value = useBaseParams({
     from: routeId,
+    select: ({[name]: value}) => value,
   })
 
   return [value as ParamOut[ParamKey], useSetParam(routeId, name, defaultOptions)] as const

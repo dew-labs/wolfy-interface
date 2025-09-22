@@ -34,8 +34,10 @@ export default function useSearch<
   SearchParamOut extends ResolveUseSearch<RegisteredRouter, RouteId, true>,
   SearchParamKey extends keyof SearchParamOut,
 >(routeId: RouteId, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
-  const {[name]: value} = useBaseSearch({
+  // @ts-expect-error -- navigate type gone wrong because the typeof ParamKey cannot determine at compile time
+  const value = useBaseSearch({
     from: routeId,
+    select: ({[name]: value}) => value,
   })
 
   return [

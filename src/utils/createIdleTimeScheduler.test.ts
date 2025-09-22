@@ -1,4 +1,4 @@
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
+import {afterEach, beforeEach, describe, expect, expectTypeOf, it, vi} from 'vitest'
 
 import type {IdleTimeScheduler} from '@/utils/createIdleTimeScheduler'
 import createIdleTimeScheduler from '@/utils/createIdleTimeScheduler'
@@ -51,7 +51,8 @@ describe(createIdleTimeScheduler, () => {
       const task = vi.fn()
       const id = scheduler.schedule(task)
 
-      expect(typeof id).toBe('number')
+      expectTypeOf(id).toBeNumber()
+
       expect(id).toBeGreaterThanOrEqual(0)
     })
 

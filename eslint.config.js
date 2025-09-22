@@ -188,6 +188,12 @@ function getCoreConfigs() {
         'guard-for-in': 'error',
         'symbol-description': 'error',
         'yoda': 'error',
+        'preserve-caught-error': [
+          'error',
+          {
+            requireCatchParameter: true,
+          },
+        ],
       },
     }),
     ...applyTo.all('core/security', pluginSecurity.configs.recommended),
@@ -643,7 +649,7 @@ function getReactConfigs() {
 
   const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortableEffect']
 
-  const reactPerfIgnoreSources = ['@heroui/react']
+  const reactPerfIgnoreSources = ['@heroui/react', 'react-hook-form', '@tanstack/react-router']
 
   return [
     ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
@@ -827,6 +833,22 @@ function getReactTypescriptConfigs() {
         '@typescript-eslint/no-misused-promises': [
           'error',
           {checksVoidReturn: {attributes: false}},
+        ],
+      },
+    }),
+    ...applyTo.typescript('react-router/custom', {
+      rules: {
+        '@typescript-eslint/only-throw-error': [
+          'error',
+          {
+            allow: [
+              {
+                from: 'package',
+                package: '@tanstack/router-core',
+                name: 'Redirect',
+              },
+            ],
+          },
         ],
       },
     }),
