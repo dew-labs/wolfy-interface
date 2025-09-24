@@ -12,7 +12,7 @@ import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
-import {tanstackRouter} from '@tanstack/router-plugin/vite'
+import {tanstackStart} from '@tanstack/react-start/plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
@@ -326,29 +326,9 @@ export function getConfig(mode: string): UserConfig {
       }),
     createHtmlPlugin({
       minify: true,
-      /**
-       * After writing entry here, you will not need to add script tags in `index.html`, the original tags need to be deleted
-       */
-      entry: 'src/main.tsx',
-      /**
-       * Data that needs to be injected into the index.html ejs template
-       */
-      inject: {
-        data: {
-          title: process.env.VITE_APP_TITLE,
-          description: process.env.VITE_APP_DESCRIPTION,
-          ogImage: '/og.jpg',
-          gtagTagId: process.env.GA_TAG_ID,
-        },
-        tags: [
-          /**
-           * Inject <div id='root'/> to body of `index.html`
-           */
-          {injectTo: 'body-prepend', tag: 'div', attrs: {id: 'root'}},
-        ],
-      },
     }),
     millionLintVite({enabled: shouldEnableProfile}),
+    tanstackStart({customViteReactPlugin: true}), // react's vite plugin must come after start's vite plugin
     // SWC React
     react({
       plugins: [
@@ -373,7 +353,6 @@ export function getConfig(mode: string): UserConfig {
             ],
       ].filter(Boolean),
     }),
-
     // Oxc + Babel React for react compiler
     // react({
     //   babel: {
@@ -421,11 +400,7 @@ export function getConfig(mode: string): UserConfig {
       cache: true,
       cacheLocation: './.imageoptimizercache',
     }),
-    tanstackRouter({
-      target: 'react',
-      // autoCodeSplitting: true,
-    }),
-    mkcert(),
+    // mkcert(),
     obfuscator({sourceMap: shouldUseSourceMap}),
     isDevMode && inspectorServer(),
     // compression(), // Useful when serve dist as static files (https://nginx.org/en/docs/http/ngx_http_gzip_static_module.html), but not when serve dist with a backend (since the backend should handle compression)
@@ -585,14 +560,14 @@ export function getConfig(mode: string): UserConfig {
     json: {stringify: true},
     plugins,
     resolve: {alias: [{find: '@', replacement: '/src'}]},
-    server: {
-      open: true,
-      host: '0.0.0.0',
-      proxy: {
-        '/api': {target: process.env.VITE_API_URL, changeOrigin: true, cookieDomainRewrite: ''},
-      },
-      cors: false,
-    },
+    // server: {
+    //   open: true,
+    //   host: '0.0.0.0',
+    //   proxy: {
+    //     '/api': {target: process.env.VITE_API_URL, changeOrigin: true, cookieDomainRewrite: ''},
+    //   },
+    //   cors: false,
+    // },
     assetsInclude: ['**/*.lottie'],
   }
 }

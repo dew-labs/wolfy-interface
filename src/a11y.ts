@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom'
 
 import {MODE} from './constants/config'
 
-if (MODE === 'development') {
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, sonarjs/different-types-comparison -- we are checking if window is undefined
+if (MODE === 'development' && globalThis.document !== undefined) {
   import('@axe-core/react')
     .then(({default: axe}) => {
       void axe(React, ReactDOM, 1000)

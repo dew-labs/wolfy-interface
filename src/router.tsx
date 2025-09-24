@@ -4,6 +4,7 @@ import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/
 import {setupRouterSsrQueryIntegration} from '@tanstack/react-router-ssr-query'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {type Store} from 'jotai'
+import type {Unhead} from 'unhead/types'
 
 import {routeTree} from './routeTree.gen'
 import RouterErrorComponent from './views/Error/RouterErrorComponent'
@@ -12,6 +13,7 @@ import NotFound from './views/NotFound/NotFound'
 export interface RouterContext {
   queryClient: QueryClient
   store: Store
+  head: Unhead
 }
 
 // Tanstack's default parse behavior: just like JSON.parse, JSON.stringify => support JSON types
@@ -44,7 +46,17 @@ export interface RouterContext {
 // const parseSearch = (search: string) => queryString.parse(search, PARSE_SEARCH_OPTIONS),
 // const stringifySearch = (search: Record<string, unknown>) => queryString.stringify(search, STRINGIFY_SEARCH_OPTIONS),
 
-export function createRouter({queryClient, store}: {queryClient: QueryClient; store: Store}) {
+export function createRouter({
+  queryClient,
+  store,
+  head,
+  Wrap,
+}: {
+  queryClient: QueryClient
+  store: Store
+  head: Unhead
+  Wrap: (props: {children: ReactNode}) => React.JSX.Element
+}) {
   const router = createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
     // Thinking about using jsurl2 for better readability, or zipson for shorter string,
@@ -61,7 +73,8 @@ export function createRouter({queryClient, store}: {queryClient: QueryClient; st
       return String(value)
     }, JSON.parse),
     routeTree,
-    context: {queryClient, store},
+    Wrap,
+    context: {queryClient, store, head},
     // On the server, dehydrate the loader client and return it
     // to the router to get injected into `<DehydrateRouter />`
     // @ts-expect-error -- TODO: library type error
