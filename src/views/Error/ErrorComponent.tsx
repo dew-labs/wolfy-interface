@@ -14,7 +14,7 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
     if (reset) {
       reset()
     } else {
-      location.reload()
+      globalThis.location.reload()
     }
   }, [reset])
 

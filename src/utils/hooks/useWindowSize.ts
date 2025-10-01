@@ -7,7 +7,7 @@ function subscribeToResize(callback: (this: Window, ev: UIEvent) => void) {
   }
 }
 
-const MOBILE_BREAKPOINT = 1023
+const DEFAULT_MOBILE_BREAKPOINT = 1023
 const DEFAULT_WIDTH = 0
 const DEFAULT_HEIGHT = 0
 const DEFAULT_IS_MOBILE = false
@@ -24,14 +24,14 @@ function getHeightSnapshot() {
   return globalThis.innerHeight
 }
 
-function getIsMobileSnapshot() {
+function getIsMobileSnapshot(mobileBreakpoint: number = DEFAULT_MOBILE_BREAKPOINT) {
   if (!globalThis.innerWidth) return DEFAULT_IS_MOBILE
 
-  return globalThis.innerWidth <= MOBILE_BREAKPOINT
+  return globalThis.innerWidth <= mobileBreakpoint
 }
 
-export function useIsMobile() {
-  return useSyncExternalStore(subscribeToResize, getIsMobileSnapshot)
+export function useIsMobile(mobileBreakpoint: number = DEFAULT_MOBILE_BREAKPOINT) {
+  return useSyncExternalStore(subscribeToResize, () => getIsMobileSnapshot(mobileBreakpoint))
 }
 
 /**
@@ -47,7 +47,7 @@ export function useWindowSizeReducer<T>(reducer: (width: number, height: number)
   )
 }
 
-export default function useWindowSize() {
+export default function useWindowSize(mobileBreakpoint: number = DEFAULT_MOBILE_BREAKPOINT) {
   // NOTE: we prefer `useState` over `useRef` because it come with purity check in <StrictMode>
   // eslint-disable-next-line @eslint-react/naming-convention/use-state -- don't need to
   const [isSubscribedTo] = useState({
@@ -68,7 +68,7 @@ export default function useWindowSize() {
 
   const isMobile = useSyncExternalStore(subscribeToResize, () => {
     if (!isSubscribedTo.isMobile) return DEFAULT_IS_MOBILE
-    return getIsMobileSnapshot()
+    return getIsMobileSnapshot(mobileBreakpoint)
   })
 
   const target = {

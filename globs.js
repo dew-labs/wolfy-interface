@@ -9,6 +9,7 @@ const globs = {
   JSON5: ['**/*.json5'],
   JSONC5: ['**/*.json?(c|5)'],
   // Add vue, svelte,... if using them
+  JAVASCRIPT: ['**/*.?(c|m)js?(x)'],
   TYPESCRIPT: ['**/*.?(c|m)ts?(x)'],
   REACT_COMPONENTS: ['**/*.?(c|m)[jt]sx'],
   REACT_HOOKS: ['**/use*.?(c|m)[jt]s?(x)'],

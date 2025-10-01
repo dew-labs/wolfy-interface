@@ -220,7 +220,7 @@ export default memo(function DepositWithdrawalHistory() {
         })} ${feeToken.symbol}`
 
         const executionFeeUsd = shrinkDecimals(
-          expandDecimals(executionFee, feeToken.decimals) * BigInt(feeTokenPrice.max),
+          expandDecimals(executionFee, feeToken.decimals) * feeTokenPrice.max,
           USD_DECIMALS + feeToken.decimals,
         )
 

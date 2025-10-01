@@ -1,4 +1,4 @@
-// From https://github.com/facebook/react/blob/c0464aedb16b1c970d717651bba8d1c66c578729/packages/shared/shallowEqual.js
+// From https://github.com/facebook/react/blob/fda1f0b902b527089fe5ae7b3aa573c633166ec9/packages/shared/shallowEqual.js
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
@@ -6,7 +6,7 @@ const is =
   typeof Object.is === 'function'
     ? Object.is
     : (x, y) => {
-        // eslint-disable-next-line no-self-compare -- match original code
+        // eslint-disable-next-line no-self-compare, math/prefer-number-is-nan -- match original code
         return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y)
       }
 

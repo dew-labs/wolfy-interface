@@ -205,7 +205,7 @@ export function getTokenMetadata(chainId: StarknetChainId, address: string) {
   const tokenMetadata = TOKENS_METADATA.get(chainId)?.get(address)
 
   if (!tokenMetadata) {
-    throw new Error(`Token address "${String(address)}" for chainId ${chainId} is not supported`)
+    throw new Error(`Token address "${address}" for chainId ${chainId} is not supported`)
   }
 
   return tokenMetadata

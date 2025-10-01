@@ -6,11 +6,12 @@ import {fixupConfigRules} from '@eslint/compat'
 import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
-import pluginReact from '@eslint-react/eslint-plugin'
+import pluginReactX from '@eslint-react/eslint-plugin'
 import pluginQuery from '@tanstack/eslint-plugin-query'
 // import expoConfig from 'eslint-config-expo/flat.js'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
+import restrictedGlobals from 'confusing-browser-globals'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
@@ -24,6 +25,7 @@ import pluginJestDom from 'eslint-plugin-jest-dom'
 import pluginJsdoc from 'eslint-plugin-jsdoc'
 import pluginJsonc from 'eslint-plugin-jsonc'
 import pluginJsxA11y from 'eslint-plugin-jsx-a11y'
+import pluginMath from 'eslint-plugin-math'
 import pluginNoBarrelFiles from 'eslint-plugin-no-barrel-files'
 import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
@@ -32,11 +34,15 @@ import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 // import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
 // import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
+import pluginReact from 'eslint-plugin-react'
 // import pluginReactCompiler from 'eslint-plugin-react-compiler'
 import * as pluginReactHooks from 'eslint-plugin-react-hooks'
+import pluginReactHooksAddons from 'eslint-plugin-react-hooks-addons'
 import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
+import pluginReactYouMightNotNeedAnEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
 import * as pluginRegexp from 'eslint-plugin-regexp'
+// import pluginRemeda from 'eslint-plugin-remeda'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
@@ -92,6 +98,7 @@ const applyTo = {
   jsonC5: createApplyTo(globs.JSONC5),
   // translations: createApplyTo(globs.TRANSLATIONS),
   typescript: createApplyTo(globs.TYPESCRIPT),
+  javascript: createApplyTo(globs.JAVASCRIPT),
   react: createApplyTo(globs.REACT),
   reactHooks: createApplyTo(globs.REACT_HOOKS, globs.ROUTES),
   reactComponents: createApplyTo(globs.REACT_COMPONENTS, globs.ROUTES),
@@ -119,6 +126,7 @@ function getCoreConfigs() {
     ...applyTo.all('core/recommended', eslint.configs.recommended),
     ...applyTo.all('core/custom', {
       rules: {
+        'no-restricted-globals': ['error'].concat(restrictedGlobals),
         'camelcase': ['error', {allow: ['contract_address']}],
         'grouped-accessor-pairs': 'error',
         'accessor-pairs': 'error',
@@ -429,6 +437,14 @@ function getCoreConfigs() {
         'jsdoc/tag-lines': ['error', 'any', {startLines: 1}],
       },
     }),
+    ...applyTo.all('core/math', pluginMath.configs.recommended),
+    ...applyTo.all('core/math/custom', {
+      rules: {
+        'math/prefer-exponentiation-operator': 'error',
+        // 'math/prefer-math-sum-precise': 'error' // TODO: enable this when Math.sumPrecise() become baseline available
+      },
+    }),
+    // ...applyTo.all('core/remeda', pluginRemeda.configs.recommended),
     // TODO: enable for new projects
     // ...applyTo.all('core/unicorn', pluginUnicorn.configs['flat/recommended']),
     // ...applyTo.all('core/unicorn/custom', {
@@ -631,7 +647,7 @@ function getTypescriptConfigs() {
       'typescript/jsdoc',
       pluginJsdoc.configs['flat/recommended-typescript-error'],
     ),
-    ...applyTo.script('typescript/jsdoc/custom', {
+    ...applyTo.typescript('typescript/jsdoc/custom', {
       rules: {
         // NOTE: remove this if you are authoring a library
         'jsdoc/require-jsdoc': 'off',
@@ -652,6 +668,47 @@ function getReactConfigs() {
   const reactPerfIgnoreSources = ['@heroui/react', 'react-hook-form', '@tanstack/react-router']
 
   return [
+    ...applyTo.react('react/default', pluginReact.configs.flat.recommended),
+    ...applyTo.react('react/jsx-runtime', pluginReact.configs.flat['jsx-runtime']),
+    ...applyTo.react('react/custom', {
+      rules: {
+        'react/boolean-prop-naming': [
+          'error',
+          {
+            propTypeNames: ['bool', 'mutuallyExclusiveTrueProps'],
+            rule: '^(is|has)[A-Z]([A-Za-z0-9]?)+',
+            message:
+              "Boolean prop name must start with 'is' or 'has', following with an adjective phrase, and in PascalCase",
+            validateNested: true,
+          },
+        ],
+        'react/forbid-dom-props': [
+          'error',
+          {
+            forbid: ['style'],
+          },
+        ],
+        // 'react/forbid-component-props': ['error', {forbid: []}],
+        // 'react/forbid-elements': ['error', {forbid: []}],
+        'react/jsx-handler-names': [
+          'error',
+          {
+            eventHandlerPrefix: 'handle',
+            eventHandlerPropPrefix: 'on',
+            // checkLocalVariables: true,
+            // checkInlineFunction: true,
+            ignoreComponentNames: [],
+          },
+        ],
+        'react/self-closing-comp': [
+          'error',
+          {
+            component: true,
+            html: true,
+          },
+        ],
+      },
+    }),
     ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
     // Use below when using expo
     // ...applyTo.react('react/hooks', {
@@ -686,8 +743,11 @@ function getReactConfigs() {
       settings: {'jsx-a11y': {polymorphicPropName: 'as', components: {VisuallyHidden: 'span'}}},
     }),
     ...applyTo.react('react/query', pluginQuery.configs['flat/recommended']),
-    ...applyTo.react('react/dom', pluginReact.configs.dom), // TODO: Exclude react in SSR, RSC??
-    ...applyTo.javascriptReact('react/x-javascript', {...pluginReact.configs['recommended']}),
+    ...applyTo.react('react/dom', pluginReactX.configs.dom), // TODO: Exclude react in SSR, RSC??
+    ...applyTo.javascriptReact('react/x-javascript', {...pluginReactX.configs['recommended']}),
+    ...applyTo.react('react/x-disable-conflict', {
+      ...pluginReactX.configs['disable-conflict-eslint-plugin-react'],
+    }),
     ...applyTo.react('react/x-custom', {
       rules: {
         '@eslint-react/jsx-shorthand-boolean': 'warn',
@@ -777,6 +837,33 @@ function getReactConfigs() {
       languageOptions: {globals: {React: true}, parserOptions: {ecmaFeatures: {jsx: true}}},
       rules: {'jsx-a11y/label-has-associated-control': ['error', {controlComponents: ['button']}]},
     }),
+    ...applyTo.react('react-you-might-not-need-an-effect', {
+      ...pluginReactYouMightNotNeedAnEffect.configs.recommended,
+      rules: Object.keys(pluginReactYouMightNotNeedAnEffect.configs.recommended.rules || {}).reduce(
+        (acc, key) => {
+          acc[key] = 'error'
+          return acc
+        },
+        {},
+      ),
+    }),
+    ...applyTo.react('react-hooks-addons', {
+      plugins: {
+        'react-hooks-addons': pluginReactHooksAddons,
+      },
+      rules: {
+        'react-hooks-addons/no-unused-deps': [
+          'warn',
+          {
+            effectComment: 'effectful',
+            additionalHooks: {
+              pattern: reactUseAdditionalHooks.join('|'),
+              replace: false,
+            },
+          },
+        ],
+      },
+    }),
   ]
 }
 
@@ -820,13 +907,14 @@ function getReactWebConfigs() {
 function getReactTypescriptConfigs() {
   return [
     ...applyTo.typescriptReact('react/x-typescript', {
-      ...pluginReact.configs['recommended-type-checked'],
+      ...pluginReactX.configs['recommended-type-checked'],
     }),
     ...applyTo.typescriptReact('react/x-typescript-custom', {
       rules: {'@eslint-react/prefer-read-only-props': 'warn'},
     }),
     ...applyTo.typescriptReact('react/typescript', {
       rules: {
+        'react/jsx-no-undef': 'off', // Already covered by typescript
         // https://github.com/orgs/react-hook-form/discussions/8020
         '@typescript-eslint/no-misused-promises': [
           'error',
@@ -935,14 +1023,30 @@ export default tsEslint.config(
       parserOptions: {ecmaFeatures: {impliedStrict: true}},
       globals: {
         ...globals.browser,
-        ...globals.commonjs,
-        ...globals.node,
         ...globals.worker,
         ...globals.serviceworker,
         ...globals.webextensions,
+        // ...globals.node, // NOTE: this is default to SPA, all js run in browser. When SSR introduced, we must config globals.node for RSC and SSR files only
+        document: 'readonly',
+        navigator: 'readonly',
+        window: 'readonly',
       },
     },
   }),
+  {
+    name: 'cjs',
+    files: ['**/*.c[jt]s?(x)'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      ecmaVersion: 'latest',
+      parserOptions: {ecmaFeatures: {impliedStrict: true}},
+      globals: {
+        ...globals.commonjs,
+        ...globals.node,
+        ...globals.worker,
+      },
+    },
+  },
   // NOTE: enable this when using pnpm workspaces & catalogs
   // ...pluginPnpmConfigs.json,
   // ...pluginPnpmConfigs.yaml,
