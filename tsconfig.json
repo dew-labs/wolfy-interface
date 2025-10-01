@@ -48,8 +48,11 @@
     // This needs to be above root so that vscode will do auto-import correctly.
     // Basically, it will respect tsconfig.base.json's aliases in paths first,
     // because the full non-relative path would be longer.
-    "baseUrl": ".",
-    "paths": {"@/*": ["./src/*"], "/*": ["./public/*"]},
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./src/*"],
+      "/*": ["./public/*"]
+    },
     "types": [
       "vite/client",
       "vite-plugin-svgr/client",
