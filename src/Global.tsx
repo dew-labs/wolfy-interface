@@ -5,7 +5,6 @@ import UpdateMousePosition from '@/components/UpdateMousePosition'
 import WolfyBackground from '@/components/WolfyBackground'
 import WolfyToaster from '@/components/WolfyToaster'
 import {loadSentryIntegrations} from '@/instrument'
-import Head from '@/lib/head/Head'
 import ChainEffects from '@/lib/starknet/components/ChainEffects'
 import ThemeEffects from '@/lib/theme/ThemeEffects'
 import TokenPricesUpdater from '@/lib/trade/components/TokenPricesUpdater'
@@ -42,7 +41,6 @@ export default memo(function Global() {
     <>
       <RouteAnnouncer />
       <WolfyBackground />
-      <Head />
       <UpdateMousePosition />
       <WolfyToaster />
       <ChainEffects />

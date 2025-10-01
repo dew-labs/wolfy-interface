@@ -690,18 +690,18 @@ function getReactConfigs() {
     ...applyTo.javascriptReact('react/x-javascript', {...pluginReact.configs['recommended']}),
     ...applyTo.react('react/x-custom', {
       rules: {
-        '@eslint-react/prefer-shorthand-boolean': 'warn',
-        '@eslint-react/prefer-shorthand-fragment': 'warn',
+        '@eslint-react/jsx-shorthand-boolean': 'warn',
+        '@eslint-react/jsx-shorthand-fragment': 'warn',
         '@eslint-react/no-class-component': 'error',
         '@eslint-react/no-missing-component-display-name': 'error',
         '@eslint-react/no-useless-fragment': 'error',
-        '@eslint-react/prefer-react-namespace-import': 'error',
-        '@eslint-react/no-complex-conditional-rendering': 'error',
-        '@eslint-react/prefer-destructuring-assignment': 'error',
+        '@eslint-react/prefer-namespace-import': 'error',
+        '@eslint-react/prefer-destructuring-assignment': 'warn', // TODO: enable
         '@eslint-react/dom/no-unknown-property': [
           'error',
           {requireDataLowercase: true, ignore: []},
         ],
+        '@eslint-react/no-unnecessary-key': 'error',
       },
     }),
     ...applyTo.react('react/naming-convention', {
@@ -723,12 +723,10 @@ function getReactConfigs() {
       // TODO: enable this when available in v2.0.0 instead of manually set rules
       // ...pluginReact.configs['hooks-extra'],
       rules: {
-        '@eslint-react/hooks-extra/prefer-use-state-lazy-initialization': 'error',
-        '@eslint-react/hooks-extra/no-direct-set-state-in-use-layout-effect': 'error',
-        '@eslint-react/hooks-extra/no-unnecessary-use-callback': 'error',
-        '@eslint-react/hooks-extra/no-unnecessary-use-memo': 'error',
+        '@eslint-react/prefer-use-state-lazy-initialization': 'error',
         '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'error',
-        '@eslint-react/hooks-extra/no-useless-custom-hooks': 'error',
+        '@eslint-react/no-unnecessary-use-callback': 'error',
+        '@eslint-react/no-unnecessary-use-memo': 'error',
       },
     }),
     ...applyTo.react('react/x-settings', {

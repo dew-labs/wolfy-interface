@@ -1,8 +1,8 @@
-diff --git a/build/modern/chunk-4FWBSZRD.js b/build/modern/chunk-4FWBSZRD.js
-index 31694707f095bed7e775fa40fcace64a88a5ca59..b28f99170f383892e422f2ccabffe8ad4e249b22 100644
---- a/build/modern/chunk-4FWBSZRD.js
-+++ b/build/modern/chunk-4FWBSZRD.js
-@@ -874,7 +874,6 @@ var rule5 = createPropertyOrderRule(
+diff --git a/build/modern/chunk-WNWA3ZM7.js b/build/modern/chunk-WNWA3ZM7.js
+index 63a44419c85b533fff6fee482f239a8c6609d3f6..11a57ae3bda79543eb93ff63af4e14c0dbbb86db 100644
+--- a/build/modern/chunk-WNWA3ZM7.js
++++ b/build/modern/chunk-WNWA3ZM7.js
+@@ -893,7 +893,6 @@ var rule5 = createPropertyOrderRule(
  
  // src/rules/no-void-query-fn/no-void-query-fn.rule.ts
  import { ESLintUtils as ESLintUtils6 } from "@typescript-eslint/utils";
@@ -10,7 +10,7 @@ index 31694707f095bed7e775fa40fcace64a88a5ca59..b28f99170f383892e422f2ccabffe8ad
  var name6 = "no-void-query-fn";
  var createRule6 = ESLintUtils6.RuleCreator(getDocsUrl);
  var rule6 = createRule6({
-@@ -926,7 +925,7 @@ function isIllegalReturn(checker, type) {
+@@ -945,7 +944,7 @@ function isIllegalReturn(checker, type) {
    if (awaited.isUnion()) {
      return awaited.types.some((t) => isIllegalReturn(checker, t));
    }

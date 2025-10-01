@@ -3,12 +3,25 @@ import '@/setup'
 
 import {reactErrorHandler} from '@sentry/react'
 import {RouterProvider} from '@tanstack/react-router'
+import {InferSeoMetaPlugin} from '@unhead/addons'
+import {createHead, UnheadProvider} from '@unhead/react/client'
+import {AliasSortingPlugin, CanonicalPlugin} from '@unhead/react/plugins'
 import {createStore} from 'jotai'
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 
 import {createQueryClient} from './query'
 import {createRouter} from './router'
+
+const head = createHead({
+  plugins: [
+    AliasSortingPlugin,
+    CanonicalPlugin({
+      canonicalHost: 'https://mysite.com',
+    }),
+    InferSeoMetaPlugin(),
+  ],
+})
 
 function App() {
   // Ensures each request has its own cache in SSR
@@ -39,7 +52,9 @@ function render() {
     onRecoverableError: reactErrorHandler(),
   }).render(
     <StrictMode>
-      <App />
+      <UnheadProvider head={head}>
+        <App />
+      </UnheadProvider>
     </StrictMode>,
   )
 }

@@ -64,6 +64,7 @@ export function createRouter({queryClient, store}: {queryClient: QueryClient; st
     context: {queryClient, store},
     // On the server, dehydrate the loader client and return it
     // to the router to get injected into `<DehydrateRouter />`
+    // @ts-expect-error -- TODO: library type error
     dehydrate: () => ({queryClientState: dehydrate(queryClient)}),
     // On the client, hydrate the loader client with the data
     // we dehydrated on the server
