@@ -36,7 +36,7 @@ import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 import pluginPromise from 'eslint-plugin-promise'
 import pluginReact from 'eslint-plugin-react'
 // import pluginReactCompiler from 'eslint-plugin-react-compiler'
-import * as pluginReactHooks from 'eslint-plugin-react-hooks'
+import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReactHooksAddons from 'eslint-plugin-react-hooks-addons'
 import pluginReactPerf from 'eslint-plugin-react-perf'
 import pluginReactRefresh from 'eslint-plugin-react-refresh'
@@ -672,6 +672,8 @@ function getReactConfigs() {
     ...applyTo.react('react/jsx-runtime', pluginReact.configs.flat['jsx-runtime']),
     ...applyTo.react('react/custom', {
       rules: {
+        'react/prop-types': 'off',
+        'react/no-unescaped-entities': 'warn',
         'react/boolean-prop-naming': [
           'error',
           {
@@ -709,12 +711,12 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/hooks', pluginReactHooks.configs.recommended),
+    ...applyTo.react('react/hooks', pluginReactHooks.configs['flat/recommended']),
     // Use below when using expo
     // ...applyTo.react('react/hooks', {
     //   // Expo already define `react-hooks` plugin so we cannot redefine
     //   rules: {
-    //     ...pluginReactHooks.configs.recommended.rules,
+    //     ...pluginReactHooks.configs['flat/recommended'].rules,
     //   },
     // }),
     ...applyTo.react('react/hooks/custom', {
@@ -761,7 +763,6 @@ function getReactConfigs() {
           'error',
           {requireDataLowercase: true, ignore: []},
         ],
-        '@eslint-react/no-unnecessary-key': 'error',
       },
     }),
     ...applyTo.react('react/naming-convention', {
