@@ -268,7 +268,7 @@
     "unplugin-fonts": "^1.4.0",
     "unplugin-turbo-console": "^2.2.0",
     "url": "^0.11.4",
-    "vite": "^7.1.10",
+    "vite": "^7.1.11",
     "vite-css-modules": "^1.11.1",
     "vite-imagetools": "^9.0.0",
     "vite-plugin-checker": "^0.11.0",
