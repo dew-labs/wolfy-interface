@@ -1,18 +1,21 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- this is a utility file */
-import type {NamedExoticComponent} from 'react'
-
 import {useResetComponent} from './useResetComponent'
 
-export default function createResettableComponent<T extends {reset: () => void}>(
-  Component: ComponentType<T>,
-): NamedExoticComponent<Omit<T, 'reset'>> {
+export default function selfResettableComponent<
+  T extends {
+    reset: StableCallback<() => void>
+  },
+>(Component: ComponentType<T>): ComponentType<Omit<T, 'reset'>> {
   const ResettableComponent = function (props: Omit<T, 'reset'>) {
     const [resetKey, reset] = useResetComponent()
 
     return <Component {...(props as T)} key={resetKey} reset={reset} />
   }
 
-  Object.defineProperty(ResettableComponent, 'name', {value: Component.name, writable: false})
+  Object.defineProperty(ResettableComponent, 'name', {
+    value: Component.name,
+    writable: false,
+  })
 
   Object.defineProperty(ResettableComponent, 'displayName', {
     value: Component.displayName,

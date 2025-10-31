@@ -1,6 +1,6 @@
 ---
 description: Writing unit tests, component tests, integration tests, end-to-end (e2e) tests
-globs: **/__tests__/**/*, **/*.test.*, **/*.spec.*, **/*.test-d.*, **/*.spec-d.*
+globs: **/__tests__/**/*.js,**/__tests__/**/*.jsx,**/__tests__/**/*.ts,**/__tests__/**/*.tsx,**/__tests__/**/*.cjs,**/__tests__/**/*.cjsx,**/__tests__/**/*.cts,**/__tests__/**/*.ctsx,**/__tests__/**/*.mjs,**/__tests__/**/*.mjsx,**/__tests__/**/*.mts,**/__tests__/**/*.mtsx,**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx,**/*.test.cjs,**/*.test.cjsx,**/*.test.cts,**/*.test.ctsx,**/*.test.mjs,**/*.test.mjsx,**/*.test.mts,**/*.test.mtsx,**/*.test-d.js,**/*.test-d.jsx,**/*.test-d.ts,**/*.test-d.tsx,**/*.test-d.cjs,**/*.test-d.cjsx,**/*.test-d.cts,**/*.test-d.ctsx,**/*.test-d.mjs,**/*.test-d.mjsx,**/*.test-d.mts,**/*.test-d.mtsx,**/*.spec.js,**/*.spec.jsx,**/*.spec.ts,**/*.spec.tsx,**/*.spec.cjs,**/*.spec.cjsx,**/*.spec.cts,**/*.spec.ctsx,**/*.spec.mjs,**/*.spec.mjsx,**/*.spec.mts,**/*.spec.mtsx,**/*.spec-d.js,**/*.spec-d.jsx,**/*.spec-d.ts,**/*.spec-d.tsx,**/*.spec-d.cjs,**/*.spec-d.cjsx,**/*.spec-d.cts,**/*.spec-d.ctsx,**/*.spec-d.mjs,**/*.spec-d.mjsx,**/*.spec-d.mts,**/*.spec-d.mtsx
 ---
 # Testing
 
@@ -8,6 +8,8 @@ globs: **/__tests__/**/*, **/*.test.*, **/*.spec.*, **/*.test-d.*, **/*.spec-d.*
 
 + Write both runtime and type tests when applicable
 + Organize tests in descriptive nested describe blocks
++ Set up and tear down test environments properly
++ Use AAA pattern (Arrange-Act-Assert pattern)
 + Use `expect` for runtime assertions
 + Use `expectTypeOf` for type assertions
 + Reset mocks between tests using `beforeEach`

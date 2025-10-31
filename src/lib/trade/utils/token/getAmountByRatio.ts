@@ -17,7 +17,7 @@ export function getAmountByRatio(p: {
     return p.fromTokenAmount
   }
 
-  const ratio2 = shouldInvertRatio ? PRECISION ** 2 / ratio : ratio
+  const ratio2 = shouldInvertRatio ? PRECISION ** 2n / ratio : ratio
 
   const adjustedDecimalsRatio =
     (ratio2 * expandDecimals(1, toToken.decimals)) / expandDecimals(1, fromToken.decimals)

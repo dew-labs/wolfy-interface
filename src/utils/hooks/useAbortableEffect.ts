@@ -1,6 +1,5 @@
 import type {DependencyList, EffectCallback} from 'react'
 
-
 /**
  * An effect that will automatically abort when the component is unmounted.
  *

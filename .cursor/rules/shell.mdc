@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+
+# Run Shell/Terminal/Bash/Sh Commands/Scripts
+
+## Recommended
+
+- When running tests, prefer run some of the test files only instead of running all tests.
+- NEVER TRY TO START A NEW DEVELOPMENT SERVER! (eg: `start`, `dev` commands)
+
+## Custom
+
+- Remember to use `pnpm` instead of `npm` or `yarn`, `pnpm dlx` instead of `npx`
+- Run with `CI=true mise exec --` to ensure the commands are run in the correct environment and preventing any interactive prompts.

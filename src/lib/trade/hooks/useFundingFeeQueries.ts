@@ -11,7 +11,7 @@ export default function useFundingFeeQueries() {
 
   const queries = useMemo(() => {
     return markets?.map(market => getFundingQueryOptions({chainId, market, accountAddress})) ?? []
-  }, [markets, chainId, accountAddress])
+  }, [markets, chainId, accountAddress]) as ReturnType<typeof getFundingQueryOptions>[]
 
   return useQueries({
     queries,

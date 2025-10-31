@@ -1,6 +1,6 @@
 ---
 description: Writing typescript type testing
-globs: **/*.test-d.*, **/*.spec-d.*
+globs: **/*.test-d.ts,**/*.test-d.cts,**/*.test-d.mts,**/*.test-d.tsx,**/*.test-d.ctsx,**/*.test-d.mtsx
 ---
 # Type Testing
 

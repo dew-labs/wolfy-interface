@@ -1,68 +1,106 @@
+diff --git a/.eslintrcXXX b/.eslintrcXXX
+deleted file mode 100644
+index ed223c7d39379fadf99d082573239dc7369a0455..0000000000000000000000000000000000000000
+diff --git a/eslint.config.jsXXXX b/eslint.config.jsXXXX
+deleted file mode 100644
+index 2634bfdfe05a8e185a1fca00c51f9ff62b818302..0000000000000000000000000000000000000000
+diff --git a/eslint.config.jsYYYY b/eslint.config.jsYYYY
+deleted file mode 100644
+index ebe8a525aa71db743cd50c7e4b76ac8ee1fe7999..0000000000000000000000000000000000000000
+diff --git a/lib/rules/jsx-no-jsx-as-prop.js b/lib/rules/jsx-no-jsx-as-prop.js
+index 654af9df10cca7315bdee2df185caca4ead10bbe..8a08a5a10fb0417b5229ac74eba20d3f2c6636e7 100644
+--- a/lib/rules/jsx-no-jsx-as-prop.js
++++ b/lib/rules/jsx-no-jsx-as-prop.js
+@@ -4,6 +4,6 @@ module.exports = require("../utils/common").createRule(
+   "Prevent JSX as JSX prop value",
+   "JSX attribute values should not contain other JSX",
+   function(node) {
+-    return node.type === "JSXElement";
++    return ["JSXElement", "JSXFragment"].includes(node.type);
+   }
+ );
+diff --git a/lib/rules/jsx-no-new-object-as-prop.js b/lib/rules/jsx-no-new-object-as-prop.js
+index 9c3bc80ddadaeaef5b7444583b81508767b166ff..4903fe93d20f5622807ba1e2e39e54990594fbf7 100644
+--- a/lib/rules/jsx-no-new-object-as-prop.js
++++ b/lib/rules/jsx-no-new-object-as-prop.js
+@@ -2,10 +2,41 @@
+ 
+ const { checkConstructor, createRule } = require("../utils/common");
+ 
++// Memoization functions that should be allowed
++const MEMOIZATION_FUNCTIONS = new Set([
++  "useMemo",
++  "useCallback",
++]);
++
++function isMemoizationCall(node) {
++  return (
++    node.type === "CallExpression" &&
++    node.callee &&
++    ((node.callee.type === "Identifier" &&
++      MEMOIZATION_FUNCTIONS.has(node.callee.name)) ||
++      (node.callee.type === "MemberExpression" &&
++        node.callee.object.type === "Identifier" &&
++        node.callee.object.name === "React" &&
++        node.callee.property.type === "Identifier" &&
++        MEMOIZATION_FUNCTIONS.has(node.callee.property.name)))
++  );
++}
++
+ module.exports = createRule(
+   "Prevent {...} as JSX prop value",
+   "JSX attribute values should not contain objects created in the same scope",
+-  function(node) {
++  function (node) {
++    // Allow memoization calls
++    if (isMemoizationCall(node)) {
++      return false;
++    }
++
++    // Flag any new expression (including built-in objects and custom classes)
++    if (node.type === "NewExpression") {
++      return true;
++    }
++
++    // Keep existing logic for object literals and Object constructor
+     return node.type === "ObjectExpression" || checkConstructor(node, "Object");
+   }
+ );
 diff --git a/lib/utils/common.js b/lib/utils/common.js
-index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782a9fc06f7 100644
+index 90415975e33ea77d161df0329d3ed2426977c404..2ef9b2a4e1997fc33730bad33ca3222995fb24b5 100644
 --- a/lib/utils/common.js
 +++ b/lib/utils/common.js
-@@ -1,11 +1,14 @@
--"use strict";
-+'use strict'
-+
-+const {get} = require('http')
-+const {type} = require('os')
-
- function createRule(description, errorMessage, isViolation) {
-   return {
-     meta: {
-       docs: {
-         description,
--        category: "",
-+        category: '',
-         recommended: true,
-       },
-       schema: [
-@@ -15,128 +18,229 @@ function createRule(description, errorMessage, isViolation) {
-             nativeAllowList: {
-               oneOf: [
-                 {
--                  enum: ["all"],
-+                  enum: ['all'],
-                 },
-                 {
--                  type: "array",
-+                  type: 'array',
-                   items: {
--                    type: "string",
-+                    type: 'string',
-                   },
+@@ -25,6 +25,41 @@ function createRule(description, errorMessage, isViolation) {
                  },
                ],
              },
 +            allowList: {
-+              type: 'array',
++              type: "array",
 +              items: {
-+                type: 'string',
++                type: "string",
 +              },
 +            },
 +            ignoreComponents: {
-+              type: 'array',
++              type: "array",
 +              items: {
-+                type: 'string',
++                type: "string",
 +              },
 +            },
 +            ignoreSources: {
-+              type: 'array',
++              type: "array",
 +              items: {
 +                oneOf: [
-+                  {type: 'string'},
++                  { type: "string" },
 +                  {
-+                    type: 'object',
++                    type: "object",
 +                    properties: {
 +                      source: {
-+                        type: 'string',
++                        type: "string",
 +                      },
 +                      importNames: {
-+                        type: 'array',
++                        type: "array",
 +                        items: {
-+                          type: 'string',
++                          type: "string",
 +                        },
 +                      },
 +                    },
@@ -72,162 +110,240 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 +              },
 +            },
            },
--          type: "object",
-+          type: 'object',
+           type: "object",
          },
-       ],
-     },
-
+@@ -33,34 +68,182 @@ function createRule(description, errorMessage, isViolation) {
+ 
      create: function (context) {
--      const { options } = context;
+       const { options } = context;
 -      const { nativeAllowList } = options[0] || {};
-+      const {options} = context
-+      const {nativeAllowList, allowList, ignoreComponents, ignoreSources} = options[0] || {}
++      const { nativeAllowList, allowList, ignoreComponents, ignoreSources } =
++        options[0] || {};
 +
-+      const allowListSet = new Set()
++      const allowListSet = new Set(allowList ?? []);
++      const ignoreComponentsSet = new Set(ignoreComponents ?? []);
 +
-+      if (allowList) {
-+        allowList.forEach(item => {
-+          allowListSet.add(item)
-+        })
-+      }
++      // Pre-compute native allow list for faster lookups
++      const nativeAllowAll = nativeAllowList === "all";
++      const nativeAllowSet = Array.isArray(nativeAllowList)
++        ? new Set(nativeAllowList.map((item) => item.toLowerCase()))
++        : null;
 +
-+      const sourceMap = new Map()
-+      const ignoreComponentsSet = new Set()
++      const sourceMap = new Map();
 +
 +      if (ignoreComponents) {
-+        ignoreComponents.forEach(component => {
-+          ignoreComponentsSet.add(component)
-+        })
++        ignoreComponents.forEach((component) => {
++          ignoreComponentsSet.add(component);
++        });
 +      }
-+
-+      const ignoreSourcesSet = new Set()
++      const ignoreSourcesMap = new Map();
 +
 +      if (ignoreSources) {
-+        ignoreSources.forEach(config => {
-+          if (typeof config === 'string') {
-+            ignoreSourcesSet.add(config)
++        for (let i = 0; i < ignoreSources.length; i++) {
++          const config = ignoreSources[i];
++          if (typeof config === "string") {
++            ignoreSourcesMap.set(config, true); // ignore all imports from this source
 +          } else {
-+            config.importNames.forEach(importName => {
-+              ignoreSourcesSet.add(hashSourceAndImportName(config.source, importName))
-+            })
++            config.importNames.forEach((importName) => {
++              let currentSet = ignoreSourcesMap.get(config.source);
++              if (!currentSet) {
++                currentSet = new Set();
++                ignoreSourcesMap.set(config.source, currentSet);
++              }
++              currentSet.add(importName);
++            });
 +          }
-+        })
++        }
 +      }
 +
        return {
 +        ImportDeclaration: function (node) {
-+          node.specifiers.forEach(specifier => {
-+            if (specifier.type === 'ImportSpecifier') {
-+              sourceMap.set(specifier.local.name, [node.source.value, specifier.imported.name])
-+            } else if (specifier.type === 'ImportDefaultSpecifier') {
-+              sourceMap.set(specifier.local.name, [node.source.value, 'default'])
++          node.specifiers.forEach((specifier) => {
++            if (specifier.type === "ImportNamespaceSpecifier") {
++              sourceMap.set(specifier.local.name, [
++                node.source.value,
++                specifier.local.name,
++              ]);
++            } else if (specifier.type === "ImportDefaultSpecifier") {
++              sourceMap.set(specifier.local.name, [
++                node.source.value,
++                specifier.local.name,
++              ]);
++            } else {
++              sourceMap.set(specifier.local.name, [
++                node.source.value,
++                specifier.imported.name,
++              ]);
 +            }
-+          })
++          });
 +        },
          JSXAttribute: function (node) {
--          if (!node.value || node.value.type !== "JSXExpressionContainer") {
--            return;
-+          if (!node.value || node.value.type !== 'JSXExpressionContainer') {
-+            return
+           if (!node.value || node.value.type !== "JSXExpressionContainer") {
+             return;
            }
-+
-           if (
-             isNativeElement(node) &&
+-          if (
+-            isNativeElement(node) &&
 -            (nativeAllowList === "all" ||
-+            (nativeAllowList === 'all' ||
-               (Array.isArray(nativeAllowList) &&
-                 nativeAllowList.find(function (nativeExclude) {
+-              (Array.isArray(nativeAllowList) &&
+-                nativeAllowList.find(function (nativeExclude) {
 -                  return (
 -                    node.name.name.toLowerCase() === nativeExclude.toLowerCase()
 -                  );
-+                  return node.name.name.toLowerCase() === nativeExclude.toLowerCase()
-                 })))
-           ) {
--            return;
-+            return
+-                })))
+-          ) {
++
++          // Cache commonly accessed properties
++          const attrName = node.name.name;
++          const parentName = node.parent.name;
++          const parentNameType = parentName.type;
++
++          // Check native element allow list
++          if (parentNameType === "JSXIdentifier") {
++            const nodeName = parentName.name;
++            const firstChar = nodeName.charAt(0);
++            if (firstChar === firstChar.toLowerCase()) {
++              if (nativeAllowAll) {
++                return;
++              }
++              if (nativeAllowSet?.has(attrName.toLowerCase())) {
++                return;
++              }
++            }
++          }
++
++          if (allowListSet.has(attrName)) {
++            return;
++          }
++
++          const componentName =
++            parentNameType === "JSXIdentifier"
++              ? parentName.name
++              : parentNameType === "JSXMemberExpression"
++              ? parentName.object.name
++              : undefined;
++
++          if (ignoreComponentsSet.has(componentName)) {
+             return;
            }
-
+ 
 -          var violationFound = false;
 -          findRelevantNodes(context, node.value.expression).forEach(function (
 -            node
 -          ) {
-+          if (allowListSet.has(node.name.name)) {
-+            return
-+          }
-+
-+          if (ignoreComponentsSet.has(node.parent.name.name)) {
-+            return
-+          }
-+
+-            if (isViolation(node)) {
 +          if (ignoreSources) {
-+            let source
-+            if (node.parent.name.type === 'JSXMemberExpression') {
-+              const object = node.parent.name.object.name
-+              const property = node.parent.name.property.name
-+              const realSource = sourceMap.get(object)
++            let source;
++            let propertyName;
 +
-+              if (realSource) { source = [realSource[0], property] }
++            if (parentNameType === "JSXMemberExpression") {
++              const objectName = parentName.object.name;
++              propertyName = parentName.property.name;
++              const objectSource = sourceMap.get(objectName);
++
++              if (objectSource) {
++                // Check for ignore this property name (e.g., Item in <Foo.Item /> where Foo is default import)
++                const [sourcePath] = objectSource;
++                const sourceConfig = ignoreSourcesMap.get(sourcePath);
++                if (sourceConfig === true || sourceConfig?.has(propertyName)) {
++                  return;
++                }
++                source = objectSource;
++              }
 +            } else {
-+              source = sourceMap.get(node.parent.name.name)
++              source = sourceMap.get(parentName.name);
 +            }
 +
-+            if (
-+              source &&
-+              (ignoreSourcesSet.has(source[0]) ||
-+                ignoreSourcesSet.has(hashSourceAndImportName(source[0], source[1])))
-+            ) {
-+              return
++            if (source) {
++              const [sourcePath, importName] = source;
++              const ignoreConfig = ignoreSourcesMap.get(sourcePath);
++
++              // Check for ignore all imports from this source
++              if (ignoreConfig === true) {
++                return;
++              }
++
++              // Check for ignore this import name from this source
++              if (ignoreConfig?.has(importName)) {
++                return;
++              }
++
++              // For member expressions, also check the property name
++              if (
++                propertyName &&
++                ignoreSourcesMap.get(source[0])?.has(propertyName)
++              ) {
++                return;
++              }
++
++              // Check if source starts with any configured source prefix
++              for (const [
++                ignoreSource,
++                ignoreImportNames,
++              ] of ignoreSourcesMap) {
++                const prefix = ignoreSource + "/";
++                if (sourcePath.startsWith(prefix)) {
++                  if (ignoreImportNames === true) {
++                    return;
++                  }
++                  if (ignoreImportNames.has(importName)) {
++                    return;
++                  }
++                  // For member expressions, also check the property name
++                  if (propertyName && ignoreImportNames.has(propertyName)) {
++                    return;
++                  }
++                }
++              }
 +            }
 +          }
 +
-+          var violationFound = false
-+          findRelevantNodes(context, node.value.expression).forEach(function (node) {
-             if (isViolation(node)) {
--              violationFound = true;
++          let violationFound = false;
++          const relevantNodes = findRelevantNodes(
++            context,
++            node.value.expression
++          );
++          for (const relevantNode of relevantNodes) {
++            if (isViolation(relevantNode)) {
+               violationFound = true;
 -              context.report(node, errorMessage);
-+              violationFound = true
-+              context.report(node, errorMessage)
++              context.report(relevantNode, errorMessage);
              }
 -          });
--          return violationFound;
-+          })
-+          return violationFound
++          }
+           return violationFound;
          },
--      };
-+      }
-     },
--  };
-+  }
+       };
+@@ -69,71 +252,74 @@ function createRule(description, errorMessage, isViolation) {
  }
-
+ 
  function findRelevantNodes(context, node) {
++  const nodes = [];
++  const sourceCode = context.sourceCode || context.getSourceCode();
++
    function _findRelevantNodes(node) {
 -    if (node.type === "Literal") {
-+    if (node.type === 'Literal') {
-       // we have found a Literal (ex. 'foo', 1, false), bail
--      return;
-+      return
+-      // we have found a Literal (ex. 'foo', 1, false), bail
++    const nodeType = node.type;
++
++    // Fast path for literals
++    if (nodeType === "Literal") {
+       return;
      }
 -    if (node.type === "Identifier") {
 -      const sourceCode = context.sourceCode || context.getSourceCode();
--      const scope = sourceCode.getScope
--        ? sourceCode.getScope(node)
--        : context.getScope();
-+    if (node.type === 'Identifier') {
-+      const sourceCode = context.sourceCode || context.getSourceCode()
-+      const scope = sourceCode.getScope ? sourceCode.getScope(node) : context.getScope()
-
-       var variable = scope.variables.find(function (variable) {
++
++    if (nodeType === "Identifier") {
+       const scope = sourceCode.getScope
+         ? sourceCode.getScope(node)
+         : context.getScope();
+ 
+-      var variable = scope.variables.find(function (variable) {
 -        return variable.name === node.name;
 -      });
-+        return variable.name === node.name
-+      })
-       if (variable) {
-         variable.references.forEach(function (reference) {
+-      if (variable) {
+-        variable.references.forEach(function (reference) {
 -          if (!reference.identifier.parent) return;
-+          if (!reference.identifier.parent) return
-           switch (reference.identifier.parent.type) {
+-          switch (reference.identifier.parent.type) {
 -            case "AssignmentExpression":
 -              nodes.push(reference.identifier.parent.right);
 -              break;
@@ -237,78 +353,81 @@ index 90415975e33ea77d161df0329d3ed2426977c404..aa02006b46bb6a5d9143d8b86679e782
 -            case "AssignmentPattern":
 -              nodes.push(reference.identifier.parent.right);
 -              break;
-+            case 'AssignmentExpression':
-+              nodes.push(reference.identifier.parent.right)
-+              break
-+            case 'VariableDeclarator':
-+              nodes.push(reference.identifier.parent.init)
-+              break
-+            case 'AssignmentPattern':
-+              nodes.push(reference.identifier.parent.right)
-+              break
++      const nodeName = node.name;
++      const variables = scope.variables;
++
++      // Optimized variable lookup
++      for (let i = 0; i < variables.length; i++) {
++        if (variables[i].name === nodeName) {
++          const references = variables[i].references;
++          for (let j = 0; j < references.length; j++) {
++            const parent = references[j].identifier.parent;
++            if (!parent) continue;
++
++            const parentType = parent.type;
++            if (parentType === "AssignmentExpression") {
++              nodes.push(parent.right);
++            } else if (parentType === "VariableDeclarator") {
++              nodes.push(parent.init);
++            } else if (parentType === "AssignmentPattern") {
++              nodes.push(parent.right);
++            }
            }
 -        });
-+        })
++          break;
++        }
        }
--      return;
-+      return
+       return;
      }
 -    if (node.type === "LogicalExpression") {
 -      return _findRelevantNodes(node.left) || _findRelevantNodes(node.right);
-+    if (node.type === 'LogicalExpression') {
-+      return _findRelevantNodes(node.left) || _findRelevantNodes(node.right)
++
++    if (nodeType === "LogicalExpression") {
++      _findRelevantNodes(node.left);
++      _findRelevantNodes(node.right);
++      return;
      }
 -    if (node.type === "ConditionalExpression") {
 -      return (
 -        _findRelevantNodes(node.consequent) ||
 -        _findRelevantNodes(node.alternate)
 -      );
-+    if (node.type === 'ConditionalExpression') {
-+      return _findRelevantNodes(node.consequent) || _findRelevantNodes(node.alternate)
++
++    if (nodeType === "ConditionalExpression") {
++      _findRelevantNodes(node.consequent);
++      _findRelevantNodes(node.alternate);
++      return;
      }
-
--    nodes.push(node);
-+    nodes.push(node)
+ 
+     nodes.push(node);
    }
-
+ 
 -  var nodes = [];
--  _findRelevantNodes(node);
--  return nodes;
-+  var nodes = []
-+  _findRelevantNodes(node)
-+  return nodes
+   _findRelevantNodes(node);
+   return nodes;
  }
-
+ 
  function checkConstructor(node, className) {
-   if (node.callee && node.callee.name === className) {
+-  if (node.callee && node.callee.name === className) {
 -    if (["NewExpression", "CallExpression"].indexOf(node.type) !== -1) {
 -      return true;
-+    if (['NewExpression', 'CallExpression'].indexOf(node.type) !== -1) {
-+      return true
-     }
-   }
- }
-
- function isNativeElement(node) {
+-    }
+-  }
+-}
+-
+-function isNativeElement(node) {
 -  if (node.parent.name.type !== "JSXIdentifier") {
 -    return false;
-+  if (node.parent.name.type !== 'JSXIdentifier') {
-+    return false
-   }
+-  }
 -  const nodeName = node.parent.name.name;
 -  const firstChar = nodeName.charAt(0);
 -  return firstChar === firstChar.toLowerCase();
-+  const nodeName = node.parent.name.name
-+  const firstChar = nodeName.charAt(0)
-+  return firstChar === firstChar.toLowerCase()
-+}
-+
-+function hashSourceAndImportName(source, importName) {
-+  return source + '%%%' + importName
++  const nodeType = node.type;
++  return (
++    (nodeType === "NewExpression" || nodeType === "CallExpression") &&
++    node.callee &&
++    node.callee.name === className
++  );
  }
-
+ 
  module.exports = {
-   createRule,
-   checkConstructor,
--};
-+}

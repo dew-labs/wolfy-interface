@@ -1,0 +1,10 @@
+---
+alwaysApply: false
+---
+
+# Security Rules
+
+## Recommended
+
+- Implement input sanitization to prevent XSS attacks
+- Use DOMPurify for sanitizing HTML content

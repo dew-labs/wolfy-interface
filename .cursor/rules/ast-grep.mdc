@@ -1,0 +1,6 @@
+---
+description: Using ast-grep for superior code search, syntax-aware and structural matching
+alwaysApply: true
+---
+
+MANDATORY SEARCH TOOL: ALWAYS use `sg` (ast-grep) as FIRST OPTION for ANY code search, syntax-aware or structural matching, or even grepping task. For example: `sg -p <pattern> -l <language>`. ONLY use `rg` (ripgrep), `grep` if `sg` fails or if explicitly requested. This is OBLIGATORY - no exceptions. `sg` is way superior to plain text `rg` or `grep`.

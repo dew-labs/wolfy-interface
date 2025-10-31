@@ -41,7 +41,7 @@ export default function useSearch<
   })
 
   return [
-    value as SearchParamOut[SearchParamKey],
+    value as Memoized<SearchParamOut[SearchParamKey]>,
     useSetSearch(routeId, name, defaultOptions),
   ] as const
 }

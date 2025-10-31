@@ -1,7 +1,6 @@
 ---
 description: Build memory bank which help agent have memory and aware of what it learned from the past
-globs:
-alwaysApply: false
+globs: **/*
 ---
 # Memory Bank
 

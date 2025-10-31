@@ -1,7 +1,6 @@
 ---
 description: Writing readable, maintainable code
 globs: **/*
-alwaysApply: false
 ---
 # Code Style
 
@@ -9,8 +8,12 @@ alwaysApply: false
 
 + The filename should match the functionality
 + Follow SOLID principles, DRY, YAGNI, KISS, etc.
++ Favor early returns and fail-fast (fail-early) over nested if statements to reduce code branch complexity and improve readability.
++ Favor defensive programming.
++ Favor composition over inheritance.
 + Prioritize reusability and modularity over code duplication. Use abstraction to extract core logic and hide complexity, making code flexible and generic. Keep components focused on a single responsibility.
 + Use functional and declarative programming patterns; avoid classes
++ Use exception (throw error) only for truly exceptional cases (the error you cannot handle/don't know how to handle or recover from). Use the Result Pattern for errors you know how to handle, making the error handling more explicit and obvious. For asynchronous operations, use the Promise rejection but not with an Error object.
 + Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 + Document complex types with JSDoc
 + Separate concerns: presentational components, business logic, side effects
@@ -26,3 +29,4 @@ alwaysApply: false
 ## Custom
 
 + You don't have to import libraries that are already auto-imported by `unplugin-auto-import` (read `auto-imports.d.ts` for the list).
++ Always validate the data coming from the API using `arktype`, DO NOT cast or assume the data is valid

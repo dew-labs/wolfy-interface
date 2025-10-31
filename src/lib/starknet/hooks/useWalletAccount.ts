@@ -19,7 +19,7 @@ export default function useWalletAccount() {
     setWalletChainId(undefined)
     setAccountAddress('')
     setShouldReconnect(false)
-  }, [setShouldReconnect, setWalletChainId, setAccountAddress])
+  }, [setWalletAccount, setWalletChainId, setAccountAddress, setShouldReconnect])
 
   return [walletAccount, disconnect] as const
 }

@@ -1,6 +1,6 @@
 ---
 description: Working with Tailwind CSS
-globs: **/*.htm, **/*.html, **/*.tsx, **/*.jsx, **/*.ctsx, **/*.cjsx, **/*.mtsx, **/*.mjsx, **/*.vue, **/*.svelte
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx,**/*.cjs,**/*.cjsx,**/*.cts,**/*.ctsx,**/*.mjs,**/*.mjsx,**/*.mts,**/*.mtsx,**/*.vue,**/*.svelte, **/*htm, **/*.html
 ---
 # Tailwind CSS
 
@@ -10,5 +10,3 @@ globs: **/*.htm, **/*.html, **/*.tsx, **/*.jsx, **/*.ctsx, **/*.cjsx, **/*.mtsx,
 + Avoid custom CSS unless absolutely necessary
 
 ## Custom
-
-<!-- Add project-specific Tailwind CSS rules here -->

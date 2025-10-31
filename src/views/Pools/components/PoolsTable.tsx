@@ -271,18 +271,19 @@ export default memo(function PoolsTable() {
     })
   }, [extendedMarkets, sortDescriptor])
 
-  const handleOpenModal = useCallback((marketTokenAddress: string, action: 'buy' | 'sell') => {
-    setSelectedMarketAddress(marketTokenAddress)
-    setOrderType(action)
-    setIsModalOpen(true)
-  }, [])
-
-  const latestHandleOpenModal = useLatest(handleOpenModal)
+  const handleOpenModal = useCallback(
+    (marketTokenAddress: string, action: 'buy' | 'sell') => {
+      setSelectedMarketAddress(marketTokenAddress)
+      setOrderType(action)
+      setIsModalOpen(true)
+    },
+    [setSelectedMarketAddress, setOrderType, setIsModalOpen],
+  )
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
     setSelectedMarketAddress(null)
-  }, [])
+  }, [setIsModalOpen, setSelectedMarketAddress])
 
   const renderCell = useCallback((market: ExtendedMarketData, columnKey: React.Key) => {
     const key = String(columnKey) as keyof ExtendedMarketData
@@ -325,7 +326,7 @@ export default memo(function PoolsTable() {
             size='sm'
             color='success'
             onPress={() => {
-              latestHandleOpenModal.current(market.marketTokenAddress, 'buy')
+              handleOpenModal(market.marketTokenAddress, 'buy')
             }}
           >
             Buy
@@ -334,7 +335,7 @@ export default memo(function PoolsTable() {
             size='sm'
             color='danger'
             onPress={() => {
-              latestHandleOpenModal.current(market.marketTokenAddress, 'sell')
+              handleOpenModal(market.marketTokenAddress, 'sell')
             }}
           >
             Sell

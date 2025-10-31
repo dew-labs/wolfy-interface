@@ -385,7 +385,7 @@ describe('attempt type tests', () => {
     const emailPattern = type('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/')
     const defaultEmail = 'default@example.com'
     const emailOrDefault = attempt(emailPattern, defaultEmail)
-    const emailOrFn = attempt(emailPattern, (_value, _ctx) => 'fallback@example.com')
+    const emailOrFn = attempt(emailPattern, (_value, _ctx) => 'fallback@example.com' as const)
 
     it('should handle valid patterns', () => {
       expectTypeOf(emailOrDefault('test@example.com')).toBeString()
@@ -514,7 +514,7 @@ describe('attempt type tests', () => {
         // Test that ctx.errors contains all validation errors
         expectTypeOf(ctx.errors).toExtend<type.errors>()
 
-        return {name: 'default', age: 0, email: 'default@test.com'}
+        return {name: 'default', age: 0, email: 'default@test.com' as const}
       })
 
       expectTypeOf(withErrors({name: 123, age: 'invalid', email: 'invalid'})).toExtend<{

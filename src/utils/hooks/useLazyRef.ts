@@ -4,5 +4,5 @@
 export function useLazyRef<T>(getValue: () => T) {
   // eslint-disable-next-line @eslint-react/naming-convention/use-state -- not needed
   const [value] = useState<T>(getValue)
-  return useRef<T>(value)
+  return useRef(value)
 }

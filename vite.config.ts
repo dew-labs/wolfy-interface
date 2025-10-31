@@ -104,39 +104,78 @@ export function getConfig(mode: string): UserConfig {
   const shouldEnableProfile = process.env.ENABLE_PROFILE === 'true' && mode === 'development'
   // END: Verify the environment variables
 
-  const optimizeLocales = pluginOptimizeLocales.vite({
-    locales: ['en-US'],
-  })
-
-  if (Array.isArray(optimizeLocales)) {
-    optimizeLocales.forEach(plugin => {
-      plugin.enforce = 'pre' as const
-    })
-  } else {
-    optimizeLocales.enforce = 'pre' as const
-  }
-
   const plugins: PluginOption[] = [
     patchCssModules(),
-    optimizeLocales,
+    {
+      ...pluginOptimizeLocales.vite({
+        locales: ['en-US'],
+      }),
+      enforce: 'pre' as const,
+    },
     paraglideVitePlugin({project: './project.inlang', outdir: './src/paraglide'}),
     AutoImport({
       include: [...globs.SCRIPT],
       ignore: [],
       imports: [
         {
+          '@/utils/hooks/useStableCallback': [['default', 'useStableCallback']],
+        },
+        {
           '@/utils/react/deepMemo': [['default', 'deepMemo']],
+        },
+        {
+          '@/utils/react/markAsMemoized': [['default', 'markAsMemoized']],
+        },
+        {
+          '@/utils/react/markAsStable': [['default', 'markAsStable']],
         },
         {
           'tiny-invariant': [['default', 'invariant']],
         },
         'react',
         {
-          react: ['Suspense', 'createContext', 'use', 'Fragment'],
+          react: [
+            'use',
+            'act',
+            'addTransitionType',
+            'cache',
+            'cacheSignal',
+            'createContext',
+            'Suspense',
+            'Fragment',
+            'ViewTransition',
+            'Activity',
+            'Profiler',
+            'useEffectEvent',
+            'useOptimistic',
+            'useDebugValue',
+          ],
+        },
+        {
+          'react-dom': [
+            'flushSync',
+            'createPortal',
+            'preconnect',
+            'prefetchDNS',
+            'preinit',
+            'preinitModule',
+            'preload',
+            'preloadModule',
+          ],
         },
         {
           from: 'react',
           imports: [
+            'MemoizedValue',
+            'MemoizedCallback',
+            'Memoized',
+            'MemoizedProps',
+            'StableValue',
+            'StableCallback',
+            'Stable',
+            'StableDispatchSetStateAction',
+            'UnwrapMemoized',
+            'UnwrapStable',
             'SyntheticEvent', // base of all events, use when unsure about event type
             'ReactEventHandler',
             'UIEventHandler',
@@ -173,6 +212,11 @@ export function getConfig(mode: string): UserConfig {
           jotai: ['useStore'],
         },
         {
+          from: 'jotai',
+          imports: ['Atom', 'Getter', 'Setter'],
+          type: true,
+        },
+        {
           'jotai-effect': ['atomEffect'],
         },
         {
@@ -180,6 +224,12 @@ export function getConfig(mode: string): UserConfig {
         },
         {
           'jotai-mutative': ['atomWithMutative', 'withMutative', 'useMutativeAtom'],
+        },
+        {
+          'jotai-location': ['atomWithLocation', 'atomWithSearchParams', 'atomWithHash'],
+        },
+        {
+          'use-mutative': ['useMutative', 'useMutativeReducer'],
         },
         {
           clsx: ['clsx'],
@@ -316,9 +366,7 @@ export function getConfig(mode: string): UserConfig {
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
-    tsconfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
+    tsconfigPaths({}),
     partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
     isDevMode &&
       turboConsole({
@@ -552,7 +600,10 @@ export function getConfig(mode: string): UserConfig {
     ssr: {
       noExternal: ['react-use'],
     },
-    define: {__COMMIT_HASH__: commitHashJson},
+    define: {
+      global: 'globalThis',
+      __COMMIT_HASH__: commitHashJson,
+    },
     build: {
       sourcemap: shouldUseSourceMap,
       // manifest: true,
@@ -564,16 +615,11 @@ export function getConfig(mode: string): UserConfig {
     },
     esbuild: {
       supported: {
+        'bigint': true,
         'top-level-await': true,
       },
     },
-    optimizeDeps: {
-      esbuildOptions: {
-        target: 'esnext',
-        define: {global: 'globalThis'},
-        supported: {'bigint': true, 'top-level-await': true},
-      },
-    },
+    optimizeDeps: {},
     css: {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
       devSourcemap: shouldUseSourceMap,

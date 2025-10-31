@@ -1,0 +1,11 @@
+---
+description: Writing React Native code (React Native components, React Native hooks,...)
+globs: **/use*.?(c|m)[jt]s?(x),**/*.jsx,**/*.tsx,**/*.cjsx,**/*.cjsx,**/*.mjsx,**/*.mtsx,**/use*.js,**/use*.jsx,**/use*.ts,**/use*.tsx,**/use*.cjs,**/use*.cjsx,**/use*.cts,**/use*.ctsx,**/use*.mjs,**/use*.mjsx,**/use*.mts,**/use*.mtsx
+alwaysApply: false
+---
+
+# React Native
+
+## Recommended
+
+- Always prefer a separated screen instead of conditional rendering

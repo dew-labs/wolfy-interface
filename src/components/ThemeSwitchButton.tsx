@@ -5,24 +5,19 @@ import useTheme from '@/lib/theme/useTheme'
 
 export default memo(function ThemeSwitchButton() {
   const [theme, setTheme] = useTheme()
-  const latestTheme = useLatest(theme)
 
   const handleSwitchTheme = useCallback(() => {
-    const nextTheme = (() => {
-      if (latestTheme.current === Theme.Dark) return Theme.Light
-      if (latestTheme.current === Theme.Light) return Theme.System
-      return Theme.Dark
-    })()
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not supported in all browsers
-    if (!document.startViewTransition) {
-      setTheme(nextTheme)
-      return
+    function circleTheme() {
+      setTheme(currentTheme => {
+        if (currentTheme === Theme.Dark) return Theme.Light
+        if (currentTheme === Theme.Light) return Theme.System
+        return Theme.Dark
+      })
     }
 
-    document.startViewTransition(() => {
-      setTheme(nextTheme)
-    })
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not supported in all browsers
+    if (document.startViewTransition) document.startViewTransition(circleTheme)
+    else circleTheme()
   }, [setTheme])
 
   const icon = (() => {

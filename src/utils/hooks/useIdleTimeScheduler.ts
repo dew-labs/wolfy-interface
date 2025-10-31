@@ -13,9 +13,12 @@ export default function useIdleTimeScheduler() {
     }
   }, [])
 
-  return {
-    schedule: scheduler.current.schedule,
-    clear: scheduler.current.clear,
-    cancel: scheduler.current.cancel,
-  }
+  return useMemo(
+    () => ({
+      schedule: scheduler.current.schedule,
+      clear: scheduler.current.clear,
+      cancel: scheduler.current.cancel,
+    }),
+    [],
+  )
 }

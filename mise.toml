@@ -1,0 +1,7 @@
+[tools]
+node = "22"
+
+[hooks]
+enter = "mise i -q"
+
+[settings]

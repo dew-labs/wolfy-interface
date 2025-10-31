@@ -1,5 +1,5 @@
 ---
-description: Writing code
+description: Writing clean code
 globs: **/*
 ---
 <!-- Source: https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29 -->
@@ -107,5 +107,3 @@ Code is clean if it can be understood easily - by everyone on the team. Clean co
 6. Opacity. The code is hard to understand.
 
 ## Custom
-
-<!-- Add project-specific clean code rules here -->

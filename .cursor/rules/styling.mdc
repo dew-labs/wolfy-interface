@@ -1,15 +1,21 @@
 ---
-description: Writing CSS, PostCSS, SCSS, SASS
-globs: **/*.scss, **/*.sass, **/*.css, **/*.pcss,
+description: Writing CSS, SCSS
+globs: **/*.scss,**/*.sass,**/*.css,**/*.pcss
 ---
 # Styling
+
+## Maintenance Philosophy
+
++ Systematic unit conversion (px to rem) across the entire codebase improves both maintainability and accessibility
++ Prefer consistent patterns over introducing new methodologies when working with existing code
++ When working with large-scale changes that are difficult to validate visually, make only necessary changes
 
 ## Recommended
 
 + Use CSS logical properties instead of physical properties (e.g., `inline-size` instead of `width`, `block-size` instead of `height`) for better RTL/LTR support
 + Use rem units for most measurements (margins, paddings, font sizes, borders, etc.) for better accessibility and scalability
 + Keep media query breakpoints in pixels for consistent behavior across devices
-+ Use CSS variables for theming and consistent values across components
++ Use CSS variables (desgin tokens) for theming and consistent values across components
 
 ## Custom
 
@@ -24,9 +30,3 @@ globs: **/*.scss, **/*.sass, **/*.css, **/*.pcss,
 + Use SCSS modules for component-scoped styles
 + Prioritize consistent measurement units throughout the codebase, even if it means having some unusual-looking numerical values
 + When making styling changes that affect multiple files, preserve existing patterns and minimize the scope of changes to reduce validation overhead
-
-## Maintenance Philosophy
-
-+ Systematic unit conversion (px to rem) across the entire codebase improves both maintainability and accessibility
-+ Prefer consistent patterns over introducing new methodologies when working with existing code
-+ When working with large-scale changes that are difficult to validate visually, make only necessary changes

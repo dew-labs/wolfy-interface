@@ -6,30 +6,41 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const Activity: typeof import('react')['Activity']
   const Fragment: typeof import('react')['Fragment']
   const Icon: typeof import('@iconify/react')['Icon']
   const InfiniteQueryObserver: typeof import('@tanstack/react-query')['InfiniteQueryObserver']
   const Link: typeof import('@tanstack/react-router')['Link']
   const Outlet: typeof import('@tanstack/react-router')['Outlet']
+  const Profiler: typeof import('react')['Profiler']
   const QueriesObserver: typeof import('@tanstack/react-query')['QueriesObserver']
   const QueryErrorResetBoundary: typeof import('@tanstack/react-query')['QueryErrorResetBoundary']
   const QueryObserver: typeof import('@tanstack/react-query')['QueryObserver']
   const Suspense: typeof import('react')['Suspense']
+  const ViewTransition: typeof import('react')['ViewTransition']
+  const act: typeof import('react')['act']
+  const addTransitionType: typeof import('react')['addTransitionType']
   const atom: typeof import('jotai')['atom']
   const atomEffect: typeof import('jotai-effect')['atomEffect']
   const atomFamily: typeof import('jotai/utils')['atomFamily']
   const atomWithDefault: typeof import('jotai/utils')['atomWithDefault']
-  const atomWithHash: typeof import('jotai/utils')['atomWithHash']
+  const atomWithHash: typeof import('jotai-location')['atomWithHash']
+  const atomWithLocation: typeof import('jotai-location')['atomWithLocation']
   const atomWithMutative: typeof import('jotai-mutative')['atomWithMutative']
   const atomWithObservable: typeof import('jotai/utils')['atomWithObservable']
   const atomWithReducer: typeof import('jotai/utils')['atomWithReducer']
   const atomWithReset: typeof import('jotai/utils')['atomWithReset']
+  const atomWithSearchParams: typeof import('jotai-location')['atomWithSearchParams']
   const atomWithStorage: typeof import('jotai/utils')['atomWithStorage']
+  const cache: typeof import('react')['cache']
+  const cacheSignal: typeof import('react')['cacheSignal']
   const clsx: typeof import('clsx')['clsx']
   const createContext: typeof import('react')['createContext']
   const createJSONStorage: typeof import('jotai/utils')['createJSONStorage']
+  const createPortal: typeof import('react-dom')['createPortal']
   const createRef: typeof import('react')['createRef']
   const deepMemo: typeof import('@/utils/react/deepMemo')['default']
+  const flushSync: typeof import('react-dom')['flushSync']
   const focusAtom: typeof import('jotai-optics')['focusAtom']
   const focusManager: typeof import('@tanstack/react-query')['focusManager']
   const forwardRef: typeof import('react')['forwardRef']
@@ -40,9 +51,17 @@ declare global {
   const keepPreviousData: typeof import('@tanstack/react-query')['keepPreviousData']
   const lazy: typeof import('react')['lazy']
   const loadable: typeof import('jotai/utils')['loadable']
+  const markAsMemoized: typeof import('@/utils/react/markAsMemoized')['default']
+  const markAsStable: typeof import('@/utils/react/markAsStable')['default']
   const memo: typeof import('react')['memo']
   const notifyManager: typeof import('@tanstack/react-query')['notifyManager']
   const onlineManager: typeof import('@tanstack/react-query')['onlineManager']
+  const preconnect: typeof import('react-dom')['preconnect']
+  const prefetchDNS: typeof import('react-dom')['prefetchDNS']
+  const preinit: typeof import('react-dom')['preinit']
+  const preinitModule: typeof import('react-dom')['preinitModule']
+  const preload: typeof import('react-dom')['preload']
+  const preloadModule: typeof import('react-dom')['preloadModule']
   const queryOptions: typeof import('@tanstack/react-query')['queryOptions']
   const selectAtom: typeof import('jotai/utils')['selectAtom']
   const skipToken: typeof import('@tanstack/react-query')['skipToken']
@@ -61,6 +80,7 @@ declare global {
   const useDebugValue: typeof import('react')['useDebugValue']
   const useDeferredValue: typeof import('react')['useDeferredValue']
   const useEffect: typeof import('react')['useEffect']
+  const useEffectEvent: typeof import('react')['useEffectEvent']
   const useHydrateAtoms: typeof import('jotai/utils')['useHydrateAtoms']
   const useId: typeof import('react')['useId']
   const useImperativeHandle: typeof import('react')['useImperativeHandle']
@@ -80,8 +100,11 @@ declare global {
   const useMemo: typeof import('react')['useMemo']
   const useMutation: typeof import('@tanstack/react-query')['useMutation']
   const useMutationState: typeof import('@tanstack/react-query')['useMutationState']
+  const useMutative: typeof import('use-mutative')['useMutative']
   const useMutativeAtom: typeof import('jotai-mutative')['useMutativeAtom']
+  const useMutativeReducer: typeof import('use-mutative')['useMutativeReducer']
   const useNavigate: typeof import('@tanstack/react-router')['useNavigate']
+  const useOptimistic: typeof import('react')['useOptimistic']
   const useParams: typeof import('@tanstack/react-router')['useParams']
   const useParentMatches: typeof import('@tanstack/react-router')['useParentMatches']
   const usePrefetchInfiniteQuery: typeof import('@tanstack/react-query')['usePrefetchInfiniteQuery']
@@ -99,6 +122,7 @@ declare global {
   const useRouterState: typeof import('@tanstack/react-router')['useRouterState']
   const useSearch: typeof import('@tanstack/react-router')['useSearch']
   const useSetAtom: typeof import('jotai')['useSetAtom']
+  const useStableCallback: typeof import('@/utils/hooks/useStableCallback')['default']
   const useState: typeof import('react')['useState']
   const useStore: typeof import('jotai')['useStore']
   const useSuspenseInfiniteQuery: typeof import('@tanstack/react-query')['useSuspenseInfiniteQuery']
@@ -113,8 +137,11 @@ declare global {
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { SyntheticEvent, ReactEventHandler, UIEventHandler, MouseEventHandler, TouchEventHandler, PointerEventHandler, ChangeEventHandler, KeyboardEventHandler, FormEventHandler, ComponentProps, ComponentPropsWithRef, ComponentPropsWithoutRef, CustomComponentPropsWithRef, PropsWithoutRef, PropsWithChildren, ComponentRef, Ref, RefObject, RefCallback, Dispatch, SetStateAction, ReactNode, JSX, ComponentType, ElementType, ReactElement, CSSProperties } from 'react'
+  export type { MemoizedValue, MemoizedCallback, Memoized, MemoizedProps, StableValue, StableCallback, Stable, StableDispatchSetStateAction, UnwrapMemoized, UnwrapStable, SyntheticEvent, ReactEventHandler, UIEventHandler, MouseEventHandler, TouchEventHandler, PointerEventHandler, ChangeEventHandler, KeyboardEventHandler, FormEventHandler, ComponentProps, ComponentPropsWithRef, ComponentPropsWithoutRef, CustomComponentPropsWithRef, PropsWithoutRef, PropsWithChildren, ComponentRef, Ref, RefObject, RefCallback, Dispatch, SetStateAction, ReactNode, JSX, ComponentType, ElementType, ReactElement, CSSProperties } from 'react'
   import('react')
+  // @ts-ignore
+  export type { Atom, Getter, Setter } from 'jotai'
+  import('jotai')
   // @ts-ignore
   export type { QueryClient, UseQueryResult, UseInfiniteQueryResult, UseQueryOptions, UseInfiniteQueryOptions } from '@tanstack/react-query'
   import('@tanstack/react-query')

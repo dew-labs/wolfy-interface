@@ -15,6 +15,7 @@ import {
 } from '@heroui/react'
 import {type Key} from '@react-types/shared'
 import {toast} from 'sonner'
+import selfResettableComponent from 'src/utils/reset-component/selfResettableComponent'
 import invariant from 'tiny-invariant'
 import {OrderType} from 'wolfy-sdk'
 
@@ -60,7 +61,6 @@ import convertTokenAmountToUsd from '@/lib/trade/utils/price/convertTokenAmountT
 import errorMessageOrUndefined from '@/utils/errors/errorMessageOrUndefined'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format} from '@/utils/numbers/formatNumber'
-import createResettableComponent from '@/utils/reset-component/createResettableComponent'
 
 import useAcceptablePriceImpact from './hooks/useAcceptablePriceImpact'
 import useAvailableMarketsForIndexToken from './hooks/useAvailableMarketsForIndexToken'
@@ -101,8 +101,8 @@ const DEFAULT_AVAILABLE_MARKETS: MarketData[] = []
 const selectPositionsInfoViaStringRepresentation = (data: PositionsInfoData) =>
   data.positionsInfoViaStringRepresentation
 
-const Controller = createResettableComponent(({reset}) => {
-  const latestReset = useLatest(reset)
+const Controller = selfResettableComponent(({reset}) => {
+  const stableReset = useStableCallback(reset)
   const [chainId] = useChainId()
   const latestChainId = useRef(chainId)
   const queryClient = useQueryClient()
@@ -746,7 +746,7 @@ const Controller = createResettableComponent(({reset}) => {
           void queryClient.invalidateQueries({
             queryKey: ['orders', latestChainId.current, latestAccountAddress.current],
           })
-          latestReset.current()
+          stableReset()
           return (
             <>
               Order placed.

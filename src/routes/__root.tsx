@@ -72,7 +72,7 @@ function ErrorBoundaryFallback({error, resetErrorBoundary}: ReadonlyDeep<Fallbac
   )
 }
 
-const DevTool = deepMemo(function DevTool({children}: PropsWithChildren) {
+const DevTool = deepMemo<PropsWithChildren>()()(function DevTool({children}) {
   if (!ENABLE_DEVTOOLS) return null
 
   return (

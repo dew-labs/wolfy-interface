@@ -170,15 +170,21 @@ export default memo(function TradesTab() {
     }))
   }, [marketsData])
 
+  interface MarketOption {
+    label: string
+    value: string | boolean
+    indexTokenAddress?: string
+  }
+
   const marketOptions = useMemo(() => {
     return {
       Direction: [
         {label: 'Long', value: true},
         {label: 'Short', value: false},
         {label: 'Swap', value: '--swap--'},
-      ],
-      Markets: markets,
-    } as const
+      ] as MarketOption[],
+      Markets: markets as MarketOption[],
+    }
   }, [markets])
 
   // FORMAT MARKET USD
@@ -328,15 +334,15 @@ export default memo(function TradesTab() {
               scrollShadowProps={SCROLL_SHADOW_PROPS}
               items={Array.from(Object.entries(marketOptions))}
             >
-              {([category, markets]) => (
+              {([category, items]: [string, MarketOption[]]) => (
                 <SelectSection
                   key={category}
                   title={category}
                   classNames={SELECT_SECTION_CLASS_NAMES}
                 >
-                  {markets.map(action => (
-                    <SelectItem key={String(action.value)} className='text-nowrap'>
-                      {action.label}
+                  {items.map(item => (
+                    <SelectItem key={String(item.value)} className='text-nowrap'>
+                      {item.label}
                     </SelectItem>
                   ))}
                 </SelectSection>

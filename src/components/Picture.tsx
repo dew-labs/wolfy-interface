@@ -86,7 +86,7 @@ const PRELOAD_PRIORITY = ['avif', 'webp', 'png', 'jpeg', 'gif'] as const // mime
  * @param props - Component's properties {@link PictureProps}
  * @returns Picture component
  */
-export default memo(function Picture({src, sizes, preload = false, ...rest}: PictureProps) {
+export default memo<PictureProps>(function Picture({src, sizes, preload = false, ...rest}) {
   const id = useId()
 
   const srcs = Array.isArray(src) ? src : [src]

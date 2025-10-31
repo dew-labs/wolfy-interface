@@ -1,6 +1,6 @@
 ---
 description: Writing Typescript
-globs: **/*.ts, **/*.cts, **/*.mts, **/*.tsx, **/*.ctsx, **/*.mtsx
+globs: **/*.ts,**/*.cts,**/*.mts,**/*.tsx,**/*.ctsx,**/*.mtsx
 ---
 # Typescript Rules
 
@@ -14,6 +14,7 @@ globs: **/*.ts, **/*.cts, **/*.mts, **/*.tsx, **/*.ctsx, **/*.mtsx
 + Avoid enums; use const objects with 'as const' assertion, then export the same const as type: `export type <const name> = (typeof <const name>)[keyof typeof <const name>]`
 + Avoid ambiguous union types, use discriminated unions when necessary
 + Use advanced TypeScript features (type guards, mapped types, conditional types, utility types)
++ Use mapped types for creating variations of existing types dynamically
 + Use strict TypeScript mode
 + Prefer type inference over explicit type annotations when possible
 + Use type utilities to enhance type safety and validation
@@ -36,6 +37,10 @@ globs: **/*.ts, **/*.cts, **/*.mts, **/*.tsx, **/*.ctsx, **/*.mtsx
 + Use `use` prefix for custom hooks.
 + When exporting default, the variable name should be the same as the file name.
 
-## Custom
+## Code Style
 
-<!-- Add project-specific Typescript rules here -->
++ Use 2-spaces for indentation.
++ Use single quotes for strings.
++ Omit semicolons unless required for disambiguation
+
+## Custom

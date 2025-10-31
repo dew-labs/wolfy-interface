@@ -32,10 +32,6 @@ $heroUiForeground: hsl(
     var(--heroui-primary-foreground-opacity, var(--tw-text-opacity))
 );
 
-* {
-  outline-color: $heroUiPrimary;
-}
-
 .visually-hidden:not(:focus, :active, :focus-within),
 .strict-visually-hidden {
   @include utils.visually-hidden;

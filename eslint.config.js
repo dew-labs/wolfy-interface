@@ -35,7 +35,7 @@ import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
 // import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
 import pluginReact from 'eslint-plugin-react'
-// import pluginReactCompiler from 'eslint-plugin-react-compiler'
+import pluginReactCompiler from 'eslint-plugin-react-compiler'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReactHooksAddons from 'eslint-plugin-react-hooks-addons'
 import pluginReactPerf from 'eslint-plugin-react-perf'
@@ -51,8 +51,9 @@ import pluginTestingLibrary from 'eslint-plugin-testing-library'
 import globals from 'globals'
 import tsEslint from 'typescript-eslint'
 
-// eslint-plugin-unused-imports
+import {extractAutoImportedReactComponents} from './extractAutoImports.js'
 import globs from './globs.js'
+import packageJson from './package.json' with {type: 'json'}
 import {CAMEL_CASE} from './regexes.js'
 
 const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
@@ -634,9 +635,19 @@ function getTypescriptConfigs() {
           'error',
           {allowDefaultCaseForExhaustiveSwitch: false},
         ],
-        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error', // TODO: enable
-        '@typescript-eslint/restrict-plus-operands': 'error', // TODO: enable
-        '@typescript-eslint/restrict-template-expressions': 'warn', // TODO: enable
+        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
+        '@typescript-eslint/restrict-plus-operands': 'error',
+        '@typescript-eslint/restrict-template-expressions': [
+          'warn',
+          {
+            allowAny: false,
+            allowBoolean: false,
+            allowNever: false,
+            allowNullish: false,
+            allowNumber: true,
+            allowRegExp: false,
+          },
+        ], // TODO: enable
         '@typescript-eslint/no-deprecated': 'off', // lag
         '@typescript-eslint/no-unsafe-assignment': 'off', // lag
         '@typescript-eslint/no-misused-promises': 'off', // lag
@@ -658,14 +669,28 @@ function getTypescriptConfigs() {
 
 function getReactConfigs() {
   // TODO: add all react-use and other hooks libraries to staticHooks
-  const reactUseStaticHooks = {useUpdate: true}
+  const reactUseStaticHooks = {
+    useUpdate: true,
+    useLatest: true,
+  }
 
   // TODO: add all react-use and other hooks libraries to additionalHooks
   const reactUseAdditionalHooks = ['useIsomorphicLayoutEffect']
 
   const utilityHooks = ['useMemoClientValue', 'useMountedEffect', 'useAbortableEffect']
 
-  const reactPerfIgnoreSources = ['@heroui/react', 'react-hook-form', '@tanstack/react-router']
+  const reactPerfIgnoreSources = Object.keys(packageJson.dependencies)
+  const deepMemoizedComponents = ['RACLink', 'CopyableText', 'QueryErrorBoundary', 'Picture']
+  const autoImportedComponents = extractAutoImportedReactComponents()
+  const reactPrefForFunctionIgnoreComponent = [
+    'BetterSuspense',
+    'VisuallyHidden',
+    ...autoImportedComponents,
+  ]
+  const reactPrefIgnoreComponent = [
+    ...reactPrefForFunctionIgnoreComponent,
+    ...deepMemoizedComponents,
+  ]
 
   return [
     ...applyTo.react('react/default', pluginReact.configs.flat.recommended),
@@ -711,27 +736,63 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/hooks', pluginReactHooks.configs['flat/recommended']),
+    ...applyTo.react('react/hooks', pluginReactHooks.configs.flat['recommended-latest']),
     // Use below when using expo
     // ...applyTo.react('react/hooks', {
     //   // Expo already define `react-hooks` plugin so we cannot redefine
     //   rules: {
-    //     ...pluginReactHooks.configs['flat/recommended'].rules,
+    //     ...pluginReactHooks.configs.flat['recommended-latest'].rules,
     //   },
     // }),
     ...applyTo.react('react/hooks/custom', {
       rules: {
+        'react-hooks/preserve-manual-memoization': 0,
+        // Hidden rules that are not documented
+        'react-hooks/automatic-effect-dependencies': 2,
+        'react-hooks/capitalized-calls': 2,
+        'react-hooks/memoized-effect-dependencies': 2,
+        'react-hooks/no-deriving-state-in-effects': 2,
+        'react-hooks/fire': 2,
+        'react-hooks/hooks': 2,
+        'react-hooks/invariant': 2,
+        'react-hooks/rule-suppression': 2,
+        'react-hooks/syntax': 2,
+        'react-hooks/void-use-memo': 2,
+        // End hidden rules
+        'react-hooks/component-hook-factories': 2,
+        'react-hooks/config': 2,
+        'react-hooks/error-boundaries': 2,
+        'react-hooks/gating': 2,
+        'react-hooks/globals': 2,
+        'react-hooks/immutability': 2,
+        'react-hooks/incompatible-library': 2,
+        'react-hooks/purity': 2,
+        'react-hooks/refs': 2,
+        'react-hooks/rules-of-hooks': 2,
+        'react-hooks/set-state-in-effect': 2,
+        'react-hooks/set-state-in-render': 2,
+        'react-hooks/static-components': 2,
+        'react-hooks/unsupported-syntax': 2,
+        'react-hooks/use-memo': 2,
         'react-hooks/exhaustive-deps': [
           'error',
           {
             staticHooks: {
-              useAtom: [false, true], // means [unstable, stable]
-              useSetAtom: true,
-              useMutative: [false, true],
-              useMutativeReducer: [false, true],
-              useLatest: true,
+              // User-defined hooks
+              useStableCallback: true,
               useLazyRef: true,
               useIdleTimeScheduler: true,
+              useSearch: [false, true],
+              useSetSearch: true,
+              useParam: [false, true],
+              useSetParam: true,
+              // Jotai, note that these 3s are not really stable, they can change if the store or atom changes, but for now we only use one store, and don't dynamically pass the atom, so it's still safe to say they are stable
+              useAtom: [false, true], // means [unstable, stable]
+              useSetAtom: true,
+              useResetAtom: true,
+              // use-mutative
+              useMutative: [false, true],
+              useMutativeReducer: [false, true],
               ...reactUseStaticHooks,
             },
             additionalHooks: `(${[...utilityHooks, ...reactUseAdditionalHooks].join('|')})`,
@@ -807,30 +868,50 @@ function getReactConfigs() {
           {
             allowConstantExport: true,
             checkJS: true,
-            customHOCs: ['deepMemo'],
+            customHOCs: ['deepMemo'], // currently not working because we are using currying to return the memoized component
           },
         ],
       },
     }),
-    // ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended), // lag, we didn't use react-compiler anyway
+    ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended),
     ...applyTo.react('react/perf', pluginReactPerf.configs.flat.all),
     ...applyTo.react('react/perf-custom', {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
+          {
+            nativeAllowList: 'all',
+            allowList: [],
+            ignoreSources: reactPerfIgnoreSources,
+            ignoreComponents: reactPrefIgnoreComponent,
+          },
         ],
         'react-perf/jsx-no-new-array-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
+          {
+            nativeAllowList: 'all',
+            allowList: [],
+            ignoreSources: reactPerfIgnoreSources,
+            ignoreComponents: reactPrefIgnoreComponent,
+          },
         ],
         'react-perf/jsx-no-new-function-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
+          {
+            nativeAllowList: 'all',
+            allowList: [],
+            ignoreSources: reactPerfIgnoreSources,
+            ignoreComponents: reactPrefForFunctionIgnoreComponent,
+          },
         ],
         'react-perf/jsx-no-jsx-as-prop': [
           'error',
-          {nativeAllowList: 'all', ignoreSources: reactPerfIgnoreSources},
+          {
+            nativeAllowList: 'all',
+            allowList: [],
+            ignoreSources: reactPerfIgnoreSources,
+            ignoreComponents: reactPrefIgnoreComponent,
+          },
         ],
       },
     }),
@@ -911,7 +992,7 @@ function getReactTypescriptConfigs() {
       ...pluginReactX.configs['recommended-type-checked'],
     }),
     ...applyTo.typescriptReact('react/x-typescript-custom', {
-      rules: {'@eslint-react/prefer-read-only-props': 'warn'},
+      // rules: {'@eslint-react/prefer-read-only-props': 'warn'}, // Too many noise
     }),
     ...applyTo.typescriptReact('react/typescript', {
       rules: {
@@ -1018,6 +1099,9 @@ export default tsEslint.config(
   ...getTestingLibraryReactConfigs(),
   ...getCypressConfigs(),
   ...applyTo.all('settings', {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',

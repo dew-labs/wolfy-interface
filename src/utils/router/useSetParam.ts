@@ -44,9 +44,11 @@ export default function useSetParam<
   ParamValueOut extends ReturnType<ParamSetter>[ParamKey],
 >(routeId: RouteId, name: ParamKey, defaultOptions?: NavigateOptionProps) {
   const navigate = useNavigate()
+  const latestNavigate = useLatest(navigate)
   const latestDefaultOptions = useLatest(defaultOptions)
   const {fullPath} = useMatch({from: routeId})
   const latestFullPatch = useLatest(fullPath)
+  const latestName = useLatest(name)
 
   return useCallback(
     async (
@@ -54,14 +56,14 @@ export default function useSetParam<
       options?: NavigateOptionProps,
     ) => {
       // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
-      return navigate({
+      return latestNavigate.current({
         to: latestFullPatch.current,
         search: prevSearch => prevSearch,
         params: prevParams => ({
           ...prevParams,
           // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
-          [name]: isFunction(value) ? value(prevParams[name] as ParamValueIn) : value,
+          [latestName.current]: isFunction(value) ? value(prevParams[latestName.current]) : value,
         }),
         replace: true,
         resetScroll: false,
@@ -69,6 +71,6 @@ export default function useSetParam<
         ...options,
       })
     },
-    [navigate, name],
+    [],
   )
 }

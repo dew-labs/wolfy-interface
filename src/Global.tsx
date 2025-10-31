@@ -4,11 +4,11 @@ import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/r
 import UpdateMousePosition from '@/components/UpdateMousePosition'
 import WolfyBackground from '@/components/WolfyBackground'
 import WolfyToaster from '@/components/WolfyToaster'
-import {loadSentryIntegrations} from '@/instrument'
 import ChainEffects from '@/lib/starknet/components/ChainEffects'
 import ThemeEffects from '@/lib/theme/ThemeEffects'
 import TokenPricesUpdater from '@/lib/trade/components/TokenPricesUpdater'
-import {setupWolfy, teardownWolfy} from '@/setupWolfy'
+import {loadSentryIntegrations} from '@/setup.instrument'
+import {setupWolfy, teardownWolfy} from '@/setup.wolfy'
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
 
 import {DEBUG} from './constants/config'

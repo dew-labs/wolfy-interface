@@ -76,13 +76,13 @@ interface TVLightWeightChartProps extends PropsWithChildren {
   children: ReactElement<LineProps> | ReactElement<LineProps>[]
 }
 
-export default deepMemo(function TVLightWeightChart({
+const TVLightWeightChart = deepMemo<TVLightWeightChartProps>()()(function TVLightWeightChart({
   asset,
   textColor,
   gridColor,
   interval,
   children,
-}: TVLightWeightChartProps) {
+}) {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const chartMainCandlestickSeries = useRef<ISeriesApi<'Candlestick'> | null>(null)
@@ -240,3 +240,4 @@ export default deepMemo(function TVLightWeightChart({
     </ChartContext>
   )
 })
+export default TVLightWeightChart

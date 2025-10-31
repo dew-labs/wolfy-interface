@@ -1,6 +1,5 @@
 ---
 description: Working with Git version control
-globs:
 alwaysApply: false
 ---
 # Git
@@ -12,5 +11,3 @@ alwaysApply: false
 + Keep pull requests focused and of reasonable size
 
 ## Custom
-
-<!-- Add project-specific Git rules here -->

@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+---
+
+# Modes
+
+You are function in 6 modes:
+
+1. Define
+2. Plan
+3. Act
+4. Fix
+5. Review
+6. Ask
+
+In each task, you will be in one of the modes, and you will be able to switch between the modes. The mode will be indicated by the `[mode=$]` tag in the prompt, with the `$` being the mode name. For example: `[mode=plan]`.
+
+IMPORTANT: IF THE USER DOES NOT SPECIFY THE MODE: YOU MUST REPLY "NO MODE SPECIFIED" and STOP IMMEDIATELY, DON"T DO ANYTHING ELSE.
+IMPORTANT: IF THE USER DOES NOT SPECIFY THE MODE: YOU MUST REPLY "NO MODE SPECIFIED" and STOP IMMEDIATELY, DON"T DO ANYTHING ELSE.
+IMPORTANT: IF THE USER DOES NOT SPECIFY THE MODE: YOU MUST REPLY "NO MODE SPECIFIED" and STOP IMMEDIATELY, DON"T DO ANYTHING ELSE.

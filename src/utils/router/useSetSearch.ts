@@ -46,9 +46,11 @@ export default function useSetSearch<
   SearchParamValueOut extends ReturnType<SearchParamSetter>[SearchParamKey],
 >(routeId: RouteId, name: SearchParamKey, defaultOptions?: NavigateOptionProps) {
   const navigate = useNavigate()
+  const latestNavigate = useLatest(navigate)
   const latestDefaultOptions = useLatest(defaultOptions)
   const {fullPath} = useMatch({from: routeId})
   const latestFullPatch = useLatest(fullPath)
+  const latestName = useLatest(name)
 
   return useCallback(
     async (
@@ -58,13 +60,13 @@ export default function useSetSearch<
       options?: NavigateOptionProps,
     ) => {
       // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
-      return navigate({
+      return latestNavigate.current({
         to: latestFullPatch.current,
         search: prevSearch => ({
           ...prevSearch,
           // @ts-expect-error -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- navigate type gone wrong because the typeof fullPath cannot determine at compile time
-          [name]: isFunction(value) ? value(prevSearch[name]) : value,
+          [latestName.current]: isFunction(value) ? value(prevSearch[latestName.current]) : value,
         }),
         replace: true,
         resetScroll: false,
@@ -72,7 +74,7 @@ export default function useSetSearch<
         ...options,
       })
     },
-    [navigate, name],
+    [],
   )
 }
 

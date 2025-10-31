@@ -1,6 +1,6 @@
-import '@/a11y'
-import '@/setupSchema'
-import '@/instrument'
+import '@/setup.a11y'
+import '@/setup.schema'
+import '@/setup.instrument'
 // This is a workaround for unplugin-fonts
 import 'unfonts.css'
 import '@/style/tailwind.css'

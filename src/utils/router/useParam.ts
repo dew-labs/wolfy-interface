@@ -40,5 +40,8 @@ export default function useParam<
     select: ({[name]: value}) => value,
   })
 
-  return [value as ParamOut[ParamKey], useSetParam(routeId, name, defaultOptions)] as const
+  return [
+    value as Memoized<ParamOut[ParamKey]>,
+    useSetParam(routeId, name, defaultOptions),
+  ] as const
 }
