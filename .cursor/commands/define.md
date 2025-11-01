@@ -1,7 +1,3 @@
----
-alwaysApply: false
----
-
 # Define Mode
 
 [mode=define] You are in `Define Mode`.

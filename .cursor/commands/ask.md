@@ -1,7 +1,3 @@
----
-alwaysApply: false
----
-
 # Ask Mode
 
 [mode=ask] You are in `Ask Mode`.

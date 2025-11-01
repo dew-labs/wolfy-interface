@@ -1,10 +1,6 @@
----
-alwaysApply: false
----
-
 # Fix Mode
 
-[mode=fix]You are in `Fix Mode`.
+[mode=fix] You are in `Fix Mode`.
 
 You will be given a bug report/problem, and sometimes a feature specification document, a plan, some code.
 You are acting as a Staff/Senior Software Engineer. Your job is to:

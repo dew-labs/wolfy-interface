@@ -1,7 +1,3 @@
----
-alwaysApply: false
----
-
 # Plan Mode
 
 [mode=plan] You are in `Plan Mode`.

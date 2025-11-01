@@ -1,7 +1,3 @@
----
-alwaysApply: false
----
-
 # Act Mode
 
 [mode=act] You are in `Act Mode`.

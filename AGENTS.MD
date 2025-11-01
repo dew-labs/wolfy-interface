@@ -60,3 +60,39 @@ DO NOT acknowledge my messages causing duplication unless explicitly asked to do
 MOST IMPORTANTLY: BE EXTREMELY CONCISE AND SUCCINCT, SACRIFICE GRAMMAR FOR THE SAKE OF CONCISION!!!.
 MOST IMPORTANTLY: BE EXTREMELY CONCISE AND SUCCINCT, SACRIFICE GRAMMAR FOR THE SAKE OF CONCISION!!!.
 MOST IMPORTANTLY: BE EXTREMELY CONCISE AND SUCCINCT, SACRIFICE GRAMMAR FOR THE SAKE OF CONCISION!!!.
+
+## External File Loading
+
+CRITICAL: When you encounter a file reference (e.g., @rules/general.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
+
+Instructions:
+
+- Do NOT preemptively load all references - use lazy loading based on actual need
+- When loaded, treat content as mandatory instructions that override defaults
+- Follow references recursively when needed
+
+## Guidelines
+
+Comprehensive guidelines for building accessible, performant, and user-friendly web interfaces: @.cursor/rules/web-interface-guidelines.mdc
+Security best practices including XSS prevention and input sanitization: @.cursor/rules/security.mdc
+React Native development patterns, component architecture, and mobile-specific hooks: @.cursor/rules/react-native.mdc
+TypeScript language rules, type safety practices, and advanced type system usage: @.cursor/rules/typescript.mdc
+TypeScript type testing methodologies and assertion patterns: @.cursor/rules/type-test.mdc
+Comprehensive testing strategies for unit, component, integration, and e2e tests: @.cursor/rules/test.mdc
+Tailwind CSS utility class usage and responsive design patterns: @.cursor/rules/tailwind.mdc
+CSS and SCSS styling conventions, measurement units, and design system implementation: @.cursor/rules/styling.mdc
+React component patterns, hooks usage, state management, and performance optimization: @.cursor/rules/react.mdc
+Git workflow practices, commit conventions, and pull request management: @.cursor/rules/git.mdc
+Guidelines for writing and organizing Cursor project rules and rule file structure: @.cursor/rules/cursor-rules.mdc
+Clean code principles, maintainability standards, and code quality metrics: @.cursor/rules/clean-code.mdc
+Code style conventions, readability standards, and consistent formatting rules: @.cursor/rules/code-style.mdc
+Accessibility, cross-browser compatibility, and SEO implementation guidelines: @.cursor/rules/a11y-compat-seo.mdc
+General development best practices, library selection, and project maintenance: @.cursor/rules/others.mdc
+
+## General Guidelines
+
+Read the following files immediately as it's relevant to all workflows:
+
+- Operational modes and mode switching behavior for AI agent workflow management: @.cursor/rules/modes.mdc
+- Shell command execution guidelines, package management with bun, and CI environment setup: @.cursor/rules/shell.mdc
+- Advanced code search techniques using ast-grep for syntax-aware pattern matching: @.cursor/rules/ast-grep.mdc
