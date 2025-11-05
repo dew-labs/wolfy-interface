@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import os from 'os'
-import {coverageConfigDefaults, defineConfig, mergeConfig} from 'vitest/config'
+import {configDefaults, coverageConfigDefaults, defineConfig, mergeConfig} from 'vitest/config'
 
 import globs from './globs'
 import viteConfig from './vite.config'
@@ -20,9 +20,6 @@ export default defineConfig(configEnv =>
         unstubEnvs: true,
         restoreMocks: true,
         silent: 'passed-only',
-        include: globs.TEST_NOT_TYPE,
-        environment: 'happy-dom',
-        environmentMatchGlobs: globs.TEST_SSR.map(path => [path, 'node']),
         setupFiles: 'src/setupTest.ts',
         typecheck: {enabled: true, include: globs.TEST_TYPE},
         coverage: {
@@ -46,6 +43,26 @@ export default defineConfig(configEnv =>
         expect: {
           requireAssertions: true,
         },
+        projects: [
+          {
+            extends: true,
+            test: {
+              name: 'happy-dom',
+              include: globs.TEST_NOT_TYPE,
+              exclude: [...configDefaults.exclude, ...globs.TEST_SSR],
+              environment: 'happy-dom',
+            },
+          },
+          {
+            extends: true,
+            test: {
+              name: 'node',
+              include: globs.TEST_SSR,
+              exclude: configDefaults.exclude,
+              environment: 'node',
+            },
+          },
+        ],
       },
     }),
   ),

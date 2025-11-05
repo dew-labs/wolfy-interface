@@ -130,7 +130,6 @@ declare global {
   const useSuspenseQuery: typeof import('@tanstack/react-query')['useSuspenseQuery']
   const useSyncExternalStore: typeof import('react')['useSyncExternalStore']
   const useTransition: typeof import('react')['useTransition']
-  const useTranslation: typeof import('react-i18next')['useTranslation']
   const waitForAll: typeof import('jotai/utils')['waitForAll']
   const withMutative: typeof import('jotai-mutative')['withMutative']
 }
