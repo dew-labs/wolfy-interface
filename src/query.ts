@@ -1,9 +1,11 @@
 import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister'
 import {
+  type InvalidateOptions,
   matchQuery,
   MutationCache,
   type OmitKeyof,
   QueryClient,
+  type QueryFilters,
   type QueryKey,
 } from '@tanstack/react-query'
 import {
@@ -24,8 +26,18 @@ declare module '@tanstack/react-query' {
     // queryMeta: {}
     mutationMeta: {
       persist?: boolean
-      invalidates?: QueryKey[] | 'all'
-      awaitInvalidates?: QueryKey[] | 'all'
+      invalidates?: // Will invalidates these queries on mutation success
+      (QueryFilters | QueryKey)[] | 'all'
+      invalidatesOptions?: InvalidateOptions
+      awaitInvalidates?: // Will await these queries on mutation success
+      (QueryFilters | QueryKey)[] | 'all'
+      awaitInvalidatesOptions?: InvalidateOptions
+      invalidatesOnSettled?: // Will invalidates these queries on mutation settled
+      (QueryFilters | QueryKey)[] | 'all'
+      invalidatesOnSettledOptions?: InvalidateOptions
+      awaitInvalidatesOnSettled?: // Will await invalidates these queries on mutation settled
+      (QueryFilters | QueryKey)[] | 'all'
+      awaitInvalidatesOnSettledOptions?: InvalidateOptions
     }
   }
 }
@@ -56,20 +68,69 @@ export function createQueryClient() {
         if (awaitInvalidates === 'all') {
           await queryClient.invalidateQueries()
         } else {
-          await queryClient.invalidateQueries({
-            predicate: query =>
-              awaitInvalidates?.some(queryKey => matchQuery({queryKey}, query)) ?? false,
-          })
+          await queryClient.invalidateQueries(
+            {
+              predicate: query =>
+                awaitInvalidates?.some(queryKeyOrFilters =>
+                  Array.isArray(queryKeyOrFilters)
+                    ? matchQuery({queryKey: queryKeyOrFilters}, query)
+                    : matchQuery(queryKeyOrFilters, query),
+                ) ?? false,
+            },
+            mutation.meta?.awaitInvalidatesOptions,
+          )
         }
 
         const invalidates = mutation.meta?.invalidates
         if (invalidates === 'all') {
           void queryClient.invalidateQueries()
         } else {
-          void queryClient.invalidateQueries({
-            predicate: query =>
-              invalidates?.some(queryKey => matchQuery({queryKey}, query)) ?? false,
-          })
+          void queryClient.invalidateQueries(
+            {
+              predicate: query =>
+                invalidates?.some(queryKeyOrFilters =>
+                  Array.isArray(queryKeyOrFilters)
+                    ? matchQuery({queryKey: queryKeyOrFilters}, query)
+                    : matchQuery(queryKeyOrFilters, query),
+                ) ?? false,
+            },
+            mutation.meta?.invalidatesOptions,
+          )
+        }
+      },
+      onSettled: async (_data, _error, _variables, _context, mutation) => {
+        const awaitInvalidatesOnSettled = mutation.meta?.awaitInvalidatesOnSettled
+        if (awaitInvalidatesOnSettled === 'all') {
+          await queryClient.invalidateQueries()
+        } else {
+          await queryClient.invalidateQueries(
+            {
+              predicate: query =>
+                awaitInvalidatesOnSettled?.some(queryKeyOrFilters =>
+                  Array.isArray(queryKeyOrFilters)
+                    ? matchQuery({queryKey: queryKeyOrFilters}, query)
+                    : matchQuery(queryKeyOrFilters, query),
+                ) ?? false,
+            },
+            mutation.meta?.awaitInvalidatesOnSettledOptions,
+          )
+        }
+
+        const invalidatesOnSettled = mutation.meta?.invalidatesOnSettled
+        if (invalidatesOnSettled === 'all') {
+          void queryClient.invalidateQueries()
+        } else {
+          void queryClient.invalidateQueries(
+            {
+              predicate: query =>
+                invalidatesOnSettled?.some(queryKeyOrFilters =>
+                  Array.isArray(queryKeyOrFilters)
+                    ? matchQuery({queryKey: queryKeyOrFilters}, query)
+                    : matchQuery(queryKeyOrFilters, query),
+                ) ?? false,
+            },
+            mutation.meta?.invalidatesOnSettledOptions,
+          )
         }
       },
     }),

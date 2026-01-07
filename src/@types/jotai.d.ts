@@ -1,7 +1,6 @@
 import 'jotai'
 
 import type {
-  createStore,
   ExtractAtomArgs,
   ExtractAtomResult,
   ExtractAtomValue,
@@ -12,8 +11,6 @@ import type {
 import type {MemoizedCallback, SetStateAction} from 'react'
 
 declare module 'jotai' {
-  type Store = ReturnType<typeof createStore>
-
   type Options = Parameters<typeof useAtomValue>[1]
   type SetAtom<Args extends unknown[], Result> = (...args: Args) => Result
 

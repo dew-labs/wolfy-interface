@@ -212,8 +212,16 @@ export function getConfig(mode: string): UserConfig {
           jotai: ['useStore'],
         },
         {
+          '@/utils/jotai/useGetAtom': [['default', 'useGetAtom']],
+        },
+        {
           from: 'jotai',
           imports: ['Atom', 'Getter', 'Setter'],
+          type: true,
+        },
+        {
+          from: 'jotai/vanilla/store',
+          imports: ['Store'],
           type: true,
         },
         {

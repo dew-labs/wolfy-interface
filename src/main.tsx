@@ -3,37 +3,15 @@ import '@/setup'
 
 import {reactErrorHandler} from '@sentry/react'
 import {RouterProvider} from '@tanstack/react-router'
-import {InferSeoMetaPlugin} from '@unhead/addons'
-import {createHead, UnheadProvider} from '@unhead/react/client'
-import {AliasSortingPlugin, CanonicalPlugin} from '@unhead/react/plugins'
-import {createStore} from 'jotai'
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 
-import {createQueryClient} from './query'
-import {createRouter} from './router'
-
-const head = createHead({
-  plugins: [
-    AliasSortingPlugin,
-    CanonicalPlugin({
-      canonicalHost: 'https://mysite.com',
-    }),
-    InferSeoMetaPlugin(),
-  ],
-})
+import {getRouter} from './router'
 
 function App() {
-  // Ensures each request has its own cache in SSR
-  /* eslint-disable @eslint-react/naming-convention/use-state -- not needed */
-  const [queryClient] = useState(() => createQueryClient())
-  const [store] = useState(() => createStore())
-  const [router] = useState(() => createRouter({queryClient, store}))
-  /* eslint-enable @eslint-react/naming-convention/use-state */
+  const [router] = useState(() => getRouter())
 
-  const context = useMemo(() => ({queryClient, store}), [queryClient, store])
-
-  return <RouterProvider router={router} context={context} />
+  return <RouterProvider router={router} />
 }
 
 function render() {
@@ -52,9 +30,7 @@ function render() {
     onRecoverableError: reactErrorHandler(),
   }).render(
     <StrictMode>
-      <UnheadProvider head={head}>
-        <App />
-      </UnheadProvider>
+      <App />
     </StrictMode>,
   )
 }
