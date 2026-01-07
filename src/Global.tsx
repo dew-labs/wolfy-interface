@@ -1,13 +1,13 @@
 import {announce} from '@react-aria/live-announcer'
-import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/react'
 
+// import {addIntegration, tanstackRouterBrowserTracingIntegration} from '@sentry/tanstackstart-react'
 import UpdateMousePosition from '@/components/UpdateMousePosition'
 import WolfyBackground from '@/components/WolfyBackground'
 import WolfyToaster from '@/components/WolfyToaster'
+import {loadSentryIntegrations} from '@/instrument.client'
 import ChainEffects from '@/lib/starknet/components/ChainEffects'
 import ThemeEffects from '@/lib/theme/ThemeEffects'
 import TokenPricesUpdater from '@/lib/trade/components/TokenPricesUpdater'
-import {loadSentryIntegrations} from '@/setup.instrument'
 import {setupWolfy, teardownWolfy} from '@/setup.wolfy'
 import RouteAnnouncer from '@/utils/router/RouteAnnouncer'
 
@@ -32,7 +32,7 @@ export default memo(function Global() {
   useEffect(
     function addSentryIntegration() {
       if (DEBUG) return
-      addIntegration(tanstackRouterBrowserTracingIntegration(router))
+      // addIntegration(tanstackRouterBrowserTracingIntegration(router))
       loadSentryIntegrations()
     },
     [router],

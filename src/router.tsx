@@ -1,4 +1,6 @@
 /* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
+import '@/setup'
+
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
 import {setupRouterSsrQueryIntegration} from '@tanstack/react-router-ssr-query'
@@ -8,6 +10,7 @@ import {AliasSortingPlugin, CanonicalPlugin} from '@unhead/react/plugins'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {createStore} from 'jotai'
 
+import {initInstrument} from './instrument.client'
 import {createQueryClient} from './query'
 import {routeTree} from './routeTree.gen'
 import RouterErrorComponent from './views/Error/RouterErrorComponent'
@@ -107,6 +110,10 @@ export function getRouter() {
     wrapQueryClient: false,
     handleRedirects: true,
   })
+
+  if (!router.isServer) {
+    initInstrument()
+  }
 
   return router
 }

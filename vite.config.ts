@@ -12,12 +12,13 @@ import {inspectorServer} from '@react-dev-inspector/vite-plugin'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
-import {tanstackRouter} from '@tanstack/router-plugin/vite'
+import {tanstackStart} from '@tanstack/react-start/plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react-swc'
 import {FontaineTransform} from 'fontaine'
 import {humanId} from 'human-id'
+import {nitro} from 'nitro/vite'
 import {obfuscator} from 'rollup-obfuscator'
 import AutoImport from 'unplugin-auto-import/vite'
 import Unfonts from 'unplugin-fonts/vite'
@@ -31,7 +32,7 @@ import circleDependency from 'vite-plugin-circular-dependency'
 // import pluginChecker from 'vite-plugin-checker'
 // import {compression} from 'vite-plugin-compression2'
 import dynamicImport from 'vite-plugin-dynamic-import'
-import {createHtmlPlugin} from 'vite-plugin-html'
+// import {createHtmlPlugin} from 'vite-plugin-html'
 import {ViteImageOptimizer} from 'vite-plugin-image-optimizer' // vs unplugin-imagemin?
 import lqip from 'vite-plugin-lqip'
 import mkcert from 'vite-plugin-mkcert'
@@ -380,31 +381,33 @@ export function getConfig(mode: string): UserConfig {
       turboConsole({
         /* options here */
       }),
-    createHtmlPlugin({
-      minify: true,
-      /**
-       * After writing entry here, you will not need to add script tags in `index.html`, the original tags need to be deleted
-       */
-      entry: 'src/main.tsx',
-      /**
-       * Data that needs to be injected into the index.html ejs template
-       */
-      inject: {
-        data: {
-          title: process.env.VITE_APP_TITLE,
-          description: process.env.VITE_APP_DESCRIPTION,
-          ogImage: '/og.jpg',
-          gtagTagId: process.env.GA_TAG_ID,
-        },
-        tags: [
-          /**
-           * Inject <div id='root'/> to body of `index.html`
-           */
-          {injectTo: 'body-prepend', tag: 'div', attrs: {id: 'root'}},
-        ],
-      },
-    }),
+    // createHtmlPlugin({
+    //   minify: true,
+    //   /**
+    //    * After writing entry here, you will not need to add script tags in `index.html`, the original tags need to be deleted
+    //    */
+    //   entry: 'src/main.tsx',
+    //   /**
+    //    * Data that needs to be injected into the index.html ejs template
+    //    */
+    //   inject: {
+    //     data: {
+    //       title: process.env.VITE_APP_TITLE,
+    //       description: process.env.VITE_APP_DESCRIPTION,
+    //       ogImage: '/og.jpg',
+    //       gtagTagId: process.env.GA_TAG_ID,
+    //     },
+    //     tags: [
+    //       /**
+    //        * Inject <div id='root'/> to body of `index.html`
+    //        */
+    //       {injectTo: 'body-prepend', tag: 'div', attrs: {id: 'root'}},
+    //     ],
+    //   },
+    // }),
     millionLintVite({enabled: shouldEnableProfile}),
+    tanstackStart(),
+    nitro(),
     // SWC React
     react({
       plugins: [
@@ -429,7 +432,6 @@ export function getConfig(mode: string): UserConfig {
             ],
       ].filter(Boolean),
     }),
-
     // Oxc + Babel React for react compiler
     // react({
     //   babel: {
@@ -476,10 +478,6 @@ export function getConfig(mode: string): UserConfig {
       // https://sharp.pixelplumbing.com/api-output/
       cache: true,
       cacheLocation: './.imageoptimizercache',
-    }),
-    tanstackRouter({
-      target: 'react',
-      // autoCodeSplitting: true,
     }),
     mkcert(),
     obfuscator({sourceMap: shouldUseSourceMap}),
@@ -617,7 +615,7 @@ export function getConfig(mode: string): UserConfig {
       // manifest: true,
       // ssrManifest: true,
       // ssr: true,
-      rollupOptions: {output: {manualChunks: {sentry: ['@sentry/react']}}},
+      rollupOptions: {output: {manualChunks: {sentry: ['@sentry/tanstackstart-react']}}},
       target: 'esnext',
       cssMinify: 'lightningcss',
     },
@@ -639,14 +637,14 @@ export function getConfig(mode: string): UserConfig {
     json: {stringify: true},
     plugins,
     resolve: {alias: [{find: '@', replacement: '/src'}]},
-    server: {
-      open: true,
-      host: '0.0.0.0',
-      proxy: {
-        '/api': {target: process.env.VITE_API_URL, changeOrigin: true, cookieDomainRewrite: ''},
-      },
-      cors: false,
-    },
+    // server: {
+    //   open: true,
+    //   host: '0.0.0.0',
+    //   proxy: {
+    //     '/api': {target: process.env.VITE_API_URL, changeOrigin: true, cookieDomainRewrite: ''},
+    //   },
+    //   cors: false,
+    // },
     assetsInclude: ['**/*.lottie'],
   }
 }

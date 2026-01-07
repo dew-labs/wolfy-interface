@@ -2,17 +2,21 @@ import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
 import type {Href} from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
-import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
+import {createRootRouteWithContext, HeadContent, Scripts} from '@tanstack/react-router'
 import {UnheadProvider} from '@unhead/react/client'
 import {Provider as JotaiProvider} from 'jotai'
 import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import invariant from 'tiny-invariant'
 import type {ReadonlyDeep} from 'type-fest'
 
-import {DEBUG, ENABLE_DEVTOOLS} from '@/constants/config'
+// This is a workaround for unplugin-fonts
+// import unfontsCss from 'unfonts.css?url'
+import {DEBUG, DESCRIPTION, ENABLE_DEVTOOLS, TITLE} from '@/constants/config'
 import Global from '@/Global'
 import {createQueryPersistOptions} from '@/query'
 import type {RouterContext} from '@/router'
+import globalCss from '@/style/global.scss?url'
+import tailwindCss from '@/style/tailwind.css?url'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
 import {logError} from '@/utils/logger'
@@ -101,40 +105,137 @@ const RootRoute = memo(function RootRoute() {
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
   const useHref = useCallback((to: Href) => router.buildLocation({to}).href, [router])
   return (
-    <UnheadProvider head={head}>
-      <ErrorBoundary fallback={null}>
-        <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
-      </ErrorBoundary>
-      <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
-        <JotaiProvider store={store}>
-          <HeroUIProvider navigate={navigate} useHref={useHref}>
-            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-              <QueryErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
-                <Global />
-                <VisuallyHidden strict {...skipTargetProps('top')} />
-                <HeadContent />
-                <Outlet />
+    <RootDocument>
+      <UnheadProvider head={head}>
+        <ErrorBoundary fallback={null}>
+          <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
+        </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+          <JotaiProvider store={store}>
+            <HeroUIProvider navigate={navigate} useHref={useHref}>
+              <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+                <QueryErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+                  <Global />
+                  <VisuallyHidden strict {...skipTargetProps('top')} />
+                  <HeadContent />
+                  <Outlet />
+                  <DevTool>
+                    <Inspector />
+                  </DevTool>
+                </QueryErrorBoundary>
                 <DevTool>
-                  <Inspector />
+                  <ReactQueryDevtools initialIsOpen={false} />
                 </DevTool>
-              </QueryErrorBoundary>
-              <DevTool>
-                <ReactQueryDevtools initialIsOpen={false} />
-              </DevTool>
-            </PersistQueryClientProvider>
-          </HeroUIProvider>
-          <DevTool>
-            <JotaiDevTools />
-          </DevTool>
-        </JotaiProvider>
-      </ErrorBoundary>
-      <DevTool>
-        <TanStackRouterDevtools initialIsOpen={false} />
-      </DevTool>
-    </UnheadProvider>
+              </PersistQueryClientProvider>
+            </HeroUIProvider>
+            <DevTool>
+              <JotaiDevTools />
+            </DevTool>
+          </JotaiProvider>
+        </ErrorBoundary>
+        <DevTool>
+          <TanStackRouterDevtools initialIsOpen={false} />
+        </DevTool>
+      </UnheadProvider>
+    </RootDocument>
   )
 })
 
+function RootDocument({children}: Readonly<{children: ReactNode}>) {
+  return (
+    <html lang='en'>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  )
+}
+
+const OG_IMAGE = '/og.jpg'
+
 export const Route = createRootRouteWithContext<RouterContext>()({
+  head: () => ({
+    meta: [
+      {
+        charSet: 'utf-8',
+      },
+      {
+        name: 'viewport',
+        content:
+          'width=device-width, initial-scale=1.0, shrink-to-fit=no, interactive-widget=resizes-content, viewport-fit=cover, user-scalable=yes',
+      },
+      {
+        name: 'mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
+      },
+      {
+        title: TITLE,
+      },
+      {
+        property: 'og:title',
+        content: TITLE,
+      },
+      {
+        property: 'twitter:title',
+        content: TITLE,
+      },
+      {
+        description: DESCRIPTION,
+      },
+      {
+        property: 'og:description',
+        content: DESCRIPTION,
+      },
+      {
+        property: 'twitter:description',
+        content: OG_IMAGE,
+      },
+      {
+        property: 'og:image',
+        content: OG_IMAGE,
+      },
+      {
+        property: 'twitter:image',
+        content: OG_IMAGE,
+      },
+    ],
+    links: [
+      {
+        rel: 'icon',
+        href: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+      // {rel: 'stylesheet', href: unfontsCss},
+      {rel: 'stylesheet', href: tailwindCss},
+      {rel: 'stylesheet', href: globalCss},
+    ],
+    scripts: [
+      {
+        src: 'https://www.googletagmanager.com/gtag/js?id=<%- gtagTagId %>',
+        async: true,
+      },
+      {
+        children: `window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag('js', new Date())
+
+      gtag('config', '<%- gtagTagId %>')`,
+      },
+    ],
+  }),
   component: RootRoute,
 })

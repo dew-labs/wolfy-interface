@@ -1,4 +1,9 @@
-import {captureException, captureMessage, setContext, type SeverityLevel} from '@sentry/react'
+import {
+  captureException,
+  captureMessage,
+  setContext,
+  type SeverityLevel,
+} from '@sentry/tanstackstart-react'
 import {stringify} from 'devalue'
 
 import {isUserFriendlyError} from './errors/UserFriendlyError'
