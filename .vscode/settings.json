@@ -2,6 +2,7 @@
   "stylelint.packageManager": "pnpm",
   "npm.packageManager": "pnpm",
   // Typescript
+  "typescript.experimental.useTsgo": true,
   "typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.validate.enable": true, // Unlike javascript, we still need typescript validator as its not covered by eslint
   "typescript.enablePromptUseWorkspaceTsdk": true,

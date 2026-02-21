@@ -39,24 +39,22 @@ cssVariablesAtom.debugLabel = 'cssVariablesAtom'
 export const CssVariableEffects = memo(function CssVariableEffects() {
   const setCssVariable = useSetAtom(cssVariablesAtom)
 
-  const updateVariables = useCallback(() => {
-    // NOTE: can use the filter function to exclude some css variables such as css variables come from libraries
-    const cssVariableNames = getAllCssVariableName(name => !name.startsWith('--mantine'))
-
-    const style = getComputedStyle(document.documentElement)
-
-    cssVariableNames.forEach(name => {
-      const value = style.getPropertyValue(name).trim()
-      if (!value) return
-
-      setCssVariable(prev => {
-        prev[name] = value
-      })
-    })
-  }, [setCssVariable])
-
   useEffect(() => {
-    updateVariables()
+    const updateVariables = () => {
+      // NOTE: can use the filter function to exclude some css variables such as css variables come from libraries
+      const cssVariableNames = getAllCssVariableName(name => !name.startsWith('--mantine'))
+
+      const style = getComputedStyle(document.documentElement)
+
+      cssVariableNames.forEach(name => {
+        const value = style.getPropertyValue(name).trim()
+        if (!value) return
+
+        setCssVariable(prev => {
+          prev[name] = value
+        })
+      })
+    }
 
     const observer = new MutationObserver(_mutations => {
       updateVariables()
@@ -70,7 +68,7 @@ export const CssVariableEffects = memo(function CssVariableEffects() {
     return () => {
       observer.disconnect()
     }
-  }, [updateVariables])
+  }, [])
 
   return null
 })

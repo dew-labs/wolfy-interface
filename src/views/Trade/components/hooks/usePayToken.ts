@@ -93,14 +93,14 @@ export default function usePayToken(
 
   const latestLeverage = useLatest(leverage)
   const [leverageInput, setLeverageInput] = useState('1')
-  const [leverageInputIsFocused, setLeverageInputFocused] = useState(false)
+  const [leverageInputIsFocused, setLeverageInputIsFocused] = useState(false)
   const latestLeverageInput = useLatest(leverageInput)
 
   const leverageNumber = Number(leverageInput)
 
   const handleLeverageChange = useCallback(
     (value: unknown) => {
-      setLeverageInputFocused(true)
+      setLeverageInputIsFocused(true)
       if (typeof value !== 'string' && typeof value !== 'number') return
       const leverage = expandDecimals(value, LEVERAGE_DECIMALS)
 
@@ -120,7 +120,7 @@ export default function usePayToken(
   )
 
   const handleLeverageChangeEnd = useCallback(() => {
-    setLeverageInputFocused(false)
+    setLeverageInputIsFocused(false)
   }, [])
 
   useEffect(
@@ -162,6 +162,6 @@ export default function usePayToken(
     setLeverageInput,
     handleLeverageChange,
     handleLeverageChangeEnd,
-    setLeverageInputFocused,
+    setLeverageInputIsFocused,
   }
 }

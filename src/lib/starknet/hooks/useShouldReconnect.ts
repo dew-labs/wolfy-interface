@@ -7,3 +7,8 @@ export default function useShouldReconnect() {
 export function useSetShouldReconnect() {
   return useSetAtom(shouldReconnectAtom)
 }
+
+export function useGetShouldReconnect() {
+  const store = useStore()
+  return useCallback(() => store.get(shouldReconnectAtom), [store])
+}

@@ -12,9 +12,12 @@ import pluginQuery from '@tanstack/eslint-plugin-query'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import restrictedGlobals from 'confusing-browser-globals'
+import {defineConfig} from 'eslint/config'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
+import {getDefaultSelectors} from 'eslint-plugin-better-tailwindcss/defaults'
+import {SelectorKind} from 'eslint-plugin-better-tailwindcss/types'
 import pluginCssModules from 'eslint-plugin-css-modules'
 import pluginDepend from 'eslint-plugin-depend'
 // import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
@@ -39,9 +42,9 @@ import pluginReactCompiler from 'eslint-plugin-react-compiler'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReactHooksAddons from 'eslint-plugin-react-hooks-addons'
 import pluginReactPerf from 'eslint-plugin-react-perf'
-import pluginReactRefresh from 'eslint-plugin-react-refresh'
+import {reactRefresh} from 'eslint-plugin-react-refresh'
 import pluginReactYouMightNotNeedAnEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
-import * as pluginRegexp from 'eslint-plugin-regexp'
+import pluginRegexp from 'eslint-plugin-regexp'
 // import pluginRemeda from 'eslint-plugin-remeda'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
@@ -85,7 +88,14 @@ function createApplyTo(include, exclude = []) {
       config = configs.at(0)
     }
 
-    return [{...config, name, files: include, ignores: exclude}]
+    return [
+      {
+        ...config,
+        name,
+        files: include,
+        ignores: exclude,
+      },
+    ]
   }
 }
 
@@ -117,8 +127,14 @@ const applyTo = {
 
 function getIgnoreConfigs() {
   return [
-    pluginGitignore({root: true, files: ['.gitignore'], strict: false}),
-    {ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*', 'src/paraglide/**/*']},
+    pluginGitignore({
+      root: true,
+      files: ['.gitignore'],
+      strict: false,
+    }),
+    {
+      ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*', 'src/paraglide/**/*'],
+    },
   ]
 }
 
@@ -212,7 +228,9 @@ function getCoreConfigs() {
         'promise/always-return': ['warn', {ignoreLastCallback: true}],
         'promise/no-callback-in-promise': [
           'warn',
-          {exceptions: ['process.nextTick', 'setImmediate', 'setTimeout']},
+          {
+            exceptions: ['process.nextTick', 'setImmediate', 'setTimeout'],
+          },
         ],
       },
     }),
@@ -248,7 +266,9 @@ function getCoreConfigs() {
     ...applyTo.all('core/eslint-comments', {
       ...pluginEslintComments.configs.recommended,
       // workaround for https://github.com/eslint-community/eslint-plugin-eslint-comments/issues/215
-      plugins: {'@eslint-community/eslint-comments': pluginEslintComments},
+      plugins: {
+        '@eslint-community/eslint-comments': pluginEslintComments,
+      },
     }),
     ...applyTo.all('core/eslint-comments/custom', {
       rules: {
@@ -267,7 +287,7 @@ function getCoreConfigs() {
       },
       files: ['auto-imports.d.ts'],
     },
-    ...applyTo.all('core/regexp', pluginRegexp.configs['flat/recommended']),
+    ...applyTo.all('core/regexp', pluginRegexp.configs.recommended),
     ...applyTo.all('core/depend', pluginDepend.configs['flat/recommended']),
     ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
     ...applyTo.all('core/sonarjs/duplicated', {
@@ -397,9 +417,13 @@ function getCoreConfigs() {
         'sonarjs/no-unused-vars': 'off',
       },
     }),
-    ...applyTo.all('core/sonarjs/lag', {rules: {'sonarjs/no-commented-code': 'off'}}),
+    ...applyTo.all('core/sonarjs/lag', {rules: {
+      'sonarjs/no-commented-code': 'off'
+    }}),
     ...applyTo.all('core/no-relative-import-paths', {
-      plugins: {'no-relative-import-paths': pluginNoRelativeImportPaths},
+      plugins: {
+        'no-relative-import-paths': pluginNoRelativeImportPaths,
+      },
       rules: {
         'no-relative-import-paths/no-relative-import-paths': [
           'warn',
@@ -408,7 +432,9 @@ function getCoreConfigs() {
       },
     }),
     ...applyTo.all('core/simple-import-sort', {
-      plugins: {'simple-import-sort': pluginSimpleImportSort},
+      plugins: {
+        'simple-import-sort': pluginSimpleImportSort,
+      },
       rules: {
         'sort-imports': 'off',
         'simple-import-sort/imports': 'error',
@@ -419,14 +445,21 @@ function getCoreConfigs() {
       plugins: {
         'no-barrel-files': pluginNoBarrelFiles, // switch to eslint-plugin-barrel-files?
       },
-      rules: {'no-barrel-files/no-barrel-files': 'error'},
+      rules: {
+        'no-barrel-files/no-barrel-files': 'error',
+      },
     }),
     ...applyTo.all('core/no-secrets', {
-      plugins: {'no-secrets': pluginNoSecrets},
+      plugins: {
+        'no-secrets': pluginNoSecrets,
+      },
       rules: {
         'no-secrets/no-secrets': [
           'error',
-          {tolerance: 4.5, ignoreContent: [new RegExp(CAMEL_CASE)]},
+          {
+            tolerance: 4.5,
+            ignoreContent: [new RegExp(CAMEL_CASE)],
+          },
         ],
       },
     }),
@@ -510,7 +543,9 @@ function getJsonConfigs() {
 function getCssModuleConfigs() {
   return [
     ...applyTo.all('core/css-modules', {
-      plugins: {'css-modules': pluginCssModules},
+      plugins: {
+        'css-modules': pluginCssModules,
+      },
       rules: pluginCssModules.configs.recommended.rules,
     }),
   ]
@@ -520,10 +555,14 @@ function getI18nextConfigs() {
   return [
     ...applyTo.script('i18next', {
       plugins: {i18next: pluginI18next},
-      rules: {'i18next/no-literal-string': 1},
+      rules: {
+        'i18next/no-literal-string': 1,
+      },
     }),
     // ...applyTo.translations('i18n', {
-    //   plugins: {'i18n-json': pluginI18nJson},
+    //   plugins: {
+    //     'i18n-json': pluginI18nJson,
+    //   },
     //   processor: {
     //     meta: {name: '.json'},
     //     ...pluginI18nJson.processors['.json'],
@@ -548,11 +587,20 @@ function getTailwindCssConfigs() {
       settings: {
         'better-tailwindcss': {
           entryPoint: 'src/style/tailwind.css',
+          detectComponentClasses: true,
           //   "tailwindConfig": "...",
           //   "attributes": [/* ... */],
           //   "callees": [/* ... */],
           //   "variables": [/* ... */],
           //   "tags": [/* ... */]
+          selectors: [
+            ...getDefaultSelectors(), // preserve default selectors
+            {
+              kind: SelectorKind.Attribute,
+              match: [{type: 'objectValues'}],
+              name: '[cC]lassNames$',
+            },
+          ],
         },
       },
     }),
@@ -803,7 +851,14 @@ function getReactConfigs() {
     ...applyTo.react('react/import-x', pluginImportX.flatConfigs.react),
     ...applyTo.react('react/a11y', {
       ...pluginJsxA11y.flatConfigs.strict,
-      settings: {'jsx-a11y': {polymorphicPropName: 'as', components: {VisuallyHidden: 'span'}}},
+      settings: {
+        'jsx-a11y': {
+          polymorphicPropName: 'as',
+          components: {
+            VisuallyHidden: 'span'
+          },
+        },
+      },
     }),
     ...applyTo.react('react/query', pluginQuery.configs['flat/recommended']),
     ...applyTo.react('react/dom', pluginReactX.configs.dom), // TODO: Exclude react in SSR, RSC??
@@ -833,13 +888,19 @@ function getReactConfigs() {
       },
     }),
     ...applyTo.reactComponents('react/naming-convention/components', {
-      rules: {'@eslint-react/naming-convention/filename': ['error', 'PascalCase']},
+      rules: {
+        '@eslint-react/naming-convention/filename': ['error', 'PascalCase'],
+      },
     }),
     ...applyTo.reactHooks('react/naming-convention/hooks', {
-      rules: {'@eslint-react/naming-convention/filename': ['error', 'camelCase']},
+      rules: {
+        '@eslint-react/naming-convention/filename': ['error', 'camelCase'],
+      },
     }),
     ...applyTo.routes('react/naming-convention/routes', {
-      rules: {'@eslint-react/naming-convention/filename': 'off'},
+      rules: {
+        '@eslint-react/naming-convention/filename': 'off',
+      },
     }),
     ...applyTo.react('react/x/hooks', {
       // TODO: enable this when available in v2.0.0 instead of manually set rules
@@ -855,24 +916,29 @@ function getReactConfigs() {
       settings: {
         'react-x': {
           polymorphicPropName: 'as',
-          additionalHooks: {useLayoutEffect: ['useIsomorphicLayoutEffect']},
+          additionalHooks: {
+            useLayoutEffect: ['useIsomorphicLayoutEffect'],
+          },
           version: 'detect',
         },
       },
     }),
-    ...applyTo.react('react/refresh', {
-      plugins: {'react-refresh': pluginReactRefresh},
-      rules: {
-        'react-refresh/only-export-components': [
-          'warn',
-          {
-            allowConstantExport: true,
-            checkJS: true,
-            customHOCs: ['deepMemo'], // currently not working because we are using currying to return the memoized component
-          },
-        ],
-      },
-    }),
+    ...applyTo.react(
+      'react/refresh',
+      reactRefresh.configs.vite(() => ({
+        rules: {
+          'react-refresh/only-export-components': [
+            'warn',
+            {
+              allowConstantExport: true,
+              checkJS: true,
+              allowExportNames: [],
+              extraHOCs: ['deepMemo'], // currently not working because we are using currying to return the memoized component
+            },
+          ],
+        },
+      })),
+    ),
     ...applyTo.react('react/compiler', pluginReactCompiler.configs.recommended),
     ...applyTo.react('react/perf', pluginReactPerf.configs.flat.all),
     ...applyTo.react('react/perf-custom', {
@@ -916,8 +982,24 @@ function getReactConfigs() {
       },
     }),
     ...applyTo.react('react', {
-      languageOptions: {globals: {React: true}, parserOptions: {ecmaFeatures: {jsx: true}}},
-      rules: {'jsx-a11y/label-has-associated-control': ['error', {controlComponents: ['button']}]},
+      languageOptions: {
+        globals: {
+          React: true,
+        },
+        parserOptions: {
+          ecmaFeatures: {
+            jsx: true,
+          },
+        },
+      },
+      rules: {
+        'jsx-a11y/label-has-associated-control': [
+          'error',
+          {
+            controlComponents: ['button'],
+          },
+        ],
+      },
     }),
     ...applyTo.react('react-you-might-not-need-an-effect', {
       ...pluginReactYouMightNotNeedAnEffect.configs.recommended,
@@ -973,7 +1055,9 @@ function getReactWebConfigs() {
 //     ),
 //     ...applyTo.react('react-native/off-dom', pluginReact.configs['off-dom']),
 //     ...applyTo.reactComponents('react/naming-convention/components', {
-//       rules: {'@eslint-react/naming-convention/filename': ['error', 'kebab-case']},
+//       rules: {
+//         '@eslint-react/naming-convention/filename': ['error', 'kebab-case']
+//       },
 //     }),
 //   ]
 // }
@@ -992,7 +1076,9 @@ function getReactTypescriptConfigs() {
       ...pluginReactX.configs['recommended-type-checked'],
     }),
     ...applyTo.typescriptReact('react/x-typescript-custom', {
-      // rules: {'@eslint-react/prefer-read-only-props': 'warn'}, // Too many noise
+      rules: {
+        // '@eslint-react/prefer-read-only-props': 'warn' // Too many noise
+      },
     }),
     ...applyTo.typescriptReact('react/typescript', {
       rules: {
@@ -1000,7 +1086,11 @@ function getReactTypescriptConfigs() {
         // https://github.com/orgs/react-hook-form/discussions/8020
         '@typescript-eslint/no-misused-promises': [
           'error',
-          {checksVoidReturn: {attributes: false}},
+          {
+            checksVoidReturn: {
+              attributes: false,
+            },
+          },
         ],
       },
     }),
@@ -1026,8 +1116,12 @@ function getReactTypescriptConfigs() {
 function getTestConfigs() {
   return [
     ...applyTo.test('testing/no-only-tests', {
-      plugins: {'no-only-tests': pluginNoOnlyTests},
-      rules: {'no-only-tests/no-only-tests': 'error'},
+      plugins: {
+        'no-only-tests': pluginNoOnlyTests,
+      },
+      rules: {
+        'no-only-tests/no-only-tests': 'error',
+      },
     }),
   ]
 }
@@ -1035,14 +1129,22 @@ function getTestConfigs() {
 function getVitestConfigs() {
   return [
     ...applyTo.test('testing/vitest', {
-      plugins: {vitest: pluginVitest},
+      plugins: {
+        vitest: pluginVitest,
+      },
       rules: {
         ...pluginVitest.configs.all.rules,
         'vitest/no-hooks': 'off',
         'vitest/max-expects': 'off',
       },
-      settings: {vitest: {typecheck: true}},
-      languageOptions: {globals: pluginVitest.environments.env.globals},
+      settings: {
+        vitest: {
+          typecheck: true,
+        },
+      },
+      languageOptions: {
+        globals: pluginVitest.environments.env.globals,
+      },
     }),
     ...applyTo.testType('testing/vitest/type', {
       rules: {
@@ -1078,7 +1180,7 @@ function getCypressConfigs() {
 
 //------------------------------------------------------------------------------
 
-export default tsEslint.config(
+export default defineConfig(
   ...getIgnoreConfigs(),
   ...getCoreConfigs(),
   ...getWebConfigs(),
@@ -1105,7 +1207,11 @@ export default tsEslint.config(
     languageOptions: {
       sourceType: 'module',
       ecmaVersion: 'latest',
-      parserOptions: {ecmaFeatures: {impliedStrict: true}},
+      parserOptions: {
+        ecmaFeatures: {
+          impliedStrict: true,
+        },
+      },
       globals: {
         ...globals.browser,
         ...globals.worker,
@@ -1124,7 +1230,11 @@ export default tsEslint.config(
     languageOptions: {
       sourceType: 'commonjs',
       ecmaVersion: 'latest',
-      parserOptions: {ecmaFeatures: {impliedStrict: true}},
+      parserOptions: {
+        ecmaFeatures: {
+          impliedStrict: true,
+        },
+      },
       globals: {
         ...globals.commonjs,
         ...globals.node,

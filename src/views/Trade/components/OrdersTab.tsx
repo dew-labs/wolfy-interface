@@ -206,7 +206,7 @@ export default memo(function OrdersTab() {
               <TableRow key={order.key}>
                 <TableCell>
                   <div
-                    className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${order.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                   />
                   <div>
                     {isDecreaseOrderType(order.orderType)
@@ -222,7 +222,7 @@ export default memo(function OrdersTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap transition-none! tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
                         setTokenAddress(order.marketData.indexTokenAddress)
                       }}
@@ -230,7 +230,7 @@ export default memo(function OrdersTab() {
                       <img
                         src={order.marketData.indexToken.imageUrl}
                         alt={order.indexName}
-                        className='size-6 rounded'
+                        className='size-6 rounded-sm'
                       />
                       <div className='flex flex-col'>
                         <div>{order.indexName}</div>

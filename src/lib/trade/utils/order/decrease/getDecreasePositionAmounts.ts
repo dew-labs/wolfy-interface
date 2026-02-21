@@ -427,8 +427,8 @@ export default function getDecreasePositionAmounts(p: {
 
     values.collateralDeltaUsd =
       /**
-       * 1. @see https://app.asana.com/0/1204313444805313/1207549197964321/f
-       * 2. leverageWithoutPnl may be zero if sizeInUsd is defaulted to 0n when position not ready yet
+       * @see https://app.asana.com/0/1204313444805313/1207549197964321/f
+       * leverageWithoutPnl may be zero if sizeInUsd is defaulted to 0n when position not ready yet
        */
       leverageWithoutPnl !== undefined && leverageWithoutPnl !== 0n
         ? remainingCollateralUsd -

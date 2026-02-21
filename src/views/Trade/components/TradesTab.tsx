@@ -294,7 +294,7 @@ export default memo(function TradesTab() {
       <Table
         className='mt-2'
         aria-label='Trade History Table'
-        classNames={{th: '!rounded-none font-serif'}}
+        classNames={{th: 'rounded-none! font-serif'}}
       >
         <TableHeader>
           <TableColumn>
@@ -366,7 +366,7 @@ export default memo(function TradesTab() {
               <TableRow key={item.id}>
                 <TableCell>
                   <div
-                    className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${(() => {
+                    className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${(() => {
                       if (
                         item.action === TradeHistoryAction.MarketIncrease ||
                         item.action === TradeHistoryAction.RequestMarketIncrease ||
@@ -398,7 +398,7 @@ export default memo(function TradesTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap !transition-none tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap transition-none! tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
                         setTokenAddress(item.market.indexTokenAddress)
                       }}
@@ -406,7 +406,7 @@ export default memo(function TradesTab() {
                       <img
                         src={item.market.indexToken.imageUrl}
                         alt={item.market.indexToken.symbol}
-                        className='size-6 rounded'
+                        className='size-6 rounded-sm'
                       />
                       <div className='flex flex-col'>
                         <div>

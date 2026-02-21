@@ -204,9 +204,7 @@ export const FEE_TOKEN_ADDRESS = new Map<StarknetChainId, string>([
 export function getTokenMetadata(chainId: StarknetChainId, address: string) {
   const tokenMetadata = TOKENS_METADATA.get(chainId)?.get(address)
 
-  if (!tokenMetadata) {
-    throw new Error(`Token address "${address}" for chainId ${chainId} is not supported`)
-  }
+  invariant(tokenMetadata, `Token address "${address}" for chainId ${chainId} is not supported`)
 
   return tokenMetadata
 }
@@ -214,9 +212,7 @@ export function getTokenMetadata(chainId: StarknetChainId, address: string) {
 export function getTokensMetadata(chainId: StarknetChainId) {
   const tokensMetadata = TOKENS_METADATA.get(chainId)
 
-  if (!tokensMetadata) {
-    throw new Error(`ChainId "${chainId}" is not supported`)
-  }
+  invariant(tokensMetadata, `ChainId "${chainId}" is not supported`)
 
   return tokensMetadata
 }

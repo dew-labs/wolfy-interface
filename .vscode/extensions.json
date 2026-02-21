@@ -41,6 +41,7 @@
     "inlang.vs-code-extension",
     "crystal-spider.jsdoc-generator",
     "burkeholland.simple-react-snippets",
-    "dsznajder.es7-react-js-snippets"
+    "dsznajder.es7-react-js-snippets",
+    "typescriptteam.native-preview"
   ]
 }

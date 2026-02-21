@@ -220,7 +220,7 @@ const Controller = selfResettableComponent(({reset}) => {
     latestLeverageInput,
     handleLeverageChangeEnd,
     setLeverageInput,
-    setLeverageInputFocused,
+    setLeverageInputIsFocused,
     leverage,
     leverageNumber,
     handleLeverageChange,
@@ -801,12 +801,12 @@ const Controller = selfResettableComponent(({reset}) => {
   )
 
   const onLeverageInputFocus = useCallback(() => {
-    setLeverageInputFocused(true)
-  }, [setLeverageInputFocused])
+    setLeverageInputIsFocused(true)
+  }, [setLeverageInputIsFocused])
 
   const onLeverageInputBlur = useCallback(() => {
-    setLeverageInputFocused(false)
-  }, [setLeverageInputFocused])
+    setLeverageInputIsFocused(false)
+  }, [setLeverageInputIsFocused])
 
   const sliderRenderValue = useCallback(
     (props: ComponentProps<'output'>) => (
@@ -850,7 +850,7 @@ const Controller = selfResettableComponent(({reset}) => {
   )
 
   return (
-    <div className='flex w-full flex-col md:max-w-[26rem] lg:max-w-[30rem]'>
+    <div className='flex w-full flex-col md:max-w-104 lg:max-w-120'>
       <Card>
         <CardBody>
           <Tabs
@@ -858,7 +858,7 @@ const Controller = selfResettableComponent(({reset}) => {
             selectedKey={tradeType}
             onSelectionChange={handleChangeTradeType}
             aria-label='Trade type'
-            classNames={{tabList: 'gap-2 w-full relative'}}
+            classNames={{tabList: 'relative w-full gap-2'}}
             color={tradeType === TradeType.Long ? 'success' : 'danger'}
           >
             {SUPPORTED_TRADE_TYPES.map(type => (
@@ -911,8 +911,8 @@ const Controller = selfResettableComponent(({reset}) => {
             defaultValue={1}
             className='mt-4'
             classNames={{
-              thumb: '!rounded-none before:!rounded-none after:!rounded-none',
-              track: '!rounded-none',
+              thumb: 'rounded-none! before:rounded-none! after:rounded-none!',
+              track: 'rounded-none!',
             }}
             renderValue={sliderRenderValue}
             value={leverageNumber}

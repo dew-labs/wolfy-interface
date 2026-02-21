@@ -224,7 +224,7 @@ describe('attempt runtime tests', () => {
       const circular: Record<string, unknown> = {a: 1}
       circular.self = circular
 
-      expect(() => stringOrFn(circular)).not.toThrow()
+      expect(() => stringOrFn(circular)).not.toThrowError()
     })
 
     it('should handle undefined properties', () => {

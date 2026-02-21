@@ -19,15 +19,15 @@
 
 html,
 body {
-  /* Improve text rendering */
-  -webkit-font-smoothing: antialiased;
-
   /* Improve text spacing: https://www.w3.org/WAI/WCAG21/Understanding/text-spacing.html */
   line-height: 1.5;
 
   /* Prevent font size inflation */
   text-size-adjust: none;
   background: none;
+
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
 
   @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
     /* Disabled user select in PWA */
@@ -83,7 +83,7 @@ body {
 /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
 ul[role='list'],
 ol[role='list'] {
-  list-style: none;
+  list-style: '';
 }
 
 /* Remove summary style on webkit */

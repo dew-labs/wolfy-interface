@@ -25,7 +25,7 @@ const PoolsIndexRoute = PoolsIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/pools': typeof PoolsIndexRoute
+  '/pools/': typeof PoolsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -38,7 +38,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pools'
+  fullPaths: '/' | '/pools/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/pools'
   id: '__root__' | '/' | '/pools/'
@@ -61,7 +61,7 @@ declare module '@tanstack/react-router' {
     '/pools/': {
       id: '/pools/'
       path: '/pools'
-      fullPath: '/pools'
+      fullPath: '/pools/'
       preLoaderRoute: typeof PoolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

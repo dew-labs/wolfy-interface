@@ -240,13 +240,12 @@ export default memo(function MarketInformation() {
     return sortedAndFilteredIndexTokens
   }, [indexTokensWithLiquidityInformationList, marketSortDescriptor, tokensMetadata])
 
-  const indexTokenAddressList = useMemo(
-    () => indexTokensWithLiquidityInformationList.map(i => i.markets[0]?.indexTokenAddress),
-    [indexTokensWithLiquidityInformationList],
-  )
-
   useEffect(
     function setDefaultTokenAddress() {
+      const indexTokenAddressList = indexTokensWithLiquidityInformationList.map(
+        i => i.markets[0]?.indexTokenAddress,
+      )
+
       if (
         (!tokenAddress || !indexTokenAddressList.includes(tokenAddress)) &&
         indexTokenAddressList[0]
@@ -254,7 +253,7 @@ export default memo(function MarketInformation() {
         setTokenAddress(indexTokenAddressList[0])
       }
     },
-    [indexTokenAddressList, setTokenAddress, tokenAddress],
+    [indexTokensWithLiquidityInformationList, setTokenAddress, tokenAddress],
   )
 
   const tokenMetadata = tokenAddress ? tokensMetadata.get(tokenAddress) : undefined
@@ -362,7 +361,7 @@ export default memo(function MarketInformation() {
                 variant='flat'
                 startContent={
                   tokenMetadata ? (
-                    <img className='rounded' src={tokenMetadata.imageUrl} width='24' alt='' />
+                    <img className='rounded-sm' src={tokenMetadata.imageUrl} width='24' alt='' />
                   ) : (
                     '--'
                   )
@@ -395,7 +394,7 @@ export default memo(function MarketInformation() {
                       <TableRow key={item.address} className='cursor-pointer'>
                         <TableCell>
                           <div className='flex min-w-max items-center gap-2 text-nowrap'>
-                            <img src={item.imageUrl} alt={item.symbol} className='size-6 rounded' />
+                            <img src={item.imageUrl} alt={item.symbol} className='size-6 rounded-sm' />
                             <span>{`${item.symbol}/USD`}</span>
                           </div>
                         </TableCell>
@@ -417,7 +416,7 @@ export default memo(function MarketInformation() {
           </Popover>
           <div className='flex flex-1 flex-row gap-4'>
             <div className='flex flex-col items-start justify-center'>
-              <div className='text-2xl leading-6 text-nowrap'>{priceIndexComp}</div>
+              <div className='text-2xl/6 text-nowrap'>{priceIndexComp}</div>
               <div className='text-xs text-nowrap opacity-70'>{priceMarkText}</div>
             </div>
             <div className='flex flex-col items-start justify-center'>

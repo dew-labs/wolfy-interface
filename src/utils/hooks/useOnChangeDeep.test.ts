@@ -139,12 +139,14 @@ describe(useOnChangeDeep, () => {
 
     const onChangeFn = vi.fn()
     const {rerender} = renderHook(
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument -- its okay */
       ({value}: any) => {
         useOnChangeDeep(value, onChangeFn)
       },
       {
         initialProps: {value: []},
       } as any,
+      /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument  */
     )
 
     expect(onChangeFn).toHaveBeenCalledTimes(0)

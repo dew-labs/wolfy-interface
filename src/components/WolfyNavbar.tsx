@@ -40,8 +40,8 @@ import middleEllipsis from '@/utils/middleEllipsis'
 import ThemeSwitchButton from './ThemeSwitchButton'
 
 const menuItems = [
-  {label: 'Trade', to: TradeRoute.fullPath, target: '_self', external: false},
-  {label: 'Pools', to: PoolsRoute.fullPath, target: '_self', external: false},
+  {label: 'Trade', to: TradeRoute.to, target: '_self', external: false},
+  {label: 'Pools', to: PoolsRoute.to, target: '_self', external: false},
   {label: 'Referrals', to: '', target: '_self', external: true},
   {label: 'Leaderboard', to: '', target: '_self', external: true},
   {
@@ -200,7 +200,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
           </NavbarItem>
         </NavbarContent>
         <NavbarMenu
-          className='top-[calc(var(--navbar-height)_-_1px)] mt-4 max-h-fit bg-default-200/50 pt-4 pb-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
+          className='top-[calc(var(--navbar-height)-1px)] mt-4 max-h-fit bg-default-200/50 pt-4 pb-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
           motionProps={NAVBAR_MENU_MOTION_PROPS}
         >
           {menuItems.map((item, index) => (

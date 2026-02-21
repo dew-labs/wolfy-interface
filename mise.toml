@@ -1,5 +1,5 @@
 [tools]
-node = "22"
+node = "24"
 
 [hooks]
 enter = "mise i -q"

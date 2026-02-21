@@ -268,7 +268,7 @@ export default memo(function DepositWithdrawalHistory() {
         <Table
           className='mt-2'
           aria-label='Deposit/Withdrawal History Table'
-          classNames={{th: '!rounded-none font-serif'}}
+          classNames={{th: 'rounded-none! font-serif'}}
         >
           <TableHeader>
             <TableColumn>
@@ -331,7 +331,7 @@ export default memo(function DepositWithdrawalHistory() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div
-                      className={`!absolute top-[10%] -left-4 h-4/5 w-1 ${(() => {
+                      className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${(() => {
                         if (
                           item.action === TradeHistoryAction.RequestDeposit ||
                           item.action === TradeHistoryAction.Deposit ||
@@ -350,7 +350,7 @@ export default memo(function DepositWithdrawalHistory() {
                       <img
                         src={item.market.indexToken.imageUrl}
                         alt={item.market.indexToken.symbol}
-                        className='size-6 rounded'
+                        className='size-6 rounded-sm'
                       />
                       <div className='flex flex-col'>
                         <div>{item.market.indexToken.symbol}</div>

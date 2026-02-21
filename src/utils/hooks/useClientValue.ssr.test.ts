@@ -13,7 +13,7 @@ describe('useClientValue on server side', () => {
       useClientValue(() => window.innerHeight, DEFAULT_VALUE),
     )
 
-    expect(() => window).toThrow('window is not defined')
+    expect(() => window).toThrowError('window is not defined')
 
     expect(result.current).toBe(DEFAULT_VALUE)
 

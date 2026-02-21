@@ -345,7 +345,7 @@ export default memo(function PoolsTable() {
     }
 
     return <>{market[key]}</>
-  }, [])
+  }, [handleOpenModal])
 
   const onSearchChange = useCallback((value: string) => {
     setFilterValue(value)
