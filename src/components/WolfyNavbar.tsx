@@ -90,6 +90,7 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   return (
     <>
       <ConnectModal />
+      {/* @ts-expect-error -- unresolved type issues due to type augmentation */}
       <Navbar
         {...props}
         classNames={navbarClassNames}

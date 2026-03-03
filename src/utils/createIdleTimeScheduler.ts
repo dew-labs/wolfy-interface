@@ -133,7 +133,6 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
       abortControllers.set(id, abortController)
 
       try {
-        // @ts-expect-error - type is not available yet https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1249
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- explanation above
         globalThis.scheduler
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- explanation above

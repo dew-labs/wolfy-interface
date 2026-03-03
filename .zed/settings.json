@@ -34,7 +34,7 @@
       }
     },
     "TypeScript": {
-      "language_servers": ["vtsls", "eslint"],
+      "language_servers": ["tsgo", "vtsls", "eslint"],
       "formatter": {
         "external": {
           "command": "prettierd",
@@ -47,7 +47,7 @@
       }
     },
     "TSX": {
-      "language_servers": ["vtsls", "eslint"],
+      "language_servers": ["tsgo", "vtsls", "eslint"],
       "formatter": {
         "external": {
           "command": "prettierd",

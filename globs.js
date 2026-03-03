@@ -8,6 +8,7 @@ const globs = {
   JSONC: ['**/*.jsonc', '**/tsconfig.json', '.{vscode,zed}/*.json'],
   JSON5: ['**/*.json5'],
   JSONC5: ['**/*.json?(c|5)'],
+  TRANSLATIONS: ['./src/i18n/translations/**/*.json'],
   // Add vue, svelte,... if using them
   JAVASCRIPT: ['**/*.?(c|m)js?(x)'],
   TYPESCRIPT: ['**/*.?(c|m)ts?(x)'],

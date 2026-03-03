@@ -417,9 +417,11 @@ function getCoreConfigs() {
         'sonarjs/no-unused-vars': 'off',
       },
     }),
-    ...applyTo.all('core/sonarjs/lag', {rules: {
-      'sonarjs/no-commented-code': 'off'
-    }}),
+    ...applyTo.all('core/sonarjs/lag', {
+      rules: {
+        'sonarjs/no-commented-code': 'off',
+      },
+    }),
     ...applyTo.all('core/no-relative-import-paths', {
       plugins: {
         'no-relative-import-paths': pluginNoRelativeImportPaths,
@@ -855,7 +857,7 @@ function getReactConfigs() {
         'jsx-a11y': {
           polymorphicPropName: 'as',
           components: {
-            VisuallyHidden: 'span'
+            VisuallyHidden: 'span',
           },
         },
       },
@@ -1053,10 +1055,10 @@ function getReactWebConfigs() {
 //       'react-native-a11y',
 //       fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all')),
 //     ),
-//     ...applyTo.react('react-native/off-dom', pluginReact.configs['off-dom']),
+//     ...applyTo.react('react-native/off-dom', pluginReactX.configs['off-dom']),
 //     ...applyTo.reactComponents('react/naming-convention/components', {
 //       rules: {
-//         '@eslint-react/naming-convention/filename': ['error', 'kebab-case']
+//         '@eslint-react/naming-convention/filename': ['error', 'kebab-case'],
 //       },
 //     }),
 //   ]
@@ -1077,7 +1079,7 @@ function getReactTypescriptConfigs() {
     }),
     ...applyTo.typescriptReact('react/x-typescript-custom', {
       rules: {
-        // '@eslint-react/prefer-read-only-props': 'warn' // Too many noise
+        // '@eslint-react/prefer-read-only-props': 'warn', // Too many noise
       },
     }),
     ...applyTo.typescriptReact('react/typescript', {

@@ -78,6 +78,7 @@ describe('filteredArray runtime tests', () => {
     it('should call error handler for each invalid value', () => {
       expect.assertions(2)
 
+      errorHandler.mockRestore()
       numbersType(['foo', 123, 'bar', 456])
 
       expect(errorHandler).toHaveBeenCalledTimes(2)
@@ -87,6 +88,7 @@ describe('filteredArray runtime tests', () => {
     it('should not call error handler for valid values', () => {
       expect.assertions(2)
 
+      errorHandler.mockRestore()
       numbersType([1, 2, 3])
 
       expect(errorHandler).not.toHaveBeenCalled()

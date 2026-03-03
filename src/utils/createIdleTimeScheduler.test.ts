@@ -3,13 +3,6 @@ import {afterEach, beforeEach, describe, expect, expectTypeOf, it, vi} from 'vit
 import type {IdleTimeScheduler} from '@/utils/createIdleTimeScheduler'
 import createIdleTimeScheduler from '@/utils/createIdleTimeScheduler'
 
-interface SchedulerAPI {
-  postTask: (
-    callback: () => void,
-    options: {priority: 'background'; signal: AbortSignal; delay: number},
-  ) => Promise<void>
-}
-
 describe(createIdleTimeScheduler, () => {
   let scheduler: IdleTimeScheduler
   const mockRequestIdleCallback = vi.fn()
@@ -18,10 +11,14 @@ describe(createIdleTimeScheduler, () => {
 
   beforeEach(() => {
     vi.useFakeTimers()
+    mockRequestIdleCallback.mockRestore()
+    mockSetTimeout.mockRestore()
+    mockConsoleError.mockRestore()
     // Mock requestIdleCallback
     window.requestIdleCallback = mockRequestIdleCallback as typeof window.requestIdleCallback
     vi.spyOn(window, 'setTimeout').mockImplementation(mockSetTimeout)
     vi.spyOn(console, 'error').mockImplementation(mockConsoleError)
+    // @ts-expect-error - removing window method for testing
     delete window.scheduler
     scheduler = createIdleTimeScheduler(1000)
   })
@@ -209,7 +206,7 @@ describe(createIdleTimeScheduler, () => {
       // Mock window.scheduler to simulate AbortController failure
       const error = new Error('AbortController failed')
       const mockPostTask = vi.fn().mockRejectedValue(error)
-      window.scheduler = {postTask: mockPostTask} as SchedulerAPI
+      window.scheduler = {postTask: mockPostTask, yield: vi.fn()}
 
       const task = vi.fn()
       scheduler.schedule(task)
@@ -227,7 +224,7 @@ describe(createIdleTimeScheduler, () => {
       expect.assertions(1)
 
       const mockPostTask = vi.fn().mockResolvedValue(undefined)
-      window.scheduler = {postTask: mockPostTask} as SchedulerAPI
+      window.scheduler = {postTask: mockPostTask, yield: vi.fn()}
 
       const task = vi.fn()
       scheduler.schedule(task)
