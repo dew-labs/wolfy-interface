@@ -257,7 +257,7 @@
     "stylelint-plugin-defensive-css": "^2.5.0",
     "stylelint-prettier": "^5.0.3",
     "stylelint-use-logical-spec": "^5.0.1",
-    "svgo": "^4.0.0",
+    "svgo": "^4.0.1",
     "tailwindcss": "^4.2.0",
     "terser": "^5.46.0",
     "ts-api-utils": "^2.4.0",
