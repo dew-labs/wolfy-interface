@@ -8,7 +8,7 @@
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable", "WebWorker"],
+    "lib": ["ESNext", "DOM", "WebWorker"],
     "useDefineForClassFields": true, // https://vitejs.dev/guide/features.html#usedefineforclassfields
     // Interop constraints
     "isolatedModules": true,
@@ -54,6 +54,7 @@
       "/*": ["./public/*"]
     },
     "types": [
+      "*",
       "node",
       "react/experimental",
       "react-dom/experimental",

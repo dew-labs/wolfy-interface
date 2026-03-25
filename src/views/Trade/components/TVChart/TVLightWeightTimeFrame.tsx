@@ -1,11 +1,10 @@
 import {Tab, Tabs} from '@heroui/react'
-import {type Key} from '@react-types/shared'
 
 import {ChartInterval} from '@/lib/tvchart/chartdata/ChartData.ts'
 
 interface Props {
   selectedInterval: ChartInterval
-  onSelectInterval: Dispatch<Key | null>
+  onSelectInterval: Dispatch<string | number | null>
 }
 
 export default memo(function TVLightWeightTimeFrame({selectedInterval, onSelectInterval}: Props) {

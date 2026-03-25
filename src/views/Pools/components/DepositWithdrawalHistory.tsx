@@ -111,7 +111,7 @@ export default memo(function DepositWithdrawalHistory() {
 
   const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // GET DEPOSIT/WITHDRAWAL HISTORY
   const {

@@ -1,5 +1,4 @@
 import {Card} from '@heroui/react'
-import {type Key} from '@react-types/shared'
 import {LineStyle} from 'lightweight-charts'
 
 import {getTokensMetadata, MOCK_SYMBOL_MAP} from '@/constants/tokens'
@@ -183,7 +182,7 @@ export default memo(function Chart() {
   const tokenSymbol = getTokensMetadata(chainId).get(tokenAddress ?? '')?.symbol
   const asset = tokenSymbol ? MOCK_SYMBOL_MAP[tokenSymbol] : undefined
 
-  const handleChartIntervalSelection = useCallback((key: Key | null) => {
+  const handleChartIntervalSelection = useCallback((key: string | number | null) => {
     if (isChartInterval(key)) {
       setChartInterval(key)
     }

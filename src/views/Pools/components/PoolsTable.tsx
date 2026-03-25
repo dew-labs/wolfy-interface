@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@heroui/react'
-import type {SortDescriptor} from '@react-types/shared'
 import {matchSorter} from 'match-sorter'
 import {create} from 'mutative'
 
@@ -31,6 +30,11 @@ import formatNumber, {Format} from '@/utils/numbers/formatNumber'
 
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
+
+interface SortDescriptor {
+  column: string | number
+  direction: 'ascending' | 'descending'
+}
 
 const columns = [
   {name: 'MARKET', uid: 'market', sortable: true},
@@ -285,67 +289,70 @@ export default memo(function PoolsTable() {
     setSelectedMarketAddress(null)
   }, [setIsModalOpen, setSelectedMarketAddress])
 
-  const renderCell = useCallback((market: ExtendedMarketData, columnKey: React.Key) => {
-    const key = String(columnKey) as keyof ExtendedMarketData
+  const renderCell = useCallback(
+    (market: ExtendedMarketData, columnKey: React.Key) => {
+      const key = String(columnKey) as keyof ExtendedMarketData
 
-    if (['market'].includes(key)) {
-      return (
-        <div className='flex items-center gap-2'>
-          <img src={market.imageUrl} alt={market.market} className='size-6' />
-          <span className='text-nowrap'>{market.market}</span>
-        </div>
-      )
-    }
+      if (['market'].includes(key)) {
+        return (
+          <div className='flex items-center gap-2'>
+            <img src={market.imageUrl} alt={market.market} className='size-6' />
+            <span className='text-nowrap'>{market.market}</span>
+          </div>
+        )
+      }
 
-    if (['price'].includes(key)) {
-      return <span className='text-nowrap'>{market.priceString}</span>
-    }
+      if (['price'].includes(key)) {
+        return <span className='text-nowrap'>{market.priceString}</span>
+      }
 
-    if (['totalSupply'].includes(key)) {
-      return (
-        <>
-          <div className='text-nowrap'>{market.totalSupplyString} WM</div>
-          <div className='text-xs text-nowrap opacity-50'>{market.valueString}</div>
-        </>
-      )
-    }
+      if (['totalSupply'].includes(key)) {
+        return (
+          <>
+            <div className='text-nowrap'>{market.totalSupplyString} WM</div>
+            <div className='text-xs text-nowrap opacity-50'>{market.valueString}</div>
+          </>
+        )
+      }
 
-    if (['balance'].includes(key)) {
-      return (
-        <>
-          <div className='text-nowrap'>{market.balanceString} WM</div>
-          <div className='text-xs text-nowrap opacity-50'>${market.balanceValueString}</div>
-        </>
-      )
-    }
+      if (['balance'].includes(key)) {
+        return (
+          <>
+            <div className='text-nowrap'>{market.balanceString} WM</div>
+            <div className='text-xs text-nowrap opacity-50'>${market.balanceValueString}</div>
+          </>
+        )
+      }
 
-    if (key === 'actions') {
-      return (
-        <div className='flex gap-2'>
-          <Button
-            size='sm'
-            color='success'
-            onPress={() => {
-              handleOpenModal(market.marketTokenAddress, 'buy')
-            }}
-          >
-            Buy
-          </Button>
-          <Button
-            size='sm'
-            color='danger'
-            onPress={() => {
-              handleOpenModal(market.marketTokenAddress, 'sell')
-            }}
-          >
-            Sell
-          </Button>
-        </div>
-      )
-    }
+      if (key === 'actions') {
+        return (
+          <div className='flex gap-2'>
+            <Button
+              size='sm'
+              color='success'
+              onPress={() => {
+                handleOpenModal(market.marketTokenAddress, 'buy')
+              }}
+            >
+              Buy
+            </Button>
+            <Button
+              size='sm'
+              color='danger'
+              onPress={() => {
+                handleOpenModal(market.marketTokenAddress, 'sell')
+              }}
+            >
+              Sell
+            </Button>
+          </div>
+        )
+      }
 
-    return <>{market[key]}</>
-  }, [handleOpenModal])
+      return <>{market[key]}</>
+    },
+    [handleOpenModal],
+  )
 
   const onSearchChange = useCallback((value: string) => {
     setFilterValue(value)

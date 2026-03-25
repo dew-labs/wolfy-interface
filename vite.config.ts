@@ -9,13 +9,14 @@ import {vite as millionLintVite} from '@million/lint'
 import {partytownVite} from '@qwik.dev/partytown/utils'
 import pluginOptimizeLocales from '@react-aria/optimize-locales-plugin'
 import {inspectorServer} from '@react-dev-inspector/vite-plugin'
+import babel from '@rolldown/plugin-babel'
 import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
 import UnheadVite from '@unhead/addons/vite'
 import legacy from '@vitejs/plugin-legacy'
-import react from '@vitejs/plugin-react-swc'
+import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {humanId} from 'human-id'
 import {obfuscator} from 'rollup-obfuscator'
@@ -27,8 +28,8 @@ import turboConsole from 'unplugin-turbo-console/vite'
 import {defineConfig, loadEnv, type PluginOption, type UserConfig} from 'vite'
 import {patchCssModules} from 'vite-css-modules'
 import {imagetools as pluginImageTools} from 'vite-imagetools'
-import circleDependency from 'vite-plugin-circular-dependency'
 // import pluginChecker from 'vite-plugin-checker'
+import circleDependency from 'vite-plugin-circular-dependency'
 // import {compression} from 'vite-plugin-compression2'
 import dynamicImport from 'vite-plugin-dynamic-import'
 import {createHtmlPlugin} from 'vite-plugin-html'
@@ -40,7 +41,6 @@ import preload from 'vite-plugin-preload'
 import reactFallbackThrottlePlugin from 'vite-plugin-react-fallback-throttle'
 import {robots} from 'vite-plugin-robots'
 import svgr from 'vite-plugin-svgr'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 import generateW from './generateW.js'
 import globs from './globs.js'
@@ -374,7 +374,6 @@ export function getConfig(mode: string): UserConfig {
       __RRWEB_EXCLUDE_SHADOW_DOM__: true,
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
-    tsconfigPaths({}),
     partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
     isDevMode &&
       turboConsole({
@@ -405,50 +404,26 @@ export function getConfig(mode: string): UserConfig {
       },
     }),
     millionLintVite({enabled: shouldEnableProfile}),
-    // SWC React
-    react({
+    // Oxc + Babel React for react compiler
+    react(),
+    babel({
+      presets: [
+        reactCompilerPreset({
+          // compilationMode: 'annotation'
+        }),
+        ['jotai-babel/preset', {
+          customAtomNames: []
+        }],
+      ],
       plugins: [
-        ['@swc-jotai/debug-label', {}],
-        ['@swc-jotai/react-refresh', {}],
-        // ['swc-plugin-dev-expression', {}], // Need to upgrade swc_core
-        // [
-        //   '@swc/plugin-remove-console',
-        //   {
-        //     exclude: ['error'],
-        //   },
-        // ],
         inTestOrDevMode
           ? false
           : [
-              '@swc/plugin-react-remove-properties',
-              {
-                // The regexes defined here are processed in Rust so the syntax is different from
-                // JavaScript `RegExp`s. See https://docs.rs/regex.
-                properties: ['^data-testid$', '^data-test-id$'], // Remove `data-testid` and `data-test-id`
-              },
+              'react-remove-properties',
+              {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
             ],
       ].filter(Boolean),
     }),
-
-    // Oxc + Babel React for react compiler
-    // react({
-    //   babel: {
-    //     plugins: [
-    //       [
-    //         'babel-plugin-react-compiler', // must run first!
-    //         {
-    //           // compilationMode: 'annotation',
-    //         },
-    //       ],
-    //       ['jotai/babel/plugin-debug-label', {}],
-    //       ['jotai/babel/plugin-react-refresh', {}],
-    //       [
-    //         'react-remove-properties',
-    //         {properties: ['data-testid', 'data-test-id', 'data-testId', 'data-testID']},
-    //       ],
-    //     ],
-    //   },
-    // }),
     // process.env.VITEST
     //   ? undefined
     //   : pluginChecker({
@@ -617,15 +592,17 @@ export function getConfig(mode: string): UserConfig {
       // manifest: true,
       // ssrManifest: true,
       // ssr: true,
-      rollupOptions: {output: {manualChunks: {sentry: ['@sentry/react']}}},
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [{name: 'sentry', test: /@sentry\/react?/}],
+          },
+        },
+      },
       target: 'esnext',
       cssMinify: 'lightningcss',
     },
-    esbuild: {
-      supported: {
-        'bigint': true,
-        'top-level-await': true,
-      },
+    oxc: {
     },
     optimizeDeps: {},
     css: {
@@ -638,7 +615,9 @@ export function getConfig(mode: string): UserConfig {
     },
     json: {stringify: true},
     plugins,
-    resolve: {alias: [{find: '@', replacement: '/src'}]},
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
       open: true,
       host: '0.0.0.0',

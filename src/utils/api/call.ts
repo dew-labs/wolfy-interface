@@ -57,6 +57,9 @@ const call = up(fetch, () => ({
   onError: () => {
     // isAuthenticatedPubSubChannel.pub(isAuthenticated())
   },
+  retry: {
+    attempts: 0, // react-query will take care of this
+  },
 }))
 
 export default call

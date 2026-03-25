@@ -14,7 +14,7 @@ export const themeEffect = atomEffect((get, set) => {
   set(currentThemeAtom, getPreferColorScheme())
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- can run in environments without window.matchMedia
-  if (!window || !window.matchMedia) {
+  if (!globalThis?.matchMedia) {
     return
   }
 

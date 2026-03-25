@@ -20,8 +20,8 @@ import {UAParser} from 'ua-parser-js'
 import {getProvider, ProviderType, type StarknetChainId} from 'wolfy-sdk'
 
 import {isConnectModalOpenAtom} from '@/lib/starknet/hooks/useConnect'
-import useIsWalletConnected from '@/lib/starknet/hooks/useIsWalletConnected'
-import useShouldReconnect from '@/lib/starknet/hooks/useShouldReconnect'
+import {useGetIsWalletConnected} from '@/lib/starknet/hooks/useIsWalletConnected'
+import {useGetShouldReconnect, useSetShouldReconnect} from '@/lib/starknet/hooks/useShouldReconnect'
 import {useSetWalletAccount} from '@/lib/starknet/hooks/useWalletAccount'
 import {useSetWalletChainId} from '@/lib/starknet/hooks/useWalletChainId'
 import useWalletsQueryQuery from '@/lib/starknet/hooks/useWalletsQuery'
@@ -111,22 +111,26 @@ const Wallet = memo(function Wallet(
 function useConnect({onConnected, onCancel}: {onConnected?: () => void; onCancel?: () => void}) {
   const setWalletAccount = useSetWalletAccount()
   const setWalletChainId = useSetWalletChainId()
-  const [shouldReconnect, setShouldReconnect] = useShouldReconnect()
-  const isConnected = useIsWalletConnected()
+  const setShouldReconnect = useSetShouldReconnect()
 
   const [isConnecting, setIsConnecting] = useState(false)
-  const latestIsConnecting = useLatest(isConnecting)
-  const isCancelled = useRef(false)
+  const connectAbortControllerRef = useRef(new AbortController())
 
-  const shouldStopConnectingOrContinue = useCallback(() => {
-    if (isCancelled.current) {
-      isCancelled.current = false
-      throw new Error('Connection cancelled')
-    }
-  }, [])
+  const cancel = useCallback(() => {
+    connectAbortControllerRef.current.abort()
+    onCancel?.()
+  }, [onCancel])
 
   const connect = useCallback(
     async (wallet: StarknetWindowObject) => {
+      const shouldStopConnectingOrContinue = () => {
+        if (connectAbortControllerRef.current.signal.aborted) {
+          const oldAbortController = connectAbortControllerRef.current
+          connectAbortControllerRef.current = new AbortController()
+          oldAbortController.signal.throwIfAborted()
+        }
+      }
+
       setIsConnecting(true)
       try {
         const connectedWallet = await getStarknetCore.enable(wallet)
@@ -167,36 +171,27 @@ function useConnect({onConnected, onCancel}: {onConnected?: () => void; onCancel
         setShouldReconnect(true)
       } catch (error: unknown) {
         console.error(error)
-        toastErrorMessage(error, 'Unexpected error occurred while connecting to the wallet')
+        toastErrorMessage(null, 'Unexpected error occurred while connecting to the wallet')
         void getStarknetCore.disconnect()
         setShouldReconnect(false)
+        onConnected?.()
+      } finally {
+        setIsConnecting(false)
       }
-
-      setIsConnecting(false)
-      onConnected?.()
     },
-    [
-      setShouldReconnect,
-      setWalletAccount,
-      setWalletChainId,
-      shouldStopConnectingOrContinue,
-      onConnected,
-    ],
+    [setShouldReconnect, setWalletAccount, setWalletChainId, onConnected],
   )
 
-  const cancel = useCallback(() => {
-    if (latestIsConnecting.current) isCancelled.current = true
-    setIsConnecting(false)
-    onCancel?.()
-  }, [onCancel])
-
-  return {shouldReconnect, isConnected, isConnecting, connect, cancel}
+  return {isConnecting, connect, cancel}
 }
 
 export default memo(function ConnectModal() {
   const [isOpen, setIsOpen] = useAtom(isConnectModalOpenAtom)
+  const getShouldReconnect = useGetShouldReconnect()
 
-  const {isConnecting, isConnected, connect, shouldReconnect, cancel} = useConnect({
+  const getIsWalletConnected = useGetIsWalletConnected()
+
+  const {connect, cancel, isConnecting} = useConnect({
     onConnected: useCallback(() => {
       setIsOpen(false)
     }, []),
@@ -204,8 +199,6 @@ export default memo(function ConnectModal() {
       setIsOpen(false)
     }, []),
   })
-
-  const latestIsWalletConnected = useLatest(isConnected)
 
   const handleClose = useCallback(() => {
     cancel()
@@ -216,12 +209,12 @@ export default memo(function ConnectModal() {
   useEffect(
     function connectToLastConnectedWallet() {
       if (!wallets?.lastConnectedWallet) return
-      if (!shouldReconnect) return
-      if (latestIsWalletConnected.current) return
+      if (!getShouldReconnect()) return
+      if (getIsWalletConnected()) return
 
       void connect(wallets.lastConnectedWallet)
     },
-    [connect, shouldReconnect, wallets?.lastConnectedWallet],
+    [connect, wallets?.lastConnectedWallet, getShouldReconnect, getIsWalletConnected],
   )
 
   return (

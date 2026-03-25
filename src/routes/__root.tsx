@@ -1,6 +1,5 @@
 import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
-import type {Href} from '@react-types/shared'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
 import {UnheadProvider} from '@unhead/react/client'
@@ -99,7 +98,8 @@ const RootRoute = memo(function RootRoute() {
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
-  const useHref = useCallback((to: Href) => router.buildLocation({to}).href, [router])
+  const useHref = useCallback((to: string) => router.buildLocation({to}).href, [router])
+
   return (
     <UnheadProvider head={head}>
       <ErrorBoundary fallback={null}>

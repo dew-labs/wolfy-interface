@@ -207,7 +207,7 @@ export default memo(function TradesTab() {
   const [selectedActions, setSelectedActions] = useState<TradeHistoryAction[]>([])
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([])
   const [selectedDirection, setSelectedDirection] = useState<boolean[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentPage, setCurrentPage] = useState(1)
 
   // GET TRADE HISTORY
   const {

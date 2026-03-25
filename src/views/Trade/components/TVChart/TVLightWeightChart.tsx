@@ -47,6 +47,7 @@ const ChartContext = createContext<ChartContextValue>({
   createPriceLine: null,
   removePriceLine: null,
 })
+ChartContext.displayName = 'ChartContext'
 
 interface LineProps {
   options: CreatePriceLineOptions

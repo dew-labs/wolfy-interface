@@ -13,7 +13,6 @@ import {
   TableRow,
 } from '@heroui/react'
 import NumberFlow from '@number-flow/react'
-import type {Selection, SortDescriptor} from '@react-types/shared'
 import {groupBy} from 'remeda'
 
 import {getTokenMetadata, getTokensMetadata} from '@/constants/tokens'
@@ -32,6 +31,11 @@ import max from '@/utils/numbers/bigint/max'
 import min from '@/utils/numbers/bigint/min'
 import expandDecimals, {shrinkDecimals} from '@/utils/numbers/expandDecimals'
 import formatNumber, {Format, getIntlNumberFormatOptions} from '@/utils/numbers/formatNumber'
+
+interface SortDescriptor {
+  column: string | number
+  direction: 'ascending' | 'descending'
+}
 
 interface TokenOption {
   longLiquidity: bigint
@@ -265,7 +269,7 @@ export default memo(function MarketInformation() {
   }, [])
 
   const handleSelectMarket = useCallback(
-    (selection: Selection) => {
+    (selection: 'all' | Set<string | number>) => {
       if (selection === 'all') return
       const selected = Array.from(selection.keys())
       if (selected.length === 0) return
@@ -394,7 +398,11 @@ export default memo(function MarketInformation() {
                       <TableRow key={item.address} className='cursor-pointer'>
                         <TableCell>
                           <div className='flex min-w-max items-center gap-2 text-nowrap'>
-                            <img src={item.imageUrl} alt={item.symbol} className='size-6 rounded-sm' />
+                            <img
+                              src={item.imageUrl}
+                              alt={item.symbol}
+                              className='size-6 rounded-sm'
+                            />
                             <span>{`${item.symbol}/USD`}</span>
                           </div>
                         </TableCell>

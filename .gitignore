@@ -39,3 +39,5 @@ tsconfig.vitest-temp.json
 
 coverage-ts
 .type-coverage
+
+env.d.ts

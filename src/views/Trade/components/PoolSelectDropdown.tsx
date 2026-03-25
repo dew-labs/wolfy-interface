@@ -1,5 +1,4 @@
 import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from '@heroui/react'
-import {type Key} from '@react-types/shared'
 
 import type {MarketData} from '@/lib/trade/services/fetchMarketData'
 import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
@@ -7,7 +6,7 @@ import getMarketPoolName from '@/lib/trade/utils/market/getMarketPoolName'
 interface PoolSelectDropdownProps {
   availableMarkets: MarketData[]
   poolName: string | undefined
-  handlePoolChange: Dispatch<Key>
+  handlePoolChange: Dispatch<string | number>
 }
 
 // TODO: provide more information about the pool

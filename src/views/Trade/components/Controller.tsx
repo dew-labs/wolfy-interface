@@ -13,7 +13,6 @@ import {
   Tabs,
   Tooltip,
 } from '@heroui/react'
-import {type Key} from '@react-types/shared'
 import {toast} from 'sonner'
 import selfResettableComponent from 'src/utils/reset-component/selfResettableComponent'
 import invariant from 'tiny-invariant'
@@ -134,7 +133,7 @@ const Controller = selfResettableComponent(({reset}) => {
   const tradeFlags = useTradeFlags(tradeType, tradeMode)
 
   const handleChangeTradeType = useCallback(
-    (value: Key | null) => {
+    (value: string | number | null) => {
       if (!value) return
       setTradeType(value as TradeType)
     },
@@ -142,7 +141,7 @@ const Controller = selfResettableComponent(({reset}) => {
   )
 
   const handleChangeTradeMode = useCallback(
-    (value: Key | null) => {
+    (value: string | number | null) => {
       if (!value) return
       const tradeMode = value as TradeMode
       setTradeMode(tradeMode)

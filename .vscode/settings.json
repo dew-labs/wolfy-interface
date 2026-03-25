@@ -8,7 +8,6 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "typescript.tsserver.nodePath": "node", // Run typescript via our local node instead of vscode's node
   // Eslint
-  "eslint.useFlatConfig": true,
   // Disable vscode default validator
   "javascript.validate.enable": false,
   "json.validate.enable": false,
@@ -51,6 +50,10 @@
     },
     {
       "rule": "vitest/padding-*",
+      "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+    },
+    {
+      "rule": "jest/padding-*",
       "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
     },
     {

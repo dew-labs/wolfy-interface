@@ -1,9 +1,9 @@
 // TODO: using .ts config file https://eslint.org/docs/head/use/configure/configuration-files#typescript-configuration-files
-import path from 'node:path'
-import {fileURLToPath} from 'node:url'
+// import path from 'node:path'
+// import {fileURLToPath} from 'node:url'
 
-import {fixupConfigRules} from '@eslint/compat'
-import {FlatCompat} from '@eslint/eslintrc'
+// import {fixupConfigRules} from '@eslint/compat'
+// import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
 import pluginReactX from '@eslint-react/eslint-plugin'
@@ -12,7 +12,7 @@ import pluginQuery from '@tanstack/eslint-plugin-query'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import pluginVitest from '@vitest/eslint-plugin'
 import restrictedGlobals from 'confusing-browser-globals'
-import {defineConfig} from 'eslint/config'
+import {defineConfig, globalIgnores} from 'eslint/config'
 import pluginGitignore from 'eslint-config-flat-gitignore'
 import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
@@ -59,7 +59,7 @@ import globs from './globs.js'
 import packageJson from './package.json' with {type: 'json'}
 import {CAMEL_CASE} from './regexes.js'
 
-const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
+// const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
 
 //------------------------------------------------------------------------------
 
@@ -80,8 +80,8 @@ function createApplyTo(include, exclude = []) {
         return configs.map((cfg, index) => ({
           ...cfg,
           name: `${name}-${index}`,
-          files: include,
-          ignores: exclude,
+          files: [...include, ...(cfg.files || [])],
+          ignores: [...exclude, ...(cfg.ignores || [])],
         }))
       }
 
@@ -92,8 +92,8 @@ function createApplyTo(include, exclude = []) {
       {
         ...config,
         name,
-        files: include,
-        ignores: exclude,
+        files: [...include, ...(config.files || [])],
+        ignores: [...exclude, ...(config.ignores || [])],
       },
     ]
   }
@@ -132,9 +132,14 @@ function getIgnoreConfigs() {
       files: ['.gitignore'],
       strict: false,
     }),
-    {
-      ignores: ['public/*', '**/*.gen.ts', 'vitest.config.ts.timestamp*', 'src/paraglide/**/*'],
-    },
+    globalIgnores([
+      '.agent/',
+      '.agents/',
+      'public/*',
+      '**/*.gen.ts',
+      'vitest.config.ts.timestamp*',
+      'src/paraglide/**/*',
+    ]),
   ]
 }
 
@@ -477,7 +482,7 @@ function getCoreConfigs() {
     ...applyTo.all('core/math/custom', {
       rules: {
         'math/prefer-exponentiation-operator': 'error',
-        // 'math/prefer-math-sum-precise': 'error' // TODO: enable this when Math.sumPrecise() become baseline available
+        // 'math/prefer-math-sum-precise': 'error' // TODO: enable this when Math.sumPrecise() become baseline available https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sumPrecise
       },
     }),
     // ...applyTo.all('core/remeda', pluginRemeda.configs.recommended),
@@ -523,10 +528,11 @@ function getCoreConfigs() {
 
 function getWebConfigs() {
   return [
-    ...applyTo.all(
-      'core/ssr-friendly',
-      fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
-    ),
+    // Waiting for https://github.com/kopiro/eslint-plugin-ssr-friendly/issues/30
+    // ...applyTo.all(
+    //   'core/ssr-friendly',
+    //   fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
+    // ),
   ]
 }
 
@@ -864,57 +870,30 @@ function getReactConfigs() {
     }),
     ...applyTo.react('react/query', pluginQuery.configs['flat/recommended']),
     ...applyTo.react('react/dom', pluginReactX.configs.dom), // TODO: Exclude react in SSR, RSC??
-    ...applyTo.javascriptReact('react/x-javascript', {...pluginReactX.configs['recommended']}),
+    ...applyTo.javascriptReact('react/x-javascript', {...pluginReactX.configs.strict}),
     ...applyTo.react('react/x-disable-conflict', {
       ...pluginReactX.configs['disable-conflict-eslint-plugin-react'],
+      ...pluginReactX.configs['disable-conflict-eslint-plugin-react-hooks'],
     }),
     ...applyTo.react('react/x-custom', {
       rules: {
+        '@eslint-react/refs': 'error',
+        '@eslint-react/immutability': 'error',
+        '@eslint-react/no-duplicate-key': 'error',
         '@eslint-react/jsx-shorthand-boolean': 'warn',
         '@eslint-react/jsx-shorthand-fragment': 'warn',
-        '@eslint-react/no-class-component': 'error',
         '@eslint-react/no-missing-component-display-name': 'error',
-        '@eslint-react/no-useless-fragment': 'error',
         '@eslint-react/prefer-namespace-import': 'error',
-        '@eslint-react/prefer-destructuring-assignment': 'warn', // TODO: enable
+        '@eslint-react/no-missing-context-display-name': 'error',
+        '@eslint-react/dom/no-string-style-prop': 'error',
         '@eslint-react/dom/no-unknown-property': [
           'error',
           {requireDataLowercase: true, ignore: []},
         ],
+        '@eslint-react/no-implicit-children': 'warn',
+        '@eslint-react/no-implicit-key': 'warn',
+        '@eslint-react/no-implicit-ref': 'warn',
       },
-    }),
-    ...applyTo.react('react/naming-convention', {
-      rules: {
-        '@eslint-react/naming-convention/component-name': ['error', 'PascalCase'],
-        '@eslint-react/naming-convention/use-state': 'error',
-      },
-    }),
-    ...applyTo.reactComponents('react/naming-convention/components', {
-      rules: {
-        '@eslint-react/naming-convention/filename': ['error', 'PascalCase'],
-      },
-    }),
-    ...applyTo.reactHooks('react/naming-convention/hooks', {
-      rules: {
-        '@eslint-react/naming-convention/filename': ['error', 'camelCase'],
-      },
-    }),
-    ...applyTo.routes('react/naming-convention/routes', {
-      rules: {
-        '@eslint-react/naming-convention/filename': 'off',
-      },
-    }),
-    ...applyTo.react('react/x/hooks', {
-      // TODO: enable this when available in v2.0.0 instead of manually set rules
-      // ...pluginReact.configs['hooks-extra'],
-      rules: {
-        '@eslint-react/prefer-use-state-lazy-initialization': 'error',
-        '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'error',
-        '@eslint-react/no-unnecessary-use-callback': 'error',
-        '@eslint-react/no-unnecessary-use-memo': 'error',
-      },
-    }),
-    ...applyTo.react('react/x-settings', {
       settings: {
         'react-x': {
           polymorphicPropName: 'as',
@@ -1056,10 +1035,6 @@ function getReactWebConfigs() {
 //       fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all')),
 //     ),
 //     ...applyTo.react('react-native/off-dom', pluginReactX.configs['off-dom']),
-//     ...applyTo.reactComponents('react/naming-convention/components', {
-//       rules: {
-//         '@eslint-react/naming-convention/filename': ['error', 'kebab-case'],
-//       },
 //     }),
 //   ]
 // }
@@ -1075,12 +1050,7 @@ function getReactWebConfigs() {
 function getReactTypescriptConfigs() {
   return [
     ...applyTo.typescriptReact('react/x-typescript', {
-      ...pluginReactX.configs['recommended-type-checked'],
-    }),
-    ...applyTo.typescriptReact('react/x-typescript-custom', {
-      rules: {
-        // '@eslint-react/prefer-read-only-props': 'warn', // Too many noise
-      },
+      ...pluginReactX.configs['strict-type-checked'],
     }),
     ...applyTo.typescriptReact('react/typescript', {
       rules: {
@@ -1156,15 +1126,6 @@ function getVitestConfigs() {
   ]
 }
 
-function getJestConfigs() {
-  return [
-    ...applyTo.test(
-      'testing/vitest/formatting',
-      flatCompat.extends('plugin:jest-formatting/strict'),
-    ),
-  ]
-}
-
 function getTestingLibraryDomConfigs() {
   return [
     ...applyTo.test('testing/vitest/jest-dom', pluginJestDom.configs['flat/recommended']),
@@ -1198,7 +1159,6 @@ export default defineConfig(
   ...getReactTypescriptConfigs(),
   ...getTestConfigs(),
   ...getVitestConfigs(),
-  ...getJestConfigs(),
   ...getTestingLibraryDomConfigs(),
   ...getTestingLibraryReactConfigs(),
   ...getCypressConfigs(),

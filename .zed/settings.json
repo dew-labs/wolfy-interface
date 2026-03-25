@@ -120,6 +120,10 @@
           "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
         },
         {
+          "rule": "jest/padding-*",
+          "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
+        },
+        {
           "rule": "jest-formatting/*",
           "severity": "off" // Silent the stylistic rules in you IDE, but still auto fix them
         }
