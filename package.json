@@ -278,7 +278,7 @@
     "unplugin-fonts": "^1.4.0",
     "unplugin-turbo-console": "^2.3.0",
     "url": "^0.11.4",
-    "vite": "^8.0.2",
+    "vite": "^8.0.5",
     "vite-css-modules": "^1.15.0",
     "vite-imagetools": "^10.0.0",
     "vite-plugin-checker": "^0.12.0",
@@ -312,7 +312,7 @@
       "@pnpm/plugin-types-fixer": "0.1.0+sha512-bLww63gRHi7siYTqFJb5qNdcXadU0jv20Et6z5AryMZ7FlLolbEJOrXLpg8+amQZNHHNW1dfFUBGVw/9ezQbFg=="
     },
     "overrides": {
-      "vite": "^8.0.2"
+      "vite": "^8.0.5"
     },
     "patchedDependencies": {
       "eslint-plugin-react-perf@3.3.3": "patches/eslint-plugin-react-perf@3.3.3.patch",
