@@ -10,7 +10,7 @@ import {
   thirdPartyErrorFilterIntegration,
 } from '@sentry/react'
 
-import {APP_NAME, COMMIT_HASH, DEBUG, MODE, SENTRY_DSN} from './constants/config'
+import {API_URL, APP_NAME, COMMIT_HASH, DEBUG, MODE, SENTRY_DSN} from './constants/config'
 
 export const DEPTH = 10
 
@@ -31,7 +31,7 @@ if (!DEBUG) {
         ...[
           thirdPartyErrorFilterIntegration({
             filterKeys: [APP_NAME],
-            behaviour: 'apply-tag-if-contains-third-party-frames',
+            behaviour: 'drop-error-if-contains-third-party-frames',
           }),
           browserTracingIntegration(),
           // send console.* calls as logs to Sentry: https://docs.sentry.io/platforms/javascript/guides/react/logs/
@@ -45,20 +45,24 @@ if (!DEBUG) {
     },
     sendClientReports: false, // TODO: Enable this?
     // Performance Monitoring
-    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    tracesSampleRate: MODE === 'production' ? 0.25 : 1.0, //  Capture 25% of the transactions on production
     // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-    // tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
+    tracePropagationTargets: ['localhost', RegExp(`^${window.location.origin}/api`), RegExp(`^${API_URL}`)],
     // Session Replay
-    replaysSessionSampleRate: 0.1, // This  sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-    replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+    replaysSessionSampleRate: MODE === 'production' ? 0.05 : 1.0, // This sets the sample rate at 5% on production
+    replaysOnErrorSampleRate: 1.0,
     profilesSampleRate: 1.0,
+    profileLifecycle: 'trace',
     transport: makeBrowserOfflineTransport(makeFetchTransport),
     transportOptions: {}, // https://docs.sentry.io/platforms/javascript/guides/react/best-practices/offline-caching/
     ignoreTransactions: [], // TODO: add more ignore transactions
     ignoreErrors: [],
     normalizeDepth: DEPTH,
     // Enable logs to be sent to Sentry
-    _experiments: {enableLogs: true},
+    enableLogs: true,
+    // Adds request headers and IP for users
+    sendDefaultPii: true,
+    _experiments: {enableMetrics: true},
   })
 }
 

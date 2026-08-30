@@ -1,12 +1,11 @@
 import {HeroUIProvider} from '@heroui/react'
 import {Partytown} from '@qwik.dev/partytown/react'
+import {ErrorBoundary} from '@sentry/react'
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createRootRouteWithContext, HeadContent} from '@tanstack/react-router'
 import {UnheadProvider} from '@unhead/react/client'
 import {Provider as JotaiProvider} from 'jotai'
-import {ErrorBoundary, type FallbackProps} from 'react-error-boundary'
 import invariant from 'tiny-invariant'
-import type {ReadonlyDeep} from 'type-fest'
 
 import {DEBUG, ENABLE_DEVTOOLS} from '@/constants/config'
 import Global from '@/Global'
@@ -14,9 +13,7 @@ import {createQueryPersistOptions} from '@/query'
 import type {RouterContext} from '@/router'
 import skipTargetProps from '@/utils/a11y/skipTargetProps'
 import VisuallyHidden from '@/utils/a11y/VisuallyHidden'
-import {logError} from '@/utils/logger'
-import QueryErrorBoundary from '@/utils/query/QueryErrorBoundary'
-import ErrorComponent from '@/views/Error/ErrorComponent'
+import ErrorPage from '@/views/Error/ErrorPage'
 
 const JotaiDevTools = ENABLE_DEVTOOLS
   ? lazy(async () => import('@/utils/components/JotaiDevTools'))
@@ -42,41 +39,57 @@ const TanStackRouterDevtools = ENABLE_DEVTOOLS
     )
   : () => null
 
-function ErrorBoundaryFallback({error, resetErrorBoundary}: ReadonlyDeep<FallbackProps>) {
-  logError(error)
-
-  const errorMessage = (() => {
-    if (typeof error !== 'object') return undefined
-    if (error === null) return undefined
-    if (!('message' in error)) return undefined
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
-    if (typeof error.message !== 'string') return undefined
-
-    return String(error.message)
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-  })()
-
-  const errorCode = (() => {
-    if (typeof error !== 'object') return undefined
-    if (error === null) return undefined
-    if (!('code' in error)) return undefined
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- it's guaranteed by the previous condition */
-    if (typeof error.code !== 'string') return undefined
-
-    return String(error.code)
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-  })()
-
+const QueryGlobalErrorBoundary = deepMemo<PropsWithChildren>()()(function QueryErrorBoundary({
+  children,
+}) {
   return (
-    <ErrorComponent errorMessage={errorMessage} errorCode={errorCode} reset={resetErrorBoundary} />
+    <QueryErrorResetBoundary>
+      {({reset}) => (
+        <ErrorBoundary
+          onReset={reset}
+          beforeCapture={scope => {
+            scope.setTag('error.type', 'query')
+            scope.setTag('section', 'global')
+          }}
+          fallback={props => (
+            <ErrorPage
+
+              reset={props.resetError}
+            />
+          )}
+        >
+          {children}
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
   )
-}
+})
+
+const GlobalErrorBoundary = deepMemo<PropsWithChildren>()()(function GlobalErrorBoundary({
+  children,
+}) {
+  return (
+    <ErrorBoundary
+      beforeCapture={scope => {
+        scope.setTag('section', 'global')
+      }}
+      fallback={props => (
+        <ErrorPage
+
+          reset={props.resetError}
+        />
+      )}
+    >
+      {children}
+    </ErrorBoundary>
+  )
+})
 
 const DevTool = deepMemo<PropsWithChildren>()()(function DevTool({children}) {
   if (!ENABLE_DEVTOOLS) return null
 
   return (
-    <ErrorBoundary fallback={null}>
+    <ErrorBoundary fallback={undefined}>
       <Suspense>{children}</Suspense>
     </ErrorBoundary>
   )
@@ -94,22 +107,21 @@ const RootRoute = memo(function RootRoute() {
   invariant(store, 'store is required')
   invariant(head, 'head is required')
 
-  // eslint-disable-next-line @eslint-react/naming-convention/use-state -- not needed
   const [persistOptions] = useState(() => createQueryPersistOptions())
 
   const navigate = useCallback(async (to: string) => router.navigate({to}), [router])
   const useHref = useCallback((to: string) => router.buildLocation({to}).href, [router])
 
   return (
-    <UnheadProvider head={head}>
-      <ErrorBoundary fallback={null}>
-        <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
-      </ErrorBoundary>
-      <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+    <GlobalErrorBoundary>
+      <UnheadProvider value={head}>
+        <ErrorBoundary fallback={undefined}>
+          <Partytown debug={DEBUG} forward={PARTYTOWN_FORWARD} />
+        </ErrorBoundary>
         <JotaiProvider store={store}>
           <HeroUIProvider navigate={navigate} useHref={useHref}>
             <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-              <QueryErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+              <QueryGlobalErrorBoundary>
                 <Global />
                 <VisuallyHidden strict {...skipTargetProps('top')} />
                 <HeadContent />
@@ -117,7 +129,7 @@ const RootRoute = memo(function RootRoute() {
                 <DevTool>
                   <Inspector />
                 </DevTool>
-              </QueryErrorBoundary>
+              </QueryGlobalErrorBoundary>
               <DevTool>
                 <ReactQueryDevtools initialIsOpen={false} />
               </DevTool>
@@ -127,11 +139,11 @@ const RootRoute = memo(function RootRoute() {
             <JotaiDevTools />
           </DevTool>
         </JotaiProvider>
-      </ErrorBoundary>
-      <DevTool>
-        <TanStackRouterDevtools initialIsOpen={false} />
-      </DevTool>
-    </UnheadProvider>
+        <DevTool>
+          <TanStackRouterDevtools initialIsOpen={false} />
+        </DevTool>
+      </UnheadProvider>
+    </GlobalErrorBoundary>
   )
 })
 

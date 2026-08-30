@@ -27,16 +27,16 @@ declare module '@tanstack/react-query' {
     mutationMeta: {
       persist?: boolean
       invalidates?: // Will invalidates these queries on mutation success
-      (QueryFilters | QueryKey)[] | 'all'
+        (QueryFilters | QueryKey)[] | 'all'
       invalidatesOptions?: InvalidateOptions
       awaitInvalidates?: // Will await these queries on mutation success
-      (QueryFilters | QueryKey)[] | 'all'
+        (QueryFilters | QueryKey)[] | 'all'
       awaitInvalidatesOptions?: InvalidateOptions
       invalidatesOnSettled?: // Will invalidates these queries on mutation settled
-      (QueryFilters | QueryKey)[] | 'all'
+        (QueryFilters | QueryKey)[] | 'all'
       invalidatesOnSettledOptions?: InvalidateOptions
       awaitInvalidatesOnSettled?: // Will await invalidates these queries on mutation settled
-      (QueryFilters | QueryKey)[] | 'all'
+        (QueryFilters | QueryKey)[] | 'all'
       awaitInvalidatesOnSettledOptions?: InvalidateOptions
     }
   }

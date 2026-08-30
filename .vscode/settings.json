@@ -102,5 +102,5 @@
   "typescript.preferences.autoImportSpecifierExcludeRegexes": ["^(node:)?os$"],
   "mise.configureExtensionsAutomatically": false,
   "i18n-ally.disabled": true,
-  "cSpell.words": ["heroui", "Numberish", "Wolfy", "lqip"]
+  "cSpell.words": ["heroui", "lqip", "Numberish", "sonarjs", "SONARQUBE", "Wolfy"]
 }

@@ -28,7 +28,6 @@ export default function stripZeroSearchParams<TSearchSchema>(): SearchMiddleware
 
     removeZeros(newResult)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any -- its desired
-    return newResult as any
+    return newResult
   }
 }

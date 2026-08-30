@@ -79,7 +79,7 @@ export default function useWindowSize(mobileBreakpoint: number = DEFAULT_MOBILE_
 
   return new Proxy(target, {
     get(target, prop, receiver) {
-      // eslint-disable-next-line react-compiler/react-compiler, react-hooks/immutability -- it's okay
+      // eslint-disable-next-line react-compiler/react-compiler -- it's okay
       isSubscribedTo[prop as keyof typeof target] = true
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- it's safe
       return Reflect.get(target, prop, receiver)

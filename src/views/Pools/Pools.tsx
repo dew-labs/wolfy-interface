@@ -1,5 +1,5 @@
 import {Button} from '@heroui/react'
-import {ErrorBoundary} from 'react-error-boundary'
+import {ErrorBoundary} from '@sentry/react'
 
 import SkipLink from '@/components/SkipLink'
 import WolfyNavbar from '@/components/WolfyNavbar'
@@ -34,7 +34,7 @@ export default function Pools() {
         </div>
         <div className='m-auto mb-4 max-w-7xl'>
           <PoolsTable />
-          <ErrorBoundary fallback={null}>
+          <ErrorBoundary fallback={undefined}>
             <DepositWithdrawalHistory />
           </ErrorBoundary>
         </div>

@@ -133,13 +133,13 @@ export default memo(function DepositWithdrawalHistory() {
     )
   }, [historyItems, marketsData])
 
-  const {data: shortlistedTokenPrices = new Map()} = useQuery(
+  const {data: shortlistedTokenPrices = new Map()} = useQuery<TokenPricesData>(
     getTokenPricesQueryOptions(
       {chainId},
       {
         select: useCallback(
           prices => {
-            if (shortlistedTokenAddresses.size === 0) return new Map() as TokenPricesData
+            if (shortlistedTokenAddresses.size === 0) return new Map()
 
             return create(prices, draft => {
               draft.forEach((_, key) => {
@@ -331,17 +331,11 @@ export default memo(function DepositWithdrawalHistory() {
                 <TableRow key={item.id}>
                   <TableCell>
                     <div
-                      className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${(() => {
-                        if (
-                          item.action === TradeHistoryAction.RequestDeposit ||
-                          item.action === TradeHistoryAction.Deposit ||
-                          item.action === TradeHistoryAction.FailedDeposit ||
-                          item.action === TradeHistoryAction.CancelDeposit
-                        ) {
-                          return 'bg-green-500'
-                        }
-                        return 'bg-red-500'
-                      })()}`}
+                      className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${(() => { if ( item.action
+                      === TradeHistoryAction.RequestDeposit || item.action ===
+                      TradeHistoryAction.Deposit || item.action === TradeHistoryAction.FailedDeposit
+                      || item.action === TradeHistoryAction.CancelDeposit ) { return 'bg-green-500'
+                      } return 'bg-red-500' })()}`}
                     />
                     {getActionLabel(item.action)}
                   </TableCell>

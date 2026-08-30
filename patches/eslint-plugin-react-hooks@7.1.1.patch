@@ -1,5 +1,5 @@
 diff --git a/cjs/eslint-plugin-react-hooks.development.js b/cjs/eslint-plugin-react-hooks.development.js
-index cd884c454be18d696a2ef0d9981f8fae11951f89..516dbfc0548f2322d96925b156e295b8aefefa3c 100644
+index 35021bbae99a2824e55f4ece4d411c54f012a833..d1b8e9d5502157c2270568fc6cdaeb223491925b 100644
 --- a/cjs/eslint-plugin-react-hooks.development.js
 +++ b/cjs/eslint-plugin-react-hooks.development.js
 @@ -55,6 +55,28 @@ const rule$1 = {

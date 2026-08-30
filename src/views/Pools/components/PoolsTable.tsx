@@ -124,13 +124,13 @@ export default memo(function PoolsTable() {
   )
 
   // TODO: optimize, extract this query to a single function to avoid closure memory leak
-  const {data: shortlistedTokenPrices = new Map()} = useQuery(
+  const {data: shortlistedTokenPrices = new Map()} = useQuery<TokenPricesData>(
     getTokenPricesQueryOptions(
       {chainId},
       {
         select: useCallback(
           prices => {
-            if (filteredMarkets.length === 0) return new Map() as TokenPricesData
+            if (filteredMarkets.length === 0) return new Map()
             const tokenAddresses = new Set<string>()
             filteredMarkets.forEach(market => {
               tokenAddresses.add(market.longToken.address)

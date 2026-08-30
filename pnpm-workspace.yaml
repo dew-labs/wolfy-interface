@@ -1,0 +1,39 @@
+allowBuilds:
+  '@heroui/shared-utils': true
+  '@parcel/watcher': true
+  '@sentry/cli': true
+  '@tailwindcss/oxide': true
+  core-js: true
+  esbuild: true
+  javascript-obfuscator: true
+  sharp: true
+  unrs-resolver: true
+configDependencies:
+  '@pnpm/plugin-better-defaults': 0.2.1+sha512-3Fmur80S7+vmOKMmTdKS6JofiuvpUaBIdKEpgDyr9571FHo5Z4O2nrRUaSflxvwEakeYxIaFZ5MBaqAUnYHaeg==
+  '@pnpm/plugin-trusted-deps': 0.2.2+sha512-+ZupiXKJhW2fbSilfyRp+wrAY54MKg+c0JWSFGdeb/y9bUoYN5u4XLOZ0Txk7O2bBa6NMhWrX5mwmsHP3/nm9Q==
+  '@pnpm/plugin-types-fixer': 0.1.0+sha512-bLww63gRHi7siYTqFJb5qNdcXadU0jv20Et6z5AryMZ7FlLolbEJOrXLpg8+amQZNHHNW1dfFUBGVw/9ezQbFg==
+enablePrePostScripts: true
+engineStrict: true
+minimumReleaseAgeExclude:
+  - eslint-plugin-unicorn@74.0.0
+  - '@lottiefiles/dotlottie-react@0.19.16'
+  - '@lottiefiles/dotlottie-web@0.80.0'
+  - '@sentry/browser-utils@10.72.0'
+  - '@sentry/browser@10.72.0'
+  - '@sentry/core@10.72.0'
+  - '@sentry/feedback@10.72.0'
+  - '@sentry/react@10.72.0'
+  - '@sentry/replay-canvas@10.72.0'
+  - '@sentry/replay@10.72.0'
+  - happy-dom@20.11.15
+  - vite-imagetools@12.0.1
+  - react-dom@19.3.0-canary-2dc7da79-20260828
+  - react@19.3.0-canary-2dc7da79-20260828
+  - scheduler@19.3.0-canary-2dc7da79-20260828
+patchedDependencies:
+  eslint-plugin-react-perf@3.3.3: patches/eslint-plugin-react-perf@3.3.3.patch
+  typed-scss-modules@8.1.1: patches/typed-scss-modules@8.1.1.patch
+  eslint-plugin-no-relative-import-paths@1.6.1: patches/eslint-plugin-no-relative-import-paths@1.6.1.patch
+  eslint-plugin-react-hooks@7.1.1: patches/eslint-plugin-react-hooks@7.1.1.patch
+publicHoistPattern:
+  - '*@heroui/*'

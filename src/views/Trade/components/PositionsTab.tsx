@@ -113,14 +113,19 @@ export default memo(function PositionTab() {
                 <TableRow key={position.key} className='relative'>
                   <TableCell>
                     <div
-                      className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
+                      className={`absolute! top-[10%] -left-4 h-4/5 w-1
+                      ${position.isLong ? 'bg-green-500' : 'bg-red-500'}`}
                     />
                     <Tooltip content='Press to switch market' showArrow>
                       <Button
                         disableRipple
                         disableAnimation
                         variant='light'
-                        className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap transition-none! tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                        className='inline-flex min-w-max items-center justify-center gap-2
+                          rounded-none bg-transparent px-0 text-sm whitespace-nowrap
+                          transition-none! tap-highlight-transparent hover:bg-transparent
+                          focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2
+                          focus-visible:outline-focus data-[hover=true]:bg-transparent'
                         onPress={() => {
                           setTokenAddress(position.marketData.indexTokenAddress)
                         }}

@@ -14,9 +14,9 @@ import replace from '@rollup/plugin-replace'
 import {sentryVitePlugin} from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
-import UnheadVite from '@unhead/addons/vite'
+import {Unhead} from '@unhead/react/vite'
 import legacy from '@vitejs/plugin-legacy'
-import react, {reactCompilerPreset} from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react'
 import {FontaineTransform} from 'fontaine'
 import {humanId} from 'human-id'
 import {obfuscator} from 'rollup-obfuscator'
@@ -43,7 +43,7 @@ import {robots} from 'vite-plugin-robots'
 import svgr from 'vite-plugin-svgr'
 
 import generateW from './generateW.js'
-import globs from './globs.js'
+import {globsRegexes} from './globs.js'
 
 // import packageJson from './package.json'
 
@@ -114,7 +114,7 @@ export function getConfig(mode: string): UserConfig {
     },
     paraglideVitePlugin({project: './project.inlang', outdir: './src/paraglide'}),
     AutoImport({
-      include: [...globs.SCRIPT],
+      include: [...(globsRegexes.SCRIPT as string[])],
       ignore: [],
       imports: [
         {
@@ -364,7 +364,10 @@ export function getConfig(mode: string): UserConfig {
     dynamicImport(),
     preload(),
     robots({}),
-    UnheadVite(),
+    Unhead({
+      sourcemap: shouldUseSourceMap,
+      streaming: true,
+    }),
     // Tree-shaking for sentry https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/
     replace({
       preventAssignment: false,
@@ -375,10 +378,7 @@ export function getConfig(mode: string): UserConfig {
       // __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
     }),
     partytownVite({dest: path.join(__dirname, 'dist', '~partytown')}),
-    isDevMode &&
-      turboConsole({
-        /* options here */
-      }),
+    isDevMode && turboConsole({/* options here */}),
     createHtmlPlugin({
       minify: true,
       /**
@@ -404,16 +404,17 @@ export function getConfig(mode: string): UserConfig {
       },
     }),
     millionLintVite({enabled: shouldEnableProfile}),
-    // Oxc + Babel React for react compiler
-    react(),
+    react({
+      compiler: true,
+    }),
     babel({
       presets: [
-        reactCompilerPreset({
-          // compilationMode: 'annotation'
-        }),
-        ['jotai-babel/preset', {
-          customAtomNames: []
-        }],
+        [
+          'jotai-babel/preset',
+          {
+            customAtomNames: [],
+          },
+        ],
       ],
       plugins: [
         inTestOrDevMode
@@ -575,9 +576,27 @@ export function getConfig(mode: string): UserConfig {
         reactComponentAnnotation: {enabled: true},
         telemetry: false,
         _experiments: {injectBuildInformation: true},
+        sourcemaps: {
+          filesToDeleteAfterUpload: [
+            './**/*.map',
+            '.*/**/public/**/*.map',
+            './dist/**/client/**/*.map',
+          ],
+        },
       }) as PluginOption,
     )
   }
+
+  const publicEnv = Object.keys(process.env)
+    .filter(key => key.startsWith('VITE_'))
+    .reduce(
+      // @ts-expect-error - it's ok to assign to the object
+      // eslint-disable-next-line no-sequences -- it's ok
+      (pre, cur) => ((pre[`import.meta.env.${cur}`] = JSON.stringify(process.env[cur])), pre),
+      {},
+    )
+
+  console.log(publicEnv)
 
   return {
     ssr: {
@@ -586,9 +605,10 @@ export function getConfig(mode: string): UserConfig {
     define: {
       global: 'globalThis',
       __COMMIT_HASH__: commitHashJson,
+      ...publicEnv,
     },
     build: {
-      sourcemap: shouldUseSourceMap,
+      sourcemap: shouldUseSourceMap && 'hidden',
       // manifest: true,
       // ssrManifest: true,
       // ssr: true,
@@ -599,11 +619,10 @@ export function getConfig(mode: string): UserConfig {
           },
         },
       },
-      target: 'esnext',
+      target: 'baseline-widely-available',
       cssMinify: 'lightningcss',
     },
-    oxc: {
-    },
+    oxc: {},
     optimizeDeps: {},
     css: {
       preprocessorMaxWorkers: true, // number of CPUs minus 1
@@ -613,10 +632,18 @@ export function getConfig(mode: string): UserConfig {
         cssModules: {},
       },
     },
-    json: {stringify: true},
+    html: {
+      additionalAssetSources: {
+        img: {srcAttributes: ['data-src-dark', 'data-src-light']},
+      },
+    },
     plugins,
     resolve: {
       tsconfigPaths: true,
+      alias: {
+        'react': path.resolve(__dirname, 'node_modules/react'),
+        'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
+      },
     },
     server: {
       open: true,
@@ -627,6 +654,7 @@ export function getConfig(mode: string): UserConfig {
       cors: false,
     },
     assetsInclude: ['**/*.lottie'],
+    devtools: {enabled: false},
   }
 }
 

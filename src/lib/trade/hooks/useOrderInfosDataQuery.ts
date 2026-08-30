@@ -25,10 +25,10 @@ export default function useOrdersInfosDataQuery<T = OrderInfosData>(
       {
         select: useCallback(
           ordersData => {
-            const ordersInfo =
+            const ordersInfo: OrderInfosData =
               marketsData && tokenPricesData
                 ? getOrdersInfo(chainId, marketsData, ordersData, tokenPricesData)
-                : (new Map() as OrderInfosData)
+                : new Map()
             if (selector) return selector(ordersInfo)
             return ordersInfo
           },

@@ -1,101 +1,178 @@
 // TODO: using .ts config file https://eslint.org/docs/head/use/configure/configuration-files#typescript-configuration-files
-// import path from 'node:path'
-// import {fileURLToPath} from 'node:url'
+import fs from 'node:fs'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
 
-// import {fixupConfigRules} from '@eslint/compat'
-// import {FlatCompat} from '@eslint/eslintrc'
+import {fixupConfigRules} from '@eslint/compat'
+import {FlatCompat} from '@eslint/eslintrc'
 import eslint from '@eslint/js'
 import pluginEslintComments from '@eslint-community/eslint-plugin-eslint-comments'
-import pluginReactX from '@eslint-react/eslint-plugin'
-import pluginQuery from '@tanstack/eslint-plugin-query'
-// import expoConfig from 'eslint-config-expo/flat.js'
-import pluginRouter from '@tanstack/eslint-plugin-router'
-import pluginVitest from '@vitest/eslint-plugin'
 import restrictedGlobals from 'confusing-browser-globals'
 import {defineConfig, globalIgnores} from 'eslint/config'
 import pluginGitignore from 'eslint-config-flat-gitignore'
-import {createTypeScriptImportResolver, defaultExtensions} from 'eslint-import-resolver-typescript'
-import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss'
-import {getDefaultSelectors} from 'eslint-plugin-better-tailwindcss/defaults'
-import {SelectorKind} from 'eslint-plugin-better-tailwindcss/types'
-import pluginCssModules from 'eslint-plugin-css-modules'
-import pluginDepend from 'eslint-plugin-depend'
+import {configs as pluginDependConfigs} from 'eslint-plugin-depend'
 // import {plugin as pluginExceptionHandling} from 'eslint-plugin-exception-handling'
-import pluginI18next from 'eslint-plugin-i18next'
-// import pluginI18nJson from 'eslint-plugin-i18n-json'
-import pluginImportX, {createNodeResolver} from 'eslint-plugin-import-x'
-import pluginJestDom from 'eslint-plugin-jest-dom'
+import {createNodeResolver, flatConfigs as pluginImportXConfigs} from 'eslint-plugin-import-x'
 import pluginJsdoc from 'eslint-plugin-jsdoc'
-import pluginJsonc from 'eslint-plugin-jsonc'
-import pluginJsxA11y from 'eslint-plugin-jsx-a11y'
-import pluginMath from 'eslint-plugin-math'
+import {configs as pluginJsoncConfigs} from 'eslint-plugin-jsonc'
+import {configs as pluginMathConfigs} from 'eslint-plugin-math'
 import pluginNoBarrelFiles from 'eslint-plugin-no-barrel-files'
 import pluginNoOnlyTests from 'eslint-plugin-no-only-tests'
 import pluginNoRelativeImportPaths from 'eslint-plugin-no-relative-import-paths'
-import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step
+import pluginNoSecrets from 'eslint-plugin-no-secrets' // TODO: Leave this functionality for another step?
 import pluginNoUseExtendNative from 'eslint-plugin-no-use-extend-native'
-// import {configs as pluginPnpmConfigs} from 'eslint-plugin-pnpm'
-// import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import pluginPromise from 'eslint-plugin-promise'
-import pluginReact from 'eslint-plugin-react'
-import pluginReactCompiler from 'eslint-plugin-react-compiler'
-import pluginReactHooks from 'eslint-plugin-react-hooks'
-import pluginReactHooksAddons from 'eslint-plugin-react-hooks-addons'
-import pluginReactPerf from 'eslint-plugin-react-perf'
-import {reactRefresh} from 'eslint-plugin-react-refresh'
-import pluginReactYouMightNotNeedAnEffect from 'eslint-plugin-react-you-might-not-need-an-effect'
-import pluginRegexp from 'eslint-plugin-regexp'
+import {configs as pluginRegexpConfigs} from 'eslint-plugin-regexp'
 // import pluginRemeda from 'eslint-plugin-remeda'
 import pluginSecurity from 'eslint-plugin-security'
 import pluginSimpleImportSort from 'eslint-plugin-simple-import-sort'
 import pluginSonarjs from 'eslint-plugin-sonarjs'
-import pluginTestingLibrary from 'eslint-plugin-testing-library'
 // import pluginUnicorn from 'eslint-plugin-unicorn'
 import globals from 'globals'
-import tsEslint from 'typescript-eslint'
 
 import {extractAutoImportedReactComponents} from './extractAutoImports.js'
 import globs from './globs.js'
 import packageJson from './package.json' with {type: 'json'}
 import {CAMEL_CASE} from './regexes.js'
 
-// const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
+const flatCompat = new FlatCompat({baseDirectory: path.dirname(fileURLToPath(import.meta.url))})
 
 //------------------------------------------------------------------------------
 
-const REACT_NATIVE = false
+const CONFIGS = {
+  WEB: true,
+  TYPESCRIPT: true,
+  REACT: true,
+  NEW_JSX_TRANSFORM: true, // the new JSX transform from React 17
+  REACT_NATIVE: false,
+  EXPO: false,
+  CSS_MODULES: false,
+  TAILWINDCSS: true,
+  I18N: true,
+  ICU_MESSAGE_FORMAT: false,
+  NEXT_JS: fs.existsSync('next.config.js') || fs.existsSync('next.config.ts'),
+  TEST: true,
+  VITEST: true,
+  PRETTIER: false,
+  PNPM_WORKSPACES_CATALOGS: false,
+  TANSTACK: {
+    QUERY: true,
+    ROUTER: true,
+  },
+  SONARQUBE_OR_SONAR_CLOUD: false,
+  UNHEAD: true,
+  LIBRARY: false,
+}
+
+const GLOBAL_IGNORES = [
+  '.agent/',
+  '.agents/',
+  'public/*',
+  '**/*.gen.ts',
+  'vitest.config.ts.timestamp*',
+  'src/paraglide/**/*',
+]
 
 //------------------------------------------------------------------------------
+
+const expoConfig = CONFIGS.EXPO
+  ? await import('eslint-config-expo/flat.js').then(module => module.default)
+  : undefined
+const pluginI18nJson = CONFIGS.ICU_MESSAGE_FORMAT
+  ? await import('eslint-plugin-i18n-json').then(module => module.default)
+  : undefined
+const pluginReact = CONFIGS.REACT
+  ? await import('eslint-plugin-react').then(module => module.default)
+  : undefined
+const pluginReactX = CONFIGS.REACT
+  ? await import('@eslint-react/eslint-plugin').then(module => module.default)
+  : undefined
+const pluginReactCompiler = CONFIGS.REACT
+  ? await import('eslint-plugin-react-compiler').then(module => module.default)
+  : undefined
+const pluginReactHooks = CONFIGS.REACT
+  ? await import('eslint-plugin-react-hooks').then(module => module.default)
+  : undefined
+const pluginReactHooksAddons = CONFIGS.REACT
+  ? await import('eslint-plugin-react-hooks-addons').then(module => module.default)
+  : undefined
+const pluginReactPerf = CONFIGS.REACT
+  ? await import('eslint-plugin-react-perf').then(module => module.default)
+  : undefined
+const pluginJsxA11y = CONFIGS.REACT
+  ? await import('eslint-plugin-jsx-a11y').then(module => module.default)
+  : undefined
+const {reactRefresh} = CONFIGS.REACT ? await import('eslint-plugin-react-refresh') : undefined
+const pluginReactYouMightNotNeedAnEffect = CONFIGS.REACT
+  ? await import('eslint-plugin-react-you-might-not-need-an-effect').then(module => module.default)
+  : undefined
+const pluginVitest = CONFIGS.VITEST
+  ? await import('@vitest/eslint-plugin').then(module => module.default)
+  : undefined
+const {createTypeScriptImportResolver, defaultExtensions} = CONFIGS.TYPESCRIPT
+  ? await import('eslint-import-resolver-typescript')
+  : undefined
+const tsEslint = CONFIGS.TYPESCRIPT ? await import('typescript-eslint') : undefined
+const eslintPluginBetterTailwindcss = CONFIGS.TAILWINDCSS
+  ? await import('eslint-plugin-better-tailwindcss').then(module => module.default)
+  : undefined
+const {getDefaultSelectors} = CONFIGS.TAILWINDCSS
+  ? await import('eslint-plugin-better-tailwindcss/defaults')
+  : undefined
+const {SelectorKind} = CONFIGS.TAILWINDCSS
+  ? await import('eslint-plugin-better-tailwindcss/types')
+  : undefined
+const pluginCssModules = CONFIGS.CSS_MODULES
+  ? await import('eslint-plugin-css-modules').then(module => module.default)
+  : undefined
+const pluginI18next = CONFIGS.I18N
+  ? await import('eslint-plugin-i18next').then(module => module.default)
+  : undefined
+const pluginJestDom =
+  CONFIGS.TEST && CONFIGS.WEB
+    ? await import('eslint-plugin-jest-dom').then(module => module.default)
+    : undefined
+const pluginTestingLibrary = CONFIGS.TEST
+  ? await import('eslint-plugin-testing-library').then(module => module.default)
+  : undefined
+const pluginPrettierRecommended = CONFIGS.PRETTIER
+  ? await import('eslint-plugin-prettier/recommended').then(module => module.default)
+  : undefined
+const pluginPnpmConfigs = CONFIGS.PNPM_WORKSPACES_CATALOGS
+  ? await import('eslint-plugin-pnpm').then(module => module.configs)
+  : undefined
+const pluginQuery = CONFIGS.TANSTACK.QUERY
+  ? await import('@tanstack/eslint-plugin-query').then(module => module.default)
+  : undefined
+const pluginRouter = CONFIGS.TANSTACK.ROUTER
+  ? await import('@tanstack/eslint-plugin-router').then(module => module.default)
+  : undefined
+const pluginUnheadConfigs = CONFIGS.UNHEAD
+  ? await import('@unhead/eslint-plugin').then(module => module.configs)
+  : undefined
 
 function createApplyTo(include, exclude = []) {
+  const withTarget = (config, name) => ({
+    ...config,
+    name,
+    files: [...include, ...(config.files ?? [])],
+    ignores: [...exclude, ...(config.ignores ?? [])],
+  })
+
   return (name, configs, enabled = true) => {
     if (!enabled) {
       return []
     }
 
-    let config = configs
-
     if (Array.isArray(configs)) {
       if (configs.length > 1) {
-        return configs.map((cfg, index) => ({
-          ...cfg,
-          name: `${name}-${index}`,
-          files: [...include, ...(cfg.files || [])],
-          ignores: [...exclude, ...(cfg.ignores || [])],
-        }))
+        return configs.map((cfg, index) => withTarget(cfg, `${name}-${index}`))
       }
-
-      config = configs.at(0)
     }
 
-    return [
-      {
-        ...config,
-        name,
-        files: [...include, ...(config.files || [])],
-        ignores: [...exclude, ...(config.ignores || [])],
-      },
-    ]
+    const config = Array.isArray(configs) ? configs.at(0) : configs
+
+    return [withTarget(config, name)]
   }
 }
 
@@ -107,7 +184,7 @@ const applyTo = {
   jsonc: createApplyTo(globs.JSONC),
   json5: createApplyTo(globs.JSON5),
   jsonC5: createApplyTo(globs.JSONC5),
-  // translations: createApplyTo(globs.TRANSLATIONS),
+  translations: createApplyTo(globs.TRANSLATIONS),
   typescript: createApplyTo(globs.TYPESCRIPT),
   javascript: createApplyTo(globs.JAVASCRIPT),
   react: createApplyTo(globs.REACT),
@@ -121,6 +198,7 @@ const applyTo = {
   testNotReact: createApplyTo(globs.TEST_NOT_REACT, globs.TEST_2E2),
   testReact: createApplyTo(globs.TEST_REACT, globs.TEST_2E2),
   testE2E: createApplyTo(globs.TEST_2E2),
+  commonjs: createApplyTo(globs.COMMONJS),
 }
 
 //------------------------------------------------------------------------------
@@ -132,14 +210,7 @@ function getIgnoreConfigs() {
       files: ['.gitignore'],
       strict: false,
     }),
-    globalIgnores([
-      '.agent/',
-      '.agents/',
-      'public/*',
-      '**/*.gen.ts',
-      'vitest.config.ts.timestamp*',
-      'src/paraglide/**/*',
-    ]),
+    globalIgnores(GLOBAL_IGNORES),
   ]
 }
 
@@ -153,13 +224,12 @@ function getCoreConfigs() {
         'grouped-accessor-pairs': 'error',
         'accessor-pairs': 'error',
         // 'default-case': ['error', {commentPattern: '^skip\\sdefault'}],
-        'default-case-last': 'error',
+        // 'default-case-last': 'error', // Already supported by sonarjs/prefer-default-last
         // 'default-param-last': 'error',
         'no-promise-executor-return': 'error',
         'no-self-compare': 'error',
         'no-template-curly-in-string': 'error',
         'no-unmodified-loop-condition': 'error',
-        'no-useless-assignment': 'error',
         'no-await-in-loop': 'error',
         'require-atomic-updates': 'error',
         'eqeqeq': 'error',
@@ -195,7 +265,7 @@ function getCoreConfigs() {
         'no-script-url': 'error',
         'no-sequences': ['error', {allowInParentheses: true}],
         // 'no-shadow': 'error',
-        'no-undef-init': 'error',
+        'no-undef-init': 'error', // TODO: migrate to `unicorn/no-useless-undefined`
         'no-unneeded-ternary': 'error',
         'no-useless-call': 'error',
         'no-useless-computed-key': 'error',
@@ -218,12 +288,6 @@ function getCoreConfigs() {
         'guard-for-in': 'error',
         'symbol-description': 'error',
         'yoda': 'error',
-        'preserve-caught-error': [
-          'error',
-          {
-            requireCatchParameter: true,
-          },
-        ],
       },
     }),
     ...applyTo.all('core/security', pluginSecurity.configs.recommended),
@@ -239,14 +303,17 @@ function getCoreConfigs() {
         ],
       },
     }),
-    ...applyTo.all('core/import-x', pluginImportX.flatConfigs.recommended),
+    ...applyTo.all('core/import-x', pluginImportXConfigs.recommended),
     ...applyTo.all('core/import-x/custom', {
       settings: {
         'import-x/extensions': ['.js', '.jsx', '.cjs', '.mjs'],
         'import-x/external-module-folders': ['node_modules', 'node_modules/@types'],
         'import/resolver-next': [
           createNodeResolver({
-            extensions: ['.js', ...(REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : [])],
+            extensions: [
+              '.js',
+              ...(CONFIGS.REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : []),
+            ],
           }),
         ],
         'import-x/cache': {
@@ -254,7 +321,7 @@ function getCoreConfigs() {
         },
       },
       rules: {
-        'import-x/no-unresolved': 'error',
+        'import-x/no-unresolved': 'off', // will always contain false positives due to module resolution complexity
         'import-x/order': 'off',
         'import-x/namespace': 'off',
         'import-x/no-mutable-exports': 'error',
@@ -292,141 +359,78 @@ function getCoreConfigs() {
       },
       files: ['auto-imports.d.ts'],
     },
-    ...applyTo.all('core/regexp', pluginRegexp.configs.recommended),
-    ...applyTo.all('core/depend', pluginDepend.configs['flat/recommended']),
-    ...applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended), // drop this if using SonarQube or SonarCloud in favor of the IDE extension
-    ...applyTo.all('core/sonarjs/duplicated', {
-      rules: {
-        // From https://community.sonarsource.com/t/documenting-and-clarifying-duplicate-eslint-rules/129385
+    ...applyTo.all('core/regexp', pluginRegexpConfigs.recommended),
+    ...applyTo.all('core/depend', pluginDependConfigs['flat/recommended']),
+    ...(CONFIGS.SONARQUBE_OR_SONAR_CLOUD
+      ? []
+      : applyTo.all('core/sonarjs', pluginSonarjs.configs.recommended)),
+    ...(CONFIGS.SONARQUBE_OR_SONAR_CLOUD
+      ? []
+      : applyTo.all('core/sonarjs/duplicated', {
+          rules: {
+            // From https://community.sonarsource.com/t/documenting-and-clarifying-duplicate-eslint-rules/129385
 
-        // Duplicates no-warning-comments
-        'sonarjs/todo-tag': 'off',
-        // Duplicates unicorn/prefer-string-starts-ends-with
-        'sonarjs/prefer-string-starts-ends-with': 'off',
-        // Duplicates no-nested-ternary and unicorn/no-nested-ternary
-        'sonarjs/no-nested-conditional': 'off',
+            // Duplicates no-warning-comments
+            'sonarjs/todo-tag': 'off',
+            // Duplicates no-nested-ternary and unicorn/no-nested-ternary
+            'sonarjs/no-nested-conditional': 'off',
 
-        // Base ESLint rules duplications (same names)
+            // Base ESLint rules duplications (same names)
 
-        'sonarjs/default-param-last': 'off',
-        'sonarjs/no-delete-var': 'off',
-        'sonarjs/no-empty-function': 'off',
-        'sonarjs/no-extend-native': 'off',
-        'sonarjs/no-redeclare': 'off',
-        'sonarjs/no-unreachable': 'off',
-        'sonarjs/no-unused-expressions': 'off',
-        'sonarjs/no-unused-private-class-members': 'off',
-        'sonarjs/sonar-block-scoped-var': 'off',
-        'sonarjs/sonar-max-params': 'off',
-        'sonarjs/sonar-no-control-regex': 'off',
-        'sonarjs/sonar-no-dupe-keys': 'off',
-        'sonarjs/sonar-no-empty-character-class': 'off', // Also regexp/no-empty-character-class
-        'sonarjs/sonar-no-fallthrough': 'off',
-        'sonarjs/sonar-no-invalid-regexp': 'off', // Also regexp/no-invalid-regexp
-        'sonarjs/sonar-no-misleading-character-class': 'off',
-        'sonarjs/use-isnan': 'off',
+            'sonarjs/no-delete-var': 'off',
 
-        // eslint-plugin-autofix rules duplications (same names)
+            // eslint-plugin-autofix rules duplications (same names)
 
-        'sonarjs/no-lonely-if': 'off', // Also unicorn/no-lonely-if
-        'sonarjs/no-throw-literal': 'off',
-        'sonarjs/no-useless-catch': 'off',
-        'sonarjs/no-var': 'off',
-        'sonarjs/prefer-object-spread': 'off',
-        'sonarjs/prefer-spread': 'off', // Also unicorn/prefer-spread
-        'sonarjs/sonar-no-regex-spaces': 'off', // Also regexp/prefer-quantifier
-        'sonarjs/sonar-no-unused-vars': 'off',
+            'sonarjs/no-useless-catch': 'off',
 
-        // Other regex-related duplications
+            // Other regex-related duplications
 
-        // Duplicates regexp/prefer-d, regexp/no-obscure-range and regexp/no-dupe-characters-character-class
-        'sonarjs/duplicates-in-character-class': 'off',
-        // Duplicates regexp/prefer-w, regexp/prefer-d, regexp/match-any
-        'sonarjs/concise-regex': 'off',
-        // Duplicates regexp/no-empty-alternative, regexp/no-trivially-nested-quantifier, regexp/no-dupe-disjunctions and regexp/no-trivially-nested-quantifier
-        'sonarjs/empty-string-repetition': 'off',
-        // Duplicates regexp/no-useless-character-class
-        'sonarjs/single-char-in-character-classes': 'off',
-        // Duplicates unicorn/better-regex and regexp/prefer-character-class
-        'sonarjs/single-character-alternation': 'off',
-        // Duplicates regexp/no-super-linear-move
-        'sonarjs/slow-regex': 'off',
-        // Duplciates regexp/prefer-regexp-exec
-        'sonarjs/sonar-prefer-regexp-exec': 'off',
-        // Duplicates regexp/no-empty-alternative
-        'sonarjs/no-empty-alternatives': 'off',
-        // Duplicates regexp/no-useless-dollar-replacements + regexp/no-unused-capturing-group
-        'sonarjs/existing-groups': 'off',
-        // Duplicates regexp/no-empty-capturing-group and regexp/no-empty-group
-        'sonarjs/no-empty-group': 'off',
+            // Duplicates regexp/prefer-d, regexp/no-obscure-range and regexp/no-dupe-characters-character-class
+            'sonarjs/duplicates-in-character-class': 'off',
+            // Duplicates regexp/prefer-w, regexp/prefer-d, regexp/match-any
+            'sonarjs/concise-regex': 'off',
+            // Duplicates regexp/no-empty-alternative, regexp/no-trivially-nested-quantifier, regexp/no-dupe-disjunctions and regexp/no-trivially-nested-quantifier
+            'sonarjs/empty-string-repetition': 'off',
+            // Duplicates regexp/no-useless-character-class
+            'sonarjs/single-char-in-character-classes': 'off',
+            // Duplicates unicorn/better-regex and regexp/prefer-character-class
+            'sonarjs/single-character-alternation': 'off',
+            // Duplicates regexp/no-super-linear-move
+            'sonarjs/slow-regex': 'off',
+            // Duplicates regexp/no-empty-alternative
+            'sonarjs/no-empty-alternatives': 'off',
+            // Duplicates regexp/no-useless-dollar-replacements + regexp/no-unused-capturing-group
+            'sonarjs/existing-groups': 'off',
+            // Duplicates regexp/no-empty-capturing-group and regexp/no-empty-group
+            'sonarjs/no-empty-group': 'off',
 
-        // React/JSX-related duplications
+            // React/JSX-related duplications
 
-        // Duplicates react/hook-use-state
-        'sonarjs/hook-use-state': 'off',
-        // Duplicates react/jsx-key
-        'sonarjs/jsx-key': 'off',
-        // Duplicated react/jsx-no-constructed-context-values
-        'sonarjs/jsx-no-constructed-context-values': 'off',
-        // Duplicates react/jsx-no-useless-fragment
-        'sonarjs/jsx-no-useless-fragment': 'off',
-        // Duplicates react/no-array-index-key
-        'sonarjs/no-array-index-key': 'off',
-        // Duplicates react/no-deprecated
-        'sonarjs/no-deprecated-react': 'off',
-        // Duplicates react/no-find-dom-node
-        'sonarjs/no-find-dom-node': 'off',
-        // Duplicates react/no-unknown-property
-        'sonarjs/no-unknown-property': 'off',
-        // Duplicates react/no-unsafe
-        'sonarjs/no-unsafe': 'off',
-        // Duplicates react/no-unstable-nested-components
-        'sonarjs/no-unstable-nested-components': 'off',
-        // Duplicates react-hooks/rules-of-hooks
-        'sonarjs/rules-of-hooks': 'off',
-        // Duplicates react/jsx-no-leaked-render
-        'sonarjs/sonar-jsx-no-leaked-render': 'off',
-        // Duplicates react/no-unused-class-component-methods
-        'sonarjs/sonar-no-unused-class-component-methods': 'off',
-        // Duplicates react/prefer-read-only-props
-        'sonarjs/sonar-prefer-read-only-props': 'off',
+            // Redundant in TypeScript
+            'sonarjs/function-return-type': 'off',
 
-        /*
-         * SonarJS rules obsoleted by TS rules of the same name
-         */
-        'sonarjs/no-misused-promises': 'off',
-        'sonarjs/no-redundant-type-constituents': 'off',
-        'sonarjs/prefer-enum-initializers': 'off',
-        'sonarjs/prefer-nullish-coalescing': 'off',
-        'sonarjs/sonar-prefer-optional-chain': 'off',
+            // [...]nobsoleted by @typescript-eslint
+            'sonarjs/deprecation': 'off',
+            'sonarjs/unused-import': 'off',
 
-        // Redundant in TypeScript
-        'sonarjs/function-return-type': 'off',
-
-        // [...]nobsoleted by @typescript-eslint
-        'sonarjs/deprecation': 'off',
-        'sonarjs/unused-import': 'off',
-
-        // Redundant by some other rules
-        'sonarjs/assertions-in-tests': 'off',
-      },
-    }),
-    ...applyTo.all('core/sonarjs/custom', {
-      rules: {
-        'sonarjs/no-duplicate-string': 'warn',
-        'sonarjs/no-nested-functions': 'warn',
-        'sonarjs/cognitive-complexity': 'warn',
-        'sonarjs/no-selector-parameter': 'off',
-        'sonarjs/prefer-read-only-props': 'off',
-        'sonarjs/no-useless-intersection': 'off',
-        'sonarjs/no-unused-vars': 'off',
-      },
-    }),
-    ...applyTo.all('core/sonarjs/lag', {
-      rules: {
-        'sonarjs/no-commented-code': 'off',
-      },
-    }),
+            // Redundant by some other rules
+            'sonarjs/assertions-in-tests': 'off',
+          },
+        })),
+    ...(CONFIGS.SONARQUBE_OR_SONAR_CLOUD
+      ? []
+      : applyTo.all('core/sonarjs/custom', {
+          rules: {
+            'sonarjs/no-duplicate-string': 'warn',
+            'sonarjs/no-nested-functions': 'warn',
+            'sonarjs/cognitive-complexity': 'warn',
+            'sonarjs/no-selector-parameter': 'off',
+            'sonarjs/prefer-read-only-props': 'off',
+            'sonarjs/no-useless-intersection': 'off',
+            'sonarjs/no-unused-vars': 'off',
+            'sonarjs/no-commented-code': 'off', // lag
+          },
+        })),
     ...applyTo.all('core/no-relative-import-paths', {
       plugins: {
         'no-relative-import-paths': pluginNoRelativeImportPaths,
@@ -473,12 +477,18 @@ function getCoreConfigs() {
     ...applyTo.script('core/jsdoc', pluginJsdoc.configs['flat/recommended-error']),
     ...applyTo.script('core/jsdoc/custom', {
       rules: {
-        // NOTE: remove this if you are authoring a library
         'jsdoc/require-jsdoc': 'off',
         'jsdoc/tag-lines': ['error', 'any', {startLines: 1}],
       },
     }),
-    ...applyTo.all('core/math', pluginMath.configs.recommended),
+    ...(CONFIGS.LIBRARY
+      ? applyTo.script('core/jsdoc/library', {
+          rules: {
+            'jsdoc/require-jsdoc': 'error',
+          },
+        })
+      : []),
+    ...applyTo.all('core/math', pluginMathConfigs.recommended),
     ...applyTo.all('core/math/custom', {
       rules: {
         'math/prefer-exponentiation-operator': 'error',
@@ -486,6 +496,17 @@ function getCoreConfigs() {
       },
     }),
     // ...applyTo.all('core/remeda', pluginRemeda.configs.recommended),
+    // TODO: investigate why this is causing issues
+    // ...applyTo.all('core/exception-handling', {
+    //   plugins: {
+    //     'exception-handling': pluginExceptionHandling,
+    //   },
+    //   rules: {
+    //     'exception-handling/no-unhandled': 'error',
+    //     'exception-handling/might-throw': 'error',
+    //     'exception-handling/use-error-cause': 'error',
+    //   },
+    // }),
     // TODO: enable for new projects
     // ...applyTo.all('core/unicorn', pluginUnicorn.configs['flat/recommended']),
     // ...applyTo.all('core/unicorn/custom', {
@@ -512,43 +533,50 @@ function getCoreConfigs() {
     //     'unicorn/prefer-math-min-max': 'off',
     //   },
     // }),
-    // TODO: investigate why this is causing issues
-    // ...applyTo.all('core/exception-handling', {
-    //   plugins: {
-    //     'exception-handling': pluginExceptionHandling,
-    //   },
-    //   rules: {
-    //     'exception-handling/no-unhandled': 'error',
-    //     'exception-handling/might-throw': 'error',
-    //     'exception-handling/use-error-cause': 'error',
-    //   },
-    // }),
+    ...applyTo.scriptNotTest('unhead', pluginUnheadConfigs.recommended),
   ]
 }
 
 function getWebConfigs() {
+  if (!CONFIGS.WEB) return []
+
   return [
-    // Waiting for https://github.com/kopiro/eslint-plugin-ssr-friendly/issues/30
+    // TODO: Waiting for https://github.com/kopiro/eslint-plugin-ssr-friendly/issues/30
     // ...applyTo.all(
     //   'core/ssr-friendly',
     //   fixupConfigRules(flatCompat.extends('plugin:ssr-friendly/recommended')),
     // ),
+    ...applyTo.all('web', {
+      languageOptions: {
+        globals: {
+          ...globals.browser,
+          ...globals.worker,
+          ...globals.serviceworker,
+          ...globals.webextensions,
+          document: 'readonly',
+          navigator: 'readonly',
+          window: 'readonly',
+        },
+      },
+    }),
   ]
 }
 
 function getJsonConfigs() {
   // TODO: make `eslint-plugin-jsonc` working with `@eslint/json` https://github.com/ota-meshi/eslint-plugin-jsonc#experimental-support-for-eslintjson
   return [
-    ...applyTo.json('json/json', pluginJsonc.configs['flat/recommended-with-json']),
+    ...applyTo.json('json/json', pluginJsoncConfigs['flat/recommended-with-json']),
     // JSONC is just JSON with comments
-    ...applyTo.jsonc('json/jsonc', pluginJsonc.configs['flat/recommended-with-jsonc']),
+    ...applyTo.jsonc('json/jsonc', pluginJsoncConfigs['flat/recommended-with-jsonc']),
     // JSON5 is much more: comments, trailing commas, multi-line strings, single or double quotes, object keys without quotes, and other features borrowed from ECMAScript 5.1,...
-    ...applyTo.json5('json/json5', pluginJsonc.configs['flat/recommended-with-json5']),
-    ...applyTo.jsonC5('json', pluginJsonc.configs['flat/prettier']),
+    ...applyTo.json5('json/json5', pluginJsoncConfigs['flat/recommended-with-json5']),
+    ...applyTo.jsonC5('json', pluginJsoncConfigs['flat/prettier']),
   ]
 }
 
 function getCssModuleConfigs() {
+  if (!CONFIGS.CSS_MODULES) return []
+
   return [
     ...applyTo.all('core/css-modules', {
       plugins: {
@@ -559,7 +587,9 @@ function getCssModuleConfigs() {
   ]
 }
 
-function getI18nextConfigs() {
+function getI18NConfigs() {
+  if (!CONFIGS.I18N) return []
+
   return [
     ...applyTo.script('i18next', {
       plugins: {i18next: pluginI18next},
@@ -567,23 +597,26 @@ function getI18nextConfigs() {
         'i18next/no-literal-string': 1,
       },
     }),
-    // ...applyTo.translations('i18n', {
-    //   plugins: {
-    //     'i18n-json': pluginI18nJson,
-    //   },
-    //   processor: {
-    //     meta: {name: '.json'},
-    //     ...pluginI18nJson.processors['.json'],
-    //   },
-    //   rules: {
-    //     ...pluginI18nJson.configs.recommended.rules,
-    //     'i18n-json/valid-message-syntax': 'off',
-    //   },
-    // }),
+    ...(CONFIGS.ICU_MESSAGE_FORMAT
+      ? applyTo.translations('i18n', {
+          plugins: {
+            'i18n-json': pluginI18nJson,
+          },
+          processor: {
+            meta: {name: '.json'},
+            ...pluginI18nJson.processors['.json'],
+          },
+          rules: {
+            ...pluginI18nJson.configs.recommended.rules,
+          },
+        })
+      : []),
   ]
 }
 
 function getTailwindCssConfigs() {
+  if (!CONFIGS.TAILWINDCSS) return []
+
   return [
     ...applyTo.scriptNotTest('tailwindcss', {
       plugins: {
@@ -616,15 +649,16 @@ function getTailwindCssConfigs() {
       rules: {
         'better-tailwindcss/enforce-consistent-line-wrapping': 'off', // We rely on prettier or dprint to format
         'better-tailwindcss/enforce-consistent-variable-syntax': 'error',
-        'better-tailwindcss/no-conflicting-classes': 'error',
       },
     }),
   ]
 }
 
 function getTypescriptConfigs() {
+  if (!CONFIGS.TYPESCRIPT) return []
+
   return [
-    ...applyTo.typescript('typescript/import-x', pluginImportX.flatConfigs.typescript),
+    ...applyTo.typescript('typescript/import-x', pluginImportXConfigs.typescript),
     ...applyTo.typescript('typescript/import-x/custom', {
       settings: {
         'import-x/parsers': {
@@ -637,7 +671,10 @@ function getTypescriptConfigs() {
             extensions: [...defaultExtensions, '.mts', '.cts', '.d.mts', '.d.cts', '.mjs', '.cjs'],
           }),
           createNodeResolver({
-            extensions: ['.js', ...(REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : [])],
+            extensions: [
+              '.js',
+              ...(CONFIGS.REACT_NATIVE ? ['.web.js', '.ios.js', '.android.js'] : []),
+            ],
           }),
         ],
       },
@@ -648,6 +685,7 @@ function getTypescriptConfigs() {
         'import-x/default': 'off',
         'import-x/no-named-as-default-member': 'off',
         'import-x/no-unresolved': 'off',
+        'no-invalid-this': 'off', // Superseded by TypeScript's [`noImplicitThis`](https://www.typescriptlang.org/tsconfig/#noImplicitThis) compiler option (enabled by `strict` mode)
       },
     }),
     ...applyTo.typescript('typescript/strict', tsEslint.configs.strictTypeChecked),
@@ -691,7 +729,6 @@ function getTypescriptConfigs() {
           'error',
           {allowDefaultCaseForExhaustiveSwitch: false},
         ],
-        '@typescript-eslint/use-unknown-in-catch-callback-variable': 'error',
         '@typescript-eslint/restrict-plus-operands': 'error',
         '@typescript-eslint/restrict-template-expressions': [
           'warn',
@@ -716,14 +753,22 @@ function getTypescriptConfigs() {
     ),
     ...applyTo.typescript('typescript/jsdoc/custom', {
       rules: {
-        // NOTE: remove this if you are authoring a library
         'jsdoc/require-jsdoc': 'off',
       },
     }),
+    ...(CONFIGS.LIBRARY
+      ? applyTo.typescript('typescript/jsdoc/library', {
+          rules: {
+            'jsdoc/require-jsdoc': 'error',
+          },
+        })
+      : []),
   ]
 }
 
 function getReactConfigs() {
+  if (!CONFIGS.REACT) return []
+
   // TODO: add all react-use and other hooks libraries to staticHooks
   const reactUseStaticHooks = {
     useUpdate: true,
@@ -750,7 +795,9 @@ function getReactConfigs() {
 
   return [
     ...applyTo.react('react/default', pluginReact.configs.flat.recommended),
-    ...applyTo.react('react/jsx-runtime', pluginReact.configs.flat['jsx-runtime']),
+    ...(CONFIGS.NEW_JSX_TRANSFORM
+      ? applyTo.react('react/jsx-runtime', pluginReact.configs.flat['jsx-runtime'])
+      : []),
     ...applyTo.react('react/custom', {
       rules: {
         'react/prop-types': 'off',
@@ -792,44 +839,47 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/hooks', pluginReactHooks.configs.flat['recommended-latest']),
-    // Use below when using expo
-    // ...applyTo.react('react/hooks', {
-    //   // Expo already define `react-hooks` plugin so we cannot redefine
-    //   rules: {
-    //     ...pluginReactHooks.configs.flat['recommended-latest'].rules,
-    //   },
-    // }),
+    ...(CONFIGS.EXPO
+      ? []
+      : applyTo.react('react/hooks', pluginReactHooks.configs.flat['recommended-latest'])),
+    ...(CONFIGS.EXPO
+      ? applyTo.react('react/hooks', {
+          rules: {
+            // Expo already define `react-hooks` plugin so we cannot redefine, so we need to only get the rules
+            ...pluginReactHooks.configs.flat['recommended-latest'].rules,
+          },
+        })
+      : []),
     ...applyTo.react('react/hooks/custom', {
       rules: {
-        'react-hooks/preserve-manual-memoization': 0,
-        // Hidden rules that are not documented
-        'react-hooks/automatic-effect-dependencies': 2,
-        'react-hooks/capitalized-calls': 2,
-        'react-hooks/memoized-effect-dependencies': 2,
-        'react-hooks/no-deriving-state-in-effects': 2,
-        'react-hooks/fire': 2,
-        'react-hooks/hooks': 2,
-        'react-hooks/invariant': 2,
-        'react-hooks/rule-suppression': 2,
-        'react-hooks/syntax': 2,
-        'react-hooks/void-use-memo': 2,
-        // End hidden rules
-        'react-hooks/component-hook-factories': 2,
+        // 'react-hooks/preserve-manual-memoization': 0, // Why
         'react-hooks/config': 2,
+        'react-hooks/set-state-in-effect': 2,
         'react-hooks/error-boundaries': 2,
         'react-hooks/gating': 2,
         'react-hooks/globals': 2,
         'react-hooks/immutability': 2,
-        'react-hooks/incompatible-library': 2,
+        'react-hooks/preserve-manual-memoization': 2,
         'react-hooks/purity': 2,
         'react-hooks/refs': 2,
-        'react-hooks/rules-of-hooks': 2,
-        'react-hooks/set-state-in-effect': 2,
         'react-hooks/set-state-in-render': 2,
         'react-hooks/static-components': 2,
         'react-hooks/unsupported-syntax': 2,
         'react-hooks/use-memo': 2,
+        'react-hooks/incompatible-library': 2,
+        // Hidden rules that are not documented: https://github.com/react/react/blob/main/compiler/packages/babel-plugin-react-compiler/src/CompilerError.ts#L776
+        'react-hooks/capitalized-calls': 2,
+        'react-hooks/memoized-effect-dependencies': 2,
+        'react-hooks/exhaustive-effect-dependencies': 2,
+        'react-hooks/no-deriving-state-in-effects': 2,
+        'react-hooks/hooks': 2,
+        'react-hooks/invariant': 2,
+        'react-hooks/rule-suppression': 2,
+        'react-hooks/syntax': 2,
+        'react-hooks/todo': 2,
+        'react-hooks/void-use-memo': 2,
+        'react-hooks/memo-dependencies': 2,
+        // End hidden rules
         'react-hooks/exhaustive-deps': [
           'error',
           {
@@ -856,7 +906,7 @@ function getReactConfigs() {
         ],
       },
     }),
-    ...applyTo.react('react/import-x', pluginImportX.flatConfigs.react),
+    ...applyTo.react('react/import-x', pluginImportXConfigs.react),
     ...applyTo.react('react/a11y', {
       ...pluginJsxA11y.flatConfigs.strict,
       settings: {
@@ -868,8 +918,9 @@ function getReactConfigs() {
         },
       },
     }),
-    ...applyTo.react('react/query', pluginQuery.configs['flat/recommended']),
-    ...applyTo.react('react/dom', pluginReactX.configs.dom), // TODO: Exclude react in SSR, RSC??
+    ...(CONFIGS.TANSTACK.QUERY
+      ? applyTo.react('react/query', pluginQuery.configs['flat/recommended'])
+      : []),
     ...applyTo.javascriptReact('react/x-javascript', {...pluginReactX.configs.strict}),
     ...applyTo.react('react/x-disable-conflict', {
       ...pluginReactX.configs['disable-conflict-eslint-plugin-react'],
@@ -880,19 +931,18 @@ function getReactConfigs() {
         '@eslint-react/refs': 'error',
         '@eslint-react/immutability': 'error',
         '@eslint-react/no-duplicate-key': 'error',
-        '@eslint-react/jsx-shorthand-boolean': 'warn',
-        '@eslint-react/jsx-shorthand-fragment': 'warn',
         '@eslint-react/no-missing-component-display-name': 'error',
-        '@eslint-react/prefer-namespace-import': 'error',
         '@eslint-react/no-missing-context-display-name': 'error',
-        '@eslint-react/dom/no-string-style-prop': 'error',
-        '@eslint-react/dom/no-unknown-property': [
+        '@eslint-react/dom-no-string-style-prop': 'error',
+        '@eslint-react/dom-no-unknown-property': [
           'error',
           {requireDataLowercase: true, ignore: []},
         ],
         '@eslint-react/no-implicit-children': 'warn',
         '@eslint-react/no-implicit-key': 'warn',
         '@eslint-react/no-implicit-ref': 'warn',
+        '@eslint-react/globals': 'warn',
+        '@eslint-react/no-unused-state': 'warn',
       },
       settings: {
         'react-x': {
@@ -1013,41 +1063,49 @@ function getReactConfigs() {
 }
 
 function getReactWebConfigs() {
-  return [...applyTo.react('react-router', pluginRouter.configs['flat/recommended'])]
+  if (!CONFIGS.REACT || !CONFIGS.WEB) return []
+
+  return [
+    ...(CONFIGS.TANSTACK.ROUTER
+      ? applyTo.react('react-router', pluginRouter.configs['flat/recommended'])
+      : []),
+    ...applyTo.react('react/dom', pluginReactX.configs.dom),
+  ]
 }
 
-// function getReactNativeConfigs() {
-//   return [
-//     expoConfig,
-//     ...applyTo.react('@react-native', fixupConfigRules(flatCompat.plugins('@react-native'))),
-//     ...applyTo.react('@react-native/rules', {
-//       rules: {
-//         '@react-native/no-deep-imports': 'error',
-//         '@react-native/platform-colors': 'error',
-//       },
-//     }),
-//     ...applyTo.react(
-//       'react-native',
-//       fixupConfigRules(flatCompat.extends('plugin:react-native/all')),
-//     ),
-//     ...applyTo.react(
-//       'react-native-a11y',
-//       fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all')),
-//     ),
-//     ...applyTo.react('react-native/off-dom', pluginReactX.configs['off-dom']),
-//     }),
-//   ]
-// }
+function getReactNativeConfigs() {
+  if (!CONFIGS.REACT || !CONFIGS.REACT_NATIVE) return []
 
-// function getNextJsConfigs() {
-//   // If files is in a nextJs project or not
-//   // const isNextJsProject = fs.existsSync('next.config.js');
-//   // const nextJsOrEmptyExtends = isNextJsProject ? ['plugin:@next/next/core-web-vitals'] : [];
+  return [
+    expoConfig,
+    ...applyTo.react('@react-native', fixupConfigRules(flatCompat.plugins('@react-native'))),
+    ...applyTo.react('@react-native/rules', {
+      rules: {
+        '@react-native/no-deep-imports': 'error',
+        '@react-native/platform-colors': 'error',
+      },
+    }),
+    ...applyTo.react(
+      'react-native',
+      fixupConfigRules(flatCompat.extends('plugin:react-native/all')),
+    ),
+    ...applyTo.react(
+      'react-native-a11y',
+      fixupConfigRules(flatCompat.extends('plugin:react-native-a11y/all')),
+    ),
+    ...applyTo.react('react-native/off-dom', pluginReactX.configs['off-dom']),
+  ]
+}
 
-//   return []
-// }
+function getNextJsConfigs() {
+  if (!CONFIGS.REACT || !CONFIGS.NEXT_JS) return []
+
+  return ['plugin:@next/next/core-web-vitals']
+}
 
 function getReactTypescriptConfigs() {
+  if (!CONFIGS.REACT || !CONFIGS.TYPESCRIPT) return []
+
   return [
     ...applyTo.typescriptReact('react/x-typescript', {
       ...pluginReactX.configs['strict-type-checked'],
@@ -1066,7 +1124,7 @@ function getReactTypescriptConfigs() {
         ],
       },
     }),
-    ...applyTo.typescript('react-router/custom', {
+    ...applyTo.routes('react-router/custom', {
       rules: {
         '@typescript-eslint/only-throw-error': [
           'error',
@@ -1086,6 +1144,8 @@ function getReactTypescriptConfigs() {
 }
 
 function getTestConfigs() {
+  if (!CONFIGS.TEST) return []
+
   return [
     ...applyTo.test('testing/no-only-tests', {
       plugins: {
@@ -1099,6 +1159,8 @@ function getTestConfigs() {
 }
 
 function getVitestConfigs() {
+  if (!CONFIGS.TEST || !CONFIGS.VITEST) return []
+
   return [
     ...applyTo.test('testing/vitest', {
       plugins: {
@@ -1127,6 +1189,8 @@ function getVitestConfigs() {
 }
 
 function getTestingLibraryDomConfigs() {
+  if (!CONFIGS.TEST || !CONFIGS.WEB) return []
+
   return [
     ...applyTo.test('testing/vitest/jest-dom', pluginJestDom.configs['flat/recommended']),
     ...applyTo.testNotReact('testing/dom', pluginTestingLibrary.configs['flat/dom']),
@@ -1134,11 +1198,40 @@ function getTestingLibraryDomConfigs() {
 }
 
 function getTestingLibraryReactConfigs() {
+  if (!CONFIGS.TEST || !CONFIGS.REACT) return []
+
   return [...applyTo.testReact('testing/react', pluginTestingLibrary.configs['flat/react'])]
 }
 
-function getCypressConfigs() {
+function getE2ETestConfigs() {
   return []
+}
+
+function getPnpmWorkspacesCatalogsConfigs() {
+  if (!CONFIGS.PNPM_WORKSPACES_CATALOGS) return []
+
+  return [...pluginPnpmConfigs.json, ...pluginPnpmConfigs.yaml]
+}
+
+function getCommonjsConfigs() {
+  return [
+    ...applyTo.commonjs('commonjs', {
+      languageOptions: {
+        sourceType: 'commonjs',
+        ecmaVersion: 'latest',
+        parserOptions: {
+          ecmaFeatures: {
+            impliedStrict: true,
+          },
+        },
+        globals: {
+          ...globals.commonjs,
+          ...globals.node,
+          ...globals.worker,
+        },
+      },
+    }),
+  ]
 }
 
 //------------------------------------------------------------------------------
@@ -1149,22 +1242,23 @@ export default defineConfig(
   ...getWebConfigs(),
   ...getJsonConfigs(),
   ...getCssModuleConfigs(),
-  ...getI18nextConfigs(),
+  ...getI18NConfigs(),
   ...getTailwindCssConfigs(),
   ...getTypescriptConfigs(),
   ...getReactConfigs(),
   ...getReactWebConfigs(),
-  // ...getReactNativeConfigs(),
-  // ...getNextJsConfigs(),
+  ...getReactNativeConfigs(),
+  ...getNextJsConfigs(),
   ...getReactTypescriptConfigs(),
   ...getTestConfigs(),
   ...getVitestConfigs(),
   ...getTestingLibraryDomConfigs(),
   ...getTestingLibraryReactConfigs(),
-  ...getCypressConfigs(),
+  ...getE2ETestConfigs(),
+  ...getPnpmWorkspacesCatalogsConfigs(),
   ...applyTo.all('settings', {
     linterOptions: {
-      reportUnusedDisableDirectives: 'off',
+      reportUnusedDisableDirectives: 'warn',
     },
     languageOptions: {
       sourceType: 'module',
@@ -1175,37 +1269,10 @@ export default defineConfig(
         },
       },
       globals: {
-        ...globals.browser,
-        ...globals.worker,
-        ...globals.serviceworker,
-        ...globals.webextensions,
-        // ...globals.node, // NOTE: this is default to SPA, all js run in browser. When SSR introduced, we must config globals.node for RSC and SSR files only
-        document: 'readonly',
-        navigator: 'readonly',
-        window: 'readonly',
+        // ...globals.node, // NOTE: this is default to SPA, all js run in browser. When SSR/RSC introduced, we must config globals.node for RSC and SSR files only
       },
     },
   }),
-  {
-    name: 'cjs',
-    files: ['**/*.c[jt]s?(x)'],
-    languageOptions: {
-      sourceType: 'commonjs',
-      ecmaVersion: 'latest',
-      parserOptions: {
-        ecmaFeatures: {
-          impliedStrict: true,
-        },
-      },
-      globals: {
-        ...globals.commonjs,
-        ...globals.node,
-        ...globals.worker,
-      },
-    },
-  },
-  // NOTE: enable this when using pnpm workspaces & catalogs
-  // ...pluginPnpmConfigs.json,
-  // ...pluginPnpmConfigs.yaml,
-  // ...applyTo.all('prettier', pluginPrettierRecommended), // always the last // lag
+  ...getCommonjsConfigs(),
+  ...(CONFIGS.PRETTIER ? applyTo.all('prettier', pluginPrettierRecommended) : []), // always the last
 )

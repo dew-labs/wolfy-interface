@@ -13,8 +13,5 @@ export default function useMountedEffect(
       isMounted.current = false
       cleanup?.()
     }
-
-    // eslint-disable-next-line react-compiler/react-compiler, react-hooks/rule-suppression -- it's intentional
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- it's intentional
   }, deps)
 }

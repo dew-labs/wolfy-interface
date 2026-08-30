@@ -10,7 +10,7 @@ describe(useOnChangeDeep, () => {
     const onChangeFn = vi.fn()
     const {rerender} = renderHook(
       ({value}) => {
-        useOnChangeDeep(value as unknown[], onChangeFn)
+        useOnChangeDeep(value, onChangeFn)
       },
       {
         initialProps: {value: [1, 2, 3]},
@@ -32,7 +32,7 @@ describe(useOnChangeDeep, () => {
     const onChangeFn = vi.fn()
     const {rerender} = renderHook(
       ({value}) => {
-        useOnChangeDeep(value as unknown[], onChangeFn)
+        useOnChangeDeep(value, onChangeFn)
       },
       {
         initialProps: {value: [1, 2, 3]},
@@ -112,7 +112,7 @@ describe(useOnChangeDeep, () => {
     const onChangeFn = vi.fn()
     const {rerender} = renderHook(
       ({value}) => {
-        useOnChangeDeep(value as unknown[], onChangeFn)
+        useOnChangeDeep(value, onChangeFn)
       },
       {
         initialProps: {value: [{id: 1}]},

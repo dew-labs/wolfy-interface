@@ -28,10 +28,8 @@ import shallowEqual from './shallowEqual'
  * @returns A function that accepts the component and returns the memoized component.
  */
 export default function deepMemo<P extends object>(): <
-  const TKeys extends
-    | readonly NonPrimitiveAndFunctionAndChildrenKeys<P>[]
-    | 'all'
-    | undefined = undefined,
+  const TKeys extends readonly NonPrimitiveAndFunctionAndChildrenKeys<P>[] | 'all' | undefined =
+    undefined,
 >(
   propsToDeepEqual?: TKeys,
 ) => (

@@ -1,17 +1,25 @@
-/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {dehydrate, hydrate, type QueryClient} from '@tanstack/react-query'
 import {createRouter as createReactRouter, stringifySearchWith} from '@tanstack/react-router'
 import {setupRouterSsrQueryIntegration} from '@tanstack/react-router-ssr-query'
-import {InferSeoMetaPlugin} from '@unhead/addons'
-import {createHead, type Unhead} from '@unhead/react/client'
-import {AliasSortingPlugin, CanonicalPlugin} from '@unhead/react/plugins'
+import {InferSeoMetaPlugin} from '@unhead/bundler'
+import {type Unhead} from '@unhead/react/client'
+import {AliasSortingPlugin, MinifyPlugin, TemplateParamsPlugin} from '@unhead/react/plugins'
+import {createStreamableHead} from '@unhead/react/stream/client'
 // import {parse as devalueParse, stringify as devalueStringify} from 'devalue'
 import {createStore} from 'jotai'
 
 import {createQueryClient} from './query'
 import {routeTree} from './routeTree.gen'
-import RouterErrorComponent from './views/Error/RouterErrorComponent'
+import createRouterErrorComponent from './utils/router/createRouterErrorComponent'
+import ErrorComponent from './views/Error/ErrorComponent'
 import NotFound from './views/NotFound/NotFound'
+import NotFoundComponent from './views/NotFound/NotFoundComponent'
+
+const RouterErrorComponent = createRouterErrorComponent(ErrorComponent)
+
+const RouterNotFoundComponent = memo(function RouterNotFoundComponent() {
+  return <NotFoundComponent />
+})
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -52,15 +60,19 @@ export interface RouterContext {
 export function getRouter() {
   const queryClient = createQueryClient()
   const store = createStore()
-  const head = createHead({
+  const head = createStreamableHead({
     plugins: [
       AliasSortingPlugin,
-      CanonicalPlugin({
-        canonicalHost: 'https://mysite.com',
-      }),
+      // CanonicalPlugin({
+      //   canonicalHost: 'https://mysite.com',
+      // }),
       InferSeoMetaPlugin(),
+      TemplateParamsPlugin,
+      MinifyPlugin(),
     ],
   })
+
+  invariant(head)
 
   const router = createReactRouter({
     // serializer: {stringify: devalueStringify, parse: devalueParse}, // NOTE: temporary removed and will come back later https://github.com/TanStack/router/pull/3216
@@ -91,7 +103,8 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadDelay: 50,
     defaultPreloadStaleTime: 0, // leverage cache control of react-query instead: we don't want loader calls to ever be stale as this will ensure that the loader is always called when the route is preloaded or visited
-    defaultNotFoundComponent: NotFound,
+    notFoundComponent: NotFound,
+    defaultNotFoundComponent: RouterNotFoundComponent,
     defaultErrorComponent: RouterErrorComponent,
     defaultStructuralSharing: true,
     scrollRestoration: true,
@@ -118,4 +131,3 @@ declare module '@tanstack/react-router' {
     router: Router
   }
 }
-/* eslint-enable @eslint-react/naming-convention/filename */

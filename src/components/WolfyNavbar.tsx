@@ -90,7 +90,6 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
   return (
     <>
       <ConnectModal />
-      {/* @ts-expect-error -- unresolved type issues due to type augmentation */}
       <Navbar
         {...props}
         classNames={navbarClassNames}
@@ -201,7 +200,8 @@ export default memo(function WolfyNavbar(props: Readonly<NavbarProps>) {
           </NavbarItem>
         </NavbarContent>
         <NavbarMenu
-          className='top-[calc(var(--navbar-height)-1px)] mt-4 max-h-fit bg-default-200/50 pt-4 pb-2 shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
+          className='top-[calc(var(--navbar-height)-1px)] mt-4 max-h-fit bg-default-200/50 pt-4 pb-2
+            shadow-medium backdrop-blur-md backdrop-saturate-150 dark:bg-default-100/50'
           motionProps={NAVBAR_MENU_MOTION_PROPS}
         >
           {menuItems.map((item, index) => (

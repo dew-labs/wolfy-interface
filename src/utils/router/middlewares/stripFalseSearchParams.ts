@@ -27,7 +27,6 @@ export default function stripFalseSearchParams<TSearchSchema>(): SearchMiddlewar
 
     removeEmptyStrings(newResult)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any -- its desired
-    return newResult as any
+    return newResult
   }
 }

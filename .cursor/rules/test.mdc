@@ -2,36 +2,38 @@
 description: Writing unit tests, component tests, integration tests, end-to-end (e2e) tests
 globs: **/__tests__/**/*.js,**/__tests__/**/*.jsx,**/__tests__/**/*.ts,**/__tests__/**/*.tsx,**/__tests__/**/*.cjs,**/__tests__/**/*.cjsx,**/__tests__/**/*.cts,**/__tests__/**/*.ctsx,**/__tests__/**/*.mjs,**/__tests__/**/*.mjsx,**/__tests__/**/*.mts,**/__tests__/**/*.mtsx,**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx,**/*.test.cjs,**/*.test.cjsx,**/*.test.cts,**/*.test.ctsx,**/*.test.mjs,**/*.test.mjsx,**/*.test.mts,**/*.test.mtsx,**/*.test-d.js,**/*.test-d.jsx,**/*.test-d.ts,**/*.test-d.tsx,**/*.test-d.cjs,**/*.test-d.cjsx,**/*.test-d.cts,**/*.test-d.ctsx,**/*.test-d.mjs,**/*.test-d.mjsx,**/*.test-d.mts,**/*.test-d.mtsx,**/*.spec.js,**/*.spec.jsx,**/*.spec.ts,**/*.spec.tsx,**/*.spec.cjs,**/*.spec.cjsx,**/*.spec.cts,**/*.spec.ctsx,**/*.spec.mjs,**/*.spec.mjsx,**/*.spec.mts,**/*.spec.mtsx,**/*.spec-d.js,**/*.spec-d.jsx,**/*.spec-d.ts,**/*.spec-d.tsx,**/*.spec-d.cjs,**/*.spec-d.cjsx,**/*.spec-d.cts,**/*.spec-d.ctsx,**/*.spec-d.mjs,**/*.spec-d.mjsx,**/*.spec-d.mts,**/*.spec-d.mtsx
 ---
+
 # Testing
 
 ## Recommended
 
-+ Write both runtime and type tests when applicable
-+ Organize tests in descriptive nested describe blocks
-+ Set up and tear down test environments properly
-+ Use AAA pattern (Arrange-Act-Assert pattern)
-+ Use `expect` for runtime assertions
-+ Use `expectTypeOf` for type assertions
-+ Reset mocks between tests using `beforeEach`
-+ Test basic cases, edge cases, and complex scenarios
-+ Test error handling explicitly
-+ Follow consistent test patterns:
-  + Basic validation
-  + Transformations
-  + Complex scenarios
-  + Error handling
-  + Edge cases
-+ Name test files consistently:
-  + `.test.ts` for runtime tests
-  + `.test-d.ts` for type tests
-+ Write clear test descriptions that explain the expected behavior
-+ Use test utilities appropriately (vi.fn(), expectTypeOf)
-+ Test error handlers and their arguments
-+ Verify both positive and negative test cases
-+ Test empty/invalid inputs
-+ Test complex transformations thoroughly
+- Write both runtime and type tests when applicable
+- Organize tests in descriptive nested describe blocks
+- Set up and tear down test environments properly
+- Use AAA pattern (Arrange-Act-Assert pattern)
+- Use `expect` for runtime assertions
+- Use `expectTypeOf` for type assertions
+- Reset mocks between tests using `beforeEach`
+- Test basic cases, edge cases, and complex scenarios
+- Test error handling explicitly
+- Follow consistent test patterns:
+  - Basic validation
+  - Transformations
+  - Complex scenarios
+  - Error handling
+  - Edge cases
+- Name test files consistently:
+  - `.test.ts` for runtime tests
+  - `.test-d.ts` for type tests
+- Write clear test descriptions that explain the expected behavior
+- Use test utilities appropriately (vi.fn(), expectTypeOf)
+- Test error handlers and their arguments
+- Verify both positive and negative test cases
+- Test empty/invalid inputs
+- Test complex transformations thoroughly
+- Tautological tests considered harmful: Don’t derive expected values by repeating the implementation. Test externally observable behavior against independently known expectations.
 
 ## Custom
 
-+ Keep unit tests in the same place as the function they are testing, use `__tests__` folder only when the tests are many functions/components involved
-+ Use `vitest` as the testing framework
+- Keep unit tests in the same place as the function they are testing, use `__tests__` folder only when the tests are many functions/components involved
+- Use `vitest` as the testing framework

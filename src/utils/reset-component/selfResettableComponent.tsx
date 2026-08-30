@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/naming-convention/filename -- this is a utility file */
 import {useResetComponent} from './useResetComponent'
 
 export default function selfResettableComponent<
@@ -24,4 +23,3 @@ export default function selfResettableComponent<
 
   return memo(ResettableComponent)
 }
-/* eslint-enable @eslint-react/naming-convention/filename */

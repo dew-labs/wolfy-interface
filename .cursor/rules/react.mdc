@@ -3,33 +3,35 @@ description: Writing React code (React components, React hooks,...)
 globs: **/use*.?(c|m)[jt]s?(x),**/*.jsx,**/*.tsx,**/*.cjsx,**/*.cjsx,**/*.mjsx,**/*.mtsx,**/use*.js,**/use*.jsx,**/use*.ts,**/use*.tsx,**/use*.cjs,**/use*.cjsx,**/use*.cts,**/use*.ctsx,**/use*.mjs,**/use*.mjsx,**/use*.mts,**/use*.mtsx
 alwaysApply: false
 ---
+
 # React
 
 ## Recommended
 
-+ Use functional components exclusively with hooks, define props type with typescript `interface`
-+ Keep components pure and focused on single responsibility, decouple the logic from the UI
-+ Keep global state minimal, prefer local state and parameter passing when possible
-+ Implement lazy loading for all route components
-+ Always use `dispatch` function updates for `useState`
-+ Should try to use uncontrolled components when possible, only use controlled components when necessary
-+ Should always use `memo` (`React.memo`) if applicable. But DO NOT use it for simple components, only use it for components that are expensive to render.
-+ Use `useMemo`, `useCallback` for expensive calculations, or when the value is used in another components to prevent unnecessary re-renders. DO NOT use them for simple values or primitives.
-+ Use lazy initialization for `useState` for expensive initial values.
-+ Avoid introduce side effects (`useEffect`, `useLayoutEffect`,...) as much as possible.
-+ Always implement proper cleanup in `useEffect` and `useLayoutEffect` hooks.
-+ Avoid using context `useContext` as much as possible.
-+ Lazyload components with `lazy` (`React.lazy`) and `Suspense` if applicable.
-+ Favor code splitting using dynamic imports for non-critical components and whenever needed.
-+ Use `useState` for simple component-level state, `use-mutative` or `useReducer` for complex component-level state.
-+ Use `jotai` for global state management, `jotai-mutative` for complex global state management.
+- Use functional components exclusively with hooks, define props type with typescript `interface`
+- Keep components pure and focused on single responsibility, decouple the logic from the UI
+- Keep global state minimal, prefer local state and parameter passing when possible
+- Implement lazy loading for all route components
+- Always use `dispatch` function updates for `useState`
+- Should try to use uncontrolled components when possible, only use controlled components when necessary
+- Should always use `memo` (`React.memo`) if applicable. But DO NOT use it for simple components, only use it for components that are expensive to render.
+- Use `useMemo`, `useCallback` for expensive calculations, or when the value is used in another components to prevent unnecessary re-renders. DO NOT use them for simple values or primitives.
+- Use lazy initialization for `useState` for expensive initial values.
+- Avoid introduce side effects (`useEffect`, `useLayoutEffect`,...) as much as possible. Prefer `RefCallback` pattern for side effects if possible.
+- Always implement proper cleanup in `useEffect` and `useLayoutEffect` hooks.
+- Avoid using context `useContext` as much as possible.
+- Lazyload heavy components with `lazy` (`React.lazy`) and `Suspense` if applicable.
+- Display images efficiently with `Picture` component (support `srcSet`, `lqip`) and `loading="lazy"` attribute.
+- Favor code splitting using dynamic imports for non-critical components and whenever needed.
+- Use `useState` for simple component-level state, `use-mutative` or `useReducer` for complex component-level state.
+- Use `jotai` for global state management, `jotai-mutative` for complex global state management.
 
 ## Custom
 
-+ Use `Tanstack React Query`'s `useMutation` for server data mutation, side effects
-+ Use `Tanstack React Query`'s `useQuery` for data fetching
-+ Utilize the `useSetAtom` from `jotai` for set write atoms, and `useAtomValue` for read only atoms
-+ Use custom hooks that wrap around `useQuery`, `useMutation`, `useAtom`, `useSetAtom`, `useAtomValue` from `Tanstack React Query`, `jotai`, `React Hook Form`, `React Use` (`react-use`),... for better readability, reusability, and encapsulation
-+ Always use `vite-plugin-lqip` to provide a low-quality image placeholder for large, critical images.
-+ Try to lazy load images with the native `loading="lazy"` attribute or the `react-lazy-load-image-component`.
-+ Complex form handling should be done using `React Hook Form` with `arktype` schema validation.
+- Use `Tanstack React Query`'s `useMutation` for server data mutation, side effects
+- Use `Tanstack React Query`'s `useQuery` for data fetching
+- Utilize the `useSetAtom` from `jotai` for set write atoms, and `useAtomValue` for read only atoms
+- Use custom hooks that wrap around `useQuery`, `useMutation`, `useAtom`, `useSetAtom`, `useAtomValue` from `Tanstack React Query`, `jotai`, `React Hook Form`, `React Use` (`react-use`),... for better readability, reusability, and encapsulation
+- Always use `vite-plugin-lqip` to provide a low-quality image placeholder for large, critical images.
+- Try to lazy load images with the native `loading="lazy"` attribute or the `react-lazy-load-image-component`.
+- Complex form handling should be done using `React Hook Form` with `arktype` schema validation.

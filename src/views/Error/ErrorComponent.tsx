@@ -1,15 +1,13 @@
 import {FocusScope} from '@react-aria/focus'
 
-import WolfyBackground from '@/components/WolfyBackground'
-import HeadTags from '@/lib/head/HeadTags'
-
 interface Props {
   errorCode?: string | undefined
   errorMessage?: string | undefined
-  reset?: () => void
+  reset?: (() => void) | undefined
+  h1?: boolean
 }
 
-export default function ErrorComponent({reset, errorCode, errorMessage}: Readonly<Props>) {
+export default function ErrorComponent({reset, errorCode, errorMessage, h1 = false}: Readonly<Props>) {
   const onTryAgain = useCallback(() => {
     if (reset) {
       reset()
@@ -18,23 +16,19 @@ export default function ErrorComponent({reset, errorCode, errorMessage}: Readonl
     }
   }, [reset])
 
+  const Heading = h1 ? 'h1' : 'div'
+
   return (
-    <div className='absolute top-0 left-0 size-full bg-background' style={{zIndex: 1000}}>
-      <WolfyBackground />
-      <HeadTags title='Error' />
-      <main className='relative flex h-dvh w-full flex-col items-center justify-center gap-2 p-4'>
-        <FocusScope contain restoreFocus>
-          <h1 className='text-center text-4xl font-bold' tabIndex={-1}>
-            We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}
-          </h1>
-          <span>{errorMessage}</span>
-          <div>
-            <button className='border-spacing-2 border p-2' onClick={onTryAgain}>
-              Try again
-            </button>
-          </div>
-        </FocusScope>
-      </main>
-    </div>
+    <FocusScope contain restoreFocus>
+      <Heading className='text-center text-4xl font-bold' tabIndex={-1}>
+        We’re not perfect, error happens{errorCode ? `: ${errorCode}` : '!'}
+      </Heading>
+      <span>{errorMessage}</span>
+      <div>
+        <button className='border-spacing-2 border p-2' onClick={onTryAgain}>
+          Try again
+        </button>
+      </div>
+    </FocusScope>
   )
 }

@@ -58,7 +58,7 @@ describe('useMemoClientValue should works', () => {
     expect.assertions(2)
 
     const {result, rerender} = renderHook(
-      // eslint-disable-next-line sonarjs/pseudo-random, react-hooks/exhaustive-deps -- it's safe
+      // eslint-disable-next-line sonarjs/pseudo-random -- it's safe
       deps => useMemoClientValue(() => Math.random(), deps, DEFAULT_VALUE),
       {initialProps: [1]},
     )

@@ -133,15 +133,12 @@ const createIdleTimeScheduler = (timeout = 3000): IdleTimeScheduler => {
       abortControllers.set(id, abortController)
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call -- explanation above
         globalThis.scheduler
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- explanation above
           .postTask(modifiedTask, {
             priority: 'background',
             signal: abortController.signal,
             delay: 0,
           })
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- explanation above
           .catch((error: unknown) => {
             console.error('Error in scheduled task:', error)
           })

@@ -176,14 +176,14 @@ export default memo(function TradesTab() {
     indexTokenAddress?: string
   }
 
-  const marketOptions = useMemo(() => {
+  const marketOptions = useMemo<Record<string, MarketOption[]>>(() => {
     return {
       Direction: [
         {label: 'Long', value: true},
         {label: 'Short', value: false},
         {label: 'Swap', value: '--swap--'},
-      ] as MarketOption[],
-      Markets: markets as MarketOption[],
+      ],
+      Markets: markets,
     }
   }, [markets])
 
@@ -279,6 +279,32 @@ export default memo(function TradesTab() {
     tradeHistoryItems,
   ])
 
+  //----------------------------------------------------------------------------
+
+  const getActionColor = (item: (typeof extendedTradeHistoryItems)[number]) => {
+    if (
+      item.action === TradeHistoryAction.MarketIncrease ||
+      item.action === TradeHistoryAction.RequestMarketIncrease ||
+      item.action === TradeHistoryAction.FailedMarketIncrease ||
+      item.action === TradeHistoryAction.CancelMarketIncrease ||
+      item.action === TradeHistoryAction.PositionIncrease
+    ) {
+      return 'bg-green-500'
+    }
+
+    if (
+      item.action === TradeHistoryAction.MarketDecrease ||
+      item.action === TradeHistoryAction.RequestMarketDecrease ||
+      item.action === TradeHistoryAction.FailedMarketDecrease ||
+      item.action === TradeHistoryAction.CancelMarketDecrease ||
+      item.action === TradeHistoryAction.PositionDecrease
+    ) {
+      return 'bg-red-500'
+    }
+
+    return item.isLong ? 'bg-green-500' : 'bg-red-500'
+  }
+
   return (
     <div className='relative'>
       <Button
@@ -366,29 +392,7 @@ export default memo(function TradesTab() {
               <TableRow key={item.id}>
                 <TableCell>
                   <div
-                    className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${(() => {
-                      if (
-                        item.action === TradeHistoryAction.MarketIncrease ||
-                        item.action === TradeHistoryAction.RequestMarketIncrease ||
-                        item.action === TradeHistoryAction.FailedMarketIncrease ||
-                        item.action === TradeHistoryAction.CancelMarketIncrease ||
-                        item.action === TradeHistoryAction.PositionIncrease
-                      ) {
-                        return 'bg-green-500'
-                      }
-
-                      if (
-                        item.action === TradeHistoryAction.MarketDecrease ||
-                        item.action === TradeHistoryAction.RequestMarketDecrease ||
-                        item.action === TradeHistoryAction.FailedMarketDecrease ||
-                        item.action === TradeHistoryAction.CancelMarketDecrease ||
-                        item.action === TradeHistoryAction.PositionDecrease
-                      ) {
-                        return 'bg-red-500'
-                      }
-
-                      return item.isLong ? 'bg-green-500' : 'bg-red-500'
-                    })()}`}
+                    className={`absolute! top-[10%] -left-4 h-4/5 w-1 ${getActionColor(item)}`}
                   />
                   {getActionLabel(item.action)}
                 </TableCell>
@@ -398,7 +402,11 @@ export default memo(function TradesTab() {
                       disableRipple
                       disableAnimation
                       variant='light'
-                      className='inline-flex min-w-max items-center justify-center gap-2 rounded-none bg-transparent px-0 text-sm whitespace-nowrap transition-none! tap-highlight-transparent hover:bg-transparent focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-[hover=true]:bg-transparent'
+                      className='inline-flex min-w-max items-center justify-center gap-2
+                        rounded-none bg-transparent px-0 text-sm whitespace-nowrap transition-none!
+                        tap-highlight-transparent hover:bg-transparent focus-visible:z-10
+                        focus-visible:outline-2 focus-visible:outline-offset-2
+                        focus-visible:outline-focus data-[hover=true]:bg-transparent'
                       onPress={() => {
                         setTokenAddress(item.market.indexTokenAddress)
                       }}

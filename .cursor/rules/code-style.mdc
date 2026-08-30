@@ -2,31 +2,34 @@
 description: Writing readable, maintainable code
 globs: **/*
 ---
+
 # Code Style
 
 ## Recommended
 
-+ The filename should match the functionality
-+ Follow SOLID principles, DRY, YAGNI, KISS, etc.
-+ Favor early returns and fail-fast (fail-early) over nested if statements to reduce code branch complexity and improve readability.
-+ Favor defensive programming.
-+ Favor composition over inheritance.
-+ Prioritize reusability and modularity over code duplication. Use abstraction to extract core logic and hide complexity, making code flexible and generic. Keep components focused on a single responsibility.
-+ Use functional and declarative programming patterns; avoid classes
-+ Use exception (throw error) only for truly exceptional cases (the error you cannot handle/don't know how to handle or recover from). Use the Result Pattern for errors you know how to handle, making the error handling more explicit and obvious. For asynchronous operations, use the Promise rejection but not with an Error object.
-+ Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
-+ Document complex types with JSDoc
-+ Separate concerns: presentational components, business logic, side effects
-+ Always write tests, type tests
-+ Always try to add:
-  + Informational log with `console.info` about the events, behaviors, etc
-  + Fine-grained debug log with `console.debug` about the function/program state
-  + Error log with `console.error` about the errors, bugs, etc
-  + Warn log with `console.warn` about the warnings, potential issues, etc
-+ Always try to keep the files small (< 300 lines of code) and focused, with single responsibility
-+ Document and comment code clearly and concisely, focusing on "Why" rather than "What". Because "What" can be hidden with abstraction.
+- The filename should match the functionality
+- Follow SOLID principles, DRY, YAGNI, KISS, etc.
+- Favor early returns and fail-fast (fail-early) over nested if statements to reduce code branch complexity and improve readability.
+- Favor defensive programming.
+- Favor composition over inheritance.
+- Prioritize reusability and modularity over code duplication. Use abstraction to extract core logic and hide complexity, making code flexible and generic. Keep components focused on a single responsibility.
+- Use functional and declarative programming patterns; avoid classes
+- Use exception (throw error) only for truly exceptional cases (the error you cannot handle/don't know how to handle or recover from). Use the Result Pattern for errors you know how to handle, making the error handling more explicit and obvious. For asynchronous operations, use the Promise rejection but not with an Error object.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError), use shorten verbose names while keeping them clear. Prefer human-readable concepts (baseline) over compound phrases that are more mechanical / academic
+- Document complex types with JSDoc
+- Separate concerns: presentational components, business logic, side effects
+- Always write tests, type tests
+- Always try to add:
+  - Informational log with `console.info` about the events, behaviors, etc
+  - Fine-grained debug log with `console.debug` about the function/program state
+  - Error log with `console.error` about the errors, bugs, etc
+  - Warn log with `console.warn` about the warnings, potential issues, etc
+- Always try to keep the files small (< 300 lines of code) and focused, with single responsibility
+- Document and comment code clearly and concisely, focusing on "Why" rather than "What". Because "What" can be hidden with abstraction. Only mention in comments what cannot be discerned from the code.
+- Combine related concepts: If two types, functions, or constants overlap significantly, merge them. The fewer distinct concepts a reader must hold in their head, the better. Example: two union types sharing 3 of 4 values → one type with shorter value names.
+- Scope: Only touch code in the specified scope. Validate your work does not break existing functionality
 
 ## Custom
 
-+ You don't have to import libraries that are already auto-imported by `unplugin-auto-import` (read `auto-imports.d.ts` for the list).
-+ Always validate the data coming from the API using `arktype`, DO NOT cast or assume the data is valid
+- You don't have to import libraries that are already auto-imported by `unplugin-auto-import` (read `auto-imports.d.ts` for the list).
+- Always validate the data coming from the API using `arktype`, DO NOT cast or assume the data is valid

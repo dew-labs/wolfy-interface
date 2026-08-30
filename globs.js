@@ -1,3 +1,5 @@
+import micromatch from 'micromatch'
+
 const globs = {
   // Add vue, svelte,... if using them
   SCRIPT_AND_JSONS: ['**/*.{?(c|m)[jt]s?(x),json?(c|5)}'],
@@ -26,7 +28,7 @@ const globs = {
     '**/__tests__/**/!(use)*.?(c|m)[jt]s!(x)',
     '**/!(use)*.{test,spec}?(-d).?(c|m)[jt]s!(x)',
   ],
-  TEST_BROWSER: undefined,
+  TEST_BROWSER: [],
   TEST_REACT: [
     '**/__tests__/**/*.?(c|m)[jt]sx',
     '**/__tests__/**/use*.?(c|m)[jt]s?(x)',
@@ -42,6 +44,14 @@ const globs = {
     './node_modules/@heroui/theme/dist/**/*.?(c|m)[jt]s?(x)',
   ],
   MARKDOWN: ['**/*.{md,markdown,mdx,mdc}'],
+  COMMONJS: ['**/*.c[jt]s'],
 }
+
+export const globsRegexes = Object.fromEntries(
+  Object.entries(globs).map(([key, patterns]) => [
+    key,
+    patterns.map(pattern => micromatch.makeRe(pattern)),
+  ]),
+)
 
 export default globs

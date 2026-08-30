@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import {Window} from 'happy-dom'
 import {act} from 'react'
 import {hydrateRoot} from 'react-dom/client'
@@ -57,4 +56,3 @@ export const renderHookServer = <Hook extends () => unknown>(
 }
 
 export type RenderHookServer = typeof renderHookServer
-/* eslint-enable @eslint-react/naming-convention/filename */

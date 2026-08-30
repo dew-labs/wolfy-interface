@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/naming-convention/filename -- don't need to follow this convention for this file */
 import '@/setup'
 
 import {reactErrorHandler} from '@sentry/react'
@@ -19,12 +18,10 @@ function render() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- its guaranteed to be there
   createRoot(document.getElementById('root')!, {
     // Callback called when an error is thrown and not caught by an ErrorBoundary.
-    // @ts-expect-error -- `exactOptionalPropertyTypes` in library type
     onUncaughtError: reactErrorHandler((error, errorInfo) => {
       console.warn('Uncaught error', error, errorInfo.componentStack)
     }),
     // Callback called when React catches an error in an ErrorBoundary.
-    // @ts-expect-error -- `exactOptionalPropertyTypes` in library type
     onCaughtError: reactErrorHandler(),
     // Callback called when React automatically recovers from errors.
     onRecoverableError: reactErrorHandler(),
@@ -36,4 +33,3 @@ function render() {
 }
 
 render()
-/* eslint-enable @eslint-react/naming-convention/filename */

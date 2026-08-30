@@ -2,6 +2,7 @@
 node = "24"
 
 [hooks]
-enter = "mise i -q"
+enter = "mise i -q; corepack disable;"
 
 [settings]
+idiomatic_version_file_enable_tools = ['pnpm']

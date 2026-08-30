@@ -128,12 +128,12 @@ describe('attempt runtime tests', () => {
 
     it('should return fallback value when input has only name', () => {
       expect.assertions(1)
-      expect(personOrDefault({name: 'John'} as Person)).toEqual(defaultPerson)
+      expect(personOrDefault({name: 'John'})).toEqual(defaultPerson)
     })
 
     it('should return fallback value when input has only age', () => {
       expect.assertions(1)
-      expect(personOrDefault({age: 30} as Person)).toEqual(defaultPerson)
+      expect(personOrDefault({age: 30})).toEqual(defaultPerson)
     })
 
     it('should return default person when input is null with function fallback', () => {

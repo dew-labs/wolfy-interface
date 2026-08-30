@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-invalid-void-type -- it's intentional */
+/* eslint-disable @typescript-eslint/no-explicit-any -- it's intentional */
 
 /**
  * A hook that returns a callback with guaranteed referential stability.
@@ -21,4 +21,4 @@ export default function useStableCallback<
     return latestCallback.current?.(...args)
   }, []) as unknown as StableCallback<UnwrapMemoized<Exclude<T, null | undefined>>>
 }
-/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-invalid-void-type -- it's intentional */
+/* eslint-enable @typescript-eslint/no-explicit-any -- it's intentional */
